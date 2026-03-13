@@ -74933,8 +74933,8 @@ function FloatingVideoBubbles({ playerName }) {
     error && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-red-500/80 text-white text-[9px] px-2 py-1 rounded-full mt-1 max-w-[120px] truncate", children: error })
   ] });
 }
-const Profiles = reactExports.lazy(() => __vitePreload(() => import("./Profiles-bdadbbed.js"), true ? [] : void 0, import.meta.url));
-const HallOfFame = reactExports.lazy(() => __vitePreload(() => import("./HallOfFame-442f9d47.js"), true ? [] : void 0, import.meta.url).then((module2) => ({ default: module2.HallOfFame })));
+const Profiles = reactExports.lazy(() => __vitePreload(() => import("./Profiles-db6add55.js"), true ? [] : void 0, import.meta.url));
+const HallOfFame = reactExports.lazy(() => __vitePreload(() => import("./HallOfFame-924a56e1.js"), true ? [] : void 0, import.meta.url).then((module2) => ({ default: module2.HallOfFame })));
 const TEAM_CAPABLE_MODES = ["cultura", "trivia_futbol", "futbol"];
 function GameAppInner() {
   var _a3, _b2, _c3;
@@ -75488,7 +75488,7 @@ const queryClient = new QueryClient();
 const App = () => /* @__PURE__ */ jsxRuntimeExports.jsx(QueryClientProvider, { client: queryClient, children: /* @__PURE__ */ jsxRuntimeExports.jsx(AuthProvider, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs(TooltipProvider, { children: [
   /* @__PURE__ */ jsxRuntimeExports.jsx(Toaster$1, {}),
   /* @__PURE__ */ jsxRuntimeExports.jsx(Toaster, {}),
-  /* @__PURE__ */ jsxRuntimeExports.jsx(BrowserRouter, { future: { v7_startTransition: true, v7_relativeSplatPath: true }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(Routes, { children: [
+  /* @__PURE__ */ jsxRuntimeExports.jsx(BrowserRouter, { basename: "/migranjuego", future: { v7_startTransition: true, v7_relativeSplatPath: true }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(Routes, { children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: "/", element: /* @__PURE__ */ jsxRuntimeExports.jsx(Index, {}) }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: "*", element: /* @__PURE__ */ jsxRuntimeExports.jsx(NotFound, {}) })
   ] }) })
