@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 
 interface ArcadeTicTacToeProps {
     roomId: string;
+    playerId?: string;
     onClose: () => void;
 }
 
@@ -14,9 +15,10 @@ type PlayerSymbol = 'X' | 'O';
 type Board = (PlayerSymbol | null)[];
 type GamePhase = 'waiting_sync' | 'playing' | 'result';
 
-export function ArcadeTicTacToe({ roomId, onClose }: ArcadeTicTacToeProps) {
-    const { localPlayerId, players } = useGameContext();
-    const localPlayer = players.find(p => p.id === localPlayerId) || players[0];
+export function ArcadeTicTacToe({ roomId, playerId, onClose }: ArcadeTicTacToeProps) {
+    const { localPlayerId: contextPlayerId, players } = useGameContext();
+    const effectivePlayerId = playerId || contextPlayerId || 'guest';
+    const localPlayer = players.find(p => p.id === effectivePlayerId) || players[0];
 
     const [phase, setPhase] = useState<GamePhase>('waiting_sync');
     const [remotePlayerReady, setRemotePlayerReady] = useState(false);
@@ -32,7 +34,7 @@ export function ArcadeTicTacToe({ roomId, onClose }: ArcadeTicTacToeProps) {
 
     // Sync network
     useEffect(() => {
-        if (!localPlayerId) return;
+        if (!effectivePlayerId) return;
 
         const channel = supabase.channel(`tictactoe-${roomId}`);
         channelRef.current = channel;
@@ -42,7 +44,7 @@ export function ArcadeTicTacToe({ roomId, onClose }: ArcadeTicTacToeProps) {
                 // If remote is ready, and we need to assign symbols
                 setRemotePlayerReady(true);
                 // Host assigns symbols if we are first
-                if (!mySymbol && payload.playerId !== localPlayerId) {
+                if (!mySymbol && payload.playerId !== effectivePlayerId) {
                     // Decide randomly who is what
                     const iAmX = Math.random() > 0.5;
                     const hostSymbol = iAmX ? 'X' : 'O';
@@ -54,21 +56,21 @@ export function ArcadeTicTacToe({ roomId, onClose }: ArcadeTicTacToeProps) {
                         type: 'broadcast',
                         event: 'start_game',
                         payload: {
-                            starterId: iAmX ? localPlayerId : payload.playerId,
-                            xPlayerId: iAmX ? localPlayerId : payload.playerId,
-                            oPlayerId: iAmX ? payload.playerId : localPlayerId
+                            starterId: iAmX ? effectivePlayerId : payload.playerId,
+                            xPlayerId: iAmX ? effectivePlayerId : payload.playerId,
+                            oPlayerId: iAmX ? payload.playerId : effectivePlayerId
                         }
                     });
 
                     startGame(
-                        iAmX ? localPlayerId : payload.playerId,
+                        iAmX ? effectivePlayerId : payload.playerId,
                         hostSymbol
                     );
                 }
             })
             .on('broadcast', { event: 'start_game' }, ({ payload }) => {
                 if (!mySymbol) { // Guest receives assignments
-                    const sym = payload.xPlayerId === localPlayerId ? 'X' : 'O';
+                    const sym = payload.xPlayerId === effectivePlayerId ? 'X' : 'O';
                     setMySymbol(sym);
                     startGame(payload.starterId, sym);
                 }
@@ -86,7 +88,7 @@ export function ArcadeTicTacToe({ roomId, onClose }: ArcadeTicTacToeProps) {
                     channel.send({
                         type: 'broadcast',
                         event: 'ready',
-                        payload: { playerId: localPlayerId }
+                        payload: { playerId: effectivePlayerId }
                     });
                 }
             });
@@ -95,7 +97,7 @@ export function ArcadeTicTacToe({ roomId, onClose }: ArcadeTicTacToeProps) {
             if (timerRef.current) clearInterval(timerRef.current);
             supabase.removeChannel(channel);
         };
-    }, [roomId, localPlayerId, mySymbol]);
+    }, [roomId, effectivePlayerId, mySymbol]);
 
     const startGame = (starterId: string, assignedSymbol: PlayerSymbol) => {
         setBoard(Array(9).fill(null));

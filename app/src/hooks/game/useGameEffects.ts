@@ -179,6 +179,7 @@ export const useGameEffects = (mode: GameMode, players: Player[]) => {
             setGameState((prev: any) => ({
                 ...prev,
                 showImpostorWarning: true, // NEW state for anti-spoiler
+                showImpostor: false, // Don't show the main screen yet
                 impostorData: {
                     currentImpostorReal: randomImpostor.normalQuestion,
                     currentImpostorFake: randomImpostor.impostorQuestion,

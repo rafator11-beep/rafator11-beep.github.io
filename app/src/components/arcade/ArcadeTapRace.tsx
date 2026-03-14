@@ -7,14 +7,16 @@ import { toast } from 'sonner';
 
 interface ArcadeTapRaceProps {
     roomId: string;
+    playerId?: string;
     onClose: () => void;
 }
 
 type GamePhase = 'waiting_sync' | 'countdown' | 'playing' | 'result';
 
-export function ArcadeTapRace({ roomId, onClose }: ArcadeTapRaceProps) {
-    const { localPlayerId, players } = useGameContext();
-    const localPlayer = players.find(p => p.id === localPlayerId) || players[0];
+export function ArcadeTapRace({ roomId, playerId, onClose }: ArcadeTapRaceProps) {
+    const { localPlayerId: contextPlayerId, players } = useGameContext();
+    const effectivePlayerId = playerId || contextPlayerId || 'guest';
+    const localPlayer = players.find(p => p.id === effectivePlayerId) || players[0];
 
     const [phase, setPhase] = useState<GamePhase>('waiting_sync');
     const [remotePlayerReady, setRemotePlayerReady] = useState(false);
@@ -30,7 +32,7 @@ export function ArcadeTapRace({ roomId, onClose }: ArcadeTapRaceProps) {
 
     // Sync network
     useEffect(() => {
-        if (!localPlayerId) return;
+        if (!effectivePlayerId) return;
 
         const channel = supabase.channel(`taprace-${roomId}`);
         channelRef.current = channel;
@@ -40,7 +42,7 @@ export function ArcadeTapRace({ roomId, onClose }: ArcadeTapRaceProps) {
                 setRemotePlayerReady(true);
             })
             .on('broadcast', { event: 'score_update' }, ({ payload }) => {
-                if (payload.playerId !== localPlayerId) {
+                if (payload.playerId !== effectivePlayerId) {
                     setRemoteScore(payload.score);
                 }
             })
@@ -52,7 +54,7 @@ export function ArcadeTapRace({ roomId, onClose }: ArcadeTapRaceProps) {
                     channel.send({
                         type: 'broadcast',
                         event: 'ready',
-                        payload: { playerId: localPlayerId }
+                        payload: { playerId: effectivePlayerId }
                     });
                 }
             });
@@ -61,7 +63,7 @@ export function ArcadeTapRace({ roomId, onClose }: ArcadeTapRaceProps) {
             if (timerRef.current) clearInterval(timerRef.current);
             supabase.removeChannel(channel);
         };
-    }, [roomId, localPlayerId]);
+    }, [roomId, effectivePlayerId]);
 
     const handleStartSync = () => {
         channelRef.current?.send({ type: 'broadcast', event: 'start_game' });

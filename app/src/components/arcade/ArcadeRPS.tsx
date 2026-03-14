@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 
 interface ArcadeRPSProps {
     roomId: string;
+    playerId?: string;
     onClose: () => void;
 }
 
@@ -19,9 +20,10 @@ const CHOICES = [
     { id: 'scissors', name: 'TIJERA', emoji: '✂️', color: 'bg-red-500' }
 ];
 
-export function ArcadeRPS({ roomId, onClose }: ArcadeRPSProps) {
-    const { localPlayerId, players } = useGameContext();
-    const localPlayer = players.find(p => p.id === localPlayerId) || players[0];
+export function ArcadeRPS({ roomId, playerId, onClose }: ArcadeRPSProps) {
+    const { localPlayerId: contextPlayerId, players } = useGameContext();
+    const effectivePlayerId = playerId || contextPlayerId || 'guest';
+    const localPlayer = players.find(p => p.id === effectivePlayerId) || players[0];
 
     const [phase, setPhase] = useState<GamePhase>('waiting_sync');
     const [remotePlayerReady, setRemotePlayerReady] = useState(false);
@@ -33,7 +35,7 @@ export function ArcadeRPS({ roomId, onClose }: ArcadeRPSProps) {
     const channelRef = useRef<any>(null);
 
     useEffect(() => {
-        if (!localPlayerId) return;
+        if (!effectivePlayerId) return;
 
         const channel = supabase.channel(`rps-${roomId}`);
         channelRef.current = channel;
@@ -43,7 +45,7 @@ export function ArcadeRPS({ roomId, onClose }: ArcadeRPSProps) {
                 setRemotePlayerReady(true);
             })
             .on('broadcast', { event: 'choice_locked' }, ({ payload }) => {
-                if (payload.playerId !== localPlayerId) {
+                if (payload.playerId !== effectivePlayerId) {
                     setRemoteChoice(payload.choice);
                 }
             })
@@ -55,7 +57,7 @@ export function ArcadeRPS({ roomId, onClose }: ArcadeRPSProps) {
                     channel.send({
                         type: 'broadcast',
                         event: 'ready',
-                        payload: { playerId: localPlayerId }
+                        payload: { playerId: effectivePlayerId }
                     });
                 }
             });
@@ -63,7 +65,7 @@ export function ArcadeRPS({ roomId, onClose }: ArcadeRPSProps) {
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [roomId, localPlayerId]);
+    }, [roomId, effectivePlayerId]);
 
     const handleStartSync = () => {
         channelRef.current?.send({ type: 'broadcast', event: 'start_round' });
@@ -84,7 +86,7 @@ export function ArcadeRPS({ roomId, onClose }: ArcadeRPSProps) {
         channelRef.current?.send({
             type: 'broadcast',
             event: 'choice_locked',
-            payload: { playerId: localPlayerId, choice }
+            payload: { playerId: effectivePlayerId, choice }
         });
     };
 

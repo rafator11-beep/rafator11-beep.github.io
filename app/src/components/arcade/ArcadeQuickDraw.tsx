@@ -7,14 +7,16 @@ import { toast } from 'sonner';
 
 interface ArcadeQuickDrawProps {
     roomId: string;
+    playerId?: string;
     onClose: () => void;
 }
 
 type GamePhase = 'waiting_sync' | 'ready' | 'steady' | 'draw' | 'result';
 
-export function ArcadeQuickDraw({ roomId, onClose }: ArcadeQuickDrawProps) {
-    const { localPlayerId, players } = useGameContext();
-    const localPlayer = players.find(p => p.id === localPlayerId) || players[0];
+export function ArcadeQuickDraw({ roomId, playerId, onClose }: ArcadeQuickDrawProps) {
+    const { localPlayerId: contextPlayerId, players } = useGameContext();
+    const effectivePlayerId = playerId || contextPlayerId || 'guest';
+    const localPlayer = players.find(p => p.id === effectivePlayerId) || players[0];
 
     const [phase, setPhase] = useState<GamePhase>('waiting_sync');
     const [remotePlayerReady, setRemotePlayerReady] = useState(false);
@@ -28,7 +30,7 @@ export function ArcadeQuickDraw({ roomId, onClose }: ArcadeQuickDrawProps) {
     const timeoutRef = useRef<NodeJS.Timeout>(null);
 
     useEffect(() => {
-        if (!localPlayerId) return;
+        if (!effectivePlayerId) return;
 
         const channel = supabase.channel(`quickdraw-${roomId}`);
         channelRef.current = channel;
@@ -38,10 +40,10 @@ export function ArcadeQuickDraw({ roomId, onClose }: ArcadeQuickDrawProps) {
                 setRemotePlayerReady(true);
             })
             .on('broadcast', { event: 'draw_time' }, ({ payload }) => {
-                if (payload.playerId !== localPlayerId) {
+                if (payload.playerId !== effectivePlayerId) {
                     setRemoteReactionTime(payload.time);
                     if (payload.early) {
-                        setWinner(localPlayerId); // They drew early, I win
+                        setWinner(effectivePlayerId); // They drew early, I win
                         setPhase('result');
                     }
                 }
@@ -55,7 +57,7 @@ export function ArcadeQuickDraw({ roomId, onClose }: ArcadeQuickDrawProps) {
                     channel.send({
                         type: 'broadcast',
                         event: 'ready',
-                        payload: { playerId: localPlayerId }
+                        payload: { playerId: effectivePlayerId }
                     });
                 }
             });
@@ -64,7 +66,7 @@ export function ArcadeQuickDraw({ roomId, onClose }: ArcadeQuickDrawProps) {
             if (timeoutRef.current) clearTimeout(timeoutRef.current);
             supabase.removeChannel(channel);
         };
-    }, [roomId, localPlayerId]);
+    }, [roomId, effectivePlayerId]);
 
     useEffect(() => {
         // If both are ready (my component mounted AND remote is ready), the "host" starts it.

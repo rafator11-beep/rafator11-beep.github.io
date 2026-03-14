@@ -41,51 +41,98 @@ export function ArcadeOnlineHub({ onReturn }: ArcadeOnlineHubProps) {
     const [view, setView] = useState<'lobby' | 'finding_match' | 'playing'>('lobby');
     const [selectedGame, setSelectedGame] = useState<string | null>(null);
     const [matchRoomId, setMatchRoomId] = useState<string | null>(null);
+    const [myPresenceId, setMyPresenceId] = useState<string | null>(null);
 
-    // TODO: implement real Supabase Presence matching or simple code joining
+    // Real-time Matchmaking with Supabase Presence
+    useEffect(() => {
+        if (view !== 'finding_match' || !selectedGame) return;
+
+        // Use a consistent ID for presence: actual player ID or a persistent guest ID
+        const presenceId = localPlayerId || `guest_${Math.random().toString(36).substring(7)}`;
+        const myName = localPlayer?.name || 'Invitado';
+        setMyPresenceId(presenceId);
+
+        const channel = supabase.channel(`matchmaking:${selectedGame}`, {
+            config: {
+                presence: {
+                    key: presenceId,
+                },
+            },
+        });
+
+        channel
+            .on('presence', { event: 'sync' }, () => {
+                const state = channel.presenceState();
+                const entries = Object.entries(state);
+                
+                // Find another player who isn't me
+                const opponentEntry = entries.find(([id]) => id !== presenceId);
+
+                if (opponentEntry) {
+                    const [opponentId, opponentData] = opponentEntry;
+                    // We found an opponent!
+                    // Both players sort IDs to ensure they generate the SAME roomId
+                    const sortedIds = [presenceId, opponentId].sort();
+                    const roomId = `arcade_${selectedGame}_${sortedIds[0]}_${sortedIds[1]}`;
+                    
+                    setMatchRoomId(roomId);
+                    setView('playing');
+                    toast.success(`¡Rival encontrado: ${opponentData[0]?.name || 'Oponente'}!`);
+                }
+            })
+            .subscribe(async (status) => {
+                if (status === 'SUBSCRIBED') {
+                    await channel.track({
+                        id: presenceId,
+                        name: myName,
+                        joined_at: new Date().toISOString()
+                    });
+                }
+            });
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [view, selectedGame, localPlayerId, localPlayer?.name]);
+
     const handleFindMatch = (gameId: string) => {
         setSelectedGame(gameId);
         setView('finding_match');
-
-        // Mock matching logic for now
-        setTimeout(() => {
-            const mockRoom = `arcade_${gameId}_${Math.random().toString(36).substring(7)}`;
-            setMatchRoomId(mockRoom);
-            setView('playing');
-            toast.success(`Partida encontrada en ${ONLINE_GAMES.find(g => g.id === gameId)?.name}!`);
-        }, 3000);
     };
 
     if (view === 'playing' && selectedGame) {
+        // Ensure all games receive the player ID they should use
+        const playerIdToUse = myPresenceId || localPlayerId || 'unknown';
+
         if (selectedGame === 'quick_draw' && matchRoomId) {
-            return <ArcadeQuickDraw roomId={matchRoomId} onClose={() => setView('lobby')} />;
+            return <ArcadeQuickDraw roomId={matchRoomId} playerId={playerIdToUse} onClose={() => setView('lobby')} />;
         }
         if (selectedGame === 'tap_race' && matchRoomId) {
-            return <ArcadeTapRace roomId={matchRoomId} onClose={() => setView('lobby')} />;
+            return <ArcadeTapRace roomId={matchRoomId} playerId={playerIdToUse} onClose={() => setView('lobby')} />;
         }
         if (selectedGame === 'rps' && matchRoomId) {
-            return <ArcadeRPS roomId={matchRoomId} onClose={() => setView('lobby')} />;
+            return <ArcadeRPS roomId={matchRoomId} playerId={playerIdToUse} onClose={() => setView('lobby')} />;
         }
         if (selectedGame === 'tictactoe_speed' && matchRoomId) {
-            return <ArcadeTicTacToe roomId={matchRoomId} onClose={() => setView('lobby')} />;
+            return <ArcadeTicTacToe roomId={matchRoomId} playerId={playerIdToUse} onClose={() => setView('lobby')} />;
         }
         if (selectedGame === 'math_match' && matchRoomId) {
-            return <ArcadeMathMatch roomId={matchRoomId} onClose={() => setView('lobby')} />;
+            return <ArcadeMathMatch roomId={matchRoomId} playerId={playerIdToUse} onClose={() => setView('lobby')} />;
         }
         if (selectedGame === 'high_low' && matchRoomId) {
-            return <ArcadeHighLow roomId={matchRoomId} onClose={() => setView('lobby')} />;
+            return <ArcadeHighLow roomId={matchRoomId} playerId={playerIdToUse} onClose={() => setView('lobby')} />;
         }
         if (selectedGame === 'coin_flip' && matchRoomId) {
-            return <ArcadeCoinFlip roomId={matchRoomId} onClose={() => setView('lobby')} />;
+            return <ArcadeCoinFlip roomId={matchRoomId} playerId={playerIdToUse} onClose={() => setView('lobby')} />;
         }
         if (selectedGame === 'russian_roulette' && matchRoomId) {
-            return <ArcadeRussianRoulette roomId={matchRoomId} onClose={() => setView('lobby')} />;
+            return <ArcadeRussianRoulette roomId={matchRoomId} playerId={playerIdToUse} onClose={() => setView('lobby')} />;
         }
         if (selectedGame === 'simon_pvp' && matchRoomId) {
-            return <ArcadeSimonPvP roomId={matchRoomId} onClose={() => setView('lobby')} />;
+            return <ArcadeSimonPvP roomId={matchRoomId} playerId={playerIdToUse} onClose={() => setView('lobby')} />;
         }
         if (selectedGame === 'minesweeper' && matchRoomId) {
-            return <ArcadeMinesweeper roomId={matchRoomId} onClose={() => setView('lobby')} />;
+            return <ArcadeMinesweeper roomId={matchRoomId} playerId={playerIdToUse} onClose={() => setView('lobby')} />;
         }
 
         // Will route to minigame components later

@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 
 interface ArcadeMathMatchProps {
     roomId: string;
+    playerId?: string;
     onClose: () => void;
 }
 
@@ -55,9 +56,10 @@ const generateProblem = (): MathProblem => {
     return { question: `${a} ${op} ${b}`, options, answer: ans };
 };
 
-export function ArcadeMathMatch({ roomId, onClose }: ArcadeMathMatchProps) {
-    const { localPlayerId, players } = useGameContext();
-    const localPlayer = players.find(p => p.id === localPlayerId) || players[0];
+export function ArcadeMathMatch({ roomId, playerId, onClose }: ArcadeMathMatchProps) {
+    const { localPlayerId: contextPlayerId, players } = useGameContext();
+    const effectivePlayerId = playerId || contextPlayerId || 'guest';
+    const localPlayer = players.find(p => p.id === effectivePlayerId) || players[0];
 
     const [phase, setPhase] = useState<GamePhase>('waiting_sync');
     const [remotePlayerReady, setRemotePlayerReady] = useState(false);
@@ -74,7 +76,7 @@ export function ArcadeMathMatch({ roomId, onClose }: ArcadeMathMatchProps) {
 
     // Sync network
     useEffect(() => {
-        if (!localPlayerId) return;
+        if (!effectivePlayerId) return;
 
         const channel = supabase.channel(`math-${roomId}`);
         channelRef.current = channel;
@@ -84,7 +86,7 @@ export function ArcadeMathMatch({ roomId, onClose }: ArcadeMathMatchProps) {
                 setRemotePlayerReady(true);
             })
             .on('broadcast', { event: 'score_update' }, ({ payload }) => {
-                if (payload.playerId !== localPlayerId) {
+                if (payload.playerId !== effectivePlayerId) {
                     setRemoteScore(payload.score);
                     if (payload.score >= TOTAL_PROBLEMS) {
                         setWinner('remote');
@@ -100,7 +102,7 @@ export function ArcadeMathMatch({ roomId, onClose }: ArcadeMathMatchProps) {
                     channel.send({
                         type: 'broadcast',
                         event: 'ready',
-                        payload: { playerId: localPlayerId }
+                        payload: { playerId: effectivePlayerId }
                     });
                 }
             });
@@ -108,7 +110,7 @@ export function ArcadeMathMatch({ roomId, onClose }: ArcadeMathMatchProps) {
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [roomId, localPlayerId]);
+    }, [roomId, effectivePlayerId]);
 
     const handleStartSync = () => {
         channelRef.current?.send({ type: 'broadcast', event: 'start_game' });
@@ -145,11 +147,11 @@ export function ArcadeMathMatch({ roomId, onClose }: ArcadeMathMatchProps) {
             channelRef.current?.send({
                 type: 'broadcast',
                 event: 'score_update',
-                payload: { playerId: localPlayerId, score: nextScore }
+                payload: { playerId: effectivePlayerId, score: nextScore }
             });
 
             if (nextScore >= TOTAL_PROBLEMS) {
-                setWinner(localPlayerId!);
+                setWinner(effectivePlayerId);
                 setPhase('result');
             } else {
                 setCurrentProblem(generateProblem());
@@ -264,10 +266,10 @@ export function ArcadeMathMatch({ roomId, onClose }: ArcadeMathMatchProps) {
                         className="bg-black/80 p-8 rounded-[40px] backdrop-blur-xl border border-white/10 w-full max-w-md mx-auto text-center shadow-2xl"
                     >
                         <h2 className="text-4xl font-black text-white mb-2">
-                            {winner === localPlayerId ? '🧠 ¡CEREBRITO! 🧠' : '📉 SUSPENSO 📉'}
+                            {winner === effectivePlayerId ? '🧠 ¡CEREBRITO! 🧠' : '📉 SUSPENSO 📉'}
                         </h2>
                         <p className="text-muted-foreground mb-8 text-lg">
-                            {winner === localPlayerId ? 'Eres una calculadora humana.' : 'El rival resolvió los 5 problemas antes que tú.'}
+                            {winner === effectivePlayerId ? 'Eres una calculadora humana.' : 'El rival resolvió los 5 problemas antes que tú.'}
                         </p>
 
                         <Button size="lg" className="w-full h-16 text-xl rounded-2xl font-bold bg-white text-black hover:bg-gray-200" onClick={() => setPhase('waiting_sync')}>

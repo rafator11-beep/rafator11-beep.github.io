@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Users, Trophy, AlertCircle, Video, VideoOff, Copy, Crown } from 'lucide-react';
+import { ArrowLeft, Users, Trophy, AlertCircle, Video, VideoOff, Copy, Crown, Plus, Minus, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import {
@@ -51,20 +51,38 @@ interface PartyGameProps {
   roomId?: string | null;
 }
 
-// New Bottom Profiles Component with Virus Support
-const PlayerProfilesBottom = ({ players, currentPlayer, scores, playerViruses = [], mode, remoteStreams = [] }: { players: any[], currentPlayer: any, scores: any, playerViruses?: any[], mode: GameMode, remoteStreams?: any[] }) => {
+// New Bottom Profiles Component with Virus Support and Captain XP Controls
+const PlayerProfilesBottom = ({ players, currentPlayer, scores, playerViruses = [], mode, remoteStreams = [], captainId, onAdjustXP }: { players: any[], currentPlayer: any, scores: any, playerViruses?: any[], mode: GameMode, remoteStreams?: any[], captainId?: string | null, onAdjustXP?: (pid: string, delta: number) => void }) => {
   return (
-    <div className="absolute bottom-0 left-0 right-0 h-24 md:h-28 bg-gradient-to-r from-slate-900/80 to-slate-800/80 backdrop-blur-xl border-t border-white/10 flex items-center justify-center px-6 gap-6 z-[100] overflow-x-auto no-scrollbar">
+    <div className="absolute bottom-0 left-0 right-0 h-28 md:h-32 bg-slate-900/40 backdrop-blur-[12px] border-t border-white/10 flex items-center justify-center px-6 gap-6 z-[100] overflow-x-auto no-scrollbar">
       <div className="flex items-center gap-4 md:gap-8">
         {players.map((p) => {
           const isTurn = currentPlayer?.id === p.id;
           const hasVirus = playerViruses.some(v => v.playerId === p.id);
-          const virusInfo = playerViruses.find(v => v.playerId === p.id);
+          const isCaptain = captainId === p.id;
           const showVirus = hasVirus && (mode === 'megamix' || mode === 'clasico');
           const remotePeer = remoteStreams?.find(s => s.peerId === p.id);
 
           return (
             <div key={p.id} className="flex flex-col items-center gap-1 relative group shrink-0">
+              {/* Captain Controls Overlay */}
+              {onAdjustXP && (
+                <div className="absolute -top-10 left-1/2 -translate-x-1/2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                  <button
+                    onClick={() => onAdjustXP(p.id, -5)}
+                    className="w-8 h-8 rounded-full bg-red-500/80 text-white flex items-center justify-center shadow-lg border border-white/20 hover:bg-red-600 transition-colors"
+                  >
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => onAdjustXP(p.id, 5)}
+                    className="w-8 h-8 rounded-full bg-green-500/80 text-white flex items-center justify-center shadow-lg border border-white/20 hover:bg-green-600 transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+
               {/* Video Bubble anchored above name */}
               <motion.div
                 animate={{
@@ -72,7 +90,8 @@ const PlayerProfilesBottom = ({ players, currentPlayer, scores, playerViruses = 
                   borderColor: hasVirus ? '#22c55e' : (isTurn ? 'var(--primary)' : 'transparent'),
                   boxShadow: hasVirus ? '0 0 15px #22c55e' : (isTurn ? '0 0 15px var(--primary)' : 'none')
                 }}
-                className={`w-12 h-12 md:w-14 md:h-14 rounded-full bg-gradient-to-r from-slate-800/80 to-slate-700/80 border-2 flex items-center justify-center text-lg font-bold relative overflow-hidden ${isTurn ? 'border-white/20 text-white' : 'border-white/10 text-white/60'}`}
+                className={`w-14 h-14 md:w-16 md:h-16 rounded-full bg-slate-800/40 backdrop-blur-md border-2 flex items-center justify-center text-lg font-bold relative overflow-hidden ${isTurn ? 'border-primary/50 text-white' : 'border-white/10 text-white/60'}`}
+                onClick={() => onAdjustXP?.(p.id, 10)}
               >
                 {remotePeer ? (
                   <video
@@ -92,6 +111,12 @@ const PlayerProfilesBottom = ({ players, currentPlayer, scores, playerViruses = 
                     {scores[p.id]}
                   </div>
                 )}
+
+                {isCaptain && (
+                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-yellow-500 text-black rounded-full p-0.5 z-20">
+                    <Crown className="w-3 h-3" />
+                  </div>
+                )}
               </motion.div>
 
               <span className={`text-[10px] md:text-[11px] font-black max-w-full truncate px-1 uppercase tracking-tighter ${showVirus ? 'text-green-400' : (isTurn ? 'text-white' : 'text-white/60')}`}>
@@ -108,24 +133,30 @@ const PlayerProfilesBottom = ({ players, currentPlayer, scores, playerViruses = 
 export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false, roomId = null }: PartyGameProps) {
   const {
     currentPlayer,
-    players, // Added this
-    teams, // Added this
+    players,
+    teams,
     currentIndex,
-    setCurrentIndex, // Added setter
+    setCurrentIndex,
     gameState,
     setGameState,
     advanceTurn,
     addScore,
-    addWin, // Added addWin to useGameEngine
+    addWin,
     showRoundSummary,
     setShowRoundSummary,
     roundSnapshot,
     setRoundSnapshot,
     scores,
-    setGamesWon, // Automatically extracted from useGameEngine
+    setGamesWon,
     gameOver,
-    setGameOver // Expose setter for manual ending
+    setGameOver
   } = useGameEngine(mode);
+
+  const handleAdjustXP = (playerId: string, delta: number) => {
+    addScore(playerId, delta);
+    sfx.click();
+    vibe(5);
+  };
 
   const { game } = useGame(roomId);
 
@@ -170,10 +201,14 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
   // Helper: track a vote for a player
   const trackVote = (playerId: string) => {
     setVoteCounts(prev => ({ ...prev, [playerId]: (prev[playerId] || 0) + 1 }));
+    sfx.click();
+    vibe(5);
   };
   // Helper: track a drink for a player  
   const trackDrink = (playerId: string) => {
     setDrinkCounts(prev => ({ ...prev, [playerId]: (prev[playerId] || 0) + 1 }));
+    sfx.click();
+    vibe(5);
   };
 
   // Multiplayer Hook
@@ -229,12 +264,19 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
   useEffect(() => {
     if (mode === 'megamix' && gameState.round === 1 && currentIndex === 0) {
       // 1. Show Norma Global Overlay
-      setGameState(prev => ({ ...prev, showNormaGlobal: true }));
+      setGameState(prev => ({ 
+        ...prev, 
+        showNormaGlobal: true,
+        // Also trigger a virus and norma for the first round as requested
+        currentNorma: "Prohibido decir nombres de jugadores",
+        currentNormaTurnsRemaining: players.length * 2
+      }));
       // 2. Assign first Virus
       const virusResult = applyRandomVirus(true);
       if (virusResult) {
         setGameState(prev => ({ ...prev, showVirusAlert: true, virusAlertData: virusResult }));
       }
+      toast.info("¡RONDA 1: Norma Global + Virus activados!");
     }
   }, [gameState.round, currentIndex, mode]);
 
@@ -582,7 +624,13 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
   }, [gameOver, showRoundSummary, gameState.round, scores]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900/80 via-slate-800/80 to-slate-900/80 flex flex-col relative overflow-hidden pb-24 md:pb-32">
+    <div className="min-h-screen bg-slate-950 flex flex-col relative overflow-hidden pb-24 md:pb-32">
+      {/* Deep Background Blur Layer */}
+      <div className="fixed inset-0 z-0">
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950" />
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/10 rounded-full blur-[120px] animate-pulse delay-700" />
+      </div>
 
       <PlayerProfilesBottom
         players={players}
@@ -591,6 +639,8 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         playerViruses={playerViruses}
         mode={mode}
         remoteStreams={[]}
+        captainId={gameState.captainId}
+        onAdjustXP={handleAdjustXP}
       />
 
       {/* Voting Overlay for "Who is most likely" and similar prompts */}
@@ -629,9 +679,9 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                         const currentSelections = gameState.votingSelections || [];
                         if (maxVotes === 1) {
                           // Instant cast & advance
-                          addScore(p.id, 2);
+                          handleAdjustXP(p.id, 5); // Add XP for being voted
                           trackVote(p.id);
-                          toast.success(`${p.name} ha sido elegido! (+2 ptos)`);
+                          toast.success(`${p.name} ha sido elegido! (+5 XP)`);
                           handleNext();
                         } else {
                           // Toggle Selection
@@ -642,18 +692,18 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                           }
                         }
                       }}
-                      className={`flex flex-col items-center gap-3 p-5 rounded-2xl transition-all border-2 ${isSelected ? 'bg-primary/40 border-primary shadow-[0_0_20px_rgba(var(--primary-rgb),0.4)]' : 'bg-gradient-to-r from-slate-800/80 to-slate-700/80 border-white/10 hover:border-primary/50'}`}
+                      className={`flex flex-col items-center gap-3 p-5 rounded-3xl transition-all border-2 ${isSelected ? 'bg-primary/40 border-primary shadow-[0_0_20px_rgba(var(--primary-rgb),0.4)]' : 'bg-slate-800/40 border-white/10 hover:border-primary/50'}`}
                     >
-                      <div className={`w-16 h-16 rounded-full overflow-hidden border-2 transition-transform ${isSelected ? 'border-primary scale-110' : 'border-white/20'}`}>
+                      <div className={`w-20 h-20 rounded-full overflow-hidden border-4 transition-transform ${isSelected ? 'border-primary scale-110' : 'border-white/20'}`}>
                         {p.avatar_url ? (
                           <img src={p.avatar_url} className="w-full h-full object-cover" />
                         ) : (
-                          <div className="w-full h-full bg-gradient-to-r from-slate-800/80 to-slate-700/80 flex items-center justify-center text-2xl font-bold">
+                          <div className="w-full h-full bg-slate-800 flex items-center justify-center text-2xl font-black">
                             {p.name.substring(0, 2).toUpperCase()}
                           </div>
                         )}
                       </div>
-                      <span className="font-black text-base tracking-tight text-white">{p.name}</span>
+                      <span className="font-black text-lg tracking-tight text-white uppercase">{p.name}</span>
                     </motion.button>
                   );
                 })}
@@ -670,10 +720,10 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                     onClick={() => {
                       const selections = gameState.votingSelections || [];
                       selections.forEach(id => {
-                        addScore(id, 2);
+                        handleAdjustXP(id, 5);
                         trackVote(id);
                         const name = players.find(p => p.id === id)?.name;
-                        toast.success(`${name} elegido! (+2 ptos)`);
+                        toast.success(`${name} elegido! (+5 XP)`);
                       });
                       // Clear selections and advance
                       setGameState(prev => ({ ...prev, votingSelections: [] }));
@@ -936,7 +986,89 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         </Dialog>
       </div>
 
-      {/* CAPTAIN SELECTION SCREEN */}
+      {/* Reveal Overlay (Mimica / Boca Cerrada) with Long Press */}
+      <Dialog open={gameState.showMimicaReveal || gameState.showBocaCerradaReveal}>
+        <DialogContent className="sm:max-w-md bg-slate-900/90 backdrop-blur-xl border-primary/50 text-white z-[70]" aria-describedby={undefined}>
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-black text-center text-primary flex items-center justify-center gap-2 uppercase tracking-tighter">
+              ¡CAPITÁN! Pasa el móvil
+            </DialogTitle>
+          </DialogHeader>
+          <div className="text-center py-6 space-y-6">
+            <div className="space-y-2">
+              <p className="text-lg text-white/70">Entrega el móvil a:</p>
+              <p className="text-4xl font-black text-white bg-white/5 p-4 rounded-2xl border border-white/10 shadow-2xl">
+                {currentPlayer?.name}
+              </p>
+              <p className="text-red-400 font-bold animate-pulse text-sm uppercase tracking-widest mt-4">¡Y NO MIRES!</p>
+            </div>
+
+            <div className="relative group">
+              <motion.button
+                onMouseDown={() => {
+                  if (gameState.showMimicaReveal) setGameState(prev => ({ ...prev, showMimica: true }));
+                  if (gameState.showBocaCerradaReveal) setGameState(prev => ({ ...prev, showBocaCerrada: true }));
+                }}
+                onMouseUp={() => {
+                  setGameState(prev => ({ ...prev, showMimica: false, showBocaCerrada: false }));
+                }}
+                onTouchStart={() => {
+                  if (gameState.showMimicaReveal) setGameState(prev => ({ ...prev, showMimica: true }));
+                  if (gameState.showBocaCerradaReveal) setGameState(prev => ({ ...prev, showBocaCerrada: true }));
+                }}
+                onTouchEnd={() => {
+                  setGameState(prev => ({ ...prev, showMimica: false, showBocaCerrada: false }));
+                }}
+                className="w-full h-40 rounded-3xl bg-gradient-to-br from-primary/20 to-purple-600/20 border-2 border-dashed border-primary/40 flex flex-col items-center justify-center gap-4 transition-all active:scale-95 active:bg-primary/30 overflow-hidden relative"
+              >
+                <AnimatePresence mode="wait">
+                  {!(gameState.showMimica || gameState.showBocaCerrada) ? (
+                    <motion.div
+                      key="hidden"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="flex flex-col items-center gap-2"
+                    >
+                      <EyeOff className="w-12 h-12 text-primary/60" />
+                      <p className="font-bold text-primary/80 uppercase tracking-widest text-xs">Mantén pulsado para ver</p>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="visible"
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 1.1 }}
+                      className="p-6"
+                    >
+                      <p className="text-2xl font-black text-white leading-tight">
+                        {gameState.showMimicaReveal ? gameState.currentMimicaText : gameState.currentBocaCerradaText}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.button>
+            </div>
+
+            <Button
+              variant="outline"
+              className="w-full h-14 rounded-2xl border-white/10 bg-white/5 hover:bg-white/10 font-bold uppercase tracking-widest text-xs"
+              onClick={() => {
+                setGameState(prev => ({
+                  ...prev,
+                  showMimicaReveal: false,
+                  showBocaCerradaReveal: false,
+                  showMimica: false,
+                  showBocaCerrada: false
+                }));
+                handleNext();
+              }}
+            >
+              Ya lo he visto, cerrar ⏭
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
       <Dialog open={gameState.showCaptainSelection} onOpenChange={() => { }}>
         <DialogContent className="sm:max-w-md bg-gradient-to-r from-slate-900/80 to-slate-800/80 border-yellow-500/50 text-white z-[60]" aria-describedby={undefined}>
           <DialogHeader>

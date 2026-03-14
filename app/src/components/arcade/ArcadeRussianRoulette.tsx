@@ -7,14 +7,16 @@ import { toast } from 'sonner';
 
 interface ArcadeRussianRouletteProps {
     roomId: string;
+    playerId?: string;
     onClose: () => void;
 }
 
 type GamePhase = 'waiting_sync' | 'countdown' | 'playing' | 'result';
 
-export function ArcadeRussianRoulette({ roomId, onClose }: ArcadeRussianRouletteProps) {
-    const { localPlayerId, players } = useGameContext();
-    const localPlayer = players.find(p => p.id === localPlayerId) || players[0];
+export function ArcadeRussianRoulette({ roomId, playerId, onClose }: ArcadeRussianRouletteProps) {
+    const { localPlayerId: contextPlayerId, players } = useGameContext();
+    const effectivePlayerId = playerId || contextPlayerId || 'guest';
+    const localPlayer = players.find(p => p.id === effectivePlayerId) || players[0];
 
     const [phase, setPhase] = useState<GamePhase>('waiting_sync');
     const [remotePlayerReady, setRemotePlayerReady] = useState(false);
@@ -30,7 +32,7 @@ export function ArcadeRussianRoulette({ roomId, onClose }: ArcadeRussianRoulette
 
     // Sync network
     useEffect(() => {
-        if (!localPlayerId) return;
+        if (!effectivePlayerId) return;
 
         const channel = supabase.channel(`roulette-${roomId}`);
         channelRef.current = channel;
@@ -39,8 +41,8 @@ export function ArcadeRussianRoulette({ roomId, onClose }: ArcadeRussianRoulette
             .on('broadcast', { event: 'ready' }, ({ payload }) => {
                 setRemotePlayerReady(true);
                 // Host initializes game if first
-                if (!currentTurnId && payload.playerId !== localPlayerId) {
-                    const starter = Math.random() > 0.5 ? localPlayerId : payload.playerId;
+                if (!currentTurnId && payload.playerId !== effectivePlayerId) {
+                    const starter = Math.random() > 0.5 ? effectivePlayerId : payload.playerId;
                     const bullet = Math.floor(Math.random() * 6);
                     channel.send({
                         type: 'broadcast',
@@ -63,7 +65,7 @@ export function ArcadeRussianRoulette({ roomId, onClose }: ArcadeRussianRoulette
                     channel.send({
                         type: 'broadcast',
                         event: 'ready',
-                        payload: { playerId: localPlayerId }
+                        payload: { playerId: effectivePlayerId }
                     });
                 }
             });
@@ -71,7 +73,7 @@ export function ArcadeRussianRoulette({ roomId, onClose }: ArcadeRussianRoulette
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [roomId, localPlayerId, currentTurnId]);
+    }, [roomId, effectivePlayerId, currentTurnId]);
 
     const startGame = (starterId: string, bullet: number) => {
         setWinner(null);
@@ -90,7 +92,7 @@ export function ArcadeRussianRoulette({ roomId, onClose }: ArcadeRussianRoulette
         setTimeout(() => {
             if (died) {
                 if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 500]);
-                setWinner(localPlayerId!); // Remote died, I win
+                setWinner(effectivePlayerId); // Remote died, I win
                 setPhase('result');
             } else {
                 if (navigator.vibrate) navigator.vibrate(50);
@@ -98,34 +100,37 @@ export function ArcadeRussianRoulette({ roomId, onClose }: ArcadeRussianRoulette
                 setCurrentTurnId(nextTurnId);
             }
             setIsShooting(false);
-        }, 1000);
+        }, 800);
     };
 
     const handleShoot = () => {
-        if (isShooting || phase !== 'playing' || currentTurnId !== localPlayerId) return;
+        if (isShooting || phase !== 'playing' || currentTurnId !== effectivePlayerId) return;
 
         setIsShooting(true);
 
         const died = chamber === bulletIndex;
 
-        channelRef.current?.send({
-            type: 'broadcast',
-            event: 'shoot',
-            payload: { nextTurnId: 'remote', died } // 'remote' next logic
-        });
-
         setTimeout(() => {
             if (died) {
-                if (navigator.vibrate) navigator.vibrate(1000);
+                if (navigator.vibrate) navigator.vibrate([1000]);
                 setWinner('remote'); // I died, remote wins
                 setPhase('result');
             } else {
                 if (navigator.vibrate) navigator.vibrate(50);
                 setChamber(prev => prev + 1);
+                // Switch turn
+                const opponentId = 'remote'; // Not strictly needed, we use nextTurnId in broadcast
                 setCurrentTurnId('remote');
             }
+
+            channelRef.current?.send({
+                type: 'broadcast',
+                event: 'shoot',
+                payload: { nextTurnId: 'remote', died }
+            });
+
             setIsShooting(false);
-        }, 1000);
+        }, 800);
     };
 
     return (

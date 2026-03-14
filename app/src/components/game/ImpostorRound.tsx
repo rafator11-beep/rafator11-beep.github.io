@@ -26,6 +26,7 @@ export function ImpostorRound({
   const [votes, setVotes] = useState<Record<string, string>>({});
   const [discussionTime, setDiscussionTime] = useState(30);
   const [mostVotedId, setMostVotedId] = useState<string>('');
+  const [isRevealing, setIsRevealing] = useState<string | null>(null);
 
   // Discussion timer
   useEffect(() => {
@@ -121,35 +122,74 @@ export function ImpostorRound({
 
         {/* Reveal Phase */}
         {phase === 'reveal' && (
-          <div className="space-y-4">
-            <p className="text-center text-white/60 mb-4 text-sm">
-              Cada jugador debe tocar su nombre para ver su pregunta en secreto
-            </p>
+          <div className="space-y-6">
+            <div className="text-center space-y-2">
+              <p className="text-white/60 text-sm">
+                Cada jugador debe mantener pulsado su nombre para ver su secreto.
+              </p>
+              <p className="text-red-400 font-bold uppercase tracking-widest text-[10px] animate-pulse">¡No muestres tu pantalla a los demás!</p>
+            </div>
             
-            {players.map((player) => (
-              <motion.div
-                key={player.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-              >
-                {revealedPlayers.has(player.id) ? (
-                  <div className="p-4 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-xl border border-white/10 backdrop-blur-sm text-center">
-                    <span className="text-green-400 text-sm">✓ {player.name} ya vio su pregunta</span>
-                  </div>
-                ) : (
-                  <Button
-                    onClick={() => {
-                      alert(`🤫 ${player.name}, tu pregunta es:\n\n"${getPlayerQuestion(player.id)}"\n\n¡No la digas en voz alta!`);
-                      handleReveal(player.id);
-                    }}
-                    className="w-full py-6 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 border border-white/10 backdrop-blur-sm"
-                  >
-                    <UserX className="w-5 h-5 mr-2" />
-                    {player.name}: Toca para ver tu pregunta
-                  </Button>
-                )}
-              </motion.div>
-            ))}
+            <div className="grid gap-4">
+              {players.map((player) => (
+                <motion.div
+                  key={player.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="relative"
+                >
+                  {revealedPlayers.has(player.id) && isRevealing !== player.id ? (
+                    <div className="p-4 bg-green-500/10 rounded-2xl border border-green-500/20 text-center flex items-center justify-center gap-2">
+                      <ThumbsUp className="w-4 h-4 text-green-400" />
+                      <span className="text-green-400 font-bold text-sm uppercase tracking-tighter">{player.name} listo</span>
+                    </div>
+                  ) : (
+                    <motion.button
+                      onMouseDown={() => {
+                        setIsRevealing(player.id);
+                        handleReveal(player.id);
+                      }}
+                      onMouseUp={() => setIsRevealing(null)}
+                      onTouchStart={() => {
+                        setIsRevealing(player.id);
+                        handleReveal(player.id);
+                      }}
+                      onTouchEnd={() => setIsRevealing(null)}
+                      className={`w-full p-6 rounded-2xl border-2 transition-all flex flex-col items-center justify-center gap-2 relative overflow-hidden ${isRevealing === player.id ? 'bg-white border-white scale-[1.02] shadow-[0_0_30px_rgba(255,255,255,0.4)]' : 'bg-slate-800/40 border-white/10 hover:border-primary/50'}`}
+                    >
+                      <AnimatePresence mode="wait">
+                        {isRevealing === player.id ? (
+                          <motion.div
+                            key="secret"
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="text-center"
+                          >
+                            <p className="text-[10px] font-bold text-slate-500 uppercase mb-1">Tu palabra es:</p>
+                            <p className="text-2xl font-black text-slate-900 leading-tight">
+                              {getPlayerQuestion(player.id)}
+                            </p>
+                          </motion.div>
+                        ) : (
+                          <motion.div
+                            key="prompt"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="flex items-center gap-3"
+                          >
+                            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                              <EyeOff className="w-4 h-4 text-primary" />
+                            </div>
+                            <span className="font-bold text-white uppercase tracking-tighter">{player.name}: Mantén pulsado</span>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </motion.button>
+                  )}
+                </motion.div>
+              ))}
+            </div>
           </div>
         )}
 

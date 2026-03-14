@@ -13,7 +13,9 @@ export interface GameState {
   showDrinkingGame: boolean;
   showMimica: boolean;
   showBocaCerrada: boolean;
-  showBocaCerradaWarning?: boolean; // Added
+  showBocaCerradaWarning?: boolean;
+  showMimicaReveal?: boolean;
+  showBocaCerradaReveal?: boolean;
   showImpostorWord: boolean;
   showCaptainPass: boolean;
   showVirusAlert: boolean;
@@ -75,7 +77,9 @@ export const useGameEngine = (mode: GameMode) => {
     showDrinkingGame: false,
     showMimica: false,
     showBocaCerrada: false,
-    showBocaCerradaWarning: false, // Added
+    showBocaCerradaWarning: false,
+    showMimicaReveal: false,
+    showBocaCerradaReveal: false,
     showImpostorWord: false,
     showCaptainPass: false,
     showVirusAlert: false,

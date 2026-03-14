@@ -39,14 +39,12 @@ import { footballQuestions } from '@/data/footballQuestionsNew';
 import { cultureQuestions } from '@/data/cultureQuestions';
 import { buildGodDeck } from '@/lib/godDeck';
 
-// Shuffle array helper — double-pass Fisher-Yates for stronger randomization
+// Implementación eficiente de Fisher-Yates shuffle
 function shuffleArray<T>(array: T[]): T[] {
     const shuffled = [...array];
-    for (let pass = 0; pass < 2; pass++) {
-        for (let i = shuffled.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-        }
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
     return shuffled;
 }

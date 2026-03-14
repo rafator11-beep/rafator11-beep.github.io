@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 
 interface ArcadeCoinFlipProps {
     roomId: string;
+    playerId?: string;
     onClose: () => void;
 }
 
@@ -15,9 +16,10 @@ type CoinSide = 'heads' | 'tails';
 
 const WIN_STREAK_TARGET = 5;
 
-export function ArcadeCoinFlip({ roomId, onClose }: ArcadeCoinFlipProps) {
-    const { localPlayerId, players } = useGameContext();
-    const localPlayer = players.find(p => p.id === localPlayerId) || players[0];
+export function ArcadeCoinFlip({ roomId, playerId, onClose }: ArcadeCoinFlipProps) {
+    const { localPlayerId: contextPlayerId, players } = useGameContext();
+    const effectivePlayerId = playerId || contextPlayerId || 'guest';
+    const localPlayer = players.find(p => p.id === effectivePlayerId) || players[0];
 
     const [phase, setPhase] = useState<GamePhase>('waiting_sync');
     const [remotePlayerReady, setRemotePlayerReady] = useState(false);
@@ -33,7 +35,7 @@ export function ArcadeCoinFlip({ roomId, onClose }: ArcadeCoinFlipProps) {
 
     // Sync network
     useEffect(() => {
-        if (!localPlayerId) return;
+        if (!effectivePlayerId) return;
 
         const channel = supabase.channel(`coinflip-${roomId}`);
         channelRef.current = channel;
@@ -43,7 +45,7 @@ export function ArcadeCoinFlip({ roomId, onClose }: ArcadeCoinFlipProps) {
                 setRemotePlayerReady(true);
             })
             .on('broadcast', { event: 'score_update' }, ({ payload }) => {
-                if (payload.playerId !== localPlayerId) {
+                if (payload.playerId !== effectivePlayerId) {
                     setRemoteScore(payload.score);
                     if (payload.score >= WIN_STREAK_TARGET) {
                         setWinner('remote');
@@ -59,7 +61,7 @@ export function ArcadeCoinFlip({ roomId, onClose }: ArcadeCoinFlipProps) {
                     channel.send({
                         type: 'broadcast',
                         event: 'ready',
-                        payload: { playerId: localPlayerId }
+                        payload: { playerId: effectivePlayerId }
                     });
                 }
             });
@@ -67,7 +69,7 @@ export function ArcadeCoinFlip({ roomId, onClose }: ArcadeCoinFlipProps) {
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [roomId, localPlayerId]);
+    }, [roomId, effectivePlayerId]);
 
     const handleStartSync = () => {
         channelRef.current?.send({ type: 'broadcast', event: 'start_game' });
@@ -98,125 +100,87 @@ export function ArcadeCoinFlip({ roomId, onClose }: ArcadeCoinFlipProps) {
             setCurrentSide(result);
             setIsFlipping(false);
 
-            const correct = guess === result;
-            let nextScore = myScore;
-
-            if (correct) {
-                nextScore += 1;
-                setMyScore(nextScore);
-
+            if (guess === result) {
+                const newScore = myScore + 1;
+                setMyScore(newScore);
                 channelRef.current?.send({
                     type: 'broadcast',
                     event: 'score_update',
-                    payload: { playerId: localPlayerId, score: nextScore }
+                    payload: { playerId: effectivePlayerId, score: newScore }
                 });
 
-                if (nextScore >= WIN_STREAK_TARGET) {
-                    setWinner(localPlayerId!);
+                if (newScore >= WIN_STREAK_TARGET) {
+                    setWinner(effectivePlayerId);
                     setPhase('result');
                 }
             } else {
-                nextScore = 0;
                 setMyScore(0);
-                if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-
                 channelRef.current?.send({
                     type: 'broadcast',
                     event: 'score_update',
-                    payload: { playerId: localPlayerId, score: 0 }
+                    payload: { playerId: effectivePlayerId, score: 0 }
                 });
             }
-        }, 800);
+        }, 1000);
     };
 
     return (
-        <div className="absolute inset-0 z-50 bg-slate-950 flex flex-col text-white user-select-none">
-            {/* Header */}
-            <div className="p-4 flex justify-between items-center z-10 bg-black/40 border-b border-white/10">
-                <Button variant="ghost" className="text-white/50" onClick={onClose}>Abandonar</Button>
-                <div className="font-black tracking-widest text-xl text-yellow-500 uppercase">Cara o Cruz</div>
-                <div className="w-20"></div>
-            </div>
-
+        <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4">
             {phase === 'waiting_sync' && (
-                <div className="flex-1 flex flex-col items-center justify-center">
-                    {!remotePlayerReady ? (
-                        <div className="text-center animate-pulse">
-                            <h2 className="text-2xl font-bold mb-4">Esperando rival...</h2>
+                <div className="text-center">
+                    <h1 className="text-3xl font-black text-white mb-8 uppercase tracking-tight">CARA O CRUZ 1v1</h1>
+                    <div className="flex flex-col items-center gap-6">
+                        <div className="flex items-center gap-4">
+                            <div className={`w-3 h-3 rounded-full ${remotePlayerReady ? 'bg-emerald-500' : 'bg-red-500 animate-pulse'}`}></div>
+                            <span className="text-white/80 font-medium">
+                                {remotePlayerReady ? 'Rival Conectado' : 'Esperando rival...'}
+                            </span>
                         </div>
-                    ) : (
+                        <Button size="lg" className="w-64 h-16 text-xl rounded-2xl font-bold bg-amber-500 text-black hover:bg-amber-400" onClick={handleStartSync} disabled={!remotePlayerReady}>
+                            ENTRAR AL DUELO
+                        </Button>
+                        <Button variant="ghost" className="text-white/40" onClick={onClose}>Cancelar</Button>
+                    </div>
+                </div>
+            )}
+
+            {(phase === 'playing' || phase === 'countdown') && (
+                <div className="w-full max-w-lg flex flex-col items-center">
+                    <div className="w-full flex justify-between mb-12 px-4">
                         <div className="text-center">
-                            <h2 className="text-3xl font-black mb-8 text-emerald-400">Rival Listo</h2>
-                            <Button size="lg" className="h-16 px-12 text-2xl animate-bounce bg-yellow-600 hover:bg-yellow-500 text-black border-none" onClick={handleStartSync}>
-                                EMPEZAR DUELO
-                            </Button>
+                            <p className="text-white/40 text-xs font-bold uppercase tracking-widest mb-1">Tú</p>
+                            <p className="text-3xl font-black text-amber-500">{myScore}/{WIN_STREAK_TARGET}</p>
                         </div>
-                    )}
-                </div>
-            )}
-
-            {phase === 'countdown' && (
-                <div className="flex-1 flex items-center justify-center text-center">
-                    <motion.div
-                        animate={{ scale: [1, 1.5, 0], opacity: [0, 1, 0] }}
-                        transition={{ duration: 3, times: [0, 0.2, 1] }}
-                        className="text-7xl font-black text-yellow-500 drop-shadow-[0_0_30px_rgba(234,179,8,0.8)] uppercase"
-                    >
-                        ¡ADIVINA<br />5 SEGUIDAS!
-                    </motion.div>
-                </div>
-            )}
-
-            {phase === 'playing' && (
-                <div className="flex-1 flex flex-col items-center justify-between p-4 py-8 w-full max-w-2xl mx-auto">
-
-                    {/* Streaks Header */}
-                    <div className="w-full grid grid-cols-2 gap-4">
-                        <div className="bg-black/40 rounded-3xl p-4 flex flex-col items-center border border-yellow-500/30">
-                            <span className="text-xs uppercase tracking-widest font-bold text-yellow-500">Tu Racha</span>
-                            <span className="text-4xl font-black text-white px-4">{myScore} / 5</span>
-                        </div>
-                        <div className="bg-black/40 rounded-3xl p-4 flex flex-col items-center border border-red-500/30">
-                            <span className="text-xs uppercase tracking-widest font-bold text-red-500">Racha Rival</span>
-                            <span className="text-4xl font-black text-white px-4">{remoteScore} / 5</span>
+                        <div className="text-center">
+                            <p className="text-white/40 text-xs font-bold uppercase tracking-widest mb-1">Rival</p>
+                            <p className="text-3xl font-black text-white/20">{remoteScore}/{WIN_STREAK_TARGET}</p>
                         </div>
                     </div>
 
-                    {/* Coin Animation Area */}
-                    <div className="flex-1 flex items-center justify-center w-full my-8">
+                    <div className="relative w-40 h-40 mb-12">
                         <motion.div
-                            animate={{
-                                rotateY: isFlipping ? [0, 1080] : 0,
-                                scale: isFlipping ? [1, 1.5, 1] : 1,
-                                y: isFlipping ? [0, -100, 0] : 0
-                            }}
-                            transition={{ duration: 0.8, ease: "easeInOut" }}
-                            className="w-48 h-48 rounded-full border-8 border-yellow-600 bg-gradient-to-br from-yellow-300 to-yellow-600 shadow-[0_0_50px_rgba(234,179,8,0.5)] flex items-center justify-center"
+                            animate={isFlipping ? { rotateY: 720, y: [0, -150, 0] } : {}}
+                            transition={{ duration: 1, ease: "easeOut" }}
+                            className="w-full h-full rounded-full bg-gradient-to-br from-amber-300 via-amber-500 to-amber-700 shadow-[0_0_30px_rgba(245,158,11,0.4)] flex items-center justify-center border-4 border-amber-200/50"
                         >
-                            {!isFlipping && (
-                                <span className="text-5xl font-black text-yellow-900 uppercase">
-                                    {currentSide === 'heads' ? 'Cara🧔' : 'Cruz❌'}
-                                </span>
-                            )}
+                            <span className="text-6xl">{currentSide === 'heads' ? '�' : '👑'}</span>
                         </motion.div>
                     </div>
 
-                    {/* Action Controls */}
-                    <div className="flex gap-4 w-full px-4 mb-4">
+                    <div className="grid grid-cols-2 gap-4 w-full px-8">
                         <Button
                             size="lg"
-                            disabled={isFlipping}
+                            className="h-20 rounded-2xl text-xl font-bold bg-white text-black hover:bg-gray-100"
                             onClick={() => handleGuess('heads')}
-                            className="flex-1 h-24 rounded-3xl bg-amber-600 hover:bg-amber-500 text-white font-black text-2xl border-b-8 border-amber-800 active:border-b-0 active:translate-y-2 transition-all shadow-xl"
+                            disabled={isFlipping || phase === 'countdown'}
                         >
                             CARA
                         </Button>
-
                         <Button
                             size="lg"
-                            disabled={isFlipping}
+                            className="h-20 rounded-2xl text-xl font-bold bg-amber-600 text-white hover:bg-amber-500"
                             onClick={() => handleGuess('tails')}
-                            className="flex-1 h-24 rounded-3xl bg-slate-600 hover:bg-slate-500 text-white font-black text-2xl border-b-8 border-slate-800 active:border-b-0 active:translate-y-2 transition-all shadow-xl"
+                            disabled={isFlipping || phase === 'countdown'}
                         >
                             CRUZ
                         </Button>
@@ -225,20 +189,20 @@ export function ArcadeCoinFlip({ roomId, onClose }: ArcadeCoinFlipProps) {
             )}
 
             {phase === 'result' && (
-                <div className="flex-1 flex flex-col items-center justify-center p-4">
+                <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-6 backdrop-blur-md">
                     <motion.div
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
-                        className="bg-black/90 p-8 rounded-[40px] backdrop-blur-xl border border-yellow-500/50 w-full max-w-md mx-auto text-center shadow-[0_0_50px_rgba(234,179,8,0.2)]"
+                        className="bg-black/90 p-8 rounded-[40px] backdrop-blur-xl border border-amber-500/50 w-full max-w-md mx-auto text-center shadow-[0_0_50px_rgba(245,158,11,0.2)]"
                     >
-                        <h2 className="text-4xl md:text-5xl font-black text-yellow-500 mb-2 drop-shadow-md">
-                            {winner === localPlayerId ? '✨ ¡EN RACHA! ✨' : '🛑 FIN DE RACHA 🛑'}
+                        <h2 className="text-4xl md:text-5xl font-black text-amber-500 mb-2 drop-shadow-md">
+                            {winner === effectivePlayerId ? '✨ ¡IMBATIBLE! ✨' : '🛑 RACHA ROTA 🛑'}
                         </h2>
                         <p className="text-white/80 mb-8 text-lg font-medium">
-                            {winner === localPlayerId ? '¡5 monedas acertadas! Tienes el don.' : 'Tu rival completó la racha primero.'}
+                            {winner === effectivePlayerId ? `Conseguiste ${WIN_STREAK_TARGET} aciertos seguidos. ¡Tienes el toque de Midas!` : 'Tu rival fue más rápido o tuvo más suerte esta vez.'}
                         </p>
 
-                        <Button size="lg" className="w-full h-16 text-xl rounded-2xl font-bold bg-yellow-500 text-black hover:bg-yellow-400 hover:scale-105 transition-all" onClick={() => setPhase('waiting_sync')}>
+                        <Button size="lg" className="w-full h-16 text-xl rounded-2xl font-bold bg-amber-500 text-black hover:bg-amber-400 hover:scale-105 transition-all" onClick={() => setPhase('waiting_sync')}>
                             Volver al Lobby
                         </Button>
                     </motion.div>
@@ -246,4 +210,3 @@ export function ArcadeCoinFlip({ roomId, onClose }: ArcadeCoinFlipProps) {
             )}
         </div>
     );
-}

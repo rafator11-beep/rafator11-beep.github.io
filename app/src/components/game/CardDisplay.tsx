@@ -107,21 +107,32 @@ export function CardDisplay({ content, type = 'common', onClick, gameMode, playe
             <AnimatePresence mode="wait">
                 <motion.div
                     key={content}
+                    layout
                     initial={{ rotateY: 90, opacity: 0, scale: 0.8 }}
                     animate={{ rotateY: 0, opacity: 1, scale: 1 }}
                     exit={{ rotateY: -90, opacity: 0, scale: 0.8 }}
-                    transition={{ type: "spring", stiffness: 260, damping: 20 }}
-                    className="w-full h-full"
+                    transition={{ type: "spring", stiffness: 100, damping: 20 }}
+                    className="w-full h-full group"
                 >
                     <Card className={`
-            w-full h-full p-8 flex flex-col items-center justify-center text-center relative overflow-hidden
+            w-full h-full p-8 flex flex-col items-center justify-center text-center relative overflow-hidden rounded-[2.5rem] transition-all duration-500
             ${type === 'legendary' ? '!border-yellow-400 !border-2 shadow-[0_0_30px_rgba(250,204,21,0.5)]' : ''}
             ${type === 'virus' ? '!border-green-500 !border-2 shadow-[0_0_30px_rgba(34,197,94,0.5)]' : ''}
             ${type === 'chaos' ? '!border-red-600 !border-2 shadow-[0_0_30px_rgba(220,38,38,0.5)]' : ''}
             ${type === 'rare' ? '!border-blue-400 !border-2 shadow-[0_0_20px_rgba(96,165,250,0.5)]' : ''}
-            !bg-gradient-to-br from-slate-800/90 via-slate-900/95 to-slate-800/90 backdrop-blur-xl !border !border-white/20 text-white
+            !bg-slate-900/40 backdrop-blur-[16px] !border !border-white/20 text-white
           `}>
-                        {/* Background decorative elements */}
+                        {/* Glossy Overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-30 group-hover:opacity-40 transition-opacity" />
+                        
+                        {/* Neon Glow Effect */}
+                        <div className={`absolute -inset-1 opacity-20 group-hover:opacity-30 transition-opacity blur-3xl pointer-events-none
+                            ${type === 'legendary' ? 'bg-yellow-400' : ''}
+                            ${type === 'virus' ? 'bg-green-500' : ''}
+                            ${type === 'chaos' ? 'bg-red-600' : ''}
+                            ${type === 'rare' ? 'bg-blue-400' : ''}
+                            ${type === 'common' ? 'bg-primary/20' : ''}
+                        `} />
                         <div className="absolute top-0 right-0 p-4 opacity-10">
                             <span className="text-6xl">
                                 {gameMode === 'picante' ? '🔥' : gameMode === 'cultura' ? '🧠' : '🎲'}

@@ -25,9 +25,10 @@ const getRandomCard = () => {
 
 const WIN_STREAK_TARGET = 7;
 
-export function ArcadeHighLow({ roomId, onClose }: ArcadeHighLowProps) {
-    const { localPlayerId, players } = useGameContext();
-    const localPlayer = players.find(p => p.id === localPlayerId) || players[0];
+export function ArcadeHighLow({ roomId, playerId, onClose }: ArcadeHighLowProps & { playerId?: string }) {
+    const { localPlayerId: contextPlayerId, players } = useGameContext();
+    const effectivePlayerId = playerId || contextPlayerId || 'guest';
+    const localPlayer = players.find(p => p.id === effectivePlayerId) || players[0];
 
     const [phase, setPhase] = useState<GamePhase>('waiting_sync');
     const [remotePlayerReady, setRemotePlayerReady] = useState(false);
@@ -44,7 +45,7 @@ export function ArcadeHighLow({ roomId, onClose }: ArcadeHighLowProps) {
 
     // Sync network
     useEffect(() => {
-        if (!localPlayerId) return;
+        if (!effectivePlayerId) return;
 
         const channel = supabase.channel(`highlow-${roomId}`);
         channelRef.current = channel;
@@ -54,7 +55,7 @@ export function ArcadeHighLow({ roomId, onClose }: ArcadeHighLowProps) {
                 setRemotePlayerReady(true);
             })
             .on('broadcast', { event: 'score_update' }, ({ payload }) => {
-                if (payload.playerId !== localPlayerId) {
+                if (payload.playerId !== effectivePlayerId) {
                     setRemoteScore(payload.score);
                     if (payload.score >= WIN_STREAK_TARGET) {
                         setWinner('remote');
@@ -73,7 +74,7 @@ export function ArcadeHighLow({ roomId, onClose }: ArcadeHighLowProps) {
                     channel.send({
                         type: 'broadcast',
                         event: 'ready',
-                        payload: { playerId: localPlayerId }
+                        payload: { playerId: effectivePlayerId }
                     });
                 }
             });
@@ -81,7 +82,7 @@ export function ArcadeHighLow({ roomId, onClose }: ArcadeHighLowProps) {
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [roomId, localPlayerId]);
+    }, [roomId, effectivePlayerId]);
 
     const handleStartSync = () => {
         const initial = getRandomCard();
@@ -130,11 +131,11 @@ export function ArcadeHighLow({ roomId, onClose }: ArcadeHighLowProps) {
                 channelRef.current?.send({
                     type: 'broadcast',
                     event: 'score_update',
-                    payload: { playerId: localPlayerId, score: nextScore }
+                    payload: { playerId: effectivePlayerId, score: nextScore }
                 });
 
                 if (nextScore >= WIN_STREAK_TARGET) {
-                    setWinner(localPlayerId!);
+                    setWinner(effectivePlayerId);
                     setPhase('result');
                 }
             } else {
@@ -145,7 +146,7 @@ export function ArcadeHighLow({ roomId, onClose }: ArcadeHighLowProps) {
                 channelRef.current?.send({
                     type: 'broadcast',
                     event: 'score_update',
-                    payload: { playerId: localPlayerId, score: 0 }
+                    payload: { playerId: effectivePlayerId, score: 0 }
                 });
             }
 
@@ -319,10 +320,10 @@ export function ArcadeHighLow({ roomId, onClose }: ArcadeHighLowProps) {
                         className="bg-black/90 p-8 rounded-[40px] backdrop-blur-xl border border-yellow-500/50 w-full max-w-md mx-auto text-center shadow-[0_0_50px_rgba(234,179,8,0.2)]"
                     >
                         <h2 className="text-4xl md:text-5xl font-black text-yellow-500 mb-2 drop-shadow-md">
-                            {winner === localPlayerId ? '✨ ¡EN RACHA! ✨' : '🛑 FIN DE RACHA 🛑'}
+                            {winner === effectivePlayerId ? '✨ ¡EN RACHA! ✨' : '🛑 FIN DE RACHA 🛑'}
                         </h2>
                         <p className="text-white/80 mb-8 text-lg font-medium">
-                            {winner === localPlayerId ? 'Adivinaste 7 cartas seguidas antes que tu rival. ¡Qué visión!' : 'Tu rival llegó a las 7 adivinaciones primero.'}
+                            {winner === effectivePlayerId ? `Adivinaste ${WIN_STREAK_TARGET} cartas seguidas antes que tu rival. ¡Qué visión!` : 'Tu rival llegó a las 7 adivinaciones primero.'}
                         </p>
 
                         <Button size="lg" className="w-full h-16 text-xl rounded-2xl font-bold bg-yellow-500 text-black hover:bg-yellow-400 hover:scale-105 transition-all" onClick={() => setPhase('waiting_sync')}>

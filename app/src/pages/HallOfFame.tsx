@@ -7,15 +7,15 @@ import { loadLocalRankings } from '@/utils/localRanking';
 // ─── Title System (10 Ranks) ─────────────────────────────────────────────────
 function getPlayerTitle(xp: number, gamesPlayed: number, wins: number) {
   if (xp >= 5000 || wins >= 200) return { title: 'Dios de la Fiesta', emoji: '⚡', color: 'text-amber-300' };
-  if (xp >= 3000 || wins >= 100) return { title: 'Leyenda Suprema', emoji: '👑', color: 'text-yellow-400' };
-  if (xp >= 2000 || wins >= 75) return { title: 'Rey del Party', emoji: '🎉', color: 'text-pink-400' };
-  if (xp >= 1000 || wins >= 50) return { title: 'El Fiestero', emoji: '🔥', color: 'text-orange-400' };
+  if (xp >= 3000 || wins >= 100) return { title: 'Rey del Drama', emoji: '🎭', color: 'text-pink-400' };
+  if (xp >= 2000 || wins >= 75) return { title: 'El Fiestero', emoji: '🎉', color: 'text-yellow-400' };
+  if (xp >= 1000 || wins >= 50) return { title: 'Impostor Nato', emoji: '🕵️', color: 'text-purple-400' };
   if (xp >= 700 || wins >= 30) return { title: 'Alma de la Noche', emoji: '🌙', color: 'text-indigo-400' };
   if (xp >= 500 || wins >= 20) return { title: 'El Kamikaze', emoji: '💣', color: 'text-red-400' };
-  if (xp >= 300 || wins >= 10) return { title: 'El Impostor Nato', emoji: '🎭', color: 'text-purple-400' };
+  if (xp >= 300 || wins >= 10) return { title: 'El Invisible', emoji: '👻', color: 'text-slate-400' };
   if (xp >= 200 || wins >= 5) return { title: 'El Diplomático', emoji: '🤝', color: 'text-blue-400' };
   if (xp >= 100 || gamesPlayed >= 10) return { title: 'Promesa', emoji: '⭐', color: 'text-yellow-300' };
-  return { title: 'Aprendiz', emoji: '📖', color: 'text-slate-400' };
+  return { title: 'Aprendiz', emoji: '📖', color: 'text-slate-500' };
 }
 
 // ─── Neon border for TOP 3 ───────────────────────────────────────────────────
@@ -139,15 +139,15 @@ function PlayerRowCard({ player, idx }: { player: PlayerRow; idx: number }) {
 // ─── 10 Rank Titles for Legend Section ────────────────────────────────────────
 const RANK_TITLES = [
   { emoji: '⚡', title: 'Dios de la Fiesta', req: '5000+ XP', color: 'text-amber-300' },
-  { emoji: '👑', title: 'Leyenda Suprema', req: '3000+ XP', color: 'text-yellow-400' },
-  { emoji: '🎉', title: 'Rey del Party', req: '2000+ XP', color: 'text-pink-400' },
-  { emoji: '🔥', title: 'El Fiestero', req: '1000+ XP', color: 'text-orange-400' },
+  { emoji: '🎭', title: 'Rey del Drama', req: '3000+ XP', color: 'text-pink-400' },
+  { emoji: '🎉', title: 'El Fiestero', req: '2000+ XP', color: 'text-yellow-400' },
+  { emoji: '🕵️', title: 'Impostor Nato', req: '1000+ XP', color: 'text-purple-400' },
   { emoji: '🌙', title: 'Alma de la Noche', req: '700+ XP', color: 'text-indigo-400' },
   { emoji: '💣', title: 'El Kamikaze', req: '500+ XP', color: 'text-red-400' },
-  { emoji: '🎭', title: 'El Impostor Nato', req: '300+ XP', color: 'text-purple-400' },
+  { emoji: '👻', title: 'El Invisible', req: '300+ XP', color: 'text-slate-400' },
   { emoji: '🤝', title: 'El Diplomático', req: '200+ XP', color: 'text-blue-400' },
   { emoji: '⭐', title: 'Promesa', req: '100+ XP', color: 'text-yellow-300' },
-  { emoji: '📖', title: 'Aprendiz', req: 'Inicio', color: 'text-slate-400' },
+  { emoji: '📖', title: 'Aprendiz', req: 'Inicio', color: 'text-slate-500' },
 ];
 
 // ─── Main Component ──────────────────────────────────────────────────────────

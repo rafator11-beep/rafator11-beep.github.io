@@ -64,7 +64,12 @@ export const useDrinkingMicroGames = (mode: GameMode, playersCount: number) => {
                 ok: canUse('mimica', 6),
                 run: () => {
                     const mimica = getRandomMimica();
-                    setGameState((prev: any) => ({ ...prev, showMimica: true, currentMimicaText: formatMimicaChallenge(mimica, currentPlayerName) }));
+                    setGameState((prev: any) => ({ 
+                        ...prev, 
+                        showMimica: false, // Don't show immediately
+                        showMimicaReveal: true, // Show handover first
+                        currentMimicaText: formatMimicaChallenge(mimica, currentPlayerName) 
+                    }));
                 },
             },
             {
@@ -86,7 +91,12 @@ export const useDrinkingMicroGames = (mode: GameMode, playersCount: number) => {
                 ok: canUse('boca', 14),
                 run: () => {
                     const bocaCerrada = getRandomBocaCerrada();
-                    setGameState((prev: any) => ({ ...prev, showBocaCerrada: true, currentBocaCerradaText: formatBocaCerradaChallenge(bocaCerrada, currentPlayerName) }));
+                    setGameState((prev: any) => ({ 
+                        ...prev, 
+                        showBocaCerrada: false, // Don't show immediately
+                        showBocaCerradaReveal: true, // Show handover first
+                        currentBocaCerradaText: formatBocaCerradaChallenge(bocaCerrada, currentPlayerName) 
+                    }));
                 },
             },
             {

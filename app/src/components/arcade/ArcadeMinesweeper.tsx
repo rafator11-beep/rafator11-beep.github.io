@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 
 interface ArcadeMinesweeperProps {
     roomId: string;
+    playerId?: string;
     onClose: () => void;
 }
 
@@ -25,9 +26,10 @@ const generateBombs = () => {
     return Array.from(bombs);
 };
 
-export function ArcadeMinesweeper({ roomId, onClose }: ArcadeMinesweeperProps) {
-    const { localPlayerId, players } = useGameContext();
-    const localPlayer = players.find(p => p.id === localPlayerId) || players[0];
+export function ArcadeMinesweeper({ roomId, playerId, onClose }: ArcadeMinesweeperProps) {
+    const { localPlayerId: contextPlayerId, players } = useGameContext();
+    const effectivePlayerId = playerId || contextPlayerId || 'guest';
+    const localPlayer = players.find(p => p.id === effectivePlayerId) || players[0];
 
     const [phase, setPhase] = useState<GamePhase>('waiting_sync');
     const [remotePlayerReady, setRemotePlayerReady] = useState(false);
@@ -46,7 +48,7 @@ export function ArcadeMinesweeper({ roomId, onClose }: ArcadeMinesweeperProps) {
 
     // Sync network
     useEffect(() => {
-        if (!localPlayerId) return;
+        if (!effectivePlayerId) return;
 
         const channel = supabase.channel(`minesweeper-${roomId}`);
         channelRef.current = channel;
@@ -55,8 +57,8 @@ export function ArcadeMinesweeper({ roomId, onClose }: ArcadeMinesweeperProps) {
             .on('broadcast', { event: 'ready' }, ({ payload }) => {
                 setRemotePlayerReady(true);
                 // Host initializes game if first
-                if (!currentTurnId && payload.playerId !== localPlayerId) {
-                    const starter = Math.random() > 0.5 ? localPlayerId : payload.playerId;
+                if (!currentTurnId && payload.playerId !== effectivePlayerId) {
+                    const starter = Math.random() > 0.5 ? effectivePlayerId : payload.playerId;
                     const bombs = generateBombs();
                     channel.send({
                         type: 'broadcast',
@@ -79,7 +81,7 @@ export function ArcadeMinesweeper({ roomId, onClose }: ArcadeMinesweeperProps) {
                     channel.send({
                         type: 'broadcast',
                         event: 'ready',
-                        payload: { playerId: localPlayerId }
+                        payload: { playerId: effectivePlayerId }
                     });
                 }
             });
@@ -87,7 +89,7 @@ export function ArcadeMinesweeper({ roomId, onClose }: ArcadeMinesweeperProps) {
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [roomId, localPlayerId, currentTurnId]);
+    }, [roomId, effectivePlayerId, currentTurnId]);
 
     const startGame = (starterId: string, bombs: number[]) => {
         setWinner(null);
@@ -99,49 +101,37 @@ export function ArcadeMinesweeper({ roomId, onClose }: ArcadeMinesweeperProps) {
         setRemoteScore(0);
     };
 
-    const handleRemoteClick = (index: number, playerId: string) => {
+    const handleRemoteClick = (index: number, pid: string) => {
         const isBomb = bombIndices.includes(index);
-
-        setRevealedCells(prev => ({ ...prev, [index]: isBomb ? 'bomb' : 'safe' }));
-
         if (isBomb) {
-            // Remote clicked a bomb. I win.
-            if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-            setWinner(localPlayerId!); // remote died
+            setRevealedCells(prev => ({ ...prev, [index]: 'bomb' }));
+            setWinner(effectivePlayerId);
             setPhase('result');
         } else {
-            // Safe
-            if (navigator.vibrate) navigator.vibrate(20);
+            setRevealedCells(prev => ({ ...prev, [index]: 'safe' }));
             setRemoteScore(prev => prev + 1);
-            // Switch turn
-            setCurrentTurnId(localPlayerId!);
+            setCurrentTurnId(effectivePlayerId);
         }
     };
 
     const handleCellClick = (index: number) => {
-        if (phase !== 'playing' || currentTurnId !== localPlayerId || revealedCells[index]) return;
+        if (phase !== 'playing' || currentTurnId !== effectivePlayerId || revealedCells[index]) return;
 
         const isBomb = bombIndices.includes(index);
 
-        // Broadcast
         channelRef.current?.send({
             type: 'broadcast',
             event: 'click_cell',
-            payload: { index, playerId: localPlayerId }
+            payload: { index, playerId: effectivePlayerId }
         });
 
-        setRevealedCells(prev => ({ ...prev, [index]: isBomb ? 'bomb' : 'safe' }));
-
         if (isBomb) {
-            // I clicked a bomb. Remote wins.
-            if (navigator.vibrate) navigator.vibrate(1000);
+            setRevealedCells(prev => ({ ...prev, [index]: 'bomb' }));
             setWinner('remote');
             setPhase('result');
         } else {
-            // Safe
-            if (navigator.vibrate) navigator.vibrate(50);
+            setRevealedCells(prev => ({ ...prev, [index]: 'safe' }));
             setMyScore(prev => prev + 1);
-            // Switch turn
             setCurrentTurnId('remote');
         }
     };
