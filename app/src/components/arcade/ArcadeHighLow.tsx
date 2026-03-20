@@ -5,6 +5,7 @@ import { useGameContext } from '@/contexts/GameContext';
 import { Button } from '@/components/ui/button';
 import { ArrowUp, ArrowDown } from 'lucide-react';
 import { toast } from 'sonner';
+import reverso from '@/assets/reverso.jpg';
 
 interface ArcadeHighLowProps {
     roomId: string;
@@ -164,7 +165,7 @@ export function ArcadeHighLow({ roomId, playerId, onClose }: ArcadeHighLowProps 
             return (
                 <div
                     className="w-32 h-48 md:w-48 md:h-64 rounded-2xl bg-slate-800 border-4 border-slate-700 shadow-2xl flex items-center justify-center bg-cover bg-center"
-                    style={{ backgroundImage: `url('/reverso.jpg')` }}
+                    style={{ backgroundImage: `url('${reverso}')` }}
                 />
             );
         }

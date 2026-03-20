@@ -1,6 +1,7 @@
 import React from 'react';
 import { ParchisPiece, PlayerColor, SAFE_SQUARES } from '@/lib/parchisLogic';
 import { TRACK_POSITIONS, SAFE_SQUARES_UI, COLOR_CONFIG, getGoalPath, getPieceVisualPosition } from '@/lib/parchisBoardData';
+import tapete from '@/assets/tapete.jpg';
 
 interface ParchisBoardProps {
     pieces: ParchisPiece[];
@@ -116,7 +117,7 @@ export function ParchisBoard({ pieces, currentTurn, myColor, onPieceClick, teamL
                     {/* Main Goal image (Huesca Shield) in the absolute center */}
                     <circle cx={1.5 * S} cy={1.5 * S} r={1.2 * S} fill="#fff" stroke={COLORS.border} strokeWidth="2" />
                     <image
-                        href="/tapete.jpg"
+                        href={tapete}
                         x={1.5 * S - 35} y={1.5 * S - 35} width="70" height="70"
                         preserveAspectRatio="xMidYMid slice"
                     />

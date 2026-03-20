@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { ParchisBoard } from './ParchisBoard';
 import { getRandomTeamId, getTeamLogoUrl } from '@/lib/footballTeams';
 import { ParchisPiece, PlayerColor, PieceState, COLOR_ORDER, createInitialPieces, calculateNextPosition, isSafe } from '@/lib/parchisLogic';
+import tapete from '@/assets/tapete.jpg';
 
 export interface ParchisPlayer {
     id: string;
@@ -317,7 +318,7 @@ export function ParchisGame({ roomId, isHost, onExit, localPlayerName, localPlay
             <div className="flex-1 flex items-center justify-center p-4 relative">
                 {/* Background Huesca Shield Watermark */}
                 <div className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
-                    <img src="/tapete.jpg" alt="Centro" className="w-[500px] h-auto grayscale mix-blend-overlay" />
+                    <img src={tapete} alt="Centro" className="w-[500px] h-auto grayscale mix-blend-overlay" />
                 </div>
 
                 {gameState.status === 'waiting' ? (

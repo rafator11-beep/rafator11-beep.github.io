@@ -22,14 +22,15 @@ export default defineConfig({
     // This removes the potential Node stream error when Rollup attempts
     // to include missing/broken polyfill modules that are not needed
     // now that simple-peer is fully removed.
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 10000,
+    assetsInlineLimit: 100000000, // Inline all assets
     rollupOptions: {
       external: ['stream', 'buffer', 'process', 'node:stream', 'node:buffer', 'node:process'],
       output: {
         manualChunks: undefined,
       },
     },
-    minify: false,
+    minify: true,
     sourcemap: false,
   }
 });

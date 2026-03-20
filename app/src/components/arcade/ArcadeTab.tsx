@@ -11,6 +11,7 @@ import { MemoryMatch } from './MemoryMatch';
 import { GemCatcher } from './GemCatcher';
 import { SimonSays } from './SimonSays';
 import { ArcadeOnlineHub } from './ArcadeOnlineHub';
+import noise from '@/assets/noise.svg';
 
 type ArcadeGame = 'menu' | 'spin' | 'slots' | 'memory' | 'catcher' | 'simon' | 'online';
 
@@ -112,7 +113,7 @@ export function ArcadeTab() {
                         onClick={() => setActiveGame('online')}
                         className="relative group cursor-pointer overflow-hidden rounded-3xl p-8 bg-gradient-to-r from-violet-600 via-fuchsia-600 to-pink-600 shadow-[0_0_40px_rgba(236,72,153,0.3)] border border-pink-500/50 flex flex-col items-center text-center"
                     >
-                        <div className="absolute inset-0 bg-[url('/noise.svg')] opacity-20 mix-blend-overlay"></div>
+                        <div className="absolute inset-0 opacity-20 mix-blend-overlay" style={{ backgroundImage: `url('${noise}')` }}></div>
                         <div className="absolute top-0 right-0 w-64 h-64 bg-white/20 blur-[100px] rounded-full group-hover:bg-white/30 transition-all duration-700"></div>
 
                         <Target className="w-16 h-16 text-white mb-4 animate-pulse drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]" />

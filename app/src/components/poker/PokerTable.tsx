@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Player } from '@/types/game';
 import { Users, Coins, Crown } from 'lucide-react';
 import { useDailyVideo } from '@/components/multiplayer/DailyVideoProvider';
+import tapete from '@/assets/tapete.jpg';
+import reverso from '@/assets/reverso.jpg';
 
 // Helper component to render a video track
 function VideoTrack({ track, muted = false, className = '' }: { track: MediaStreamTrack; muted?: boolean; className?: string }) {
@@ -56,7 +58,7 @@ export function PokerTable({ players, gameState, localPlayerId, myCards = [], re
                 <div
                     className="absolute inset-6 rounded-[50%] opacity-[0.07] pointer-events-none mix-blend-overlay"
                     style={{
-                        backgroundImage: `url('/tapete.jpg')`,
+                        backgroundImage: `url('${tapete}')`,
                         backgroundSize: 'contain',
                         backgroundPosition: 'center',
                         backgroundRepeat: 'no-repeat'
@@ -200,11 +202,11 @@ export function PokerTable({ players, gameState, localPlayerId, myCards = [], re
                                         <>
                                             <div
                                                 className="w-8 h-12 md:w-11 md:h-16 rounded-md border border-white/20 shadow-lg transform -rotate-10 bg-cover bg-center bg-[#003366]"
-                                                style={{ backgroundImage: `url('${equippedCards?.[p.id] || '/reverso.jpg'}')` }}
+                                                style={{ backgroundImage: `url('${equippedCards?.[p.id] || reverso}')` }}
                                             />
                                             <div
                                                 className="w-8 h-12 md:w-11 md:h-16 rounded-md border border-white/20 shadow-lg transform rotate-10 bg-cover bg-center bg-[#003366]"
-                                                style={{ backgroundImage: `url('${equippedCards?.[p.id] || '/reverso.jpg'}')` }}
+                                                style={{ backgroundImage: `url('${equippedCards?.[p.id] || reverso}')` }}
                                             />
                                         </>
                                     </div>
