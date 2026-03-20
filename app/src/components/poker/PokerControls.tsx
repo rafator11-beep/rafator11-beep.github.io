@@ -17,7 +17,6 @@ export function PokerControls({ onAction, isActive, currentBetToMatch = 0, myChi
     const minRaise = currentBetToMatch > 0 ? currentBetToMatch * 2 : 20;
     const [raiseAmount, setRaiseAmount] = useState(minRaise);
 
-    // Reset slider when turn becomes active
     useEffect(() => {
         if (isActive) {
             setRaiseAmount(Math.min(minRaise, myChips));
@@ -26,8 +25,9 @@ export function PokerControls({ onAction, isActive, currentBetToMatch = 0, myChi
 
     if (!isActive) {
         return (
-            <div className="text-muted-foreground animate-pulse text-sm font-medium tracking-widest uppercase">
-                Esperando a otros jugadores...
+            <div className="premium-panel-soft rounded-[24px] px-4 py-5 text-center w-full max-w-3xl">
+                <p className="text-xs font-bold uppercase tracking-[0.22em] text-white/45 mb-2">Mesa en juego</p>
+                <p className="text-sm md:text-base text-white/70">Esperando a otros jugadores...</p>
             </div>
         );
     }
@@ -42,7 +42,6 @@ export function PokerControls({ onAction, isActive, currentBetToMatch = 0, myChi
     };
 
     const handleActionOut = (action: 'fold' | 'check' | 'call' | 'raise', amount?: number) => {
-        // Sound/Visual feedback via toast
         if (action === 'fold') toast('Te has retirado', { icon: '🏳️' });
         if (action === 'check') toast('Pasas turno', { icon: '✊' });
         if (action === 'call') toast(`Igualas la apuesta (${currentBetToMatch})`, { icon: '🪙' });
@@ -52,75 +51,64 @@ export function PokerControls({ onAction, isActive, currentBetToMatch = 0, myChi
     };
 
     return (
-        <div className="flex flex-col items-center gap-4 w-full max-w-xl px-2">
-
-            {/* Betting Slider Section */}
-            <AnimatePresence>
-                {myChips > 0 && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="w-full bg-black/60 backdrop-blur-md p-4 rounded-3xl border border-white/10 shadow-2xl flex flex-col gap-4"
-                    >
-                        <div className="flex justify-between items-center px-2">
-                            <span className="text-xs text-muted-foreground uppercase tracking-widest">Apuesta</span>
-                            <span className="text-2xl font-black text-yellow-400 font-mono tracking-tighter flex items-center gap-1">
-                                <Coins size={20} className="fill-current opacity-80" /> {raiseAmount}
-                            </span>
+        <div className="w-full max-w-3xl premium-panel rounded-[28px] p-4 md:p-5">
+            <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-4 items-stretch">
+                <div className="premium-panel-soft rounded-[24px] p-4 md:p-5 flex flex-col gap-4">
+                    <div className="flex items-center justify-between gap-3">
+                        <div>
+                            <p className="text-[11px] uppercase tracking-[0.2em] text-white/45 font-bold mb-1">Subida</p>
+                            <p className="text-xl md:text-2xl font-black text-white">Control de apuesta</p>
                         </div>
-
-                        <Slider
-                            defaultValue={[raiseAmount]}
-                            value={[raiseAmount]}
-                            min={Math.min(minRaise, myChips)}
-                            max={myChips}
-                            step={10}
-                            onValueChange={(val) => setRaiseAmount(val[0])}
-                            className="py-2"
-                        />
-
-                        {/* Quick Bet Buttons */}
-                        <div className="flex gap-2">
-                            <Button variant="ghost" size="sm" onClick={() => handleQuickBet('min')} className="flex-1 bg-white/5 hover:bg-white/10 text-xs">MIN</Button>
-                            <Button variant="ghost" size="sm" onClick={() => handleQuickBet('half')} className="flex-1 bg-white/5 hover:bg-white/10 text-xs">1/2 BOTE</Button>
-                            <Button variant="ghost" size="sm" onClick={() => handleQuickBet('allin')} className="flex-1 bg-red-500/20 hover:bg-red-500/40 text-red-300 border border-red-500/30 text-xs font-black">ALL IN</Button>
+                        <div className="premium-chip text-amber-200">
+                            <Coins size={14} className="opacity-80" /> {raiseAmount}
                         </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                    </div>
 
-            {/* Main Action Buttons */}
-            <motion.div
-                initial={{ y: 50, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                className="flex items-center gap-2 w-full"
-            >
-                <Button
-                    variant="destructive"
-                    className="flex-1 font-bold text-sm md:text-base h-16 rounded-[20px] shadow-lg border-b-4 border-red-900 active:border-b-0 active:translate-y-1 transition-all"
-                    onClick={() => handleActionOut('fold')}
-                >
-                    Retirarse
-                </Button>
+                    <Slider
+                        defaultValue={[raiseAmount]}
+                        value={[raiseAmount]}
+                        min={Math.min(minRaise, myChips)}
+                        max={myChips}
+                        step={10}
+                        onValueChange={(val) => setRaiseAmount(val[0])}
+                        className="py-3"
+                    />
 
-                <Button
-                    variant="secondary"
-                    className="flex-1 font-bold text-sm md:text-base h-16 bg-blue-600 hover:bg-blue-700 text-white rounded-[20px] shadow-lg border-b-4 border-blue-900 active:border-b-0 active:translate-y-1 transition-all"
-                    onClick={() => handleActionOut(currentBetToMatch > 0 ? 'call' : 'check', currentBetToMatch)}
-                >
-                    {currentBetToMatch > 0 ? `Igualar ${currentBetToMatch}` : 'Pasar'}
-                </Button>
+                    <div className="grid grid-cols-3 gap-2">
+                        <Button variant="ghost" size="sm" onClick={() => handleQuickBet('min')} className="h-11 rounded-2xl bg-white/5 hover:bg-white/10 text-xs font-bold border border-white/10">MIN</Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleQuickBet('half')} className="h-11 rounded-2xl bg-white/5 hover:bg-white/10 text-xs font-bold border border-white/10">1/2 BOTE</Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleQuickBet('allin')} className="h-11 rounded-2xl bg-red-500/15 hover:bg-red-500/25 text-red-200 border border-red-400/20 text-xs font-black">ALL IN</Button>
+                    </div>
+                </div>
 
-                {myChips > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-3">
                     <Button
-                        variant="default"
-                        className="flex-1 font-bold text-sm md:text-base h-16 bg-emerald-600 hover:bg-emerald-700 rounded-[20px] shadow-lg border-b-4 border-emerald-900 active:border-b-0 active:translate-y-1 transition-all"
-                        onClick={() => handleActionOut('raise', raiseAmount)}
+                        variant="destructive"
+                        className="h-14 rounded-[22px] font-black text-sm md:text-base shadow-lg border border-red-300/10"
+                        onClick={() => handleActionOut('fold')}
                     >
-                        Subir
+                        Retirarse
                     </Button>
-                )}
-            </motion.div>
+
+                    <Button
+                        variant="secondary"
+                        className="h-14 bg-blue-600 hover:bg-blue-500 text-white rounded-[22px] font-black text-sm md:text-base shadow-lg border border-white/10"
+                        onClick={() => handleActionOut(currentBetToMatch > 0 ? 'call' : 'check', currentBetToMatch)}
+                    >
+                        {currentBetToMatch > 0 ? `Igualar ${currentBetToMatch}` : 'Pasar'}
+                    </Button>
+
+                    {myChips > 0 && (
+                        <Button
+                            variant="default"
+                            className="h-14 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 rounded-[22px] font-black text-sm md:text-base shadow-[0_0_18px_rgba(16,185,129,0.22)] border border-white/10"
+                            onClick={() => handleActionOut('raise', raiseAmount)}
+                        >
+                            {raiseAmount === myChips ? 'All in' : `Subir a ${raiseAmount}`}
+                        </Button>
+                    )}
+                </div>
+            </div>
         </div>
     );
 }

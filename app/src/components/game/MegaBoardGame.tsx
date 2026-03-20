@@ -2,10 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LogOut, Trophy, Dice1, Dice2, Dice3, Dice4, Dice5, Dice6, Crown, ArrowRight, Sparkles, Zap, Flame, Target, Gift, Skull, HelpCircle, Star, Monitor } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
 import { RewardPopup } from './RewardPopup';
-import { upsertLocalRanking, loadLocalRankings } from '@/utils/localRanking';
+import { loadLocalRankings } from '@/utils/localRanking';
 import { shuffleArray, getRandomWithoutRepeat, resetSessionTracker } from '@/utils/shuffleUtils';
 import {
   clasico,
@@ -51,6 +50,9 @@ const TILE_CONFIG: Record<TileType, { emoji: string; color: string; label: strin
 };
 
 const ocaTilesList = [5, 9, 14, 18, 23, 27, 32, 36, 41, 45, 50, 54, 59, 63, 68, 72, 77, 81, 86, 90, 95];
+
+const MAX_MEGABOARD_PLAYERS = 20;
+const MAX_TILE_AVATARS = 4;
 
 // Generate 100-tile board with varied tile distribution
 function generateBoard(): BoardTile[] {
@@ -533,12 +535,17 @@ export function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }: Me
   // ─── SETUP SCREEN ────────────────────────────────────────────────────────────
   if (gamePhase === 'setup') {
     return (
-      <div className="fixed inset-0 z-50 bg-gradient-to-br from-slate-950 via-purple-950/30 to-slate-950 flex items-center justify-center p-4">
-        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-slate-900/80 backdrop-blur-xl rounded-3xl p-8 max-w-md w-full border border-white/10 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div className="fixed inset-0 z-50 premium-screen flex items-center justify-center p-4">
+        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="premium-panel rounded-[30px] p-8 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto">
           <div className="text-center mb-6">
             <div className="text-6xl mb-3">🏰</div>
-            <h2 className="text-3xl font-black bg-gradient-to-r from-amber-400 to-rose-500 bg-clip-text text-transparent">MegaBoard 3D</h2>
-            <p className="text-sm text-white/50 mt-1">100 casillas · Retos · Trivia · Duelos · Trampas</p>
+            <h2 className="text-3xl font-black premium-title">MegaBoard Premium</h2>
+            <p className="text-sm text-white/50 mt-1">100 casillas · Retos · Trivia · Duelos · Trampas · hasta 20 jugadores</p>
+          </div>
+
+          <div className="mb-3 flex items-center justify-between gap-3 rounded-2xl border border-white/8 bg-white/5 px-4 py-3 text-xs text-white/60">
+            <span className="font-bold uppercase tracking-[0.18em]">Jugadores</span>
+            <span className="font-black text-white">{setupNames.filter(name => name.trim().length > 0).length} / {MAX_MEGABOARD_PLAYERS}</span>
           </div>
 
           <div className="space-y-3 mb-4">
@@ -571,13 +578,13 @@ export function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }: Me
             ))}
           </div>
 
-          {setupNames.length < 10 && (
+          {setupNames.length < MAX_MEGABOARD_PLAYERS && (
             <Button
               variant="ghost"
               onClick={() => setSetupNames(prev => [...prev, ''])}
               className="w-full mb-4 border border-dashed border-white/20 text-white/60 hover:text-white hover:border-white/40"
             >
-              + Añadir Jugador
+              + Añadir jugador
             </Button>
           )}
 
@@ -594,11 +601,11 @@ export function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }: Me
 
   // ─── MAIN GAME SCREEN ─────────────────────────────────────────────────────────
   return (
-    <div className="fixed inset-0 z-50 bg-gradient-to-br from-slate-950 via-indigo-950/20 to-slate-950 text-white flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-50 premium-screen text-white flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 bg-black/40 border-b border-white/10 shrink-0">
+      <div className="p-3 md:p-5 shrink-0"><div className="premium-panel rounded-[28px] px-4 py-4 md:px-5 md:py-4 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <h2 className="text-lg font-black bg-gradient-to-r from-amber-400 to-rose-500 bg-clip-text text-transparent">🏰 MegaBoard</h2>
+          <h2 className="text-lg md:text-xl font-black premium-title">🏰 MegaBoard Premium</h2>
           {activeNorma && (
             <div className="hidden md:flex items-center gap-1 bg-orange-500/20 border border-orange-500/30 rounded-full px-3 py-1 text-xs text-orange-300 max-w-[200px] truncate">
               📜 {activeNorma}
@@ -613,22 +620,41 @@ export function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }: Me
             <LogOut className="w-4 h-4 mr-1" /> Salir
           </Button>
         </div>
-      </div>
+      </div></div>
 
       {/* Active Norma Mobile */}
       {activeNorma && (
-        <div className="md:hidden px-4 py-2 bg-orange-500/10 border-b border-orange-500/20">
+        <div className="md:hidden px-4 pb-2"> <div className="premium-panel-soft rounded-2xl px-4 py-3 border border-orange-500/20">
           <p className="text-xs text-orange-300 truncate">📜 {activeNorma}</p>
-        </div>
+        </div></div>
       )}
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden px-3 pb-3 md:px-5 md:pb-5 gap-4">
         {/* Board Area */}
-        <div className="flex-1 overflow-auto p-4">
+        <div className="flex-1 overflow-auto premium-panel rounded-[30px] p-3 md:p-5">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+            <div className="premium-stat">
+              <p className="text-[11px] uppercase tracking-[0.18em] text-white/45 font-bold mb-2">Turno</p>
+              <p className="text-lg md:text-xl font-black truncate">{currentPlayer?.name || '...'}</p>
+            </div>
+            <div className="premium-stat">
+              <p className="text-[11px] uppercase tracking-[0.18em] text-white/45 font-bold mb-2">Líder</p>
+              <p className="text-lg md:text-xl font-black truncate">{sortedPlayers[0]?.name || '...'}</p>
+            </div>
+            <div className="premium-stat">
+              <p className="text-[11px] uppercase tracking-[0.18em] text-white/45 font-bold mb-2">Meta</p>
+              <p className="text-lg md:text-xl font-black">Casilla 99</p>
+            </div>
+            <div className="premium-stat">
+              <p className="text-[11px] uppercase tracking-[0.18em] text-white/45 font-bold mb-2">Jugadores</p>
+              <p className="text-lg md:text-xl font-black">{players.length}</p>
+            </div>
+          </div>
+
           {/* 3D Isometric Board */}
-          <div className="relative" style={{ perspective: '800px' }}>
-            <div className="grid grid-cols-5 md:grid-cols-10 gap-1 md:gap-2" style={{ transform: 'rotateX(15deg) rotateZ(-2deg)', transformStyle: 'preserve-3d' }}>
+          <div className="relative rounded-[28px] border border-white/8 bg-white/[0.03] p-2 md:p-4 overflow-hidden" style={{ perspective: '800px' }}>
+            <div className="grid grid-cols-5 md:grid-cols-10 gap-1.5 md:gap-2.5" style={{ transform: 'rotateX(13deg) rotateZ(-2deg)', transformStyle: 'preserve-3d' }}>
               {getVisibleTiles().map((tile) => {
                 const playersOnTile = players.filter(p => p.position === tile.id);
                 const isCurrentTile = currentPlayer && currentPlayer.position === tile.id;
@@ -639,7 +665,7 @@ export function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }: Me
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: (tile.id % 20) * 0.02 }}
-                    className={`relative w-full aspect-square rounded-xl border flex flex-col items-center justify-center text-center
+                    className={`relative w-full aspect-square rounded-2xl border flex flex-col items-center justify-center text-center backdrop-blur-[2px]
                       ${isCurrentTile ? 'ring-2 ring-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.5)]' : ''}
                       bg-gradient-to-br ${tile.color} border-white/20 shadow-lg`}
                     style={{ transform: 'translateZ(4px)', transformStyle: 'preserve-3d' }}
@@ -651,8 +677,8 @@ export function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }: Me
 
                     {/* Player Avatars on tile */}
                     {playersOnTile.length > 0 && (
-                      <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
-                        {playersOnTile.map(p => (
+                      <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 flex items-center gap-0.5">
+                        {playersOnTile.slice(0, MAX_TILE_AVATARS).map(p => (
                           <div key={p.id} className={`w-5 h-5 md:w-6 md:h-6 rounded-full border-2 overflow-hidden ${p.id === currentPlayer?.id ? 'border-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.6)]' : 'border-white/50'}`}>
                             {p.avatarUrl ? (
                               <img src={p.avatarUrl} alt={p.name} className="w-full h-full object-cover" />
@@ -663,6 +689,11 @@ export function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }: Me
                             )}
                           </div>
                         ))}
+                        {playersOnTile.length > MAX_TILE_AVATARS && (
+                          <div className="h-5 min-w-5 px-1 md:h-6 md:min-w-6 rounded-full border border-white/40 bg-slate-950/90 flex items-center justify-center text-[8px] md:text-[9px] font-black text-white">
+                            +{playersOnTile.length - MAX_TILE_AVATARS}
+                          </div>
+                        )}
                       </div>
                     )}
                   </motion.div>
@@ -673,13 +704,13 @@ export function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }: Me
         </div>
 
         {/* Sidebar — Leaderboard + Controls */}
-        <div className="w-full md:w-72 bg-black/30 border-t md:border-t-0 md:border-l border-white/10 p-4 flex flex-col gap-3 shrink-0">
+        <div className="w-full md:w-80 premium-panel rounded-[30px] p-4 flex flex-col gap-3 shrink-0">
           {/* Leaderboard */}
-          <div className="bg-white/5 rounded-2xl p-3 border border-white/10">
+          <div className="premium-panel-soft rounded-[24px] p-4">
             <h3 className="text-xs font-black uppercase tracking-widest text-white/50 mb-2 flex items-center gap-1">
               <Trophy className="w-3 h-3" /> Clasificación
             </h3>
-            <div className="space-y-2">
+            <div className="space-y-2 max-h-[46vh] overflow-y-auto pr-1">
               {sortedPlayers.map((p, i) => (
                 <div key={p.id} className={`flex items-center gap-2 p-2 rounded-xl transition-colors ${p.id === currentPlayer?.id ? 'bg-amber-500/20 border border-amber-500/30' : 'bg-white/5'}`}>
                   <span className="text-sm font-black w-5 text-center">{i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}`}</span>
@@ -702,7 +733,7 @@ export function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }: Me
           </div>
 
           {/* Dice & Controls */}
-          <div className="bg-white/5 rounded-2xl p-4 border border-white/10 text-center">
+          <div className="premium-panel-soft rounded-[24px] p-4 text-center">
             <p className="text-xs text-white/50 mb-1">Turno de</p>
             <p className="text-lg font-black text-amber-400 mb-3">{currentPlayer?.name || '...'}</p>
 
@@ -711,7 +742,7 @@ export function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }: Me
               <motion.div
                 animate={rolling ? { rotateX: [0, 360, 720], rotateY: [0, 180, 360] } : {}}
                 transition={{ duration: 0.8 }}
-                className="w-16 h-16 rounded-2xl bg-white text-slate-900 flex items-center justify-center text-3xl font-black shadow-lg border-2 border-white/50"
+                className="w-20 h-20 rounded-[24px] bg-white text-slate-900 flex items-center justify-center text-4xl font-black shadow-lg border-2 border-white/50 mx-auto"
               >
                 {rolling ? '🎲' : diceValue || '?'}
               </motion.div>
@@ -720,7 +751,7 @@ export function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }: Me
             <Button
               onClick={rollDice}
               disabled={rolling || gamePhase !== 'playing'}
-              className="w-full h-12 rounded-xl font-black bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-400 hover:to-rose-500 text-white shadow-[0_0_15px_rgba(245,158,11,0.4)] border border-amber-400/50 disabled:opacity-30"
+              className="w-full h-14 rounded-2xl font-black bg-gradient-to-r from-amber-500 via-orange-500 to-rose-600 hover:from-amber-400 hover:via-orange-400 hover:to-rose-500 text-white shadow-[0_0_18px_rgba(245,158,11,0.28)] border border-white/10 disabled:opacity-30"
             >
               {rolling ? 'Tirando...' : '🎲 TIRAR DADO'}
             </Button>
@@ -741,7 +772,7 @@ export function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }: Me
               initial={{ scale: 0.8, y: 30 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.8, y: -30 }}
-              className="bg-slate-900/95 backdrop-blur-xl rounded-3xl p-6 md:p-8 max-w-sm md:max-w-md w-full border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.8)] pointer-events-auto"
+              className="premium-panel rounded-[30px] p-6 md:p-8 max-w-sm md:max-w-md w-full shadow-[0_0_50px_rgba(0,0,0,0.55)] pointer-events-auto"
             >
               <div className="text-center">
                 <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1, repeat: Infinity }} className="text-6xl mb-4">
@@ -814,7 +845,7 @@ export function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }: Me
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="fixed inset-0 z-[70] bg-gradient-to-br from-amber-900/90 to-rose-900/90 backdrop-blur-md flex items-center justify-center p-4"
+            className="fixed inset-0 z-[70] premium-screen backdrop-blur-md flex items-center justify-center p-4"
           >
             <motion.div initial={{ scale: 0.5 }} animate={{ scale: 1 }} className="text-center">
               <motion.div animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.1, 1] }} transition={{ repeat: Infinity, duration: 2 }} className="text-8xl mb-6">

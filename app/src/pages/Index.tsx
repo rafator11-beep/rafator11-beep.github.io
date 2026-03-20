@@ -1,6 +1,6 @@
 import { useState, useEffect, Suspense, lazy } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Users } from 'lucide-react';
+import { ArrowRight, Gamepad2, Globe, LayoutGrid, ShieldCheck, Sparkles, Smartphone, Users2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { GameProvider, useGameContext } from '@/contexts/GameContext';
@@ -10,7 +10,7 @@ import { TeamModeSelector } from '@/components/game/TeamModeSelector';
 import { PlayerSetup } from '@/components/game/PlayerSetup';
 import { GuestSetup } from '@/components/game/GuestSetup';
 import { GamePlay } from '@/components/game/GamePlay';
-import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { AuthOverlay } from '@/components/auth/AuthOverlay';
 import { GlobalPresence } from '@/components/auth/GlobalPresence';
 import { WelcomeScreen } from '@/components/auth/WelcomeScreen';
@@ -26,7 +26,6 @@ import { GameMode, GAME_MODES, TabId, PlayMode } from '@/types/game';
 import { supabase } from '@/integrations/supabase/client';
 import { DailyVideoProvider, useDailyVideo, createDailyRoom } from '@/components/multiplayer/DailyVideoProvider';
 import { FloatingVideoBubbles } from '@/components/multiplayer/FloatingVideoBubbles';
-import { ParchisGame } from '@/components/game/ParchisGame';
 import {
   Dialog,
   DialogContent,
@@ -557,43 +556,165 @@ function GameAppInner() {
             >
               {activeTab === 'inicio' && (
                 <>
-                  {roomId && (
-                    <div className="mx-4 mt-4 p-4 bg-primary/20 border border-primary/50 rounded-xl flex flex-col items-center justify-center animate-in fade-in slide-in-from-top-2">
-                      <p className="text-xs uppercase tracking-widest text-primary font-bold mb-1">Sala Activa</p>
-                      <p className="text-4xl font-mono font-black text-white tracking-widest mb-2">{roomId}</p>
-                      <p className="text-sm text-muted-foreground text-center mb-3">Elige un juego para empezar</p>
-                      <Button variant="ghost" size="sm" className="h-8 text-xs text-red-400 hover:text-red-300 hover:bg-red-950/30" onClick={() => {
-                        setRoomId(null);
-                        setIsHost(false);
-                      }}>
-                        Cancelar Sala
-                      </Button>
-                    </div>
-                  )}
+                  <div className="app-shell pb-4">
+                    <div className="surface-panel relative overflow-hidden p-5 md:p-6">
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.18),transparent_32%),radial-gradient(circle_at_top_right,hsl(var(--accent)/0.14),transparent_24%),linear-gradient(180deg,transparent,rgba(255,255,255,0.01))]" />
 
-                  <div className="flex justify-center gap-4 mt-2">
-                    <button
-                      onClick={() => setMainTab('fiesta')}
-                      className={`px-8 py-3 rounded-full font-black tracking-widest text-sm transition-all ${mainTab === 'fiesta' ? 'bg-primary text-primary-foreground shadow-[0_0_15px_rgba(var(--primary),0.5)]' : 'bg-white/5 text-muted-foreground hover:bg-white/10'}`}
-                    >
-                      FIESTA
-                    </button>
-                    <button
-                      onClick={() => setMainTab('juego')}
-                      className={`px-8 py-3 rounded-full font-black tracking-widest text-sm transition-all ${mainTab === 'juego' ? 'bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.5)]' : 'bg-white/5 text-muted-foreground hover:bg-white/10'}`}
-                    >
-                      JUEGO
-                    </button>
+                      <div className="relative grid gap-4 xl:grid-cols-[1.45fr_0.85fr]">
+                        <div className="space-y-5">
+                          <div className="space-y-3">
+                            <span className="section-badge">
+                              <Sparkles className="mr-2 h-3.5 w-3.5" />
+                              Selecciona tu experiencia
+                            </span>
+                            <div>
+                              <h1 className="text-3xl font-black tracking-tight text-white md:text-5xl">
+                                Una app más <span className="premium-title">clara, premium y móvil</span>
+                              </h1>
+                              <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground md:text-base">
+                                Inicio más ordenado, navegación más limpia y acceso directo a los modos con mejor jerarquía visual.
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-wrap gap-2.5">
+                            <span className="premium-chip text-white/90">
+                              <LayoutGrid className="h-3.5 w-3.5 text-[hsl(var(--accent))]" />
+                              {GAME_MODES.length} modos
+                            </span>
+                            <span className="premium-chip text-white/90">
+                              <Smartphone className="h-3.5 w-3.5 text-[hsl(var(--accent))]" />
+                              Mejor móvil
+                            </span>
+                            <span className="premium-chip text-white/90">
+                              <ShieldCheck className="h-3.5 w-3.5 text-[hsl(var(--accent))]" />
+                              UI más clara
+                            </span>
+                          </div>
+
+                          <div className="grid gap-3 sm:grid-cols-3">
+                            <button
+                              onClick={() => {
+                                setMainTab('fiesta');
+                                setActiveTab('inicio');
+                              }}
+                              className="premium-panel-soft rounded-[22px] p-4 text-left transition hover:-translate-y-0.5 hover:border-white/15"
+                            >
+                              <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-white">🎉</div>
+                              <p className="text-sm font-bold text-white">Modos fiesta</p>
+                              <p className="mt-1 text-xs leading-5 text-muted-foreground">Retos sociales y partidas rápidas para grupo.</p>
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                setMainTab('juego');
+                                setActiveTab('inicio');
+                              }}
+                              className="premium-panel-soft rounded-[22px] p-4 text-left transition hover:-translate-y-0.5 hover:border-white/15"
+                            >
+                              <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-white">🏆</div>
+                              <p className="text-sm font-bold text-white">Competitivo</p>
+                              <p className="mt-1 text-xs leading-5 text-muted-foreground">Poker, parchís y juegos de duelo mejor presentados.</p>
+                            </button>
+
+                            <button
+                              onClick={() => setScreen('lobby')}
+                              className="premium-panel-soft rounded-[22px] p-4 text-left transition hover:-translate-y-0.5 hover:border-white/15"
+                            >
+                              <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-white">🌐</div>
+                              <p className="text-sm font-bold text-white">Entrar a sala</p>
+                              <p className="mt-1 text-xs leading-5 text-muted-foreground">Acceso directo para crear o unirte con código.</p>
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <div className="surface-soft rounded-[26px] p-4">
+                            <div className="flex items-center gap-3">
+                              <div className="rounded-2xl bg-[hsl(var(--primary)/0.16)] p-3 text-[hsl(var(--accent))]">
+                                <Gamepad2 className="h-5 w-5" />
+                              </div>
+                              <div>
+                                <p className="text-sm font-semibold text-white">Acceso rápido</p>
+                                <p className="text-xs text-muted-foreground">Explora modos, crea sala o entra a competir con menos pasos.</p>
+                              </div>
+                            </div>
+
+                            <div className="mt-4 grid gap-3">
+                              <div className="premium-stat">
+                                <div className="flex items-center gap-2">
+                                  <Globe className="h-4 w-4 text-[hsl(var(--accent))]" />
+                                  <p className="text-sm font-bold text-white">Local u online</p>
+                                </div>
+                                <p className="mt-2 text-sm text-muted-foreground">Ahora el flujo separa mejor el tipo de partida y el modo de juego.</p>
+                              </div>
+                              <div className="premium-stat">
+                                <div className="flex items-center gap-2">
+                                  <Users2 className="h-4 w-4 text-[hsl(var(--accent))]" />
+                                  <p className="text-sm font-bold text-white">Listo para grupo</p>
+                                </div>
+                                <p className="mt-2 text-sm text-muted-foreground">Botones grandes, paneles más limpios y lectura más cómoda al pasar el móvil.</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {roomId ? (
+                            <div className="rounded-[26px] border border-[hsl(var(--primary)/0.25)] bg-[linear-gradient(135deg,hsl(var(--primary)/0.14),transparent)] p-4">
+                              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[hsl(var(--accent))]">Sala activa</p>
+                              <p className="mt-2 text-4xl font-black tracking-[0.24em] text-white">{roomId}</p>
+                              <p className="mt-2 text-sm text-muted-foreground">Comparte el código y luego elige el juego que quieras iniciar.</p>
+                              <Button
+                                variant="outline"
+                                className="mt-4 w-full text-red-300 hover:text-red-200"
+                                onClick={() => {
+                                  setRoomId(null);
+                                  setIsHost(false);
+                                }}
+                              >
+                                Cancelar sala
+                              </Button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => setScreen('lobby')}
+                              className="group rounded-[26px] border border-white/10 bg-white/[0.03] p-4 text-left transition hover:border-white/15 hover:bg-white/[0.05]"
+                            >
+                              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[hsl(var(--accent))]">Nuevo acceso</p>
+                              <p className="mt-2 text-lg font-black text-white">Crear o unirte a una sala</p>
+                              <p className="mt-2 text-sm text-muted-foreground">Ideal para entrar directamente al modo online sin pasar por más pantallas.</p>
+                              <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-white transition-transform group-hover:translate-x-1">
+                                Abrir lobby <ArrowRight className="h-4 w-4" />
+                              </span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="relative mt-5 inline-flex w-full max-w-[440px] rounded-[24px] border border-white/10 bg-white/[0.04] p-1.5">
+                        <button
+                          onClick={() => setMainTab('fiesta')}
+                          className={`flex-1 rounded-[18px] px-5 py-3 text-sm font-semibold transition ${mainTab === 'fiesta'
+                            ? 'bg-[linear-gradient(135deg,hsl(var(--primary)),hsl(var(--primary-strong)))] text-white shadow-[0_14px_30px_-18px_hsl(var(--primary)/0.95)]'
+                            : 'text-muted-foreground hover:text-white'}`}
+                        >
+                          Fiesta
+                        </button>
+                        <button
+                          onClick={() => setMainTab('juego')}
+                          className={`flex-1 rounded-[18px] px-5 py-3 text-sm font-semibold transition ${mainTab === 'juego'
+                            ? 'bg-[linear-gradient(135deg,hsl(var(--accent)),hsl(var(--primary)))] text-[hsl(var(--accent-foreground))] shadow-[0_14px_30px_-18px_hsl(var(--accent)/0.95)]'
+                            : 'text-muted-foreground hover:text-white'}`}
+                        >
+                          Competitivo
+                        </button>
+                      </div>
+                    </div>
                   </div>
 
                   {mainTab === 'fiesta' ? (
                     <FiestaTab onSelectMode={handleModeClick} />
                   ) : (
                     <JuegoTab onSelectMode={handleJuegoTabSelect} />
-                  )}
-
-                  {!selectedModeForOptions && mainTab === 'fiesta' && (
-                    <p className="text-center text-xs text-muted-foreground">Selecciona un juego para ver opciones</p>
                   )}
                 </>
               )}
@@ -632,37 +753,49 @@ function GameAppInner() {
 
       {/* MODE OPTIONS DIALOG (Local vs Online) */}
       <Dialog open={!!selectedModeForOptions} onOpenChange={(o) => !o && setSelectedModeForOptions(null)}>
-        <DialogContent className="sm:max-w-md bg-slate-900/95 border-primary/20" aria-describedby={undefined}>
+        <DialogContent className="sm:max-w-xl border-white/10 bg-[linear-gradient(180deg,hsl(var(--card)/0.98),hsl(var(--card)/0.92))]" aria-describedby={undefined}>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-2xl">
               {selectedModeForOptions && GAME_MODES.find(m => m.id === selectedModeForOptions)?.icon}
               <span>{selectedModeForOptions && GAME_MODES.find(m => m.id === selectedModeForOptions)?.name}</span>
             </DialogTitle>
-            <DialogDescription id="mode-options-desc">¿Cómo quieres jugar?</DialogDescription>
+            <DialogDescription id="mode-options-desc">Elige el formato que mejor encaja con tu grupo.</DialogDescription>
           </DialogHeader>
-          <div className="grid grid-cols-2 gap-4 py-4">
+          <div className="grid gap-4 py-4 sm:grid-cols-2">
             <Button
               variant="outline"
-              className="h-32 flex flex-col gap-3 hover:border-primary hover:bg-primary/10 transition-all group"
+              className="group h-auto min-h-[220px] flex-col items-start gap-4 rounded-[28px] border-white/10 bg-white/[0.03] p-5 text-left hover:border-primary/40 hover:bg-white/[0.06] transition-all"
               onClick={() => confirmModeSelection(false)}
             >
-              <div className="p-3 bg-secondary rounded-full group-hover:scale-110 transition-transform">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary text-white group-hover:scale-105 transition-transform">
+                <Smartphone className="h-6 w-6" />
               </div>
-              <span className="font-bold text-lg">Local</span>
-              <span className="text-xs text-muted-foreground text-center px-1">Todos en el mismo dispositivo</span>
+              <div>
+                <p className="text-lg font-black text-white">Mismo dispositivo</p>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">Ideal para jugar pasando el móvil. Menos pasos, arranque rápido y pantalla optimizada para grupos presenciales.</p>
+              </div>
+              <div className="mt-auto flex flex-wrap gap-2">
+                <span className="rounded-full bg-white/[0.06] px-3 py-1 text-xs text-muted-foreground">Rápido</span>
+                <span className="rounded-full bg-white/[0.06] px-3 py-1 text-xs text-muted-foreground">Sin código</span>
+              </div>
             </Button>
 
             <Button
               variant="outline"
-              className="h-32 flex flex-col gap-3 hover:border-purple-500 hover:bg-purple-500/10 transition-all group"
+              className="group h-auto min-h-[220px] flex-col items-start gap-4 rounded-[28px] border-white/10 bg-white/[0.03] p-5 text-left hover:border-[hsl(var(--accent)/0.4)] hover:bg-white/[0.06] transition-all"
               onClick={() => confirmModeSelection(true)}
             >
-              <div className="p-3 bg-purple-500/20 text-purple-400 rounded-full group-hover:scale-110 transition-transform">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M2 12h20" /><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" /></svg>
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-500/20 text-purple-400 group-hover:scale-105 transition-transform">
+                <Globe className="h-6 w-6" />
               </div>
-              <span className="font-bold text-lg">Online</span>
-              <span className="text-xs text-muted-foreground text-center px-1">Con amigos en otros móviles</span>
+              <div>
+                <p className="text-lg font-black text-white">Con sala online</p>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">Cada persona entra desde su móvil con código. Mejor para Poker, Parchís y partidas con videollamada o grupo remoto.</p>
+              </div>
+              <div className="mt-auto flex flex-wrap gap-2">
+                <span className="rounded-full bg-white/[0.06] px-3 py-1 text-xs text-muted-foreground">Código</span>
+                <span className="rounded-full bg-white/[0.06] px-3 py-1 text-xs text-muted-foreground">Multimóvil</span>
+              </div>
             </Button>
           </div>
         </DialogContent>

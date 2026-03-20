@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Gamepad2, Trophy, Clock, Users, Calendar, Play } from 'lucide-react';
+import { Calendar, Clock3, Play, RefreshCw, Trophy, Users, Gamepad2, History as HistoryIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, isSupabaseConfigured } from '@/integrations/supabase/client';
 import { GAME_MODES } from '@/types/game';
 
 interface GameRecord {
@@ -19,17 +19,19 @@ interface GameHistoryProps {
   onRejoinGame?: (gameId: string, mode: string) => void;
 }
 
+const statusStyles: Record<string, string> = {
+  finished: 'bg-emerald-500/15 text-emerald-300 border-emerald-400/20',
+  playing: 'bg-sky-500/15 text-sky-300 border-sky-400/20',
+  round_end: 'bg-amber-500/15 text-amber-300 border-amber-400/20',
+};
+
 export function GameHistory({ onRejoinGame }: GameHistoryProps) {
   const [games, setGames] = useState<GameRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadGameHistory();
-  }, []);
-
   const loadGameHistory = async () => {
+    setLoading(true);
     try {
-      // 1. Load Local History (Instant & Offline)
       const localHistoryJson = localStorage.getItem('partyGameHistory');
       let localGames: GameRecord[] = [];
       if (localHistoryJson) {
@@ -40,23 +42,22 @@ export function GameHistory({ onRejoinGame }: GameHistoryProps) {
         }
       }
 
-      // 2. Try Supabase (Online)
       let supabaseGames: GameRecord[] = [];
-      if (typeof supabase !== 'undefined') {
+      if (isSupabaseConfigured) {
         const { data: gamesData, error } = await supabase
           .from('games')
           .select(`
-              id,
-              mode,
-              created_at,
-              status,
-              players (name)
-            `)
+            id,
+            mode,
+            created_at,
+            status,
+            players (name)
+          `)
           .order('created_at', { ascending: false })
           .limit(30);
 
         if (!error && gamesData) {
-          supabaseGames = (gamesData).map((game: any) => ({
+          supabaseGames = (gamesData as any[]).map((game) => ({
             id: game.id,
             mode: game.mode,
             created_at: game.created_at,
@@ -68,14 +69,9 @@ export function GameHistory({ onRejoinGame }: GameHistoryProps) {
         }
       }
 
-      // Merge: Local moves usually come first if they are newer, but let's just combine unique IDs
-      // For now, if local exists, show local + supabase.
       const combined = [...localGames, ...supabaseGames];
-      // Deduplicate by ID
-      const uniqueGames = Array.from(new Map(combined.map(g => [g.id, g])).values());
-      // Sort by date desc
+      const uniqueGames = Array.from(new Map(combined.map((g) => [g.id, g])).values());
       uniqueGames.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-
       setGames(uniqueGames);
     } catch (err) {
       console.error('Error loading game history:', err);
@@ -84,92 +80,135 @@ export function GameHistory({ onRejoinGame }: GameHistoryProps) {
     }
   };
 
+  useEffect(() => {
+    loadGameHistory();
+  }, []);
+
   const getModeInfo = (modeId: string) => {
-    return GAME_MODES.find(m => m.id === modeId) || { name: modeId, icon: '🎮', color: 'from-gray-500 to-gray-600' };
+    return GAME_MODES.find((m) => m.id === modeId) || { name: modeId, icon: '🎮', color: 'from-slate-500 to-slate-700' };
   };
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleDateString('es-ES', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   };
 
-  const totalGames = games.length;
+  const summary = useMemo(() => ({
+    totalGames: games.length,
+    finished: games.filter((g) => g.status === 'finished').length,
+    active: games.filter((g) => g.status === 'playing' || g.status === 'round_end').length,
+    totalPlayers: games.reduce((acc, game) => acc + (game.players?.length || 0), 0),
+  }), [games]);
 
   return (
-    <div className="min-h-screen bg-background bg-grid-pattern pb-24 pt-8 px-4">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 right-10 w-72 h-72 bg-[hsl(var(--neon-blue))] opacity-10 rounded-full blur-[100px] animate-pulse" />
-        <div className="absolute bottom-40 left-10 w-96 h-96 bg-[hsl(var(--neon-purple))] opacity-10 rounded-full blur-[100px]" />
-      </div>
-
-      <div className="max-w-lg mx-auto relative z-10">
-        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
-          <h1 className="text-3xl font-black neon-text text-[hsl(var(--neon-purple))] mb-2">Historial</h1>
-          <p className="text-muted-foreground">Revive tus partidas anteriores</p>
-        </motion.div>
-
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-2 gap-4 mb-8">
-          <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-4 text-center neon-border">
-            <Gamepad2 className="w-6 h-6 mx-auto mb-2 text-[hsl(var(--neon-blue))]" />
-            <p className="text-2xl font-bold">{totalGames}</p>
-            <p className="text-xs text-muted-foreground">Partidas jugadas</p>
-          </div>
-          <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-4 text-center neon-border">
-            <Trophy className="w-6 h-6 mx-auto mb-2 text-[hsl(var(--neon-yellow))]" />
-            <p className="text-2xl font-bold">{games.filter(g => g.status === 'finished').length}</p>
-            <p className="text-xs text-muted-foreground">Finalizadas</p>
-          </div>
-        </motion.div>
-
-        <div className="space-y-4">
-          {loading ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-              Cargando historial...
+    <div className="min-h-screen premium-screen pb-28 pt-6 px-4 md:px-6">
+      <div className="mx-auto max-w-5xl">
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="premium-panel rounded-[34px] p-5 md:p-7 mb-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <div className="section-badge mb-3">Timeline premium</div>
+              <div className="flex items-center gap-3">
+                <div className="h-14 w-14 rounded-3xl bg-gradient-to-br from-cyan-400 to-indigo-500 flex items-center justify-center shadow-[0_0_22px_rgba(34,211,238,0.28)]">
+                  <HistoryIcon className="w-7 h-7 text-slate-950" />
+                </div>
+                <div>
+                  <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight">Historial Premium</h1>
+                  <p className="text-sm md:text-base text-white/55 mt-1">Todas las partidas, más claras, más limpias y preparadas para seguir la app premium.</p>
+                </div>
+              </div>
             </div>
-          ) : games.length === 0 ? (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12 text-muted-foreground">
-              <Gamepad2 className="w-16 h-16 mx-auto mb-4 opacity-30" />
-              <p>No hay partidas en el historial</p>
-              <p className="text-sm">¡Empieza a jugar para ver tu historial!</p>
-            </motion.div>
-          ) : (
-            games.map((game, index) => {
+            <Button onClick={loadGameHistory} variant="outline" className="rounded-2xl border-white/10 bg-white/5 text-white hover:bg-white/10">
+              <RefreshCw className="w-4 h-4 mr-2" /> Actualizar
+            </Button>
+          </div>
+        </motion.div>
+
+        <div className="grid gap-4 md:grid-cols-4 mb-6">
+          <div className="premium-stat">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-white/40 font-bold mb-2">Partidas</p>
+            <p className="text-3xl font-black text-white">{summary.totalGames}</p>
+          </div>
+          <div className="premium-stat">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-white/40 font-bold mb-2">Finalizadas</p>
+            <p className="text-3xl font-black text-white">{summary.finished}</p>
+          </div>
+          <div className="premium-stat">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-white/40 font-bold mb-2">Activas</p>
+            <p className="text-3xl font-black text-white">{summary.active}</p>
+          </div>
+          <div className="premium-stat">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-white/40 font-bold mb-2">Jugadores</p>
+            <p className="text-3xl font-black text-white">{summary.totalPlayers}</p>
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="premium-panel rounded-[32px] p-10 text-center text-white/60">
+            <RefreshCw className="w-10 h-10 mx-auto mb-4 animate-spin" />
+            Cargando historial...
+          </div>
+        ) : games.length === 0 ? (
+          <div className="premium-panel rounded-[32px] p-12 text-center">
+            <Gamepad2 className="w-14 h-14 mx-auto mb-4 text-white/30" />
+            <p className="text-xl font-black text-white">Todavía no hay partidas guardadas</p>
+            <p className="text-white/45 mt-2">Cuando juegues, aquí se irá montando el timeline premium.</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {games.map((game, index) => {
               const modeInfo = getModeInfo(game.mode);
               const canRejoin = game.status === 'finished' || game.status === 'playing' || game.status === 'round_end';
               return (
                 <motion.div
                   key={game.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className="bg-card/80 backdrop-blur-sm rounded-2xl p-4 neon-border"
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.04 }}
+                  className="premium-panel rounded-[30px] p-4 md:p-5"
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">{modeInfo.icon}</span>
-                      <div>
-                        <p className="font-bold">{modeInfo.name}</p>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Calendar className="w-3 h-3" />
-                          {formatDate(game.created_at)}
+                  <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                    <div className="flex items-start gap-4 min-w-0">
+                      <div className={`h-14 w-14 rounded-[22px] bg-gradient-to-br ${modeInfo.color} flex items-center justify-center text-2xl shadow-[0_14px_30px_-20px_rgba(168,85,247,0.65)] shrink-0`}>
+                        {modeInfo.icon}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-lg font-black text-white truncate">{modeInfo.name}</p>
+                        <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-white/50">
+                          <span className="inline-flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {formatDate(game.created_at)}</span>
+                          <span className="inline-flex items-center gap-1.5"><Clock3 className="w-3.5 h-3.5" /> {game.duration} min</span>
+                          <span className="inline-flex items-center gap-1.5"><Users className="w-3.5 h-3.5" /> {game.players.length} jugadores</span>
                         </div>
                       </div>
                     </div>
-                    <div className="text-right flex flex-col items-end gap-1">
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${game.status === 'finished' ? 'bg-green-500/20 text-green-500' :
-                          game.status === 'playing' ? 'bg-blue-500/20 text-blue-500' :
-                            'bg-muted text-muted-foreground'
-                        }`}>
-                        {game.status === 'finished' ? 'Finalizada' : game.status === 'playing' ? 'En juego' : game.status}
+
+                    <div className="flex flex-col items-start md:items-end gap-2 shrink-0">
+                      <span className={`rounded-full border px-3 py-1 text-xs font-black uppercase tracking-[0.16em] ${statusStyles[game.status] || 'bg-white/10 text-white/60 border-white/10'}`}>
+                        {game.status === 'finished' ? 'Finalizada' : game.status === 'playing' ? 'En juego' : game.status === 'round_end' ? 'Entre rondas' : game.status}
                       </span>
+                      {game.winner && (
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 border border-amber-400/20 px-3 py-1 text-xs font-bold text-amber-300">
+                          <Trophy className="w-3.5 h-3.5" /> {game.winner}
+                        </span>
+                      )}
                     </div>
                   </div>
 
                   {game.players.length > 0 && (
-                    <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
-                      <Users className="w-3 h-3" />
-                      {game.players.join(', ')}
+                    <div className="mt-4 premium-panel-soft rounded-[24px] p-4">
+                      <p className="text-[11px] uppercase tracking-[0.18em] text-white/35 font-bold mb-2">Participantes</p>
+                      <div className="flex flex-wrap gap-2">
+                        {game.players.map((player) => (
+                          <span key={`${game.id}-${player}`} className="premium-chip !py-1.5 !px-3 !text-[11px] text-white/80">
+                            {player}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   )}
 
@@ -177,18 +216,18 @@ export function GameHistory({ onRejoinGame }: GameHistoryProps) {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="mt-3 w-full"
+                      className="mt-4 w-full md:w-auto rounded-2xl border-white/10 bg-white/5 text-white hover:bg-white/10"
                       onClick={() => onRejoinGame(game.id, game.mode)}
                     >
                       <Play className="w-4 h-4 mr-2" />
-                      {game.status === 'finished' ? 'Reentrar en partida' : 'Continuar partida'}
+                      {game.status === 'finished' ? 'Reabrir partida' : 'Continuar partida'}
                     </Button>
                   )}
                 </motion.div>
               );
-            })
-          )}
-        </div>
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

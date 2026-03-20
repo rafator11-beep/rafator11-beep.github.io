@@ -1,88 +1,195 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { GAME_MODES, GameMode, TAB_MAPPING, PlayMode } from '@/types/game';
-import { Trophy, Globe, Smartphone, Crown } from 'lucide-react';
+import { ArrowRight, Globe, Smartphone, Trophy, Wifi, Users, Sword } from 'lucide-react';
 
 interface JuegoTabProps {
-    onSelectMode: (mode: GameMode, selectedPlayMode: PlayMode) => void;
+  onSelectMode: (mode: GameMode, selectedPlayMode: PlayMode) => void;
 }
 
+const playModeInfo = {
+  local: {
+    title: 'Mismo dispositivo',
+    description: 'Ideal para pasar el móvil en rondas rápidas.',
+    icon: Smartphone,
+    chip: 'Sin código',
+  },
+  online: {
+    title: 'Sala online',
+    description: 'Cada persona entra desde su móvil con código.',
+    icon: Globe,
+    chip: 'Con sala',
+  },
+} satisfies Record<PlayMode, { title: string; description: string; icon: any; chip: string }>;
+
 export function JuegoTab({ onSelectMode }: JuegoTabProps) {
-    const [playMode, setPlayMode] = useState<PlayMode>('local');
-    const juegoModes = GAME_MODES.filter(m => TAB_MAPPING.juego.includes(m.id));
+  const [playMode, setPlayMode] = useState<PlayMode>('local');
+  const juegoModes = GAME_MODES.filter((m) => TAB_MAPPING.juego.includes(m.id));
+  const activeInfo = playModeInfo[playMode];
+  const ActiveIcon = activeInfo.icon;
 
-    return (
-        <div className="w-full pb-24 pt-4 px-4 relative overflow-hidden">
-            {/* Header */}
-            <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-center mb-6 relative z-10"
-            >
-                <div className="flex flex-col items-center justify-center mb-6">
-                    <div className="flex items-center gap-3 mb-2">
-                        <Trophy className="w-8 h-8 text-[hsl(var(--neon-yellow))] drop-shadow-md" />
-                        <h1 className="text-3xl md:text-5xl font-black tracking-tight neon-text text-[hsl(var(--primary))]">
-                            Juego Competitivo
-                        </h1>
-                    </div>
-                    <p className="text-sm md:text-base text-muted-foreground">
-                        Demuestra quién manda.
-                    </p>
-                </div>
-
-                {/* Local / Online Toggle */}
-                <div className="flex bg-black/40 backdrop-blur p-1 rounded-full border border-white/10 w-fit mx-auto">
-                    <button
-                        onClick={() => setPlayMode('local')}
-                        className={`flex items-center gap-2 px-6 py-2 rounded-full font-bold text-sm transition-all duration-300 ${playMode === 'local'
-                                ? 'bg-primary text-primary-foreground shadow-[0_0_15px_rgba(var(--primary),0.5)]'
-                                : 'text-muted-foreground hover:bg-white/5'
-                            }`}
-                    >
-                        <Smartphone className="w-4 h-4" />
-                        LOCAL
-                    </button>
-                    <button
-                        onClick={() => setPlayMode('online')}
-                        className={`flex items-center gap-2 px-6 py-2 rounded-full font-bold text-sm transition-all duration-300 ${playMode === 'online'
-                                ? 'bg-purple-600 text-white shadow-[0_0_15px_rgba(147,51,234,0.5)]'
-                                : 'text-muted-foreground hover:bg-white/5'
-                            }`}
-                    >
-                        <Globe className="w-4 h-4" />
-                        ONLINE
-                    </button>
-                </div>
-            </motion.div>
-
-            {/* Menu Grid - Redesigned chips */}
-            <div className="flex flex-wrap justify-center gap-3 max-w-4xl mx-auto relative z-10 mb-8">
-                {juegoModes.map((mode, index) => (
-                    <motion.button
-                        key={mode.id}
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: index * 0.02 }}
-                        onClick={() => onSelectMode(mode.id, playMode)}
-                        whileHover={{ scale: 1.05, y: -2 }}
-                        whileTap={{ scale: 0.95 }}
-                        className={`relative px-6 py-3 rounded-2xl bg-slate-900/40 backdrop-blur-md border border-white/10 flex flex-col items-center gap-1 transition-all duration-300 hover:border-primary/50 hover:bg-primary/5 shadow-lg group overflow-hidden`}
-                    >
-                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                        <span className="text-xs font-black uppercase tracking-widest text-white/70 group-hover:text-primary transition-colors">{mode.name}</span>
-                        <span className="text-2xl drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">{mode.icon}</span>
-                        
-                        {mode.badge && (
-                            <div className="absolute -top-1 -right-1">
-                                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[8px] font-black text-white ring-2 ring-slate-900">
-                                    !
-                                </span>
-                            </div>
-                        )}
-                    </motion.button>
-                ))}
+  return (
+    <div className="app-shell pt-4">
+      <motion.div
+        initial={{ opacity: 0, y: -18 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-6 grid gap-4 xl:grid-cols-[1.35fr_0.85fr]"
+      >
+        <div className="surface-panel relative overflow-hidden p-5 md:p-7">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,hsl(var(--accent)/0.14),transparent_28%),radial-gradient(circle_at_bottom_right,hsl(var(--primary)/0.16),transparent_28%)]" />
+          <div className="relative space-y-5">
+            <div className="space-y-3">
+              <span className="section-badge">
+                <Trophy className="mr-2 h-3.5 w-3.5" />
+                Competitivo
+              </span>
+              <div>
+                <h1 className="text-3xl font-black tracking-tight text-white md:text-5xl">
+                  Juega con un estilo <span className="premium-title">más premium</span>
+                </h1>
+                <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground md:text-base">
+                  Panel de selección más limpio, cambio rápido entre local y online, y tarjetas más estructuradas para cada modo.
+                </p>
+              </div>
             </div>
+
+            <div className="surface-soft inline-flex w-full max-w-[420px] rounded-[24px] p-1.5">
+              <button
+                onClick={() => setPlayMode('local')}
+                className={`flex flex-1 items-center justify-center gap-2 rounded-[18px] px-4 py-3 text-sm font-semibold transition ${
+                  playMode === 'local'
+                    ? 'bg-[linear-gradient(135deg,hsl(var(--primary)),hsl(var(--primary-strong)))] text-white shadow-[0_12px_28px_-16px_hsl(var(--primary)/0.95)]'
+                    : 'text-muted-foreground hover:text-white'
+                }`}
+              >
+                <Smartphone className="h-4 w-4" />
+                En el mismo móvil
+              </button>
+              <button
+                onClick={() => setPlayMode('online')}
+                className={`flex flex-1 items-center justify-center gap-2 rounded-[18px] px-4 py-3 text-sm font-semibold transition ${
+                  playMode === 'online'
+                    ? 'bg-[linear-gradient(135deg,hsl(var(--accent)),hsl(var(--primary)))] text-[hsl(var(--accent-foreground))] shadow-[0_12px_28px_-16px_hsl(var(--accent)/0.95)]'
+                    : 'text-muted-foreground hover:text-white'
+                }`}
+              >
+                <Globe className="h-4 w-4" />
+                Online
+              </button>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div className="premium-panel-soft rounded-[22px] p-4">
+                <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground">Formato activo</p>
+                <div className="mt-3 flex items-center gap-3">
+                  <div className="rounded-2xl bg-white/10 p-2.5 text-white">
+                    <ActiveIcon className="h-4.5 w-4.5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-white">{activeInfo.title}</p>
+                    <p className="text-xs text-muted-foreground">{activeInfo.chip}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="premium-panel-soft rounded-[22px] p-4">
+                <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground">Lectura</p>
+                <p className="mt-3 text-sm font-bold text-white">Paneles más claros</p>
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">Mejor separación entre acción, información y entrada a la partida.</p>
+              </div>
+              <div className="premium-panel-soft rounded-[22px] p-4">
+                <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground">Ideal para</p>
+                <p className="mt-3 text-sm font-bold text-white">Duelo y estrategia</p>
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">Poker, parchís y juegos de conocimiento con mejor presencia visual.</p>
+              </div>
+            </div>
+          </div>
         </div>
-    );
+
+        <div className="surface-soft rounded-[28px] p-5 md:p-6">
+          <div className="flex items-center gap-3">
+            <div className="rounded-2xl bg-[hsl(var(--accent)/0.16)] p-3 text-[hsl(var(--accent))]">
+              <Sword className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-white">Selección directa</p>
+              <p className="text-xs text-muted-foreground">Todo el bloque competitivo ahora se entiende de un vistazo.</p>
+            </div>
+          </div>
+
+          <div className="mt-5 grid gap-3">
+            <div className="premium-stat">
+              <div className="flex items-center gap-2">
+                <Wifi className="h-4 w-4 text-[hsl(var(--accent))]" />
+                <p className="text-sm font-bold text-white">{activeInfo.title}</p>
+              </div>
+              <p className="mt-2 text-sm text-muted-foreground">{activeInfo.description}</p>
+            </div>
+            <div className="premium-stat">
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4 text-[hsl(var(--accent))]" />
+                <p className="text-sm font-bold text-white">Flujo más claro</p>
+              </div>
+              <p className="mt-2 text-sm text-muted-foreground">Primero eliges formato, luego el juego. Menos dudas y menos toques.</p>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {juegoModes.map((mode, index) => (
+          <motion.button
+            key={mode.id}
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.03 }}
+            onClick={() => onSelectMode(mode.id, playMode)}
+            whileHover={{ y: -4 }}
+            whileTap={{ scale: 0.985 }}
+            className="card-hover group surface-panel relative overflow-hidden p-5 text-left"
+          >
+            <div className={`absolute inset-0 bg-gradient-to-br ${mode.color} opacity-[0.12]`} />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.12),transparent_30%)] opacity-90" />
+            <div className="relative flex h-full flex-col gap-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-3xl shadow-[inset_0_1px_0_hsl(0_0%_100%/0.04)]">
+                    {mode.icon}
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-white">{mode.name}</h2>
+                    <p className="mt-1 text-xs uppercase tracking-[0.22em] text-muted-foreground">
+                      {playMode === 'local' ? 'Partida local' : 'Partida online'}
+                    </p>
+                  </div>
+                </div>
+                {mode.badge && (
+                  <span className="rounded-full border border-white/10 bg-white/[0.08] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white/80">
+                    {mode.badge}
+                  </span>
+                )}
+              </div>
+
+              <p className="min-h-[68px] text-sm leading-6 text-muted-foreground">{mode.description}</p>
+
+              <div className="flex flex-wrap gap-2">
+                <span className="rounded-full bg-white/[0.06] px-3 py-1 text-xs text-muted-foreground">{activeInfo.chip}</span>
+                <span className="rounded-full bg-white/[0.06] px-3 py-1 text-xs text-muted-foreground">Premium UI</span>
+                {mode.teamBased && <span className="rounded-full bg-white/[0.06] px-3 py-1 text-xs text-muted-foreground">Equipos</span>}
+              </div>
+
+              <div className="mt-auto flex items-center justify-between gap-3 border-t border-white/8 pt-4">
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">Acceso</p>
+                  <p className="mt-1 text-sm font-semibold text-white">Abrir tablero</p>
+                </div>
+                <span className="inline-flex items-center gap-1 text-sm font-semibold text-white transition-transform group-hover:translate-x-1">
+                  Abrir <ArrowRight className="h-4 w-4" />
+                </span>
+              </div>
+            </div>
+          </motion.button>
+        ))}
+      </div>
+    </div>
+  );
 }

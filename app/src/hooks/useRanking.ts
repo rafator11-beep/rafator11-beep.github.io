@@ -3,6 +3,8 @@ import { safeLower } from '@/utils/safeText';
 import { supabase, isSupabaseConfigured } from '@/integrations/supabase/client';
 import { loadLocalRankings, upsertLocalRanking, PlayerRanking } from '@/utils/localRanking';
 import { TAB_MAPPING, TabId, GameMode } from '@/types/game';
+import { useAuth } from '@/contexts/AuthContext';
+import { recordPremiumMatch } from '@/lib/premiumProgression';
 
 export interface PlayerStats {
   user_id: string;
@@ -44,7 +46,6 @@ export type BrutalMeta = {
   virusesReceived?: number;
 };
 
-// Convert local ranking to PlayerStats format for unified display
 function localToPlayerStats(lr: PlayerRanking): PlayerStats {
   return {
     user_id: lr.id,
@@ -80,7 +81,24 @@ function localToPlayerStats(lr: PlayerRanking): PlayerStats {
   };
 }
 
+function resolveCloudIdentity(
+  playerName: string,
+  currentUsername?: string | null,
+  currentUserId?: string | null,
+) {
+  const normalizedPlayer = safeLower(playerName);
+  const normalizedCurrent = safeLower(currentUsername || localStorage.getItem('fiesta_player_name') || '');
+  const isRegisteredCurrentUser = !!currentUserId && !!normalizedCurrent && normalizedPlayer === normalizedCurrent;
+
+  return {
+    shouldSyncToCloud: isRegisteredCurrentUser,
+    actorUserId: isRegisteredCurrentUser ? currentUserId : null,
+    canonicalName: isRegisteredCurrentUser ? (currentUsername || playerName) : playerName,
+  };
+}
+
 export function useRanking() {
+  const { user, profile } = useAuth();
   const [rankings, setRankings] = useState<PlayerStats[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -89,12 +107,10 @@ export function useRanking() {
     try {
       setLoading(true);
 
-      // Always load local rankings first
       const localData = loadLocalRankings();
       const localStats = localData.map(localToPlayerStats);
 
       if (!isSupabaseConfigured) {
-        // Use local data only
         setRankings(localStats);
         setError(null);
         return;
@@ -104,38 +120,69 @@ export function useRanking() {
         const { data, error: fetchError } = await supabase
           .from('user_stats')
           .select('*')
-          .order('games_won', { ascending: false })
-          .limit(100);
+          .limit(150);
 
         if (fetchError) throw fetchError;
 
-        const cloudStats = (data as PlayerStats[]) || [];
+        const cloudStats = ((data as any[]) || []).map((row) => ({
+          user_id: row.user_id || row.id || row.profile_id || row.player_name || crypto.randomUUID(),
+          name: row.player_name || row.username || 'Jugador',
+          avatar_url: row.avatar_url || null,
+          games_played: row.games_played || 0,
+          games_won: row.total_wins || row.games_won || 0,
+          fiesta_games_played: row.fiesta_games_played || row.games_played || 0,
+          fiesta_games_won: row.fiesta_games_won || row.total_wins || row.games_won || 0,
+          juego_games_played: row.juego_games_played || 0,
+          juego_games_won: row.juego_games_won || 0,
+          poker_chips_won: row.poker_score || row.poker_chips_won || 0,
+          poker_games_played: row.poker_games_played || row.poker_games || 0,
+          megamix_games_played: row.megamix_games_played || row.megamix_games || 0,
+          megamix_games_won: row.megamix_games_won || row.megamix_wins || 0,
+          clasico_games_played: row.clasico_games_played || row.clasico_games || 0,
+          clasico_games_won: row.clasico_games_won || row.clasico_wins || 0,
+          picante_games_played: row.picante_games_played || row.picante_games || 0,
+          picante_games_won: row.picante_games_won || row.picante_wins || 0,
+          parchis_games_played: row.parchis_games_played || row.parchis_games || 0,
+          parchis_games_won: row.parchis_games_won || row.parchis_wins || 0,
+          coins: row.coins || 0,
+          gems: row.gems || 0,
+          level: row.level || 1,
+          xp: row.total_xp || row.xp || row.total_score || 0,
+          poker_xp: row.poker_xp || 0,
+          poker_level: row.poker_level || 1,
+          parchis_xp: row.parchis_xp || 0,
+          parchis_level: row.parchis_level || 1,
+          unlocked_items: row.unlocked_items || [],
+          equipped_items: row.equipped_items || {},
+          updated_at: row.updated_at || new Date().toISOString(),
+        })) as PlayerStats[];
 
-        // Merge: cloud + local (prefer cloud if name matches, add local-only entries)
         const merged = [...cloudStats];
         for (const ls of localStats) {
-          const exists = merged.some(cs => safeLower(cs.name) === safeLower(ls.name));
-          if (!exists) {
+          const idx = merged.findIndex((cs) => safeLower(cs.name) === safeLower(ls.name));
+          if (idx === -1) {
             merged.push(ls);
-          } else {
-            // Update cloud entry with any higher local stats
-            const idx = merged.findIndex(cs => safeLower(cs.name) === safeLower(ls.name));
-            if (idx >= 0) {
-              const cloud = merged[idx];
-              merged[idx] = {
-                ...cloud,
-                games_played: Math.max(cloud.games_played, ls.games_played),
-                games_won: Math.max(cloud.games_won, ls.games_won),
-              };
-            }
+            continue;
           }
+
+          const cloud = merged[idx];
+          merged[idx] = {
+            ...cloud,
+            games_played: Math.max(cloud.games_played, ls.games_played),
+            games_won: Math.max(cloud.games_won, ls.games_won),
+            xp: Math.max(cloud.xp, ls.xp),
+            coins: Math.max(cloud.coins, ls.coins),
+            gems: Math.max(cloud.gems, ls.gems),
+            poker_xp: Math.max(cloud.poker_xp, ls.poker_xp),
+            parchis_xp: Math.max(cloud.parchis_xp, ls.parchis_xp),
+            level: Math.max(cloud.level, ls.level),
+          };
         }
 
-        merged.sort((a, b) => b.games_won - a.games_won);
+        merged.sort((a, b) => (b.games_won * 1000 + b.xp) - (a.games_won * 1000 + a.xp));
         setRankings(merged);
         setError(null);
       } catch (err) {
-        // Supabase failed, use local data as fallback
         console.warn('Supabase fetch failed, using local rankings:', err);
         setRankings(localStats);
         setError(null);
@@ -154,13 +201,8 @@ export function useRanking() {
 
     const channel = supabase
       .channel('user_stats_realtime')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'user_stats' },
-        () => {
-          fetchRankings();
-        }
-      )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'user_stats' }, () => fetchRankings())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => fetchRankings())
       .subscribe();
 
     return () => {
@@ -179,8 +221,7 @@ export function useRanking() {
     gameId?: string
   ) => {
     try {
-      // ALWAYS save locally first — this is the guaranteed persistence layer
-      upsertLocalRanking({
+      const localRows = upsertLocalRanking({
         playerName,
         scoreToAdd,
         won,
@@ -190,33 +231,78 @@ export function useRanking() {
         brutalMeta,
       });
 
-      // Then try Supabase as cloud backup
+      const updatedLocal = localRows.find((row) => safeLower(row.player_name) === safeLower(playerName));
+      const premiumSync = updatedLocal
+        ? recordPremiumMatch({
+            stats: {
+              id: updatedLocal.id,
+              player_name: updatedLocal.player_name,
+              avatar_url: updatedLocal.avatar_url,
+              games_played: updatedLocal.games_played,
+              games_won: updatedLocal.games_won,
+              total_score: updatedLocal.total_score,
+              xp: updatedLocal.xp,
+              level: updatedLocal.level,
+              poker_wins: updatedLocal.poker_wins,
+              poker_games: updatedLocal.poker_games,
+              megamix_wins: updatedLocal.megamix_wins,
+              megamix_games: updatedLocal.megamix_games,
+              clasico_wins: updatedLocal.clasico_wins,
+              clasico_games: updatedLocal.clasico_games,
+              picante_wins: updatedLocal.picante_wins,
+              picante_games: updatedLocal.picante_games,
+              parchis_wins: updatedLocal.parchis_wins,
+              parchis_games: updatedLocal.parchis_games,
+              football_wins: updatedLocal.football_wins,
+              football_games: updatedLocal.football_games,
+              culture_wins: updatedLocal.culture_wins,
+              culture_games: updatedLocal.culture_games,
+              win_streak: updatedLocal.win_streak,
+              updated_at: updatedLocal.updated_at,
+            },
+            won,
+            scoreToAdd,
+            gameMode,
+          })
+        : null;
+
       if (isSupabaseConfigured) {
         const actGameId = gameId || `local-${Date.now()}-${Math.random()}`;
-        const tabId = TAB_MAPPING.fiesta.includes(gameMode as GameMode) ? 'fiesta' : 'juego';
+        const tabId: TabId = TAB_MAPPING.fiesta.includes(gameMode as GameMode) ? 'fiesta' : 'juego';
+        const identity = resolveCloudIdentity(playerName, profile?.username, user?.id || null);
 
-        console.log(`Saving stats for ${playerName}, won: ${won}, score: ${scoreToAdd}`);
-
-        try {
-          const { error: insertError } = await supabase
-            .rpc('register_guest_event', {
+        if (identity.shouldSyncToCloud) {
+          try {
+            const { error: insertError } = await supabase.rpc('register_guest_event', {
               p_game_id: actGameId,
               p_event_type: 'game_finish',
-              p_actor_user_id: playerName,
+              p_actor_user_id: identity.actorUserId,
               p_tab_id: tabId,
               p_mode_id: gameMode,
               p_play_mode: 'local',
               p_score: scoreToAdd,
               p_is_winner: !!won,
-              p_player_name: playerName,
-              p_avatar_url: avatarUrl || null
+              p_player_name: identity.canonicalName,
+              p_avatar_url: avatarUrl || profile?.avatar_url || null,
             });
 
-          if (insertError) {
-            console.warn("RPC register_guest_event error (local save was successful):", insertError.message);
+            if (insertError) {
+              console.warn('RPC register_guest_event error (local save was successful):', insertError.message);
+            }
+          } catch (rpcErr) {
+            console.warn('Supabase RPC failed (local save was successful):', rpcErr);
           }
-        } catch (rpcErr) {
-          console.warn("Supabase RPC failed (local save was successful):", rpcErr);
+
+          if (premiumSync?.cloudPayload && user?.id) {
+            try {
+              await supabase
+                .from('profiles')
+                .update({ badges: premiumSync.cloudPayload, updated_at: new Date().toISOString() })
+                .eq('id', user.id);
+            } catch (premiumErr) {
+              console.warn('Premium Hall sync skipped:', premiumErr);
+            }
+          }
         }
       }
 
@@ -226,8 +312,8 @@ export function useRanking() {
     }
   };
 
-  const updatePlayerCity = async (playerName: string, city: string) => {
-    // Not used in current iteration
+  const updatePlayerCity = async (_playerName: string, _city: string) => {
+    // Reserved for future cloud sync.
   };
 
   const updateMultiplePlayers = async (

@@ -63,11 +63,11 @@ export function ParchisBoard({ pieces, currentTurn, myColor, onPieceClick, teamL
     };
 
     return (
-        <div className="w-full max-w-2xl aspect-square relative select-none touch-none drop-shadow-2xl">
+        <div className="w-full max-w-2xl md:max-w-3xl aspect-square relative select-none touch-none rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] p-2 md:p-3 shadow-[0_20px_50px_-30px_rgba(0,0,0,0.9)]">
             <svg
                 viewBox="0 0 760 760"
-                className="w-full h-full bg-[#E2E8F0] rounded-xl overflow-hidden"
-                style={{ filter: 'drop-shadow(0px 20px 30px rgba(0,0,0,0.5))' }}
+                className="w-full h-full bg-[#D9E0EA] rounded-[24px] overflow-hidden"
+                style={{ filter: 'drop-shadow(0px 24px 36px rgba(0,0,0,0.42))' }}
             >
                 <defs>
                     <radialGradient id="pieceGrad" cx="30%" cy="30%" r="70%">

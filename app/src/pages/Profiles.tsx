@@ -1,6 +1,19 @@
-import React, { useMemo, useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Gamepad2, Trophy, Star, Users, MapPin, ShoppingBag, Coins, Monitor } from 'lucide-react';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import {
+  Gamepad2,
+  Trophy,
+  Star,
+  Users,
+  ShoppingBag,
+  Coins,
+  Monitor,
+  Crown,
+  Sparkles,
+  Medal,
+  Flame,
+  ShieldCheck,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -8,7 +21,7 @@ import { useRanking, PlayerStats } from '@/hooks/useRanking';
 import { ImagePreviewDialog } from '@/components/ui/ImagePreviewDialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { ACHIEVEMENTS, getUnlocked } from '@/lib/achievementStore';
+import { buildPremiumSummaryFromRanking, getPremiumBadgeCatalog, getPremiumOverview } from '@/lib/premiumProgression';
 import { CoinShop } from '@/components/game/CoinShop';
 import { getXPProgress } from '@/lib/playerEconomy';
 import { useAuth } from '@/contexts/AuthContext';
@@ -41,52 +54,88 @@ function sortByWins(list: PlayerStats[], mode: ModeKey) {
   return [...list].sort((a, b) => pickWins(b, mode) - pickWins(a, mode));
 }
 
-function RankingList({ data, mode, onAvatarClick }: { data: PlayerStats[]; mode: ModeKey; onAvatarClick: (url: string | null) => void }) {
+function heroRankLabel(index: number) {
+  if (index === 0) return '🥇';
+  if (index === 1) return '🥈';
+  if (index === 2) return '🥉';
+  return `#${index + 1}`;
+}
+
+function SummaryStat({ icon: Icon, label, value, accent }: { icon: typeof Trophy; label: string; value: string | number; accent?: string }) {
   return (
-    <div className="space-y-2">
+    <div className="premium-stat">
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/10">
+          <Icon className={`h-4.5 w-4.5 ${accent || 'text-[hsl(var(--accent))]'}`} />
+        </div>
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">{label}</p>
+          <p className="mt-1 text-xl font-black text-white">{value}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RankingList({ data, mode, onAvatarClick, localPlayerName }: { data: PlayerStats[]; mode: ModeKey; onAvatarClick: (url: string | null) => void; localPlayerName: string }) {
+  return (
+    <div className="space-y-3">
       {data.map((rank, i) => {
         const wins = pickWins(rank, mode);
         const games = pickGames(rank, mode);
+        const isLocal = localPlayerName && rank.name.toLowerCase() === localPlayerName.toLowerCase();
 
         return (
           <motion.div
-            key={rank.name}
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: i * 0.03 }}
-            className={`bg-card/60 backdrop-blur-sm rounded-xl p-3 flex items-center gap-3 ${i < 3 ? 'neon-border' : 'border border-border/30'
-              }`}
+            key={`${rank.name}-${i}`}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.025 }}
+            className={`rounded-[24px] border p-3.5 sm:p-4 ${
+              i < 3
+                ? 'border-amber-400/20 bg-[linear-gradient(180deg,rgba(255,217,102,0.12),rgba(255,255,255,0.04))]'
+                : isLocal
+                  ? 'border-[hsl(var(--primary)/0.34)] bg-[linear-gradient(180deg,hsl(var(--primary)/0.12),rgba(255,255,255,0.03))]'
+                  : 'border-white/8 bg-white/[0.04]'
+            }`}
           >
-            <span className="text-xl w-8 text-center font-bold">
-              {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}`}
-            </span>
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-sm font-black text-white">
+                {heroRankLabel(i)}
+              </div>
 
-            <Avatar className="h-12 w-12 ring-1 ring-primary/30 cursor-pointer" onClick={() => onAvatarClick(rank.avatar_url)}>
-              {rank.avatar_url ? <AvatarImage src={rank.avatar_url} loading="lazy" /> : null}
-              <AvatarFallback className="bg-gradient-to-br from-[hsl(var(--neon-purple))] to-[hsl(var(--neon-pink))] text-white text-sm">
-                {rank.name.slice(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+              <Avatar className="h-12 w-12 ring-1 ring-white/10 cursor-pointer" onClick={() => onAvatarClick(rank.avatar_url)}>
+                {rank.avatar_url ? <AvatarImage src={rank.avatar_url} loading="lazy" /> : null}
+                <AvatarFallback className="bg-gradient-to-br from-[hsl(var(--neon-purple))] to-[hsl(var(--neon-pink))] text-white text-sm font-bold">
+                  {rank.name.slice(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
 
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold truncate">{rank.name}</p>
-              <p className="text-xs text-muted-foreground">
-                {games} partidas
-              </p>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <p className="truncate text-sm font-semibold text-white">{rank.name}</p>
+                  {isLocal ? (
+                    <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--accent))]">
+                      tú
+                    </span>
+                  ) : null}
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">{games} partidas registradas</p>
+              </div>
+
+              <div className="text-right">
+                <p className="text-sm font-black text-white">{wins}</p>
+                <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">{mode === 'poker' ? 'fichas' : 'victorias'}</p>
+              </div>
             </div>
-
-            <p className="font-bold text-primary text-sm flex items-center gap-1">
-              {mode === 'poker' ? '🪙 ' : '🏆 '}
-              {wins} {mode === 'poker' ? 'fichas' : 'vics'}
-            </p>
           </motion.div>
         );
       })}
 
       {data.length === 0 ? (
-        <p className="text-center text-muted-foreground py-8">
-          No hay datos aún para esta categoría
-        </p>
+        <div className="rounded-[24px] border border-dashed border-white/10 bg-white/[0.03] px-4 py-10 text-center text-sm text-muted-foreground">
+          No hay datos todavía para esta categoría.
+        </div>
       ) : null}
     </div>
   );
@@ -98,6 +147,7 @@ export default function Profiles() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [localPlayerName, setLocalPlayerName] = useState<string>('');
   const [screencastActive, setScreencastActive] = useState(false);
+  const [previewAvatar, setPreviewAvatar] = useState<string | null>(null);
   const { profile, syncEconomy } = useAuth();
 
   const handleScreenShare = async () => {
@@ -120,9 +170,7 @@ export default function Profiles() {
   const { rankings, loading } = useRanking();
 
   const totalGames = rankings.reduce((sum, r) => sum + (r.games_played || 0), 0);
-
   const globalRank = sortByWins(rankings.filter(r => (r.games_played || 0) > 0), 'global');
-  const fiesta = sortByWins(rankings.filter(r => (r.fiesta_games_played || 0) > 0), 'fiesta');
   const juego = sortByWins(rankings.filter(r => (r.juego_games_played || 0) > 0), 'juego');
   const poker = sortByWins(rankings.filter(r => (r.poker_games_played || 0) > 0 || r.poker_chips_won > 0), 'poker');
   const parchis = sortByWins(rankings.filter(r => (r.parchis_games_played || 0) > 0), 'parchis');
@@ -131,242 +179,369 @@ export default function Profiles() {
   const picante = sortByWins(rankings.filter(r => (r.picante_games_played || 0) > 0), 'picante');
 
   const topPlayer = globalRank[0];
-  const [previewAvatar, setPreviewAvatar] = useState<string | null>(null);
+  const myProfile = rankings.find(r => r.name.toLowerCase() === localPlayerName.toLowerCase());
+  const myRankPosition = myProfile ? globalRank.findIndex(r => r.name.toLowerCase() === myProfile.name.toLowerCase()) + 1 : 0;
+  const xpInfo = myProfile ? getXPProgress(myProfile.xp || 0) : null;
+  const pokerXp = myProfile ? getXPProgress(myProfile.poker_xp || 0) : null;
+  const parchisXp = myProfile ? getXPProgress(myProfile.parchis_xp || 0) : null;
+  const myPremium = myProfile
+    ? buildPremiumSummaryFromRanking({
+        id: myProfile.user_id,
+        player_name: myProfile.name,
+        avatar_url: myProfile.avatar_url,
+        city: null,
+        total_score: myProfile.xp || 0,
+        games_played: myProfile.games_played || 0,
+        games_won: myProfile.games_won || 0,
+        football_score: 0,
+        football_games: 0,
+        football_wins: 0,
+        culture_score: 0,
+        culture_games: 0,
+        culture_wins: 0,
+        megamix_games: myProfile.megamix_games_played || 0,
+        megamix_wins: myProfile.megamix_games_won || 0,
+        megamix_score: 0,
+        poker_games: myProfile.poker_games_played || 0,
+        poker_wins: 0,
+        poker_score: myProfile.poker_chips_won || 0,
+        clasico_games: myProfile.clasico_games_played || 0,
+        clasico_wins: myProfile.clasico_games_won || 0,
+        clasico_score: 0,
+        picante_games: myProfile.picante_games_played || 0,
+        picante_wins: myProfile.picante_games_won || 0,
+        picante_score: 0,
+        parchis_games: myProfile.parchis_games_played || 0,
+        parchis_wins: myProfile.parchis_games_won || 0,
+        parchis_score: 0,
+        coins: myProfile.coins || 0,
+        gems: myProfile.gems || 0,
+        xp: myProfile.xp || 0,
+        level: myProfile.level || 1,
+        poker_xp: myProfile.poker_xp || 0,
+        poker_level: myProfile.poker_level || 1,
+        parchis_xp: myProfile.parchis_xp || 0,
+        parchis_level: myProfile.parchis_level || 1,
+        win_streak: 0,
+        unlocked_items: myProfile.unlocked_items || [],
+        equipped_items: myProfile.equipped_items || {},
+        created_at: myProfile.updated_at || new Date().toISOString(),
+        updated_at: myProfile.updated_at || new Date().toISOString(),
+        legendary_drops: 0,
+        chaos_events: 0,
+        cursed_events: 0,
+        viruses_received: 0,
+      })
+    : profile
+      ? getPremiumOverview({
+          id: profile.id,
+          playerName: profile.username,
+          avatar_url: profile.avatar_url || null,
+          games_played: profile.games_played || 0,
+          games_won: profile.total_wins || 0,
+          total_xp: profile.total_xp || 0,
+          win_streak: 0,
+        }, profile.badges)
+      : null;
 
   return (
-    <div className="min-h-screen bg-background bg-grid-pattern pb-24 pt-8 px-4">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-[hsl(var(--neon-purple))] opacity-10 rounded-full blur-[100px] animate-pulse" />
-        <div className="absolute bottom-40 right-10 w-96 h-96 bg-[hsl(var(--neon-pink))] opacity-10 rounded-full blur-[100px]" />
-      </div>
-
-      <div className="max-w-lg mx-auto relative z-10">
+    <div className="premium-screen min-h-screen px-4 pb-28 pt-5 md:px-6 md:pb-32 md:pt-6">
+      <div className="mx-auto max-w-6xl">
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-6"
+          className="premium-panel overflow-hidden rounded-[34px] p-4 sm:p-5 md:p-7"
         >
-          <h1 className="text-3xl font-black neon-text text-[hsl(var(--neon-purple))] mb-2">
-            🏆 Perfil y Online
-          </h1>
-          <p className="text-muted-foreground">Comienza una partida para ver tu progreso</p>
-          <div className="mt-4 flex flex-wrap justify-center gap-2">
-            <Button variant="secondary" className="rounded-xl flex gap-2 items-center" onClick={() => setAchOpen(true)}>
-              <Trophy className="w-4 h-4" /> Logros
-            </Button>
-            <Button
-              className="rounded-xl flex gap-2 items-center bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-black border-none"
-              onClick={() => setShopOpen(true)}
-            >
-              <ShoppingBag className="w-4 h-4" /> Tienda Web
-            </Button>
-            <Button
-              variant="outline"
-              className={`rounded-xl flex gap-2 items-center border-white/10 ${screencastActive ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5'}`}
-              onClick={handleScreenShare}
-            >
-              <Monitor className={`w-4 h-4 ${screencastActive ? 'animate-pulse' : ''}`} />
-              {screencastActive ? 'PROYECTANDO...' : 'PROYECTAR TV'}
-            </Button>
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-3 gap-3 mb-6"
-        >
-          <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-3 text-center neon-border">
-            <Gamepad2 className="w-5 h-5 mx-auto mb-1 text-[hsl(var(--neon-blue))]" />
-            <p className="text-xl font-bold">{totalGames}</p>
-            <p className="text-xs text-muted-foreground">Partidas</p>
-          </div>
-
-          <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-3 text-center neon-border">
-            <Users className="w-5 h-5 mx-auto mb-1 text-[hsl(var(--neon-yellow))]" />
-            <p className="text-xl font-bold">{rankings.length}</p>
-            <p className="text-xs text-muted-foreground">Jugadores</p>
-          </div>
-
-          <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-3 text-center neon-border">
-            <Star className="w-5 h-5 mx-auto mb-1 text-[hsl(var(--neon-orange))]" />
-            <p className="text-xl font-bold">Online</p>
-            <p className="text-xs text-muted-foreground">Live</p>
-          </div>
-        </motion.div>
-
-        {/* Mi Perfil Card */}
-        {(() => {
-          const myProfile = rankings.find(r => r.name.toLowerCase() === localPlayerName.toLowerCase());
-          if (!myProfile) return null;
-
-          const xpInfo = getXPProgress(myProfile.xp || 0);
-
-          return (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="bg-card border-2 border-primary/20 rounded-2xl p-4 mb-6 relative overflow-hidden shadow-lg"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent pointer-events-none" />
-
-              <div className="flex items-center justify-between mb-4 relative z-10">
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-12 w-12 border-2 border-primary">
-                    {myProfile.equipped_items?.avatar || myProfile.avatar_url ? <AvatarImage src={myProfile.equipped_items?.avatar || myProfile.avatar_url || ''} /> : null}
-                    <AvatarFallback className="bg-primary/20 text-primary font-bold">
-                      {myProfile.name.slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h3 className="font-bold text-lg leading-tight">Mi Perfil</h3>
-                    <p className="text-sm text-muted-foreground">{myProfile.name}</p>
-                  </div>
-                </div>
-
-                <div className="flex flex-col items-end">
-                  <div className="flex items-center gap-1.5 bg-yellow-500/10 px-3 py-1 rounded-full border border-yellow-500/20 mb-1">
-                    <Coins className="w-4 h-4 text-yellow-400" />
-                    <span className="font-bold text-yellow-500">{myProfile.coins || 0}</span>
-                  </div>
-                  <div className="text-xs font-bold text-primary px-2 py-0.5 rounded-full bg-primary/10">
-                    Nivel {xpInfo.level}
-                  </div>
-                </div>
-              </div>
-
-              {/* Global XP Bar */}
-              <div className="relative z-10 mb-3">
-                <div className="flex justify-between text-xs font-bold mb-1 text-muted-foreground">
-                  <span>EXP Global: {xpInfo.currentXP} / {xpInfo.neededXP}</span>
-                  <span>{xpInfo.percent}%</span>
-                </div>
-                <div className="w-full h-2.5 bg-secondary rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-1000"
-                    style={{ width: `${xpInfo.percent}%` }}
-                  />
-                </div>
-              </div>
-
-              {/* Specific Levels (Poker & Parchis) */}
-              <div className="grid grid-cols-2 gap-2 mt-4 relative z-10 border-t border-primary/10 pt-3">
-                <div className="bg-black/20 p-2 rounded-lg text-center border border-white/5">
-                  <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-0.5">Poker LVL <span className="text-white">{myProfile.poker_level || 1}</span></p>
-                  <div className="w-full h-1.5 bg-secondary rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-red-500 to-amber-500"
-                      style={{ width: `${getXPProgress(myProfile.poker_xp || 0).percent}%` }}
-                    />
-                  </div>
-                </div>
-
-                <div className="bg-black/20 p-2 rounded-lg text-center border border-white/5">
-                  <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-0.5">Parchís LVL <span className="text-white">{myProfile.parchis_level || 1}</span></p>
-                  <div className="w-full h-1.5 bg-secondary rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-green-400 to-emerald-500"
-                      style={{ width: `${getXPProgress(myProfile.parchis_xp || 0).percent}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          );
-        })()}
-
-        {topPlayer ? (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border border-amber-500/30 rounded-2xl p-4 mb-6 flex items-center gap-4"
-          >
-            <Avatar className="h-14 w-14 ring-2 ring-amber-500">
-              {topPlayer.avatar_url ? <AvatarImage src={topPlayer.avatar_url} /> : null}
-              <AvatarFallback className="bg-gradient-to-br from-amber-500 to-yellow-500 text-white text-lg">
-                {topPlayer.name.slice(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-
-            <div>
-              <p className="text-sm text-muted-foreground">👑 Líder del ranking</p>
-              <p className="font-bold text-lg">{topPlayer.name}</p>
-              <p className="text-sm text-amber-400">
-                {topPlayer.games_won || 0} victorias totales
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="max-w-3xl">
+              <span className="premium-chip text-white/80">
+                <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--accent))]" />
+                perfil premium
+              </span>
+              <h1 className="premium-title mt-4 text-3xl font-black leading-tight sm:text-4xl md:text-[2.8rem]">
+                Ranking, progreso y tienda con acabado unificado.
+              </h1>
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-[15px]">
+                Esta zona ahora tiene mejor jerarquía visual, métricas más legibles, tarjetas más limpias y una estructura que encaja con el resto de la app premium.
               </p>
             </div>
-          </motion.div>
-        ) : null}
 
-        <div className="bg-card/70 backdrop-blur-sm rounded-2xl border border-border/40 p-4 neon-border">
-          <div className="flex items-center gap-2 mb-4">
-            <Trophy className="w-5 h-5 text-[hsl(var(--neon-yellow))]" />
-            <h2 className="font-bold text-lg">Rankings</h2>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="secondary" className="h-11 rounded-2xl border border-white/10 bg-white/[0.08] px-4 text-white hover:bg-white/[0.12]" onClick={() => setAchOpen(true)}>
+                <Trophy className="h-4 w-4" />
+                Logros premium
+              </Button>
+              <Button
+                className="h-11 rounded-2xl border-none bg-[linear-gradient(135deg,#facc15,#f59e0b)] px-4 text-black hover:opacity-95"
+                onClick={() => setShopOpen(true)}
+              >
+                <ShoppingBag className="h-4 w-4" />
+                Tienda Web
+              </Button>
+              <Button
+                variant="outline"
+                className={`h-11 rounded-2xl border-white/10 px-4 text-white hover:bg-white/[0.08] ${screencastActive ? 'bg-[hsl(var(--primary)/0.18)] text-[hsl(var(--accent))]' : 'bg-white/[0.04]'}`}
+                onClick={handleScreenShare}
+              >
+                <Monitor className={`h-4 w-4 ${screencastActive ? 'animate-pulse' : ''}`} />
+                {screencastActive ? 'PROYECTANDO' : 'Proyectar TV'}
+              </Button>
+            </div>
           </div>
 
-          {loading ? (
-            <div className="text-center py-12 text-muted-foreground">Cargando ranking...</div>
-          ) : (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              <Tabs defaultValue="global" className="w-full">
-                <div className="overflow-x-auto -mx-1 px-1 pb-2">
-                  <TabsList className="inline-flex w-auto min-w-full gap-1 mb-4 bg-card/60">
-                    <TabsTrigger value="global" className="text-[11px] sm:text-sm px-2">🌎 TOP</TabsTrigger>
-                    <TabsTrigger value="megamix" className="text-[11px] sm:text-sm px-2">🎲 Megamix</TabsTrigger>
-                    <TabsTrigger value="clasico" className="text-[11px] sm:text-sm px-2">🍻 Clásico</TabsTrigger>
-                    <TabsTrigger value="picante" className="text-[11px] sm:text-sm px-2">🌶️ Picante</TabsTrigger>
-                    <TabsTrigger value="juego" className="text-[11px] sm:text-sm px-2">🏆 Trivia</TabsTrigger>
-                    <TabsTrigger value="poker" className="text-[11px] sm:text-sm px-2">🃏 Poker</TabsTrigger>
-                    <TabsTrigger value="parchis" className="text-[11px] sm:text-sm px-2">🎲 Parchís</TabsTrigger>
-                  </TabsList>
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <SummaryStat icon={Gamepad2} label="Partidas" value={totalGames} accent="text-cyan-300" />
+            <SummaryStat icon={Users} label="Jugadores" value={rankings.length} accent="text-amber-300" />
+            <SummaryStat icon={Crown} label="Top global" value={topPlayer?.name || 'Pendiente'} accent="text-fuchsia-300" />
+            <SummaryStat icon={Flame} label="Tu puesto" value={myRankPosition || '—'} accent="text-emerald-300" />
+          </div>
+
+          <div className="mt-6 grid gap-5 xl:grid-cols-[1.05fr_0.95fr]">
+            <div className="space-y-5">
+              {myProfile || profile ? (
+                <motion.section
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="premium-panel-soft rounded-[30px] p-5 sm:p-6"
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-16 w-16 border border-white/10">
+                        {(myProfile?.equipped_items?.avatar || myProfile?.avatar_url || profile?.avatar_url) ? (
+                          <AvatarImage src={myProfile?.equipped_items?.avatar || myProfile?.avatar_url || profile?.avatar_url || ''} />
+                        ) : null}
+                        <AvatarFallback className="bg-gradient-to-br from-[hsl(var(--neon-purple))] to-[hsl(var(--neon-pink))] text-white font-bold">
+                          {(myProfile?.name || profile?.username || 'GU').slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Tu perfil</p>
+                        <h2 className="mt-1 text-2xl font-black text-white">{myProfile?.name || profile?.username || 'Jugador'}</h2>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          {myRankPosition ? `Posición global #${myRankPosition}` : 'Juega una partida para aparecer en el ranking.'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      <div className="rounded-full border border-yellow-400/20 bg-yellow-400/10 px-3 py-1.5 text-sm font-bold text-yellow-300">
+                        <span className="inline-flex items-center gap-1.5"><Coins className="h-4 w-4" /> {myProfile?.coins ?? profile?.coins ?? 0}</span>
+                      </div>
+                      <div className="rounded-full border border-[hsl(var(--primary)/0.2)] bg-[hsl(var(--primary)/0.12)] px-3 py-1.5 text-sm font-bold text-white">
+                        Nivel {xpInfo?.level || myProfile?.level || profile?.level || 1}
+                      </div>
+                    </div>
+                  </div>
+
+                  {xpInfo ? (
+                    <div className="mt-5 space-y-3">
+                      <div className="rounded-[24px] border border-white/8 bg-white/[0.04] p-4">
+                        <div className="mb-2 flex items-center justify-between gap-3 text-sm">
+                          <span className="font-semibold text-white">Progreso global</span>
+                          <span className="text-muted-foreground">{xpInfo.currentXP} / {xpInfo.neededXP} XP</span>
+                        </div>
+                        <div className="h-2.5 overflow-hidden rounded-full bg-black/30">
+                          <div className="h-full rounded-full bg-[linear-gradient(90deg,#8b5cf6,#22d3ee)]" style={{ width: `${xpInfo.percent}%` }} />
+                        </div>
+                      </div>
+
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="rounded-[24px] border border-white/8 bg-white/[0.04] p-4">
+                          <div className="mb-2 flex items-center justify-between text-sm">
+                            <span className="font-semibold text-white">Poker LVL {myProfile?.poker_level || 1}</span>
+                            <span className="text-muted-foreground">{pokerXp?.percent || 0}%</span>
+                          </div>
+                          <div className="h-2 overflow-hidden rounded-full bg-black/30">
+                            <div className="h-full rounded-full bg-[linear-gradient(90deg,#ef4444,#f59e0b)]" style={{ width: `${pokerXp?.percent || 0}%` }} />
+                          </div>
+                        </div>
+                        <div className="rounded-[24px] border border-white/8 bg-white/[0.04] p-4">
+                          <div className="mb-2 flex items-center justify-between text-sm">
+                            <span className="font-semibold text-white">Parchís LVL {myProfile?.parchis_level || 1}</span>
+                            <span className="text-muted-foreground">{parchisXp?.percent || 0}%</span>
+                          </div>
+                          <div className="h-2 overflow-hidden rounded-full bg-black/30">
+                            <div className="h-full rounded-full bg-[linear-gradient(90deg,#10b981,#22c55e)]" style={{ width: `${parchisXp?.percent || 0}%` }} />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
+                </motion.section>
+              ) : null}
+
+              {topPlayer ? (
+                <motion.section
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.03 }}
+                  className="rounded-[30px] border border-amber-400/20 bg-[linear-gradient(180deg,rgba(251,191,36,0.15),rgba(255,255,255,0.04))] p-5 sm:p-6"
+                >
+                  <div className="flex items-center gap-4">
+                    <Avatar className="h-16 w-16 ring-2 ring-amber-400/50">
+                      {topPlayer.avatar_url ? <AvatarImage src={topPlayer.avatar_url} /> : null}
+                      <AvatarFallback className="bg-gradient-to-br from-amber-400 to-yellow-500 text-black font-bold">
+                        {topPlayer.name.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/80">Líder actual</p>
+                      <h3 className="mt-1 text-2xl font-black text-white">{topPlayer.name}</h3>
+                      <p className="mt-1 text-sm text-amber-100/80">{topPlayer.games_won || 0} victorias totales acumuladas</p>
+                    </div>
+                  </div>
+                </motion.section>
+              ) : null}
+
+              <motion.section
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.06 }}
+                className="premium-panel-soft rounded-[30px] p-5 sm:p-6"
+              >
+                <div className="mb-4 flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
+                    <Trophy className="h-5 w-5 text-[hsl(var(--neon-yellow))]" />
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Ranking</p>
+                    <h2 className="text-xl font-bold text-white">Clasificaciones por modo</h2>
+                  </div>
                 </div>
 
-                <TabsContent value="global">
-                  <RankingList data={globalRank} mode="global" onAvatarClick={(url) => { setPreviewAvatar(url); setPreviewOpen(true); }} />
-                </TabsContent>
+                {loading ? (
+                  <div className="rounded-[24px] border border-dashed border-white/10 bg-white/[0.03] px-4 py-12 text-center text-sm text-muted-foreground">
+                    Cargando ranking...
+                  </div>
+                ) : (
+                  <Tabs defaultValue="global" className="w-full">
+                    <div className="overflow-x-auto no-scrollbar pb-3">
+                      <TabsList className="inline-flex h-auto min-w-full gap-2 rounded-[22px] border border-white/8 bg-white/[0.04] p-2">
+                        <TabsTrigger value="global" className="rounded-2xl px-3 py-2 text-xs sm:text-sm">🌎 Top</TabsTrigger>
+                        <TabsTrigger value="megamix" className="rounded-2xl px-3 py-2 text-xs sm:text-sm">🎲 Megamix</TabsTrigger>
+                        <TabsTrigger value="clasico" className="rounded-2xl px-3 py-2 text-xs sm:text-sm">🍻 Clásico</TabsTrigger>
+                        <TabsTrigger value="picante" className="rounded-2xl px-3 py-2 text-xs sm:text-sm">🌶️ Picante</TabsTrigger>
+                        <TabsTrigger value="juego" className="rounded-2xl px-3 py-2 text-xs sm:text-sm">🏆 Trivia</TabsTrigger>
+                        <TabsTrigger value="poker" className="rounded-2xl px-3 py-2 text-xs sm:text-sm">🃏 Poker</TabsTrigger>
+                        <TabsTrigger value="parchis" className="rounded-2xl px-3 py-2 text-xs sm:text-sm">🎲 Parchís</TabsTrigger>
+                      </TabsList>
+                    </div>
 
-                <TabsContent value="megamix">
-                  <RankingList data={megamix} mode="megamix" onAvatarClick={(url) => { setPreviewAvatar(url); setPreviewOpen(true); }} />
-                </TabsContent>
+                    <TabsContent value="global">
+                      <RankingList data={globalRank} mode="global" localPlayerName={localPlayerName} onAvatarClick={(url) => { setPreviewAvatar(url); setPreviewOpen(true); }} />
+                    </TabsContent>
+                    <TabsContent value="megamix">
+                      <RankingList data={megamix} mode="megamix" localPlayerName={localPlayerName} onAvatarClick={(url) => { setPreviewAvatar(url); setPreviewOpen(true); }} />
+                    </TabsContent>
+                    <TabsContent value="clasico">
+                      <RankingList data={clasico} mode="clasico" localPlayerName={localPlayerName} onAvatarClick={(url) => { setPreviewAvatar(url); setPreviewOpen(true); }} />
+                    </TabsContent>
+                    <TabsContent value="picante">
+                      <RankingList data={picante} mode="picante" localPlayerName={localPlayerName} onAvatarClick={(url) => { setPreviewAvatar(url); setPreviewOpen(true); }} />
+                    </TabsContent>
+                    <TabsContent value="juego">
+                      <RankingList data={juego} mode="juego" localPlayerName={localPlayerName} onAvatarClick={(url) => { setPreviewAvatar(url); setPreviewOpen(true); }} />
+                    </TabsContent>
+                    <TabsContent value="poker">
+                      <RankingList data={poker} mode="poker" localPlayerName={localPlayerName} onAvatarClick={(url) => { setPreviewAvatar(url); setPreviewOpen(true); }} />
+                    </TabsContent>
+                    <TabsContent value="parchis">
+                      <RankingList data={parchis} mode="parchis" localPlayerName={localPlayerName} onAvatarClick={(url) => { setPreviewAvatar(url); setPreviewOpen(true); }} />
+                    </TabsContent>
+                  </Tabs>
+                )}
+              </motion.section>
+            </div>
 
-                <TabsContent value="clasico">
-                  <RankingList data={clasico} mode="clasico" onAvatarClick={(url) => { setPreviewAvatar(url); setPreviewOpen(true); }} />
-                </TabsContent>
+            <div className="space-y-5">
+              <motion.section
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.08 }}
+                className="premium-panel-soft rounded-[30px] p-5 sm:p-6"
+              >
+                <div className="mb-4 flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-400/10">
+                    <Medal className="h-5 w-5 text-cyan-300" />
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Vista rápida</p>
+                    <h2 className="text-xl font-bold text-white">Estado del perfil</h2>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  {[
+                    ['Acabado premium', 'Paneles más limpios, mejores espacios y lectura móvil más cómoda.'],
+                    ['Jerarquía visual', 'Tu perfil, el líder y el ranking ya no compiten entre sí.'],
+                    ['Acciones claras', 'Logros, tienda y proyección quedan arriba y más accesibles.'],
+                  ].map(([title, text]) => (
+                    <div key={title} className="rounded-[24px] border border-white/8 bg-white/[0.04] p-4">
+                      <p className="text-sm font-semibold text-white">{title}</p>
+                      <p className="mt-1 text-xs leading-5 text-muted-foreground">{text}</p>
+                    </div>
+                  ))}
+                </div>
+              </motion.section>
 
-                <TabsContent value="picante">
-                  <RankingList data={picante} mode="picante" onAvatarClick={(url) => { setPreviewAvatar(url); setPreviewOpen(true); }} />
-                </TabsContent>
+              <motion.section
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="premium-panel-soft rounded-[30px] p-5 sm:p-6"
+              >
+                <div className="mb-4 flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-400/10">
+                    <ShieldCheck className="h-5 w-5 text-emerald-300" />
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Indicadores</p>
+                    <h2 className="text-xl font-bold text-white">Tus mejores datos</h2>
+                  </div>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+                  <div className="rounded-[24px] border border-white/8 bg-white/[0.04] p-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Victorias globales</p>
+                    <p className="mt-2 text-2xl font-black text-white">{myProfile?.games_won ?? 0}</p>
+                  </div>
+                  <div className="rounded-[24px] border border-white/8 bg-white/[0.04] p-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Poker</p>
+                    <p className="mt-2 text-2xl font-black text-white">{myProfile?.poker_chips_won ?? 0} fichas</p>
+                  </div>
+                  <div className="rounded-[24px] border border-white/8 bg-white/[0.04] p-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Parchís</p>
+                    <p className="mt-2 text-2xl font-black text-white">{myProfile?.parchis_games_won ?? 0} victorias</p>
+                  </div>
+                  <div className="rounded-[24px] border border-white/8 bg-white/[0.04] p-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Megamix</p>
+                    <p className="mt-2 text-2xl font-black text-white">{myProfile?.megamix_games_won ?? 0} victorias</p>
+                  </div>
+                </div>
+              </motion.section>
 
-                <TabsContent value="juego">
-                  <RankingList data={juego} mode="juego" onAvatarClick={(url) => { setPreviewAvatar(url); setPreviewOpen(true); }} />
-                </TabsContent>
-
-                <TabsContent value="poker">
-                  <RankingList data={poker} mode="poker" onAvatarClick={(url) => { setPreviewAvatar(url); setPreviewOpen(true); }} />
-                </TabsContent>
-
-                <TabsContent value="parchis">
-                  <RankingList data={parchis} mode="parchis" onAvatarClick={(url) => { setPreviewAvatar(url); setPreviewOpen(true); }} />
-                </TabsContent>
-              </Tabs>
-
-              {rankings.length === 0 ? (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="text-center py-10 text-muted-foreground"
-                >
-                  <Trophy className="w-14 h-14 mx-auto mb-3 opacity-30" />
-                  <p>Aún no hay jugadores en el ranking</p>
-                  <p className="text-sm">¡Juega una partida para aparecer aquí!</p>
-                </motion.div>
-              ) : null}
-            </motion.div>
-          )}
-        </div>
+              <motion.section
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.12 }}
+                className="premium-panel-soft rounded-[30px] p-5 sm:p-6"
+              >
+                <div className="mb-4 flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-fuchsia-400/10">
+                    <Star className="h-5 w-5 text-fuchsia-300" />
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Sugerencia</p>
+                    <h2 className="text-xl font-bold text-white">Cómo destacar más aquí</h2>
+                  </div>
+                </div>
+                <div className="rounded-[24px] border border-white/8 bg-white/[0.04] p-4 text-sm leading-7 text-muted-foreground">
+                  Juega al menos una partida en cada modo importante para llenar tus métricas. En cuanto haya datos, esta pantalla ya los enseña con más claridad y un aspecto mucho más premium.
+                </div>
+              </motion.section>
+            </div>
+          </div>
+        </motion.div>
       </div>
 
-      {/* Tienda Modal */}
       <CoinShop
         playerName={localPlayerName || profile?.username || 'Guest'}
         isOpen={shopOpen}
@@ -382,27 +557,51 @@ export default function Profiles() {
       />
 
       <Dialog open={achOpen} onOpenChange={setAchOpen}>
-        <DialogContent className="max-w-md" aria-describedby={undefined}>
+        <DialogContent className="max-w-2xl border-white/10 bg-[hsl(var(--card))]" aria-describedby={undefined}>
           <DialogHeader>
-            <DialogTitle>Logros</DialogTitle>
-            <DialogDescription>Lista de logros desbloqueados y pendientes.</DialogDescription>
+            <DialogTitle>Logros premium</DialogTitle>
+            <DialogDescription>Insignias persistentes, rachas guardadas y premios especiales conectados al Hall of Fame.</DialogDescription>
           </DialogHeader>
-          {(() => {
-            const unlocked = getUnlocked();
-            return (
-              <div className="space-y-2">
-                {ACHIEVEMENTS.map((a) => (
-                  <div key={a.id} className="rounded-xl border border-white/10 p-3 bg-white/5">
-                    <div className="flex items-center justify-between">
-                      <div className="font-semibold">{a.label}</div>
-                      <div className="text-xs text-white/60">{unlocked[a.id] ? "DESBLOQUEADO" : "BLOQUEADO"}</div>
-                    </div>
-                    <div className="text-sm text-white/70 mt-1">{a.desc}</div>
+          <div className="grid gap-4 md:grid-cols-[1.05fr_0.95fr]">
+            <div className="space-y-2">
+              {(myPremium?.badges || getPremiumBadgeCatalog().map((badge) => ({ ...badge, unlocked: false }))).map((badge) => (
+                <div key={badge.id} className={`rounded-2xl border p-3 ${badge.unlocked ? 'border-white/12 bg-white/[0.06]' : 'border-white/8 bg-white/[0.03]'}`}>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="font-semibold text-white flex items-center gap-2"><span>{badge.emoji}</span>{badge.name}</div>
+                    <div className="text-[11px] uppercase tracking-[0.14em] text-white/55">{badge.unlocked ? 'Desbloqueado' : 'Bloqueado'}</div>
                   </div>
-                ))}
+                  <div className="mt-1 text-sm text-white/70">{badge.description}</div>
+                </div>
+              ))}
+            </div>
+            <div className="space-y-3">
+              <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+                <p className="text-[11px] uppercase tracking-[0.18em] text-white/45 font-bold">Temporada actual</p>
+                <p className="mt-2 text-lg font-black text-white">{myPremium?.currentSeason?.label || 'Temporada activa'}</p>
+                <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+                  <div className="rounded-xl bg-white/[0.04] p-3"><p className="text-[10px] text-white/40 uppercase">Partidas</p><p className="mt-1 text-white font-black">{myPremium?.currentSeason?.games || 0}</p></div>
+                  <div className="rounded-xl bg-white/[0.04] p-3"><p className="text-[10px] text-white/40 uppercase">Victorias</p><p className="mt-1 text-white font-black">{myPremium?.currentSeason?.wins || 0}</p></div>
+                  <div className="rounded-xl bg-white/[0.04] p-3"><p className="text-[10px] text-white/40 uppercase">Puntos</p><p className="mt-1 text-white font-black">{myPremium?.currentSeason?.points || 0}</p></div>
+                </div>
               </div>
-            );
-          })()}
+              <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+                <p className="text-[11px] uppercase tracking-[0.18em] text-white/45 font-bold">Rachas y premios</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <span className="rounded-full border border-orange-400/20 bg-orange-400/10 px-3 py-1 text-xs font-bold text-orange-300">🔥 Racha actual {myPremium?.currentStreak || 0}</span>
+                  <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-bold text-cyan-300">💎 Mejor racha {myPremium?.bestStreak || 0}</span>
+                  <span className="rounded-full border border-fuchsia-400/20 bg-fuchsia-400/10 px-3 py-1 text-xs font-bold text-fuchsia-300">🏛️ {myPremium?.unlockedCount || 0} insignias</span>
+                </div>
+                <div className="mt-3 space-y-2">
+                  {(myPremium?.awards || []).length > 0 ? myPremium?.awards.map((award) => (
+                    <div key={award.id} className="rounded-xl border border-white/8 bg-white/[0.03] p-3">
+                      <div className="font-semibold text-white">{award.emoji} {award.name}</div>
+                      <div className="mt-1 text-sm text-white/65">{award.description}</div>
+                    </div>
+                  )) : <div className="rounded-xl border border-dashed border-white/10 bg-white/[0.02] p-3 text-sm text-white/50">Gana más partidas para desbloquear premios especiales de temporada.</div>}
+                </div>
+              </div>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
 

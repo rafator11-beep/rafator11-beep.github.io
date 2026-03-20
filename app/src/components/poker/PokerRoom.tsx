@@ -504,73 +504,103 @@ export function PokerRoom({ onExit, roomId, isHost: isHostParam }: PokerRoomProp
     };
 
     return (
-        <div className="min-h-screen bg-slate-900 flex flex-col relative overflow-hidden text-white font-sans">
-            <div className="absolute top-4 left-4 z-40 flex items-center gap-2">
-                <button onClick={onExit} className="p-2 rounded-full bg-black/40 hover:bg-black/60 transition-colors backdrop-blur-md">
-                    <ArrowLeft size={20} />
-                </button>
-                <span className="font-bold text-lg tracking-wider opacity-80">POKER {roomId ? 'ONLINE' : 'LOCAL'}</span>
-            </div>
-
-            <div className="flex-1 flex flex-col items-center justify-center p-4 pt-[10vh] pb-2 relative">
-                <PokerTable
-                    players={players.map(p => ({
-                        ...p,
-                        score: localScores[p.id] !== undefined ? localScores[p.id] : (p.score || STARTING_CHIPS)
-                    }))}
-                    gameState={pokerState}
-                    localPlayerId={localPlayerId}
-                    myCards={myCards}
-                    remoteStreams={remoteStreams}
-                    localStream={localStream}
-                    equippedCards={equippedCards}
-                />
-
-                {/* Local Waiting Overlay */}
-                {pokerState.status === 'waiting' && isHost && (
-                    <div className="absolute inset-0 flex items-center justify-center z-50">
-                        <div className="bg-black/90 backdrop-blur-xl p-10 rounded-3xl border border-white/20 text-center flex flex-col items-center gap-6 shadow-2xl">
-                            <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center animate-bounce">
-                                <Users className="text-primary" size={32} />
-                            </div>
+        <div className="min-h-screen premium-screen flex flex-col relative overflow-hidden text-white font-sans">
+            <div className="p-3 md:p-5">
+                <div className="premium-panel rounded-[30px] px-4 py-4 md:px-6 md:py-5">
+                    <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+                        <div className="flex items-start gap-3">
+                            <button onClick={onExit} className="mt-0.5 p-2.5 rounded-2xl bg-white/5 hover:bg-white/10 transition-colors border border-white/10 backdrop-blur-md shrink-0">
+                                <ArrowLeft size={20} />
+                            </button>
                             <div>
-                                <h2 className="text-3xl font-black mb-2 tracking-tighter">SALA DE ESPERA</h2>
-                                <p className="text-white/50 max-w-[200px]">Prepara a tus jugadores o bots antes de empezar.</p>
+                                <div className="flex flex-wrap gap-2 mb-3">
+                                    <span className="premium-chip text-emerald-200">Mesa premium</span>
+                                    <span className="premium-chip text-white/80">{roomId ? 'Modo online' : 'Modo local'}</span>
+                                    {roomId && <span className="premium-chip text-amber-200">Sala {roomId}</span>}
+                                </div>
+                                <h1 className="text-2xl md:text-3xl font-black premium-title">Poker Deluxe</h1>
+                                <p className="text-white/60 text-sm md:text-base mt-1">Tapete premium, mejor lectura de jugadores y controles más claros.</p>
                             </div>
-                            <Button
-                                onClick={startGame}
-                                size="lg"
-                                disabled={players.length < 2}
-                                className="w-full rounded-full h-14 text-xl font-bold bg-primary hover:bg-primary/80 neon-border"
-                            >
-                                Empezar Partida ({players.length})
-                            </Button>
                         </div>
-                    </div>
-                )}
 
-                {/* Guest Waiting Overlay */}
-                {pokerState.status === 'waiting' && !isHost && roomId && (
-                    <div className="absolute inset-0 flex items-center justify-center z-50">
-                        <div className="bg-black/80 backdrop-blur-md p-8 rounded-2xl border border-white/20 text-center animate-pulse">
-                            <h2 className="text-xl font-bold">ESPERANDO AL ANFITRIÓN...</h2>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div className="premium-stat min-w-[120px]">
+                                <p className="text-[11px] uppercase tracking-[0.2em] text-white/45 font-bold mb-2">Jugadores</p>
+                                <p className="text-2xl font-black">{players.length}</p>
+                            </div>
+                            <div className="premium-stat min-w-[120px]">
+                                <p className="text-[11px] uppercase tracking-[0.2em] text-white/45 font-bold mb-2">Bote</p>
+                                <p className="text-2xl font-black text-amber-300">{pokerState.pot || 0}</p>
+                            </div>
+                            <div className="premium-stat min-w-[120px]">
+                                <p className="text-[11px] uppercase tracking-[0.2em] text-white/45 font-bold mb-2">Tu stack</p>
+                                <p className="text-2xl font-black text-emerald-300">{localScores[localPlayerId || ''] || 0}</p>
+                            </div>
+                            <div className="premium-stat min-w-[120px]">
+                                <p className="text-[11px] uppercase tracking-[0.2em] text-white/45 font-bold mb-2">Estado</p>
+                                <p className="text-lg font-black">{pokerState.status === 'waiting' ? 'Esperando' : pokerState.status === 'finished' ? 'Finalizada' : 'En juego'}</p>
+                            </div>
                         </div>
                     </div>
-                )}
+                </div>
             </div>
 
-            <div className="bg-black/80 backdrop-blur-xl border-t border-white/10 p-4 pb-8 z-50 relative">
-                <div className="max-w-4xl mx-auto flex flex-col items-center gap-6">
-                    {/* Hand Ranking Status */}
+            <div className="flex-1 px-3 md:px-5 pb-3 md:pb-5 min-h-0 flex flex-col gap-4">
+                <div className="premium-panel rounded-[30px] p-3 md:p-5 flex-1 relative overflow-hidden">
+                    <div className="flex-1 flex flex-col items-center justify-center relative min-h-[420px]">
+                        <PokerTable
+                            players={players.map(p => ({
+                                ...p,
+                                score: localScores[p.id] !== undefined ? localScores[p.id] : (p.score || STARTING_CHIPS)
+                            }))}
+                            gameState={pokerState}
+                            localPlayerId={localPlayerId}
+                            myCards={myCards}
+                            remoteStreams={remoteStreams}
+                            localStream={localStream}
+                            equippedCards={equippedCards}
+                        />
+
+                        {pokerState.status === 'waiting' && isHost && (
+                            <div className="absolute inset-0 flex items-center justify-center z-50 p-4">
+                                <div className="premium-panel rounded-[30px] p-6 md:p-8 max-w-md w-full text-center flex flex-col items-center gap-6 shadow-2xl">
+                                    <div className="w-16 h-16 bg-primary/15 rounded-full flex items-center justify-center shadow-[0_0_24px_rgba(168,85,247,0.2)]">
+                                        <Users className="text-primary" size={32} />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-3xl font-black mb-2 premium-title">Sala de espera</h2>
+                                        <p className="text-white/55">Prepara jugadores y bots antes de repartir las cartas.</p>
+                                    </div>
+                                    <Button
+                                        onClick={startGame}
+                                        size="lg"
+                                        disabled={players.length < 2}
+                                        className="w-full rounded-[22px] h-14 text-lg font-black bg-gradient-to-r from-fuchsia-600 via-purple-600 to-cyan-600 hover:from-fuchsia-500 hover:via-purple-500 hover:to-cyan-500 border border-white/10"
+                                    >
+                                        Empezar partida ({players.length})
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+
+                        {pokerState.status === 'waiting' && !isHost && roomId && (
+                            <div className="absolute inset-0 flex items-center justify-center z-50 p-4">
+                                <div className="premium-panel rounded-[26px] p-6 text-center">
+                                    <h2 className="text-xl font-black premium-title">Esperando al anfitrión...</h2>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                <div className="flex flex-col items-center gap-4">
                     {pokerState.status !== 'waiting' && myCards.length > 0 && (
                         <motion.div
                             initial={{ scale: 0.8, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
-                            className="bg-primary/10 border border-primary/30 px-6 py-2 rounded-full"
+                            className="premium-chip text-fuchsia-200"
                         >
-                            <span className="text-primary font-black tracking-widest text-sm uppercase">
-                                TU MANO: {getHandRank([...myCards, ...pokerState.community_cards])}
-                            </span>
+                            Tu mano: {getHandRank([...myCards, ...pokerState.community_cards])}
                         </motion.div>
                     )}
 
