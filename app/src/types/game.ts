@@ -25,7 +25,7 @@ export enum ModeId {
 
 export const TAB_MAPPING: Record<TabId, GameMode[]> = {
   fiesta: ['megamix', 'clasico', 'yo_nunca', 'yo_nunca_equipos', 'picante', 'espana', 'votacion', 'pacovers', 'megaboard'],
-  juego: ['cultura', 'trivia_futbol', 'futbol', 'tictactoe', 'poker', 'parchis', 'megaboard']
+  juego: ['cultura', 'trivia_futbol', 'futbol', 'tictactoe', 'poker', 'parchis']
 };
 export type GameStatus = 'setup' | 'playing' | 'round_end' | 'finished';
 export type QuestionType = 'test' | 'open' | 'true_false' | 'social' | 'reto' | 'yo_nunca' | 'votacion' | 'accion';
