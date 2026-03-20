@@ -112,7 +112,7 @@ export function ArcadeTapRace({ roomId, playerId, onClose }: ArcadeTapRaceProps)
         channelRef.current?.send({
             type: 'broadcast',
             event: 'score_update',
-            payload: { playerId: localPlayerId, score: scoreRef.current }
+            payload: { playerId: effectivePlayerId, score: scoreRef.current }
         });
 
         // Determine winner
@@ -139,7 +139,7 @@ export function ArcadeTapRace({ roomId, playerId, onClose }: ArcadeTapRaceProps)
         channelRef.current?.send({
             type: 'broadcast',
             event: 'score_update',
-            payload: { playerId: localPlayerId, score: newScore }
+            payload: { playerId: effectivePlayerId, score: newScore }
         });
 
         // Vibrate if on mobile
@@ -257,7 +257,7 @@ export function ArcadeTapRace({ roomId, playerId, onClose }: ArcadeTapRaceProps)
                         <div className="flex justify-around items-center bg-white/5 p-6 rounded-3xl mb-8">
                             <div className="flex flex-col items-center">
                                 <span className="text-white/50 text-sm uppercase tracking-widest mb-2 font-bold">Tú</span>
-                                <span className={`text-5xl font-black ${winner === localPlayerId ? 'text-green-400' : 'text-white'}`}>{myScore}</span>
+                                <span className={`text-5xl font-black ${winner === effectivePlayerId ? 'text-green-400' : 'text-white'}`}>{myScore}</span>
                             </div>
                             <span className="text-3xl text-white/20 font-light">VS</span>
                             <div className="flex flex-col items-center">

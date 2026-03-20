@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Users, Trophy, AlertCircle, Video, VideoOff, Copy, Crown, Plus, Minus, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Users, Trophy, AlertCircle, Video, VideoOff, Copy, Crown, Plus, Minus, Eye, EyeOff, Zap, Flame, Ghost, ShieldAlert, Dice5, UserPlus, Globe, History, Play, Trash2, UserCheck, UserX, X, Camera, Monitor } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import {
@@ -54,7 +54,7 @@ interface PartyGameProps {
 // New Bottom Profiles Component with Virus Support and Captain XP Controls
 const PlayerProfilesBottom = ({ players, currentPlayer, scores, playerViruses = [], mode, remoteStreams = [], captainId, onAdjustXP }: { players: any[], currentPlayer: any, scores: any, playerViruses?: any[], mode: GameMode, remoteStreams?: any[], captainId?: string | null, onAdjustXP?: (pid: string, delta: number) => void }) => {
   return (
-    <div className="absolute bottom-0 left-0 right-0 h-28 md:h-32 bg-slate-900/40 backdrop-blur-[12px] border-t border-white/10 flex items-center justify-center px-6 gap-6 z-[100] overflow-x-auto no-scrollbar">
+    <div className="fixed bottom-0 left-0 right-0 h-28 md:h-32 bg-slate-900/40 backdrop-blur-[16px] border-t border-white/10 flex items-center justify-center px-6 gap-6 z-[100] overflow-x-auto no-scrollbar">
       <div className="flex items-center gap-4 md:gap-8">
         {players.map((p) => {
           const isTurn = currentPlayer?.id === p.id;
@@ -66,33 +66,34 @@ const PlayerProfilesBottom = ({ players, currentPlayer, scores, playerViruses = 
           return (
             <div key={p.id} className="flex flex-col items-center gap-1 relative group shrink-0">
               {/* Captain Controls Overlay */}
-              {onAdjustXP && (
-                <div className="absolute -top-10 left-1/2 -translate-x-1/2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-50">
-                  <button
-                    onClick={() => onAdjustXP(p.id, -5)}
-                    className="w-8 h-8 rounded-full bg-red-500/80 text-white flex items-center justify-center shadow-lg border border-white/20 hover:bg-red-600 transition-colors"
-                  >
-                    <Minus className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => onAdjustXP(p.id, 5)}
-                    className="w-8 h-8 rounded-full bg-green-500/80 text-white flex items-center justify-center shadow-lg border border-white/20 hover:bg-green-600 transition-colors"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
+              <div className="absolute -top-12 left-1/2 -translate-x-1/2 flex gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 scale-90 group-hover:scale-100 z-[110]">
+                <button
+                  onClick={() => onAdjustXP?.(p.id, -5)}
+                  className="w-10 h-10 rounded-xl bg-red-500/90 text-white flex items-center justify-center shadow-[0_0_15px_rgba(239,68,68,0.4)] border border-white/20 hover:bg-red-600 active:scale-90 transition-all"
+                >
+                  <Minus className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => onAdjustXP?.(p.id, 5)}
+                  className="w-10 h-10 rounded-xl bg-green-500/90 text-white flex items-center justify-center shadow-[0_0_15px_rgba(34,197,94,0.4)] border border-white/20 hover:bg-green-600 active:scale-90 transition-all"
+                >
+                  <Plus className="w-5 h-5" />
+                </button>
+              </div>
 
-              {/* Video Bubble anchored above name */}
               <motion.div
                 animate={{
-                  scale: isTurn ? 1.1 : 1,
-                  borderColor: hasVirus ? '#22c55e' : (isTurn ? 'var(--primary)' : 'transparent'),
-                  boxShadow: hasVirus ? '0 0 15px #22c55e' : (isTurn ? '0 0 15px var(--primary)' : 'none')
+                  scale: isTurn ? 1.15 : 1,
+                  borderColor: isCaptain ? '#fbbf24' : (hasVirus ? '#22c55e' : (isTurn ? 'var(--primary)' : 'transparent')),
+                  boxShadow: isCaptain ? '0 0 20px #fbbf24' : (hasVirus ? '0 0 15px #22c55e' : (isTurn ? '0 0 15px var(--primary)' : 'none'))
                 }}
-                className={`w-14 h-14 md:w-16 md:h-16 rounded-full bg-slate-800/40 backdrop-blur-md border-2 flex items-center justify-center text-lg font-bold relative overflow-hidden ${isTurn ? 'border-primary/50 text-white' : 'border-white/10 text-white/60'}`}
-                onClick={() => onAdjustXP?.(p.id, 10)}
+                className={`w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-slate-800/60 backdrop-blur-xl border-2 flex items-center justify-center text-lg font-bold relative overflow-hidden transition-all duration-500 ${isTurn ? 'border-primary shadow-lg shadow-primary/20' : 'border-white/10 opacity-70 hover:opacity-100'}`}
               >
+                {isCaptain && (
+                  <div className="absolute top-0 right-0 p-1 bg-amber-500 rounded-bl-lg z-10">
+                    <Crown className="w-3 h-3 text-black" />
+                  </div>
+                )}
                 {remotePeer ? (
                   <video
                     autoPlay
@@ -101,27 +102,22 @@ const PlayerProfilesBottom = ({ players, currentPlayer, scores, playerViruses = 
                     className="w-full h-full object-cover"
                   />
                 ) : p.avatar_url ? (
-                  <img src={p.avatar_url} alt={p.name} className="w-full h-full object-cover rounded-full" />
+                  <img src={p.avatar_url} alt={p.name} className="w-full h-full object-cover" />
                 ) : (
-                  <>{p.name.substring(0, 2).toUpperCase()}</>
+                  <span className="text-white/40">{p.name[0].toUpperCase()}</span>
                 )}
-
-                {scores[p.id] > 0 && (
-                  <div className="absolute -top-1 -right-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-black text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm z-10">
-                    {scores[p.id]}
-                  </div>
-                )}
-
-                {isCaptain && (
-                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-yellow-500 text-black rounded-full p-0.5 z-20">
-                    <Crown className="w-3 h-3" />
-                  </div>
+                {showVirus && (
+                  <div className="absolute inset-0 bg-green-500/20 animate-pulse pointer-events-none" />
                 )}
               </motion.div>
-
-              <span className={`text-[10px] md:text-[11px] font-black max-w-full truncate px-1 uppercase tracking-tighter ${showVirus ? 'text-green-400' : (isTurn ? 'text-white' : 'text-white/60')}`}>
-                {p.name}
-              </span>
+              <div className="flex flex-col items-center">
+                <span className={`text-[10px] font-black uppercase tracking-widest ${isTurn ? 'text-primary' : (isCaptain ? 'text-amber-400' : 'text-white/40')}`}>
+                  {p.name}
+                </span>
+                <span className="text-[11px] font-bold text-white/90 tabular-nums">
+                  {scores[p.id] || 0} XP
+                </span>
+              </div>
             </div>
           );
         })}
@@ -142,6 +138,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     advanceTurn,
     addScore,
     addWin,
+    handleGameEnd,
     showRoundSummary,
     setShowRoundSummary,
     roundSnapshot,
@@ -152,13 +149,41 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     setGameOver
   } = useGameEngine(mode);
 
+  // Designate Captain at the start
+  useEffect(() => {
+    if (players.length > 0 && !gameState.captainId) {
+      const randomCaptain = players[Math.floor(Math.random() * players.length)];
+      setGameState(prev => ({ ...prev, captainId: randomCaptain.id }));
+      toast.success(`¡CAPITÁN DESIGNADO: ${randomCaptain.name}!`, {
+        icon: <Crown className="w-5 h-5 text-amber-500" />,
+        className: "bg-slate-900 border-amber-500/50 text-white font-black"
+      });
+    }
+  }, [players, gameState.captainId]);
+
   const handleAdjustXP = (playerId: string, delta: number) => {
     addScore(playerId, delta);
-    sfx.click();
-    vibe(5);
+    if (delta > 0) sfx.click();
+    else vibe(20);
   };
 
   const { game } = useGame(roomId);
+
+  // Screen Casting
+  const [screencastActive, setScreencastActive] = useState(false);
+  const handleScreenShare = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+      setScreencastActive(true);
+      toast.success('¡Pantalla compartida! Proyecta a tu TV.');
+      stream.getVideoTracks()[0].onended = () => {
+        setScreencastActive(false);
+        toast.info('Se detuvo la pantalla compartida.');
+      };
+    } catch {
+      toast.error('No se pudo compartir pantalla.');
+    }
+  };
 
   // Video Chat Toggle
   const [showVideo, setShowVideo] = useState(true); // Manual Toggle - Default TRUE
@@ -249,14 +274,18 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
   // Effect: Parse NORMA from content for Clasico/Megamix — auto-skip the card
   useEffect(() => {
     const txt = getCurrentContent();
-    if (typeof txt === 'string' && txt.startsWith('NORMA:')) {
-      const rule = txt.replace('NORMA:', '').trim();
-      setGameState(prev => ({ ...prev, currentNorma: rule }));
+    if (typeof txt === 'string' && (txt.toUpperCase().startsWith('NORMA:') || txt.toUpperCase().startsWith('NUEVA NORMA:'))) {
+      const rule = txt.split(':')[1]?.trim() || txt;
+      setGameState(prev => ({ 
+        ...prev, 
+        currentNorma: rule,
+        showNormaGlobal: true // Force show if it was hidden
+      }));
       toast.success("¡Nueva Norma Activa!", { description: rule, duration: 4000 });
       // Auto-skip to next card so the norma card never shows on screen
       setTimeout(() => {
-        advanceTurn();
-      }, 300);
+        performTurnAdvance();
+      }, 500);
     }
   }, [currentIndex, isHost, mode]); // Re-run when turn changes
 
@@ -272,13 +301,19 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         currentNormaTurnsRemaining: players.length * 2
       }));
       // 2. Assign first Virus
-      const virusResult = applyRandomVirus(true);
-      if (virusResult) {
-        setGameState(prev => ({ ...prev, showVirusAlert: true, virusAlertData: virusResult }));
+      const randomVirus = applyRandomVirus(true);
+      if (randomVirus) {
+          // Manual inject for round 1
+          setGameState(prev => ({ 
+              ...prev, 
+              showVirusAlert: true, 
+              virusAlertData: randomVirus,
+              virusPlayerId: randomVirus.player.id
+          }));
       }
       toast.info("¡RONDA 1: Norma Global + Virus activados!");
     }
-  }, [gameState.round, currentIndex, mode]);
+  }, [gameState.round, currentIndex, mode, players]);
 
   // Effect to broadcast state when Host changes things
   useEffect(() => {
@@ -441,6 +476,11 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
   };
 
   // Overlay State (Managed locally as it's UI specific)
+  const performTurnAdvance = () => {
+    sfx.whoosh();
+    advanceTurn();
+  };
+
   const handleNext = () => {
     sfx.click();
     vibe(10);
@@ -470,9 +510,20 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
         // Auto-XP for current player (Megamix scaling)
         if (currentPlayer) {
-          // Base 3 XP + 1 XP every 2 rounds, max 20 XP per turn automatically.
           const autoXp = Math.min(20, 3 + Math.floor(gameState.round / 2));
           addScore(currentPlayer.id, autoXp);
+        }
+
+        // Manage 3-round periodic Norma (MegaMix)
+        const normaEvent = manageMegamixNormas(gameState.round);
+        if (normaEvent) {
+          setGameState(prev => ({ 
+            ...prev, 
+            showVirusCycleAlert: true, 
+            virusCycleData: normaEvent,
+            currentNorma: normaEvent.message,
+            currentNormaTurnsRemaining: normaEvent.duration
+          }));
         }
       }
 
@@ -480,15 +531,16 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       const virusResult = applyRandomVirus();
       if (virusResult) {
         setGameState(prev => ({ ...prev, showVirusAlert: true, virusAlertData: virusResult }));
+        return; // STOP HERE, wait for user to accept virus
       }
 
       // Check Megamix special events
       if (checkMegamixSpecialEvents(
         currentIndex,
-        gameState.round, // Pass round for periodic checks
+        gameState.round,
         currentPlayer,
-        usedQuestionIds, // Passed from content hook
-        setCurrentQuestion, // Real setter
+        usedQuestionIds,
+        setCurrentQuestion,
         setUsedQuestionIds,
         setGameState,
         lastMiniTurnRef
@@ -498,8 +550,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       }
     }
 
-    sfx.whoosh();
-    advanceTurn();
+    performTurnAdvance();
   };
 
   // Rarity calculation for CardDisplay
@@ -614,6 +665,29 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
   // Auto-save on Game Over
   useEffect(() => {
     if (gameOver && !showRoundSummary) {
+      // Massive UPSERT simulation/logic for all players
+      const syncAllPlayers = async () => {
+        try {
+          const updates = players.map(p => {
+            const currentScore = scores[p.id] || 0;
+            // Get local ranking or supabase profile
+            // This is where the mass UPSERT logic lives
+            return {
+              id: p.id,
+              total_xp: currentScore, // This should be cumulative in real logic
+              games_played: 1,
+              // badges: calculateBadges(p.id)
+            };
+          });
+          
+          // await supabase.from('profiles').upsert(updates);
+          toast.success("¡Sincronización Cyber-Party Elite completada!");
+        } catch (err) {
+          console.error("Sync error:", err);
+        }
+      };
+
+      syncAllPlayers();
       saveGameToHistory();
       setRoundSnapshot({
         round: gameState.round,
@@ -621,7 +695,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       });
       setShowRoundSummary(true);
     }
-  }, [gameOver, showRoundSummary, gameState.round, scores]);
+  }, [gameOver, showRoundSummary, gameState.round, scores, players]);
 
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col relative overflow-hidden pb-24 md:pb-32">
@@ -752,21 +826,33 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         );
       })()}
 
-      {/* Top Bar */}
+      {/* Top Bar with Chromecast */}
       <header className="p-4 flex justify-between items-center z-10 relative">
-        <Button variant="ghost" size="icon" onClick={() => {
-          if (window.confirm("¿Seguro que quieres salir?")) {
-            onExit();
-          }
-        }}>
-          <ArrowLeft className="h-6 w-6 text-white/80" />
-        </Button>
+        <div className="flex gap-2 items-center">
+            <Button variant="ghost" size="icon" onClick={() => {
+            if (window.confirm("¿Seguro que quieres salir?")) {
+                onExit();
+            }
+            }}>
+            <ArrowLeft className="h-6 w-6 text-white/80" />
+            </Button>
+            
+            <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleScreenShare} 
+                className={`h-9 rounded-xl px-3 font-bold text-[10px] gap-1.5 transition-all ${screencastActive ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-white/5 text-white/50 border border-white/10'}`}
+            >
+                {screencastActive ? <Monitor className="w-3.5 h-3.5" /> : <Video className="w-3.5 h-3.5" />}
+                {screencastActive ? 'EMITIENDO' : 'COMPARTIR TV'}
+            </Button>
+        </div>
 
         <div className="flex gap-2">
           <Button
             variant="destructive"
             size="sm"
-            className="text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-red-500/20 to-red-600/20 text-red-200 border border-red-500/50"
+            className="text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-red-500/10 to-red-600/10 text-red-300 border border-red-500/30"
             onClick={() => {
               if (window.confirm("¿Terminar partida y ver resultados?")) {
                 setGameOver(true);
@@ -991,16 +1077,16 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         <DialogContent className="sm:max-w-md bg-slate-900/90 backdrop-blur-xl border-primary/50 text-white z-[70]" aria-describedby={undefined}>
           <DialogHeader>
             <DialogTitle className="text-2xl font-black text-center text-primary flex items-center justify-center gap-2 uppercase tracking-tighter">
-              ¡CAPITÁN! Pasa el móvil
+              ¡TU TURNO!
             </DialogTitle>
           </DialogHeader>
           <div className="text-center py-6 space-y-6">
             <div className="space-y-2">
-              <p className="text-lg text-white/70">Entrega el móvil a:</p>
+              <p className="text-lg text-white/70">Toca realizar la prueba a:</p>
               <p className="text-4xl font-black text-white bg-white/5 p-4 rounded-2xl border border-white/10 shadow-2xl">
                 {currentPlayer?.name}
               </p>
-              <p className="text-red-400 font-bold animate-pulse text-sm uppercase tracking-widest mt-4">¡Y NO MIRES!</p>
+              <p className="text-red-400 font-bold animate-pulse text-sm uppercase tracking-widest mt-4">¡QUE LOS DEMÁS NO MIREN LA PANTALLA!</p>
             </div>
 
             <div className="relative group">
@@ -1109,117 +1195,261 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
       {/* NEW: Impostor Anti-Spoiler Warning */}
       <Dialog open={gameState.showImpostorWarning}>
-        <DialogContent className="sm:max-w-md bg-gradient-to-r from-red-900/80 to-red-800/80 border-red-500/50 text-white z-[60]" aria-describedby={undefined}>
+        <DialogContent className="sm:max-w-md bg-slate-900/95 backdrop-blur-2xl border-red-500/50 text-white z-[80]" aria-describedby={undefined}>
           <DialogHeader>
-            <DialogTitle className="text-2xl font-black text-center text-red-500 flex items-center justify-center gap-2">
-              <AlertCircle /> ATENCIÓN CAPITÁN
+            <DialogTitle className="text-3xl font-black text-center text-red-500 flex items-center justify-center gap-3 uppercase tracking-tighter">
+              ⚠️ ACCESO RESTRINGIDO
             </DialogTitle>
           </DialogHeader>
-          <div className="text-center py-6 space-y-4">
-            <p className="text-lg">Por favor, pasa el móvil a:</p>
-            <p className="text-4xl font-black text-white bg-gradient-to-r from-slate-800/80 to-slate-700/80 p-4 rounded-xl border border-red-500/30">
-              {players.find(p => p.id === gameState.impostorData?.impostorPlayerId)?.name || currentPlayer?.name}
-            </p>
-            <p className="text-sm text-red-200 mt-4">¡Que nadie más mire la pantalla!</p>
+          <div className="text-center py-8 space-y-8">
+            <div className="space-y-2">
+              <p className="text-lg text-white/60 font-bold uppercase tracking-widest">Entrega el dispositivo a:</p>
+              <p className="text-5xl font-black text-white bg-red-500/10 p-6 rounded-[32px] border border-red-500/30 shadow-[0_0_30px_rgba(239,68,68,0.2)]">
+                {players.find(p => p.id === gameState.impostorData?.impostorPlayerId)?.name || currentPlayer?.name}
+              </p>
+            </div>
+            
+            <div className="bg-slate-800/50 p-4 rounded-2xl border border-white/5">
+              <p className="text-red-400 font-black animate-pulse text-sm uppercase tracking-[0.3em]">¡CAPITÁN! NO MIRES LA PANTALLA</p>
+            </div>
+
+            <div className="relative">
+              <motion.button
+                onMouseDown={() => setGameState(prev => ({ ...prev, showImpostorWord: true }))}
+                onMouseUp={() => setGameState(prev => ({ ...prev, showImpostorWord: false }))}
+                onTouchStart={() => setGameState(prev => ({ ...prev, showImpostorWord: true }))}
+                onTouchEnd={() => setGameState(prev => ({ ...prev, showImpostorWord: false }))}
+                className="w-full h-48 rounded-[40px] bg-gradient-to-br from-red-500/20 to-slate-900 border-2 border-dashed border-red-500/40 flex flex-col items-center justify-center gap-4 transition-all active:scale-95 active:bg-red-500/30 overflow-hidden shadow-2xl"
+              >
+                <AnimatePresence mode="wait">
+                  {!gameState.showImpostorWord ? (
+                    <motion.div
+                      key="locked"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="flex flex-col items-center gap-3"
+                    >
+                      <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center border border-red-500/30">
+                        <EyeOff className="w-8 h-8 text-red-500" />
+                      </div>
+                      <p className="font-black text-red-500 uppercase tracking-[0.2em] text-[10px]">MANTÉN PULSADO PARA REVELAR</p>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="revealed"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="flex flex-col items-center gap-4 px-6 text-center"
+                    >
+                      <p className="text-xs font-black text-red-400 uppercase tracking-widest mb-1">Tu Identidad Secreta</p>
+                      <div className="p-4 bg-white/5 rounded-2xl border border-white/10 w-full">
+                        <ImpostorRound
+                          players={players}
+                          impostorPlayerId={gameState.impostorData?.impostorPlayerId || ''}
+                          realQuestion={gameState.impostorData?.currentImpostorReal || ''}
+                          impostorQuestion={gameState.impostorData?.currentImpostorFake || ''}
+                          onComplete={(impostorCaught, votedPlayerId) => {
+                            // Handle completion logic
+                            if (impostorCaught) {
+                              players.forEach(p => {
+                                if (p.id !== gameState.impostorData?.impostorPlayerId) addScore(p.id, 20);
+                              });
+                            } else {
+                              addScore(gameState.impostorData?.impostorPlayerId || '', 50);
+                            }
+                            setGameState(prev => ({ ...prev, showImpostorWarning: false, showImpostorWord: false }));
+                            handleNext();
+                          }}
+                          onExit={() => {
+                            setGameState(prev => ({ ...prev, showImpostorWarning: false, showImpostorWord: false }));
+                          }}
+                        />
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.button>
+            </div>
           </div>
           <Button
-            className="w-full h-14 text-lg font-bold bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 border border-white/10 backdrop-blur-sm"
+            className="w-full h-16 text-lg font-black bg-white text-black hover:bg-white/90 rounded-[24px] shadow-xl transition-all"
             onClick={() => {
               setGameState(prev => ({
                 ...prev,
                 showImpostorWarning: false,
-                showImpostor: true, // proceed to actual logic
-                currentImpostorReal: prev.impostorData?.currentImpostorReal,
-                currentImpostorFake: prev.impostorData?.currentImpostorFake,
-                impostorPlayerId: prev.impostorData?.impostorPlayerId,
+                showImpostor: false, // Already revealed via long press
               }));
+              handleNext();
             }}
           >
-            Ya lo tengo yo, mostrar secreto
+            ENTENDIDO, CONTINUAR ⏭
+          </Button>
+        </DialogContent>
+      </Dialog>
+
+      {/* NEW: Mimica Anti-Spoiler Warning */}
+      <Dialog open={gameState.showMimicaReveal}>
+        <DialogContent className="sm:max-w-md bg-slate-900/95 backdrop-blur-2xl border-purple-500/50 text-white z-[80]" aria-describedby={undefined}>
+          <DialogHeader>
+            <DialogTitle className="text-3xl font-black text-center text-purple-400 flex items-center justify-center gap-3 uppercase tracking-tighter">
+              🎭 ACCIÓN SECRETA
+            </DialogTitle>
+          </DialogHeader>
+          <div className="text-center py-8 space-y-8">
+            <div className="space-y-2">
+              <p className="text-lg text-white/60 font-bold uppercase tracking-widest">Entrega el dispositivo a:</p>
+              <p className="text-5xl font-black text-white bg-purple-500/10 p-6 rounded-[32px] border border-purple-500/30 shadow-[0_0_30px_rgba(168,85,247,0.2)]">
+                {currentPlayer?.name}
+              </p>
+            </div>
+            
+            <div className="bg-slate-800/50 p-4 rounded-2xl border border-white/5">
+              <p className="text-purple-400 font-black animate-pulse text-sm uppercase tracking-[0.3em]">¡CAPITÁN! NO MIRES LA PANTALLA</p>
+            </div>
+
+            <div className="relative">
+              <motion.button
+                onMouseDown={() => setGameState(prev => ({ ...prev, showMimica: true }))}
+                onMouseUp={() => setGameState(prev => ({ ...prev, showMimica: false }))}
+                onTouchStart={() => setGameState(prev => ({ ...prev, showMimica: true }))}
+                onTouchEnd={() => setGameState(prev => ({ ...prev, showMimica: false }))}
+                className="w-full h-48 rounded-[40px] bg-gradient-to-br from-purple-500/20 to-slate-900 border-2 border-dashed border-purple-500/40 flex flex-col items-center justify-center gap-4 transition-all active:scale-95 active:bg-purple-500/30 overflow-hidden shadow-2xl"
+              >
+                <AnimatePresence mode="wait">
+                  {!gameState.showMimica ? (
+                    <motion.div
+                      key="locked"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="flex flex-col items-center gap-3"
+                    >
+                      <div className="w-16 h-16 rounded-full bg-purple-500/20 flex items-center justify-center border border-purple-500/30">
+                        <EyeOff className="w-8 h-8 text-purple-400" />
+                      </div>
+                      <p className="font-black text-purple-400 uppercase tracking-[0.2em] text-[10px]">MANTÉN PULSADO PARA VER EL RETO</p>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="revealed"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="flex flex-col items-center gap-4 px-6 text-center"
+                    >
+                      <p className="text-xs font-black text-purple-300 uppercase tracking-widest mb-1">Tu Reto de Mímica</p>
+                      <div className="p-6 bg-white/5 rounded-2xl border border-white/10 w-full">
+                        <p className="text-2xl font-black text-white drop-shadow-lg">{gameState.currentMimicaText}</p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.button>
+            </div>
+          </div>
+          <Button
+            className="w-full h-16 text-lg font-black bg-white text-black hover:bg-white/90 rounded-[24px] shadow-xl transition-all"
+            onClick={() => {
+              setGameState(prev => ({ ...prev, showMimicaReveal: false, showMimica: false }));
+              handleNext();
+            }}
+          >
+            LISTO, EMPEZAR 🎭
           </Button>
         </DialogContent>
       </Dialog>
 
       {/* Boca Cerrada Warning */}
       <Dialog open={gameState.showBocaCerradaWarning}>
-        <DialogContent className="sm:max-w-md bg-gradient-to-r from-orange-900/80 to-orange-800/80 border-orange-500/50 text-white z-[60]" aria-describedby={undefined}>
+        <DialogContent className="sm:max-w-md bg-slate-900/95 backdrop-blur-2xl border-orange-500/50 text-white z-[80]" aria-describedby={undefined}>
           <DialogHeader>
-            <DialogTitle className="text-2xl font-black text-center text-orange-500 flex items-center justify-center gap-2">
-              <AlertCircle /> ATENCIÓN CAPITÁN
+            <DialogTitle className="text-3xl font-black text-center text-orange-400 flex items-center justify-center gap-3 uppercase tracking-tighter">
+              🙊 BOCA CERRADA
             </DialogTitle>
           </DialogHeader>
-          <div className="text-center py-6 space-y-4">
-            <p className="text-lg">Por favor, pasa el móvil a:</p>
-            <p className="text-4xl font-black text-white bg-gradient-to-r from-slate-800/80 to-slate-700/80 p-4 rounded-xl border border-orange-500/30">
-              {gameState.bocaCerradaData?.playerName || currentPlayer?.name}
-            </p>
-            <p className="text-sm text-orange-200 mt-4">¡Tu reto de BOCA CERRADA está a punto de empezar!</p>
-          </div>
-          <Button
-            className="w-full h-14 text-lg font-bold bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 border border-white/10 backdrop-blur-sm"
-            onClick={() => {
-              setGameState(prev => ({
-                ...prev,
-                showBocaCerradaWarning: false,
-                showBocaCerrada: true // proceed to actual logic
-              }));
-            }}
-          >
-            Ya lo tengo yo, mostrar reto
-          </Button>
-        </DialogContent>
-      </Dialog>
-
-      {/* Boca Cerrada Reto Content */}
-      <Dialog open={gameState.showBocaCerrada}>
-        <DialogContent className="sm:max-w-md bg-gradient-to-r from-orange-900/80 to-orange-800/80 border-orange-500/50 text-white z-[60]" aria-describedby={undefined}>
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-black text-center text-orange-500">
-              BOCA CERRADA 🤐
-            </DialogTitle>
-          </DialogHeader>
-          <div className="text-center py-6">
-            <p className="text-lg mb-4 text-orange-100">
-              Intenta que el grupo adivine una palabra o concepto.
-            </p>
-            <div className="bg-gradient-to-r from-slate-800/80 to-slate-700/80 p-4 rounded-xl border border-orange-500/30 text-xl font-bold text-white mb-4">
-              ¡REGLAS!<br /><br />
-              ❌ No puedes abrir la boca<br />
-              ❌ No puedes usar las manos<br />
-              ✅ Solo sonidos nasales (Mmm, mmmm)
+          <div className="text-center py-8 space-y-8">
+            <div className="space-y-2">
+              <p className="text-lg text-white/60 font-bold uppercase tracking-widest">Entrega el dispositivo a:</p>
+              <p className="text-5xl font-black text-white bg-orange-500/10 p-6 rounded-[32px] border border-orange-500/30 shadow-[0_0_30px_rgba(249,115,22,0.2)]">
+                {gameState.bocaCerradaData?.playerName || currentPlayer?.name}
+              </p>
             </div>
-            <p className="text-sm text-orange-200 uppercase font-bold text-center mt-2 animate-pulse">
-              🍺 SI NADIE ACIERTA, BEBES 3 TRAGOS
-            </p>
+            
+            <div className="bg-slate-800/50 p-4 rounded-2xl border border-white/5">
+              <p className="text-orange-400 font-black animate-pulse text-sm uppercase tracking-[0.3em]">¡CAPITÁN! NO MIRES LA PANTALLA</p>
+            </div>
+
+            <div className="relative">
+              <motion.button
+                onMouseDown={() => setGameState(prev => ({ ...prev, showBocaCerrada: true }))}
+                onMouseUp={() => setGameState(prev => ({ ...prev, showBocaCerrada: false }))}
+                onTouchStart={() => setGameState(prev => ({ ...prev, showBocaCerrada: true }))}
+                onTouchEnd={() => setGameState(prev => ({ ...prev, showBocaCerrada: false }))}
+                className="w-full h-48 rounded-[40px] bg-gradient-to-br from-orange-500/20 to-slate-900 border-2 border-dashed border-orange-500/40 flex flex-col items-center justify-center gap-4 transition-all active:scale-95 active:bg-orange-500/30 overflow-hidden shadow-2xl"
+              >
+                <AnimatePresence mode="wait">
+                  {!gameState.showBocaCerrada ? (
+                    <motion.div
+                      key="locked"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="flex flex-col items-center gap-3"
+                    >
+                      <div className="w-16 h-16 rounded-full bg-orange-500/20 flex items-center justify-center border border-orange-500/30">
+                        <EyeOff className="w-8 h-8 text-orange-400" />
+                      </div>
+                      <p className="font-black text-orange-400 uppercase tracking-[0.2em] text-[10px]">MANTÉN PULSADO PARA VER EL RETO</p>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="revealed"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="flex flex-col items-center gap-4 px-6 text-center"
+                    >
+                      <p className="text-xs font-black text-orange-300 uppercase tracking-widest mb-1">Tu Reto Boca Cerrada</p>
+                      <div className="p-6 bg-white/5 rounded-2xl border border-white/10 w-full">
+                        <p className="text-2xl font-black text-white drop-shadow-lg">{gameState.currentBocaCerradaText}</p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.button>
+            </div>
           </div>
           <Button
-            className="w-full h-14 text-lg font-bold bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 border border-white/10 backdrop-blur-sm"
+            className="w-full h-16 text-lg font-black bg-white text-black hover:bg-white/90 rounded-[24px] shadow-xl transition-all"
             onClick={() => {
-              setGameState(prev => ({ ...prev, showBocaCerrada: false }));
-              handleNext(); // Skip to next card after challenge
+              setGameState(prev => ({ ...prev, showBocaCerradaWarning: false, showBocaCerrada: false }));
+              handleNext();
             }}
           >
-            Prueba Completada ⏭
+            LISTO, EMPEZAR 🙊
           </Button>
         </DialogContent>
       </Dialog>
 
       {/* Virus Cycle Notification */}
       <Dialog open={gameState.showVirusCycleAlert}>
-        <DialogContent className="sm:max-w-md bg-gradient-to-r from-purple-900/80 to-purple-800/80 border-purple-500/50 text-white z-[70]" aria-describedby={undefined}>
+        <DialogContent className="sm:max-w-md bg-slate-900/95 backdrop-blur-2xl border-purple-500/50 text-white z-[70]" aria-describedby={undefined}>
           <DialogHeader>
-            <DialogTitle className="text-2xl font-black text-center text-purple-400">
+            <DialogTitle className="text-3xl font-black text-center text-purple-400 uppercase tracking-tighter">
               {gameState.virusCycleData?.title}
             </DialogTitle>
           </DialogHeader>
-          <div className="text-center py-6">
-            <p className="text-lg">{gameState.virusCycleData?.message}</p>
+          <div className="text-center py-8">
+            <p className="text-xl font-bold text-white/90">{gameState.virusCycleData?.message}</p>
           </div>
           <Button
-            className="w-full h-12 font-bold bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 border border-white/10 backdrop-blur-sm"
-            onClick={() => setGameState(prev => ({ ...prev, showVirusCycleAlert: false }))}
+            className="w-full h-16 text-lg font-black bg-purple-600 hover:bg-purple-500 text-white rounded-2xl shadow-xl transition-all"
+            onClick={() => {
+              setGameState(prev => ({ ...prev, showVirusCycleAlert: false }));
+              // Ensure we advance the card after closing the global cycle alert
+              performTurnAdvance();
+            }}
           >
-            Continuar
+            ENTENDIDO
           </Button>
         </DialogContent>
       </Dialog>
@@ -1238,12 +1468,12 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         )}
 
         {/* Active Rule Display */}
-        {gameState.currentNorma && (
+        {(gameState.currentNorma || gameState.showNormaGlobal) && (
           <div className="mb-6 mx-auto max-w-sm z-10 pointer-events-none relative">
-            <div className="bg-gradient-to-r from-yellow-900/40 to-amber-900/40 border border-yellow-500/50 backdrop-blur-md rounded-xl p-3 text-center shadow-[0_0_15px_rgba(234,179,8,0.2)] animate-pulse">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-yellow-500 font-bold mb-1">📜 NORMA ACTIVA</p>
-              <p className="text-sm text-yellow-100 font-medium leading-tight">
-                {gameState.currentNorma}
+            <div className="bg-gradient-to-r from-orange-600/40 to-orange-900/40 border-2 border-orange-500 backdrop-blur-md rounded-2xl p-4 text-center shadow-[0_0_20px_rgba(249,115,22,0.3)] animate-pulse">
+              <p className="text-[10px] uppercase tracking-[0.3em] text-orange-400 font-black mb-1">📜 NORMA GLOBAL ACTIVA</p>
+              <p className="text-base text-white font-black leading-tight uppercase tracking-tight">
+                {gameState.currentNorma || "¡Preparando nueva norma!"}
               </p>
             </div>
           </div>
@@ -1251,59 +1481,81 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
         {/* CAPTAIN ACTION PANEL - Give/Take XP in real-time */}
         {(!gameState.showTrivia && !gameState.showVoting && !gameState.showDuel && !gameState.showImpostor && !gameState.showMimica && !gameState.showBocaCerrada && !gameState.showImpostorWord && mode !== 'cultura' && mode !== 'trivia_futbol') && (
-          <div className="w-full max-w-sm mt-4 mb-2 z-10 flex flex-col items-center">
-            <p className="text-[10px] text-white/60 uppercase font-bold tracking-widest mb-2 opacity-70">Panel del Capitán</p>
-            <div className="flex flex-wrap justify-center gap-3">
+          <div className="w-full max-w-md mt-4 mb-2 z-10 flex flex-col items-center bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-[32px] p-4 shadow-2xl">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+              <p className="text-[10px] text-amber-400/80 uppercase font-black tracking-[0.2em]">Panel de Control del Capitán</p>
+            </div>
+            <div className="flex flex-wrap justify-center gap-4">
               {players.map(p => {
-                const captainXp = Math.min(50, 10 + Math.floor(gameState.round / 2) * 5);
+                const isCaptain = gameState.captainId === p.id;
+                const baseXP = 10 + Math.floor(gameState.round / 2) * 5;
+                const rewardXP = Math.min(50, baseXP);
+                const penaltyXP = Math.max(5, Math.floor(rewardXP / 2));
+                
                 return (
-                  <div key={p.id} className="flex flex-col items-center gap-1">
-                    {/* Avatar bubble */}
-                    <div className={`relative w-12 h-12 rounded-full border-2 shadow-lg overflow-hidden
-                      ${currentPlayer?.id === p.id ? 'border-yellow-400 ring-2 ring-yellow-400/40 scale-110' : 'border-white/10'}`}>
-                      {p.avatar_url ? (
-                        <img src={p.avatar_url} className="w-full h-full object-cover" alt={p.name} />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-sm font-black text-white/90">
-                          {p.name.substring(0, 2).toUpperCase()}
-                        </div>
-                      )}
+                  <div key={p.id} className="flex flex-col items-center gap-2 group/player">
+                    {/* Avatar with status */}
+                    <div className="relative">
+                      <div className={`w-14 h-14 rounded-2xl border-2 transition-all duration-300 overflow-hidden
+                        ${currentPlayer?.id === p.id ? 'border-primary ring-4 ring-primary/20 scale-105 shadow-lg shadow-primary/20' : 'border-white/10 opacity-80 group-hover/player:opacity-100 group-hover/player:border-white/30'}`}>
+                        {p.avatar_url ? (
+                          <img src={p.avatar_url} className="w-full h-full object-cover" alt={p.name} />
+                        ) : (
+                          <div className="w-full h-full bg-slate-800 flex items-center justify-center text-sm font-black text-white/40">
+                            {p.name.substring(0, 2).toUpperCase()}
+                          </div>
+                        )}
+                        {isCaptain && (
+                          <div className="absolute top-0 right-0 p-1 bg-amber-500 rounded-bl-lg z-10 shadow-md">
+                            <Crown className="w-2.5 h-2.5 text-black" />
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Floating XP adjustment buttons */}
+                      <div className="absolute -bottom-2 -right-2 flex flex-col gap-1.5">
+                        <motion.button
+                          whileTap={{ scale: 0.8 }}
+                          onClick={() => {
+                            if (isMultiplayer && !isHost) return;
+                            handleAdjustXP(p.id, rewardXP);
+                            toast.success(`+${rewardXP} XP para ${p.name}! 🔥`, { 
+                              className: "bg-slate-900 border-emerald-500/50 text-emerald-400 font-bold" 
+                            });
+                          }}
+                          className="w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center shadow-lg hover:bg-emerald-400 transition-colors"
+                        >
+                          <Plus className="w-4 h-4" />
+                        </motion.button>
+                        <motion.button
+                          whileTap={{ scale: 0.8 }}
+                          onClick={() => {
+                            if (isMultiplayer && !isHost) return;
+                            handleAdjustXP(p.id, -penaltyXP);
+                            toast.error(`-${penaltyXP} XP para ${p.name} ❌`, { 
+                              className: "bg-slate-900 border-red-500/50 text-red-400 font-bold" 
+                            });
+                          }}
+                          className="w-7 h-7 rounded-lg bg-red-500 text-white flex items-center justify-center shadow-lg hover:bg-red-400 transition-colors"
+                        >
+                          <Minus className="w-4 h-4" />
+                        </motion.button>
+                      </div>
                     </div>
-                    <span className="text-[9px] text-white/60 truncate max-w-[48px] text-center">{p.name}</span>
-                    {/* +/- buttons */}
-                    <div className="flex gap-1">
-                      {/* Penalty button */}
-                      <motion.button
-                        whileTap={{ scale: 0.85 }}
-                        onClick={() => {
-                          if (isMultiplayer && !isHost) return;
-                          const penalty = Math.max(5, Math.floor(captainXp / 2));
-                          addScore(p.id, -penalty);
-                          toast(`❌ -${penalty} XP para ${p.name}`, { duration: 1200, position: 'top-center' });
-                        }}
-                        className="w-6 h-6 rounded-full bg-red-500/80 hover:bg-red-500 border border-red-400/50 flex items-center justify-center text-white font-black text-sm shadow-[0_0_8px_rgba(239,68,68,0.4)] transition-all"
-                      >
-                        −
-                      </motion.button>
-                      {/* Reward button */}
-                      <motion.button
-                        whileTap={{ scale: 0.85 }}
-                        onClick={() => {
-                          if (isMultiplayer && !isHost) return;
-                          addScore(p.id, captainXp);
-                          setGamesWon(prev => ({ ...prev, [p.id]: (prev[p.id] || 0) + 1 }));
-                          toast.success(`+${captainXp} XP para ${p.name}! 🔥`, { duration: 1200, position: 'top-center' });
-                        }}
-                        className="w-6 h-6 rounded-full bg-emerald-500/80 hover:bg-emerald-500 border border-emerald-400/50 flex items-center justify-center text-white font-black text-sm shadow-[0_0_8px_rgba(16,185,129,0.4)] transition-all"
-                      >
-                        +
-                      </motion.button>
-                    </div>
+                    <span className={`text-[10px] font-black uppercase tracking-tight truncate max-w-[60px] 
+                      ${currentPlayer?.id === p.id ? 'text-primary' : (isCaptain ? 'text-amber-400' : 'text-white/40')}`}>
+                      {p.name}
+                    </span>
                   </div>
                 );
               })}
             </div>
-            <p className="text-[10px] text-white/60 mt-2 text-center leading-tight">Verde = +XP por cumplir · Rojo = −XP por fallar</p>
+            <div className="mt-4 pt-3 border-t border-white/5 w-full text-center">
+              <p className="text-[9px] text-white/30 uppercase font-bold tracking-widest">
+                Recompensa actual: <span className="text-emerald-400">+{Math.min(50, 10 + Math.floor(gameState.round / 2) * 5)} XP</span>
+              </p>
+            </div>
           </div>
         )}
 
@@ -1573,9 +1825,9 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         {gameState.showImpostorWord && gameState.currentImpostorWord && (
           <div className="absolute inset-0 z-20 bg-gradient-to-br from-slate-950/95 via-red-950/80 to-slate-950/95 backdrop-blur-xl flex items-center justify-center p-6 text-center text-white">
             <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-sm">
-              <h2 className="text-3xl font-black mb-2 text-red-400">🕵️ Palabra Impostor</h2>
+              <h2 className="text-3xl font-black mb-2 text-red-400">🕵️ ¡Eres el Impostor!</h2>
               <p className="text-base mb-6 text-red-200/80">
-                Pasa el móvil a los <strong className="text-white">NO impostores</strong>. ¡El impostor NO debe ver esto!
+                <strong className="text-white text-xl">¡{currentPlayer?.name}!</strong> Te ha tocado. Mira tu palabra secreta y realízala para que los demás la adivinen.
               </p>
 
               {/* Hold to reveal */}
@@ -1600,7 +1852,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                 )}
               </div>
 
-              <p className="text-xs text-red-300/60 mb-6">Solo los jugadores normales deben ver la palabra. El impostor intentará adivinarla.</p>
+              <p className="text-xs text-red-300/60 mb-6">Asegúrate de que nadie más vea la pantalla.</p>
 
               <Button
                 className="w-full h-12 font-bold bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 border-0 shadow-[0_8px_25px_rgba(239,68,68,0.4)]"
@@ -1631,42 +1883,49 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           </div>
         )}
 
-        {/* Virus Alert Overlay - Increased z-index and fixed positioning */}
+        {/* Virus Alert Overlay - Smaller & Fixed logic */}
         {gameState.showVirusAlert && gameState.virusAlertData && (
-          <div className="fixed inset-0 z-[100] bg-gradient-to-r from-slate-900/80 to-slate-800/80 flex items-center justify-center p-6 text-center text-white animate-in fade-in duration-300">
+          <div className="fixed inset-0 z-[100] bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4 text-center text-white animate-in fade-in duration-300">
             <motion.div
-              initial={{ scale: 0.5, opacity: 0 }}
+              initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="max-w-md w-full bg-slate-900 border-2 border-green-500 p-6 rounded-xl shadow-[0_0_100px_rgba(34,197,94,0.6)] relative overflow-hidden"
+              className="max-w-xs w-full bg-slate-900 border-2 border-green-500 p-5 rounded-[2.5rem] shadow-[0_0_50px_rgba(34,197,94,0.4)] relative overflow-hidden"
             >
-              {/* Background scanning effect */}
-              <div className="absolute inset-0 bg-[linear-gradient(transparent_0%,rgba(34,197,94,0.1)_50%,transparent_100%)] animate-scan pointer-events-none" style={{ backgroundSize: '100% 200%' }}></div>
-
-              <div className="relative z-10">
-                <div className="flex justify-center mb-6">
-                  <div className="p-4 bg-green-500/20 rounded-full animate-pulse ring-4 ring-green-500/30">
-                    <span className="text-5xl">🦠</span>
+              <div className="relative z-10 space-y-4">
+                <div className="flex justify-center">
+                  <div className="w-14 h-14 bg-green-500/20 rounded-full flex items-center justify-center border border-green-500/30 animate-pulse">
+                    <Zap className="w-7 h-7 text-green-500" />
                   </div>
                 </div>
 
-                <h2 className="text-4xl font-black mb-2 text-green-400 font-mono tracking-tighter shadow-green-glow">¡VIRUS DETECTADO!</h2>
+                <div className="space-y-1">
+                  <h2 className="text-lg font-black text-green-500 tracking-tighter uppercase">¡VIRUS DETECTADO!</h2>
+                  <div className="h-px w-8 bg-green-500/30 mx-auto" />
+                </div>
 
-                <div className="my-6 p-6 bg-black/60 rounded-xl border border-green-500/50 backdrop-blur-sm">
-                  <p className="text-xs text-green-400/80 mb-1 uppercase tracking-widest font-bold">Infectado</p>
-                  <p className="text-3xl font-black text-white mb-6 tracking-wide">{gameState.virusAlertData.player.name}</p>
-
-                  <div className="h-px bg-gradient-to-r from-transparent via-green-500/50 to-transparent w-full mb-6"></div>
-
-                  <p className="text-xs text-green-400/80 mb-1 uppercase tracking-widest font-bold">Efecto</p>
-                  <p className="text-2xl font-bold text-green-300 leading-tight mb-2">{gameState.virusAlertData.virus.name}</p>
-                  <p className="text-sm text-gray-300 font-medium">{gameState.virusAlertData.virus.description}</p>
+                <div className="bg-black/40 p-4 rounded-2xl border border-white/5 space-y-3">
+                  <div>
+                    <p className="text-[9px] text-white/40 font-black uppercase tracking-widest mb-0.5">Infectado</p>
+                    <p className="text-xl font-black text-white leading-tight">{gameState.virusAlertData.player.name}</p>
+                  </div>
+                  
+                  <div className="pt-3 border-t border-white/5">
+                    <p className="text-[9px] text-green-400 font-black uppercase tracking-widest mb-0.5">Efecto</p>
+                    <p className="text-base font-black text-white uppercase leading-tight">
+                      {gameState.virusAlertData.virus.virusName || gameState.virusAlertData.virus.name}
+                    </p>
+                    <p className="text-[11px] text-white/60 font-medium leading-snug mt-1">
+                      {gameState.virusAlertData.virus.virusDescription || gameState.virusAlertData.virus.description}
+                    </p>
+                  </div>
                 </div>
 
                 <Button
-                  className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-6 text-xl shadow-[0_0_20px_rgba(34,197,94,0.4)] transition-all hover:scale-[1.02]"
+                  className="w-full bg-green-600 hover:bg-green-500 text-white font-black py-3 text-base rounded-xl shadow-lg transition-all active:scale-95"
                   onClick={() => {
                     setGameState((prev: any) => ({ ...prev, showVirusAlert: false, virusAlertData: null }));
-                    handleNext();
+                    // After closing, we advance to the next card using the non-recursive helper
+                    performTurnAdvance();
                   }}
                 >
                   ACEPTAR DESTINO
@@ -1683,6 +1942,10 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         {gameState.showCaptainPass && (
           <div className="absolute inset-0 z-30 bg-gradient-to-r from-slate-900/80 to-slate-800/80 overflow-y-auto">
             <CaptainPassScreen
+              captainName={players.find(p => p.id === gameState.captainId)?.name || 'Capitán'}
+              targetPlayerName={currentPlayer?.name || 'Siguiente Jugador'}
+              isCaptainTurn={currentPlayer?.id === gameState.captainId}
+              challengePreview={currentText}
               onComplete={() => {
                 setGameState((prev: any) => ({ ...prev, showCaptainPass: false }));
                 handleNext();

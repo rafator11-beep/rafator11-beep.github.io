@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Users, Trophy, Target, Info, Zap } from 'lucide-react';
+import { ArrowLeft, Users, Trophy, Target, Info, Zap, Monitor } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useGameContext } from '@/contexts/GameContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -42,6 +42,20 @@ export function ArcadeOnlineHub({ onReturn }: ArcadeOnlineHubProps) {
     const [selectedGame, setSelectedGame] = useState<string | null>(null);
     const [matchRoomId, setMatchRoomId] = useState<string | null>(null);
     const [myPresenceId, setMyPresenceId] = useState<string | null>(null);
+    const [screencastActive, setScreencastActive] = useState(false);
+
+    const handleScreenShare = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+            setScreencastActive(true);
+            toast.success('¡Arcade proyectado! Disfruta en tu TV.');
+            stream.getVideoTracks()[0].onended = () => {
+                setScreencastActive(false);
+            };
+        } catch {
+            toast.error('No se pudo iniciar la proyección.');
+        }
+    };
 
     // Real-time Matchmaking with Supabase Presence
     useEffect(() => {
@@ -60,6 +74,13 @@ export function ArcadeOnlineHub({ onReturn }: ArcadeOnlineHubProps) {
             },
         });
 
+        // Bot timeout logic
+        const botTimer = setTimeout(() => {
+            setMatchRoomId(`bot_${selectedGame}_${presenceId}`);
+            setView('playing');
+            toast.info(`¡Modo Bot activado! Jugando contra la CPU.`);
+        }, 15000);
+
         channel
             .on('presence', { event: 'sync' }, () => {
                 const state = channel.presenceState();
@@ -75,6 +96,7 @@ export function ArcadeOnlineHub({ onReturn }: ArcadeOnlineHubProps) {
                     const sortedIds = [presenceId, opponentId].sort();
                     const roomId = `arcade_${selectedGame}_${sortedIds[0]}_${sortedIds[1]}`;
                     
+                    clearTimeout(botTimer);
                     setMatchRoomId(roomId);
                     setView('playing');
                     toast.success(`¡Rival encontrado: ${opponentData[0]?.name || 'Oponente'}!`);
@@ -91,6 +113,7 @@ export function ArcadeOnlineHub({ onReturn }: ArcadeOnlineHubProps) {
             });
 
         return () => {
+            clearTimeout(botTimer);
             supabase.removeChannel(channel);
         };
     }, [view, selectedGame, localPlayerId, localPlayer?.name]);
@@ -184,6 +207,14 @@ export function ArcadeOnlineHub({ onReturn }: ArcadeOnlineHubProps) {
                             </p>
                         </div>
                     </div>
+                    <Button
+                        variant="outline"
+                        onClick={handleScreenShare}
+                        className={`h-12 px-6 rounded-2xl border-white/10 font-black transition-all ${screencastActive ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 text-slate-400 hover:text-white'}`}
+                    >
+                        <Monitor className={`w-5 h-5 mr-3 ${screencastActive ? 'animate-pulse' : ''}`} />
+                        {screencastActive ? 'EN TV' : 'PROYECTAR'}
+                    </Button>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

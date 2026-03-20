@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useGameContext } from '@/contexts/GameContext';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { upsertLocalRanking } from '@/utils/localRanking';
 
 interface ArcadeTicTacToeProps {
     roomId: string;
@@ -22,6 +23,7 @@ export function ArcadeTicTacToe({ roomId, playerId, onClose }: ArcadeTicTacToePr
 
     const [phase, setPhase] = useState<GamePhase>('waiting_sync');
     const [remotePlayerReady, setRemotePlayerReady] = useState(false);
+    const isBotMatch = roomId.startsWith('bot_');
 
     const [board, setBoard] = useState<Board>(Array(9).fill(null));
     const [mySymbol, setMySymbol] = useState<PlayerSymbol | null>(null);
@@ -85,19 +87,28 @@ export function ArcadeTicTacToe({ roomId, playerId, onClose }: ArcadeTicTacToePr
             })
             .subscribe((status) => {
                 if (status === 'SUBSCRIBED') {
-                    channel.send({
-                        type: 'broadcast',
-                        event: 'ready',
-                        payload: { playerId: effectivePlayerId }
-                    });
+                    if (isBotMatch) {
+                        // Bot logic
+                        setTimeout(() => {
+                            setRemotePlayerReady(true);
+                            setMySymbol('X');
+                            startGame(effectivePlayerId, 'X');
+                        }, 1000);
+                    } else {
+                        channel.send({
+                            type: 'broadcast',
+                            event: 'ready',
+                            payload: { playerId: effectivePlayerId }
+                        });
+                    }
                 }
             });
 
         return () => {
             if (timerRef.current) clearInterval(timerRef.current);
-            supabase.removeChannel(channel);
+            if (!isBotMatch) supabase.removeChannel(channel);
         };
-    }, [roomId, effectivePlayerId, mySymbol]);
+    }, [roomId, effectivePlayerId, mySymbol, isBotMatch]);
 
     const startGame = (starterId: string, assignedSymbol: PlayerSymbol) => {
         setBoard(Array(9).fill(null));
@@ -111,7 +122,7 @@ export function ArcadeTicTacToe({ roomId, playerId, onClose }: ArcadeTicTacToePr
         if (timerRef.current) clearInterval(timerRef.current);
         setTimeLeft(3);
 
-        if (whoId === localPlayerId) {
+        if (whoId === effectivePlayerId) {
             let tl = 3;
             timerRef.current = setInterval(() => {
                 tl--;
@@ -144,15 +155,29 @@ export function ArcadeTicTacToe({ roomId, playerId, onClose }: ArcadeTicTacToePr
         });
     };
 
+    // Bot move simulation
+    useEffect(() => {
+        if (isBotMatch && phase === 'playing' && currentTurnStr !== effectivePlayerId && !winner) {
+            const timer = setTimeout(() => {
+                const emptyCells = board.map((c, i) => c === null ? i : -1).filter(i => i !== -1);
+                if (emptyCells.length > 0) {
+                    const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                    handleRemoteMove(randomCell, mySymbol === 'X' ? 'O' : 'X', effectivePlayerId);
+                }
+            }, 1000 + Math.random() * 1000); // 1-2s bot delay
+            return () => clearTimeout(timer);
+        }
+    }, [isBotMatch, phase, currentTurnStr, board, winner, effectivePlayerId, mySymbol]);
+
     const handleCellClick = (index: number) => {
         if (phase !== 'playing') return;
-        if (currentTurnStr !== localPlayerId) return;
+        if (currentTurnStr !== effectivePlayerId) return;
         if (board[index] !== null) return;
 
         if (timerRef.current) clearInterval(timerRef.current);
 
         const nextTurnId = 'remote'; // We don't know remote ID easily without context, we use a placeholder 'remote' for the turn logic check. 
-        // Actually, since we sync the move, the remote will see the broadcast and set their turn to localPlayerId.
+        // Actually, since we sync the move, the remote will see the broadcast and set their turn to effectivePlayerId.
         // Wait, we need the actual remote ID. We can just say "not me".
 
         setBoard(prev => {
@@ -160,11 +185,13 @@ export function ArcadeTicTacToe({ roomId, playerId, onClose }: ArcadeTicTacToePr
             newBoard[index] = mySymbol;
 
             // Broadcast the move before checking locally (so remote gets it instantly)
-            channelRef.current?.send({
-                type: 'broadcast',
-                event: 'make_move',
-                payload: { index, symbol: mySymbol, nextTurnId: localPlayerId } // we tell them "your turn" by sending my localPlayerId so they know it's *not* my turn anymore. Usually we just toggle.
-            });
+            if (!isBotMatch) {
+                channelRef.current?.send({
+                    type: 'broadcast',
+                    event: 'make_move',
+                    payload: { index, symbol: mySymbol, nextTurnId: effectivePlayerId }
+                });
+            }
 
             checkPostMove(newBoard, 'remote', true);
             return newBoard;
@@ -190,8 +217,11 @@ export function ArcadeTicTacToe({ roomId, playerId, onClose }: ArcadeTicTacToePr
         if (foundWinner) {
             setPhase('result');
             if (foundWinner === mySymbol) {
-                setWinner(localPlayerId!);
-                if (isMyMove) toast.success("¡Victoria magistral!");
+                setWinner(effectivePlayerId);
+                if (isMyMove) {
+                    toast.success("¡Victoria magistral!");
+                    upsertLocalRanking({ playerName: localPlayer.name, scoreToAdd: 50, won: true, gameMode: 'arcade' });
+                }
             } else {
                 setWinner('remote');
                 if (!isMyMove) toast.error("Te han aplastado...");
@@ -201,8 +231,8 @@ export function ArcadeTicTacToe({ roomId, playerId, onClose }: ArcadeTicTacToePr
             setWinner('tie');
             toast("¡Empate brutal!");
         } else {
-            setCurrentTurnStr(isMyMove ? 'remote' : localPlayerId!);
-            resetTurnTimer(isMyMove ? 'remote' : localPlayerId!, mySymbol!);
+            setCurrentTurnStr(isMyMove ? 'remote' : effectivePlayerId!);
+            resetTurnTimer(isMyMove ? 'remote' : effectivePlayerId!, mySymbol!);
         }
     };
 
@@ -228,8 +258,8 @@ export function ArcadeTicTacToe({ roomId, playerId, onClose }: ArcadeTicTacToePr
                         <div className="absolute top-10 flex flex-col items-center gap-2">
                             <div className="bg-white/10 px-6 py-2 rounded-full border border-white/20 backdrop-blur-md">
                                 <span className="text-sm font-bold uppercase tracking-widest text-white/70">
-                                    Turno: <span className={currentTurnStr === localPlayerId ? 'text-green-400' : 'text-red-400'}>
-                                        {currentTurnStr === localPlayerId ? 'TU TURNO' : 'RIVAL'}
+                                    Turno: <span className={currentTurnStr === effectivePlayerId ? 'text-green-400' : 'text-red-400'}>
+                                        {currentTurnStr === effectivePlayerId ? 'TU TURNO' : 'RIVAL'}
                                     </span>
                                 </span>
                             </div>
@@ -245,12 +275,12 @@ export function ArcadeTicTacToe({ roomId, playerId, onClose }: ArcadeTicTacToePr
                         {board.map((cell, idx) => (
                             <button
                                 key={idx}
-                                disabled={phase !== 'playing' || cell !== null || currentTurnStr !== localPlayerId}
+                                disabled={phase !== 'playing' || cell !== null || currentTurnStr !== effectivePlayerId}
                                 onClick={() => handleCellClick(idx)}
                                 className={`rounded-xl bg-slate-800 flex items-center justify-center text-7xl font-black transition-all
                                     ${cell === 'X' ? 'text-blue-400 drop-shadow-[0_0_15px_rgba(96,165,250,0.8)]' : ''}
                                     ${cell === 'O' ? 'text-pink-400 drop-shadow-[0_0_15px_rgba(244,114,182,0.8)]' : ''}
-                                    ${!cell && currentTurnStr === localPlayerId && phase === 'playing' ? 'hover:bg-slate-700 cursor-pointer active:scale-95' : ''}
+                                    ${!cell && currentTurnStr === effectivePlayerId && phase === 'playing' ? 'hover:bg-slate-700 cursor-pointer active:scale-95' : ''}
                                 `}
                             >
                                 <motion.div
@@ -272,7 +302,7 @@ export function ArcadeTicTacToe({ roomId, playerId, onClose }: ArcadeTicTacToePr
                             className="absolute z-20 bg-black/80 backdrop-blur-xl border border-white/20 p-8 rounded-3xl text-center shadow-2xl"
                         >
                             <h2 className="text-4xl font-black text-white mb-2">
-                                {winner === localPlayerId ? '🏆 ¡VICTORIA! 🏆' : winner === 'tie' ? '🤝 EMPATE 🤝' : '💀 DERROTA 💀'}
+                                {winner === effectivePlayerId ? '🏆 ¡VICTORIA! 🏆' : winner === 'tie' ? '🤝 EMPATE 🤝' : '💀 DERROTA 💀'}
                             </h2>
                             <p className="text-muted-foreground mb-8 text-lg">
                                 {winner === localPlayerId ? 'No hay rival para ti en 3 en Raya.' : winner === 'tie' ? 'Defensas perfectas.' : 'Fuiste más lento o te engañaron...'}

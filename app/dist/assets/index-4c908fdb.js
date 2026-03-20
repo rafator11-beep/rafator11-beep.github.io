@@ -9574,6 +9574,30 @@ const Diamond = createLucideIcon("Diamond", [
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
+const EyeOff = createLucideIcon("EyeOff", [
+  [
+    "path",
+    {
+      d: "M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49",
+      key: "ct8e1f"
+    }
+  ],
+  ["path", { d: "M14.084 14.158a3 3 0 0 1-4.242-4.242", key: "151rxh" }],
+  [
+    "path",
+    {
+      d: "M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143",
+      key: "13bj9a"
+    }
+  ],
+  ["path", { d: "m2 2 20 20", key: "1ooewy" }]
+]);
+/**
+ * @license lucide-react v0.462.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
 const Eye = createLucideIcon("Eye", [
   [
     "path",
@@ -9600,6 +9624,23 @@ const Gamepad2 = createLucideIcon("Gamepad2", [
     {
       d: "M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z",
       key: "mfqc10"
+    }
+  ]
+]);
+/**
+ * @license lucide-react v0.462.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const Ghost = createLucideIcon("Ghost", [
+  ["path", { d: "M9 10h.01", key: "qbtxuw" }],
+  ["path", { d: "M15 10h.01", key: "1qmjsl" }],
+  [
+    "path",
+    {
+      d: "M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z",
+      key: "uwwb07"
     }
   ]
 ]);
@@ -9748,6 +9789,24 @@ const MessageCircle = createLucideIcon("MessageCircle", [
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
+const Minus = createLucideIcon("Minus", [["path", { d: "M5 12h14", key: "1ays0h" }]]);
+/**
+ * @license lucide-react v0.462.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const Monitor = createLucideIcon("Monitor", [
+  ["rect", { width: "20", height: "14", x: "2", y: "3", rx: "2", key: "48i651" }],
+  ["line", { x1: "8", x2: "16", y1: "21", y2: "21", key: "1svkeh" }],
+  ["line", { x1: "12", x2: "12", y1: "17", y2: "21", key: "vw1qmm" }]
+]);
+/**
+ * @license lucide-react v0.462.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
 const Palette = createLucideIcon("Palette", [
   ["circle", { cx: "13.5", cy: "6.5", r: ".5", fill: "currentColor", key: "1okk4w" }],
   ["circle", { cx: "17.5", cy: "10.5", r: ".5", fill: "currentColor", key: "f64h9f" }],
@@ -9882,6 +9941,22 @@ const Share2 = createLucideIcon("Share2", [
   ["circle", { cx: "18", cy: "19", r: "3", key: "1xt0gg" }],
   ["line", { x1: "8.59", x2: "15.42", y1: "13.51", y2: "17.49", key: "47mynk" }],
   ["line", { x1: "15.41", x2: "8.59", y1: "6.51", y2: "10.49", key: "1n3mei" }]
+]);
+/**
+ * @license lucide-react v0.462.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const ShieldCheck = createLucideIcon("ShieldCheck", [
+  [
+    "path",
+    {
+      d: "M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z",
+      key: "oel41y"
+    }
+  ],
+  ["path", { d: "m9 12 2 2 4-4", key: "dzmm74" }]
 ]);
 /**
  * @license lucide-react v0.462.0 - ISC
@@ -30834,7 +30909,7 @@ function AuthProvider({ children }) {
       console.warn("syncEconomy error:", err);
     }
   };
-  const syncGameEnd = async (xpGained, won) => {
+  const syncGameEnd = async (xpGained, won, gameMode = "megamix") => {
     if (!user || !isSupabaseConfigured || !profile)
       return;
     try {
@@ -30842,17 +30917,16 @@ function AuthProvider({ children }) {
       const newPlayed = (profile.games_played || 0) + 1;
       const newWins = (profile.total_wins || 0) + (won ? 1 : 0);
       const newLevel = Math.floor(newXp / 100) + 1;
-      await supabase.from("profiles").update({
+      const updateData = {
         total_xp: newXp,
         games_played: newPlayed,
         total_wins: newWins,
         level: newLevel
-      }).eq("id", user.id);
+      };
+      await supabase.from("profiles").update(updateData).eq("id", user.id);
       setProfile((prev) => prev ? {
         ...prev,
-        total_xp: newXp,
-        games_played: newPlayed,
-        total_wins: newWins
+        ...updateData
       } : null);
     } catch (err) {
       console.warn("syncGameEnd error:", err);
@@ -39497,7 +39571,7 @@ function useGame(gameId) {
 const GameContext = reactExports.createContext(null);
 function GameProvider({ children }) {
   const [gameId, setGameId] = reactExports.useState(null);
-  const [localPlayerId, setLocalPlayerId] = reactExports.useState(null);
+  const [localPlayerId2, setLocalPlayerId] = reactExports.useState(null);
   const [remoteStreams, setRemoteStreams] = reactExports.useState([]);
   const [localStream, setLocalStream] = reactExports.useState(null);
   const gameHook = useGame(gameId);
@@ -39505,7 +39579,7 @@ function GameProvider({ children }) {
     ...gameHook,
     gameId,
     setGameId,
-    localPlayerId,
+    localPlayerId: localPlayerId2,
     setLocalPlayerId,
     remoteStreams,
     setRemoteStreams,
@@ -39522,7 +39596,7 @@ function useGameContext() {
 }
 const TAB_MAPPING = {
   fiesta: ["megamix", "clasico", "yo_nunca", "yo_nunca_equipos", "picante", "espana", "votacion", "pacovers"],
-  juego: ["cultura", "trivia_futbol", "futbol", "tictactoe", "poker", "parchis"]
+  juego: ["cultura", "trivia_futbol", "futbol", "tictactoe", "poker", "parchis", "megaboard"]
 };
 const GAME_MODES = [
   {
@@ -39636,6 +39710,15 @@ const GAME_MODES = [
     color: "from-blue-600 to-red-600",
     teamBased: false,
     badge: "NUEVO"
+  },
+  {
+    id: "megaboard",
+    name: "MegaBoard 3D",
+    description: "Tablero tipo Oca con 100 casillas, retos y pruebas épicas",
+    icon: "🏰",
+    color: "from-amber-500 to-rose-600",
+    teamBased: false,
+    badge: "NUEVO"
   }
 ];
 const TEAM_COLORS = [
@@ -39682,28 +39765,21 @@ function FiestaTab({ onSelectMode }) {
         ]
       }
     ),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl mx-auto relative z-10 mb-8", children: fiestaModes.map((mode2, index2) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap justify-center gap-3 max-w-4xl mx-auto relative z-10 mb-8", children: fiestaModes.map((mode2, index2) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
       motion.button,
       {
-        initial: { opacity: 0, y: 20 },
-        animate: { opacity: 1, y: 0 },
-        transition: { delay: index2 * 0.03 },
+        initial: { opacity: 0, scale: 0.9 },
+        animate: { opacity: 1, scale: 1 },
+        transition: { delay: index2 * 0.02 },
         onClick: () => onSelectMode(mode2.id),
-        whileHover: { scale: 1.02 },
-        whileTap: { scale: 0.98 },
-        className: `relative group p-4 md:p-5 rounded-2xl bg-gradient-to-br ${mode2.color} text-white shadow-lg transition-all duration-300 overflow-hidden text-center`,
+        whileHover: { scale: 1.05, y: -2 },
+        whileTap: { scale: 0.95 },
+        className: `relative px-6 py-3 rounded-2xl bg-slate-900/40 backdrop-blur-md border border-white/10 flex flex-col items-center gap-1 transition-all duration-300 hover:border-primary/50 hover:bg-primary/5 shadow-lg group overflow-hidden`,
         children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative z-10 flex flex-col items-center", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-3xl md:text-4xl mb-2 drop-shadow-lg", children: mode2.icon }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-base md:text-lg font-bold mb-1 drop-shadow-md", children: mode2.name }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs opacity-80 line-clamp-2 leading-tight", children: mode2.description }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap justify-center gap-1 mt-2", children: [
-              mode2.badge && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-flex items-center gap-1 px-2 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-xs font-medium border border-white/30", children: mode2.badge }),
-              mode2.adultOnly && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-block px-2 py-0.5 bg-red-500/70 backdrop-blur-sm rounded-full text-xs font-bold border border-red-400/50", children: "+18" })
-            ] })
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute -bottom-6 -right-6 w-24 h-24 bg-white/10 rounded-full blur-xl group-hover:bg-white/20 transition-all" })
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute inset-0 bg-gradient-to-br from-primary/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-black uppercase tracking-widest text-white/70 group-hover:text-primary transition-colors", children: mode2.name }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-2xl drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]", children: mode2.icon }),
+          mode2.badge && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute -top-1 -right-1", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[8px] font-black text-white ring-2 ring-slate-900", children: "!" }) })
         ]
       },
       mode2.id
@@ -39755,28 +39831,21 @@ function JuegoTab({ onSelectMode }) {
         ]
       }
     ),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl mx-auto relative z-10 mb-8", children: juegoModes.map((mode2, index2) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap justify-center gap-3 max-w-4xl mx-auto relative z-10 mb-8", children: juegoModes.map((mode2, index2) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
       motion.button,
       {
-        initial: { opacity: 0, y: 20 },
-        animate: { opacity: 1, y: 0 },
-        transition: { delay: index2 * 0.03 },
+        initial: { opacity: 0, scale: 0.9 },
+        animate: { opacity: 1, scale: 1 },
+        transition: { delay: index2 * 0.02 },
         onClick: () => onSelectMode(mode2.id, playMode),
-        whileHover: { scale: 1.02 },
-        whileTap: { scale: 0.98 },
-        className: `relative group p-4 md:p-5 rounded-2xl bg-gradient-to-br ${mode2.color} text-white shadow-lg transition-all duration-300 overflow-hidden text-center`,
+        whileHover: { scale: 1.05, y: -2 },
+        whileTap: { scale: 0.95 },
+        className: `relative px-6 py-3 rounded-2xl bg-slate-900/40 backdrop-blur-md border border-white/10 flex flex-col items-center gap-1 transition-all duration-300 hover:border-primary/50 hover:bg-primary/5 shadow-lg group overflow-hidden`,
         children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative z-10 flex flex-col items-center", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-3xl md:text-4xl mb-2 drop-shadow-lg", children: mode2.icon }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-base md:text-lg font-bold mb-1 drop-shadow-md", children: mode2.name }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs opacity-80 line-clamp-2 leading-tight", children: mode2.description }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap justify-center gap-1 mt-2", children: mode2.badge && /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "inline-flex items-center gap-1 px-2 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-xs font-medium border border-white/30", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(Crown, { className: "w-3 h-3 text-yellow-300" }),
-              mode2.badge
-            ] }) })
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute -bottom-6 -right-6 w-24 h-24 bg-white/10 rounded-full blur-xl group-hover:bg-white/20 transition-all" })
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute inset-0 bg-gradient-to-br from-primary/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-black uppercase tracking-widest text-white/70 group-hover:text-primary transition-colors", children: mode2.name }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-2xl drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]", children: mode2.icon }),
+          mode2.badge && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute -top-1 -right-1", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[8px] font-black text-white ring-2 ring-slate-900", children: "!" }) })
         ]
       },
       mode2.id
@@ -40158,6 +40227,1445 @@ const AvatarFallback = reactExports.forwardRef(({ className, ...props }, ref) =>
   }
 ));
 AvatarFallback.displayName = Fallback.displayName;
+var AUTOFOCUS_ON_MOUNT = "focusScope.autoFocusOnMount";
+var AUTOFOCUS_ON_UNMOUNT = "focusScope.autoFocusOnUnmount";
+var EVENT_OPTIONS$1 = { bubbles: false, cancelable: true };
+var FOCUS_SCOPE_NAME = "FocusScope";
+var FocusScope = reactExports.forwardRef((props, forwardedRef) => {
+  const {
+    loop = false,
+    trapped = false,
+    onMountAutoFocus: onMountAutoFocusProp,
+    onUnmountAutoFocus: onUnmountAutoFocusProp,
+    ...scopeProps
+  } = props;
+  const [container, setContainer] = reactExports.useState(null);
+  const onMountAutoFocus = useCallbackRef$1(onMountAutoFocusProp);
+  const onUnmountAutoFocus = useCallbackRef$1(onUnmountAutoFocusProp);
+  const lastFocusedElementRef = reactExports.useRef(null);
+  const composedRefs = useComposedRefs$1(forwardedRef, (node) => setContainer(node));
+  const focusScope = reactExports.useRef({
+    paused: false,
+    pause() {
+      this.paused = true;
+    },
+    resume() {
+      this.paused = false;
+    }
+  }).current;
+  reactExports.useEffect(() => {
+    if (trapped) {
+      let handleFocusIn2 = function(event) {
+        if (focusScope.paused || !container)
+          return;
+        const target = event.target;
+        if (container.contains(target)) {
+          lastFocusedElementRef.current = target;
+        } else {
+          focus(lastFocusedElementRef.current, { select: true });
+        }
+      }, handleFocusOut2 = function(event) {
+        if (focusScope.paused || !container)
+          return;
+        const relatedTarget = event.relatedTarget;
+        if (relatedTarget === null)
+          return;
+        if (!container.contains(relatedTarget)) {
+          focus(lastFocusedElementRef.current, { select: true });
+        }
+      }, handleMutations2 = function(mutations) {
+        const focusedElement = document.activeElement;
+        if (focusedElement !== document.body)
+          return;
+        for (const mutation of mutations) {
+          if (mutation.removedNodes.length > 0)
+            focus(container);
+        }
+      };
+      document.addEventListener("focusin", handleFocusIn2);
+      document.addEventListener("focusout", handleFocusOut2);
+      const mutationObserver = new MutationObserver(handleMutations2);
+      if (container)
+        mutationObserver.observe(container, { childList: true, subtree: true });
+      return () => {
+        document.removeEventListener("focusin", handleFocusIn2);
+        document.removeEventListener("focusout", handleFocusOut2);
+        mutationObserver.disconnect();
+      };
+    }
+  }, [trapped, container, focusScope.paused]);
+  reactExports.useEffect(() => {
+    if (container) {
+      focusScopesStack.add(focusScope);
+      const previouslyFocusedElement = document.activeElement;
+      const hasFocusedCandidate = container.contains(previouslyFocusedElement);
+      if (!hasFocusedCandidate) {
+        const mountEvent = new CustomEvent(AUTOFOCUS_ON_MOUNT, EVENT_OPTIONS$1);
+        container.addEventListener(AUTOFOCUS_ON_MOUNT, onMountAutoFocus);
+        container.dispatchEvent(mountEvent);
+        if (!mountEvent.defaultPrevented) {
+          focusFirst$1(removeLinks(getTabbableCandidates(container)), { select: true });
+          if (document.activeElement === previouslyFocusedElement) {
+            focus(container);
+          }
+        }
+      }
+      return () => {
+        container.removeEventListener(AUTOFOCUS_ON_MOUNT, onMountAutoFocus);
+        setTimeout(() => {
+          const unmountEvent = new CustomEvent(AUTOFOCUS_ON_UNMOUNT, EVENT_OPTIONS$1);
+          container.addEventListener(AUTOFOCUS_ON_UNMOUNT, onUnmountAutoFocus);
+          container.dispatchEvent(unmountEvent);
+          if (!unmountEvent.defaultPrevented) {
+            focus(previouslyFocusedElement ?? document.body, { select: true });
+          }
+          container.removeEventListener(AUTOFOCUS_ON_UNMOUNT, onUnmountAutoFocus);
+          focusScopesStack.remove(focusScope);
+        }, 0);
+      };
+    }
+  }, [container, onMountAutoFocus, onUnmountAutoFocus, focusScope]);
+  const handleKeyDown = reactExports.useCallback(
+    (event) => {
+      if (!loop && !trapped)
+        return;
+      if (focusScope.paused)
+        return;
+      const isTabKey = event.key === "Tab" && !event.altKey && !event.ctrlKey && !event.metaKey;
+      const focusedElement = document.activeElement;
+      if (isTabKey && focusedElement) {
+        const container2 = event.currentTarget;
+        const [first, last] = getTabbableEdges(container2);
+        const hasTabbableElementsInside = first && last;
+        if (!hasTabbableElementsInside) {
+          if (focusedElement === container2)
+            event.preventDefault();
+        } else {
+          if (!event.shiftKey && focusedElement === last) {
+            event.preventDefault();
+            if (loop)
+              focus(first, { select: true });
+          } else if (event.shiftKey && focusedElement === first) {
+            event.preventDefault();
+            if (loop)
+              focus(last, { select: true });
+          }
+        }
+      }
+    },
+    [loop, trapped, focusScope.paused]
+  );
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(Primitive$2.div, { tabIndex: -1, ...scopeProps, ref: composedRefs, onKeyDown: handleKeyDown });
+});
+FocusScope.displayName = FOCUS_SCOPE_NAME;
+function focusFirst$1(candidates, { select = false } = {}) {
+  const previouslyFocusedElement = document.activeElement;
+  for (const candidate of candidates) {
+    focus(candidate, { select });
+    if (document.activeElement !== previouslyFocusedElement)
+      return;
+  }
+}
+function getTabbableEdges(container) {
+  const candidates = getTabbableCandidates(container);
+  const first = findVisible(candidates, container);
+  const last = findVisible(candidates.reverse(), container);
+  return [first, last];
+}
+function getTabbableCandidates(container) {
+  const nodes = [];
+  const walker = document.createTreeWalker(container, NodeFilter.SHOW_ELEMENT, {
+    acceptNode: (node) => {
+      const isHiddenInput = node.tagName === "INPUT" && node.type === "hidden";
+      if (node.disabled || node.hidden || isHiddenInput)
+        return NodeFilter.FILTER_SKIP;
+      return node.tabIndex >= 0 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+    }
+  });
+  while (walker.nextNode())
+    nodes.push(walker.currentNode);
+  return nodes;
+}
+function findVisible(elements, container) {
+  for (const element of elements) {
+    if (!isHidden(element, { upTo: container }))
+      return element;
+  }
+}
+function isHidden(node, { upTo }) {
+  if (getComputedStyle(node).visibility === "hidden")
+    return true;
+  while (node) {
+    if (upTo !== void 0 && node === upTo)
+      return false;
+    if (getComputedStyle(node).display === "none")
+      return true;
+    node = node.parentElement;
+  }
+  return false;
+}
+function isSelectableInput(element) {
+  return element instanceof HTMLInputElement && "select" in element;
+}
+function focus(element, { select = false } = {}) {
+  if (element && element.focus) {
+    const previouslyFocusedElement = document.activeElement;
+    element.focus({ preventScroll: true });
+    if (element !== previouslyFocusedElement && isSelectableInput(element) && select)
+      element.select();
+  }
+}
+var focusScopesStack = createFocusScopesStack();
+function createFocusScopesStack() {
+  let stack = [];
+  return {
+    add(focusScope) {
+      const activeFocusScope = stack[0];
+      if (focusScope !== activeFocusScope) {
+        activeFocusScope == null ? void 0 : activeFocusScope.pause();
+      }
+      stack = arrayRemove(stack, focusScope);
+      stack.unshift(focusScope);
+    },
+    remove(focusScope) {
+      var _a3;
+      stack = arrayRemove(stack, focusScope);
+      (_a3 = stack[0]) == null ? void 0 : _a3.resume();
+    }
+  };
+}
+function arrayRemove(array, item) {
+  const updatedArray = [...array];
+  const index2 = updatedArray.indexOf(item);
+  if (index2 !== -1) {
+    updatedArray.splice(index2, 1);
+  }
+  return updatedArray;
+}
+function removeLinks(items) {
+  return items.filter((item) => item.tagName !== "A");
+}
+var count = 0;
+function useFocusGuards() {
+  reactExports.useEffect(() => {
+    const edgeGuards = document.querySelectorAll("[data-radix-focus-guard]");
+    document.body.insertAdjacentElement("afterbegin", edgeGuards[0] ?? createFocusGuard());
+    document.body.insertAdjacentElement("beforeend", edgeGuards[1] ?? createFocusGuard());
+    count++;
+    return () => {
+      if (count === 1) {
+        document.querySelectorAll("[data-radix-focus-guard]").forEach((node) => node.remove());
+      }
+      count--;
+    };
+  }, []);
+}
+function createFocusGuard() {
+  const element = document.createElement("span");
+  element.setAttribute("data-radix-focus-guard", "");
+  element.tabIndex = 0;
+  element.style.outline = "none";
+  element.style.opacity = "0";
+  element.style.position = "fixed";
+  element.style.pointerEvents = "none";
+  return element;
+}
+var zeroRightClassName = "right-scroll-bar-position";
+var fullWidthClassName = "width-before-scroll-bar";
+var noScrollbarsClassName = "with-scroll-bars-hidden";
+var removedBarSizeVariable = "--removed-body-scroll-bar-size";
+function assignRef(ref, value) {
+  if (typeof ref === "function") {
+    ref(value);
+  } else if (ref) {
+    ref.current = value;
+  }
+  return ref;
+}
+function useCallbackRef(initialValue, callback) {
+  var ref = reactExports.useState(function() {
+    return {
+      // value
+      value: initialValue,
+      // last callback
+      callback,
+      // "memoized" public interface
+      facade: {
+        get current() {
+          return ref.value;
+        },
+        set current(value) {
+          var last = ref.value;
+          if (last !== value) {
+            ref.value = value;
+            ref.callback(value, last);
+          }
+        }
+      }
+    };
+  })[0];
+  ref.callback = callback;
+  return ref.facade;
+}
+var useIsomorphicLayoutEffect = typeof window !== "undefined" ? reactExports.useLayoutEffect : reactExports.useEffect;
+var currentValues = /* @__PURE__ */ new WeakMap();
+function useMergeRefs(refs, defaultValue) {
+  var callbackRef = useCallbackRef(defaultValue || null, function(newValue) {
+    return refs.forEach(function(ref) {
+      return assignRef(ref, newValue);
+    });
+  });
+  useIsomorphicLayoutEffect(function() {
+    var oldValue = currentValues.get(callbackRef);
+    if (oldValue) {
+      var prevRefs_1 = new Set(oldValue);
+      var nextRefs_1 = new Set(refs);
+      var current_1 = callbackRef.current;
+      prevRefs_1.forEach(function(ref) {
+        if (!nextRefs_1.has(ref)) {
+          assignRef(ref, null);
+        }
+      });
+      nextRefs_1.forEach(function(ref) {
+        if (!prevRefs_1.has(ref)) {
+          assignRef(ref, current_1);
+        }
+      });
+    }
+    currentValues.set(callbackRef, refs);
+  }, [refs]);
+  return callbackRef;
+}
+function ItoI(a2) {
+  return a2;
+}
+function innerCreateMedium(defaults, middleware) {
+  if (middleware === void 0) {
+    middleware = ItoI;
+  }
+  var buffer = [];
+  var assigned = false;
+  var medium = {
+    read: function() {
+      if (assigned) {
+        throw new Error("Sidecar: could not `read` from an `assigned` medium. `read` could be used only with `useMedium`.");
+      }
+      if (buffer.length) {
+        return buffer[buffer.length - 1];
+      }
+      return defaults;
+    },
+    useMedium: function(data) {
+      var item = middleware(data, assigned);
+      buffer.push(item);
+      return function() {
+        buffer = buffer.filter(function(x2) {
+          return x2 !== item;
+        });
+      };
+    },
+    assignSyncMedium: function(cb2) {
+      assigned = true;
+      while (buffer.length) {
+        var cbs = buffer;
+        buffer = [];
+        cbs.forEach(cb2);
+      }
+      buffer = {
+        push: function(x2) {
+          return cb2(x2);
+        },
+        filter: function() {
+          return buffer;
+        }
+      };
+    },
+    assignMedium: function(cb2) {
+      assigned = true;
+      var pendingQueue = [];
+      if (buffer.length) {
+        var cbs = buffer;
+        buffer = [];
+        cbs.forEach(cb2);
+        pendingQueue = buffer;
+      }
+      var executeQueue = function() {
+        var cbs2 = pendingQueue;
+        pendingQueue = [];
+        cbs2.forEach(cb2);
+      };
+      var cycle = function() {
+        return Promise.resolve().then(executeQueue);
+      };
+      cycle();
+      buffer = {
+        push: function(x2) {
+          pendingQueue.push(x2);
+          cycle();
+        },
+        filter: function(filter2) {
+          pendingQueue = pendingQueue.filter(filter2);
+          return buffer;
+        }
+      };
+    }
+  };
+  return medium;
+}
+function createSidecarMedium(options) {
+  if (options === void 0) {
+    options = {};
+  }
+  var medium = innerCreateMedium(null);
+  medium.options = __assign({ async: true, ssr: false }, options);
+  return medium;
+}
+var SideCar$1 = function(_a3) {
+  var sideCar = _a3.sideCar, rest = __rest(_a3, ["sideCar"]);
+  if (!sideCar) {
+    throw new Error("Sidecar: please provide `sideCar` property to import the right car");
+  }
+  var Target2 = sideCar.read();
+  if (!Target2) {
+    throw new Error("Sidecar medium not found");
+  }
+  return reactExports.createElement(Target2, __assign({}, rest));
+};
+SideCar$1.isSideCarExport = true;
+function exportSidecar(medium, exported) {
+  medium.useMedium(exported);
+  return SideCar$1;
+}
+var effectCar = createSidecarMedium();
+var nothing = function() {
+  return;
+};
+var RemoveScroll$1 = reactExports.forwardRef(function(props, parentRef) {
+  var ref = reactExports.useRef(null);
+  var _a3 = reactExports.useState({
+    onScrollCapture: nothing,
+    onWheelCapture: nothing,
+    onTouchMoveCapture: nothing
+  }), callbacks = _a3[0], setCallbacks = _a3[1];
+  var forwardProps = props.forwardProps, children = props.children, className = props.className, removeScrollBar = props.removeScrollBar, enabled = props.enabled, shards = props.shards, sideCar = props.sideCar, noRelative = props.noRelative, noIsolation = props.noIsolation, inert = props.inert, allowPinchZoom = props.allowPinchZoom, _b2 = props.as, Container = _b2 === void 0 ? "div" : _b2, gapMode = props.gapMode, rest = __rest(props, ["forwardProps", "children", "className", "removeScrollBar", "enabled", "shards", "sideCar", "noRelative", "noIsolation", "inert", "allowPinchZoom", "as", "gapMode"]);
+  var SideCar2 = sideCar;
+  var containerRef = useMergeRefs([ref, parentRef]);
+  var containerProps = __assign(__assign({}, rest), callbacks);
+  return reactExports.createElement(
+    reactExports.Fragment,
+    null,
+    enabled && reactExports.createElement(SideCar2, { sideCar: effectCar, removeScrollBar, shards, noRelative, noIsolation, inert, setCallbacks, allowPinchZoom: !!allowPinchZoom, lockRef: ref, gapMode }),
+    forwardProps ? reactExports.cloneElement(reactExports.Children.only(children), __assign(__assign({}, containerProps), { ref: containerRef })) : reactExports.createElement(Container, __assign({}, containerProps, { className, ref: containerRef }), children)
+  );
+});
+RemoveScroll$1.defaultProps = {
+  enabled: true,
+  removeScrollBar: true,
+  inert: false
+};
+RemoveScroll$1.classNames = {
+  fullWidth: fullWidthClassName,
+  zeroRight: zeroRightClassName
+};
+var currentNonce;
+var getNonce = function() {
+  if (currentNonce) {
+    return currentNonce;
+  }
+  if (typeof __webpack_nonce__ !== "undefined") {
+    return __webpack_nonce__;
+  }
+  return void 0;
+};
+function makeStyleTag() {
+  if (!document)
+    return null;
+  var tag = document.createElement("style");
+  tag.type = "text/css";
+  var nonce = getNonce();
+  if (nonce) {
+    tag.setAttribute("nonce", nonce);
+  }
+  return tag;
+}
+function injectStyles(tag, css) {
+  if (tag.styleSheet) {
+    tag.styleSheet.cssText = css;
+  } else {
+    tag.appendChild(document.createTextNode(css));
+  }
+}
+function insertStyleTag(tag) {
+  var head2 = document.head || document.getElementsByTagName("head")[0];
+  head2.appendChild(tag);
+}
+var stylesheetSingleton = function() {
+  var counter = 0;
+  var stylesheet = null;
+  return {
+    add: function(style) {
+      if (counter == 0) {
+        if (stylesheet = makeStyleTag()) {
+          injectStyles(stylesheet, style);
+          insertStyleTag(stylesheet);
+        }
+      }
+      counter++;
+    },
+    remove: function() {
+      counter--;
+      if (!counter && stylesheet) {
+        stylesheet.parentNode && stylesheet.parentNode.removeChild(stylesheet);
+        stylesheet = null;
+      }
+    }
+  };
+};
+var styleHookSingleton = function() {
+  var sheet = stylesheetSingleton();
+  return function(styles, isDynamic) {
+    reactExports.useEffect(function() {
+      sheet.add(styles);
+      return function() {
+        sheet.remove();
+      };
+    }, [styles && isDynamic]);
+  };
+};
+var styleSingleton = function() {
+  var useStyle2 = styleHookSingleton();
+  var Sheet = function(_a3) {
+    var styles = _a3.styles, dynamic = _a3.dynamic;
+    useStyle2(styles, dynamic);
+    return null;
+  };
+  return Sheet;
+};
+var zeroGap = {
+  left: 0,
+  top: 0,
+  right: 0,
+  gap: 0
+};
+var parse = function(x2) {
+  return parseInt(x2 || "", 10) || 0;
+};
+var getOffset = function(gapMode) {
+  var cs2 = window.getComputedStyle(document.body);
+  var left = cs2[gapMode === "padding" ? "paddingLeft" : "marginLeft"];
+  var top = cs2[gapMode === "padding" ? "paddingTop" : "marginTop"];
+  var right = cs2[gapMode === "padding" ? "paddingRight" : "marginRight"];
+  return [parse(left), parse(top), parse(right)];
+};
+var getGapWidth = function(gapMode) {
+  if (gapMode === void 0) {
+    gapMode = "margin";
+  }
+  if (typeof window === "undefined") {
+    return zeroGap;
+  }
+  var offsets = getOffset(gapMode);
+  var documentWidth = document.documentElement.clientWidth;
+  var windowWidth = window.innerWidth;
+  return {
+    left: offsets[0],
+    top: offsets[1],
+    right: offsets[2],
+    gap: Math.max(0, windowWidth - documentWidth + offsets[2] - offsets[0])
+  };
+};
+var Style = styleSingleton();
+var lockAttribute = "data-scroll-locked";
+var getStyles = function(_a3, allowRelative, gapMode, important) {
+  var left = _a3.left, top = _a3.top, right = _a3.right, gap = _a3.gap;
+  if (gapMode === void 0) {
+    gapMode = "margin";
+  }
+  return "\n  .".concat(noScrollbarsClassName, " {\n   overflow: hidden ").concat(important, ";\n   padding-right: ").concat(gap, "px ").concat(important, ";\n  }\n  body[").concat(lockAttribute, "] {\n    overflow: hidden ").concat(important, ";\n    overscroll-behavior: contain;\n    ").concat([
+    allowRelative && "position: relative ".concat(important, ";"),
+    gapMode === "margin" && "\n    padding-left: ".concat(left, "px;\n    padding-top: ").concat(top, "px;\n    padding-right: ").concat(right, "px;\n    margin-left:0;\n    margin-top:0;\n    margin-right: ").concat(gap, "px ").concat(important, ";\n    "),
+    gapMode === "padding" && "padding-right: ".concat(gap, "px ").concat(important, ";")
+  ].filter(Boolean).join(""), "\n  }\n  \n  .").concat(zeroRightClassName, " {\n    right: ").concat(gap, "px ").concat(important, ";\n  }\n  \n  .").concat(fullWidthClassName, " {\n    margin-right: ").concat(gap, "px ").concat(important, ";\n  }\n  \n  .").concat(zeroRightClassName, " .").concat(zeroRightClassName, " {\n    right: 0 ").concat(important, ";\n  }\n  \n  .").concat(fullWidthClassName, " .").concat(fullWidthClassName, " {\n    margin-right: 0 ").concat(important, ";\n  }\n  \n  body[").concat(lockAttribute, "] {\n    ").concat(removedBarSizeVariable, ": ").concat(gap, "px;\n  }\n");
+};
+var getCurrentUseCounter = function() {
+  var counter = parseInt(document.body.getAttribute(lockAttribute) || "0", 10);
+  return isFinite(counter) ? counter : 0;
+};
+var useLockAttribute = function() {
+  reactExports.useEffect(function() {
+    document.body.setAttribute(lockAttribute, (getCurrentUseCounter() + 1).toString());
+    return function() {
+      var newCounter = getCurrentUseCounter() - 1;
+      if (newCounter <= 0) {
+        document.body.removeAttribute(lockAttribute);
+      } else {
+        document.body.setAttribute(lockAttribute, newCounter.toString());
+      }
+    };
+  }, []);
+};
+var RemoveScrollBar = function(_a3) {
+  var noRelative = _a3.noRelative, noImportant = _a3.noImportant, _b2 = _a3.gapMode, gapMode = _b2 === void 0 ? "margin" : _b2;
+  useLockAttribute();
+  var gap = reactExports.useMemo(function() {
+    return getGapWidth(gapMode);
+  }, [gapMode]);
+  return reactExports.createElement(Style, { styles: getStyles(gap, !noRelative, gapMode, !noImportant ? "!important" : "") });
+};
+var passiveSupported = false;
+if (typeof window !== "undefined") {
+  try {
+    var options = Object.defineProperty({}, "passive", {
+      get: function() {
+        passiveSupported = true;
+        return true;
+      }
+    });
+    window.addEventListener("test", options, options);
+    window.removeEventListener("test", options, options);
+  } catch (err) {
+    passiveSupported = false;
+  }
+}
+var nonPassive = passiveSupported ? { passive: false } : false;
+var alwaysContainsScroll = function(node) {
+  return node.tagName === "TEXTAREA";
+};
+var elementCanBeScrolled = function(node, overflow) {
+  if (!(node instanceof Element)) {
+    return false;
+  }
+  var styles = window.getComputedStyle(node);
+  return (
+    // not-not-scrollable
+    styles[overflow] !== "hidden" && // contains scroll inside self
+    !(styles.overflowY === styles.overflowX && !alwaysContainsScroll(node) && styles[overflow] === "visible")
+  );
+};
+var elementCouldBeVScrolled = function(node) {
+  return elementCanBeScrolled(node, "overflowY");
+};
+var elementCouldBeHScrolled = function(node) {
+  return elementCanBeScrolled(node, "overflowX");
+};
+var locationCouldBeScrolled = function(axis, node) {
+  var ownerDocument = node.ownerDocument;
+  var current = node;
+  do {
+    if (typeof ShadowRoot !== "undefined" && current instanceof ShadowRoot) {
+      current = current.host;
+    }
+    var isScrollable = elementCouldBeScrolled(axis, current);
+    if (isScrollable) {
+      var _a3 = getScrollVariables(axis, current), scrollHeight = _a3[1], clientHeight = _a3[2];
+      if (scrollHeight > clientHeight) {
+        return true;
+      }
+    }
+    current = current.parentNode;
+  } while (current && current !== ownerDocument.body);
+  return false;
+};
+var getVScrollVariables = function(_a3) {
+  var scrollTop = _a3.scrollTop, scrollHeight = _a3.scrollHeight, clientHeight = _a3.clientHeight;
+  return [
+    scrollTop,
+    scrollHeight,
+    clientHeight
+  ];
+};
+var getHScrollVariables = function(_a3) {
+  var scrollLeft = _a3.scrollLeft, scrollWidth = _a3.scrollWidth, clientWidth = _a3.clientWidth;
+  return [
+    scrollLeft,
+    scrollWidth,
+    clientWidth
+  ];
+};
+var elementCouldBeScrolled = function(axis, node) {
+  return axis === "v" ? elementCouldBeVScrolled(node) : elementCouldBeHScrolled(node);
+};
+var getScrollVariables = function(axis, node) {
+  return axis === "v" ? getVScrollVariables(node) : getHScrollVariables(node);
+};
+var getDirectionFactor = function(axis, direction) {
+  return axis === "h" && direction === "rtl" ? -1 : 1;
+};
+var handleScroll = function(axis, endTarget, event, sourceDelta, noOverscroll) {
+  var directionFactor = getDirectionFactor(axis, window.getComputedStyle(endTarget).direction);
+  var delta = directionFactor * sourceDelta;
+  var target = event.target;
+  var targetInLock = endTarget.contains(target);
+  var shouldCancelScroll = false;
+  var isDeltaPositive = delta > 0;
+  var availableScroll = 0;
+  var availableScrollTop = 0;
+  do {
+    if (!target) {
+      break;
+    }
+    var _a3 = getScrollVariables(axis, target), position = _a3[0], scroll_1 = _a3[1], capacity = _a3[2];
+    var elementScroll = scroll_1 - capacity - directionFactor * position;
+    if (position || elementScroll) {
+      if (elementCouldBeScrolled(axis, target)) {
+        availableScroll += elementScroll;
+        availableScrollTop += position;
+      }
+    }
+    var parent_1 = target.parentNode;
+    target = parent_1 && parent_1.nodeType === Node.DOCUMENT_FRAGMENT_NODE ? parent_1.host : parent_1;
+  } while (
+    // portaled content
+    !targetInLock && target !== document.body || // self content
+    targetInLock && (endTarget.contains(target) || endTarget === target)
+  );
+  if (isDeltaPositive && (noOverscroll && Math.abs(availableScroll) < 1 || !noOverscroll && delta > availableScroll)) {
+    shouldCancelScroll = true;
+  } else if (!isDeltaPositive && (noOverscroll && Math.abs(availableScrollTop) < 1 || !noOverscroll && -delta > availableScrollTop)) {
+    shouldCancelScroll = true;
+  }
+  return shouldCancelScroll;
+};
+var getTouchXY = function(event) {
+  return "changedTouches" in event ? [event.changedTouches[0].clientX, event.changedTouches[0].clientY] : [0, 0];
+};
+var getDeltaXY = function(event) {
+  return [event.deltaX, event.deltaY];
+};
+var extractRef = function(ref) {
+  return ref && "current" in ref ? ref.current : ref;
+};
+var deltaCompare = function(x2, y2) {
+  return x2[0] === y2[0] && x2[1] === y2[1];
+};
+var generateStyle = function(id2) {
+  return "\n  .block-interactivity-".concat(id2, " {pointer-events: none;}\n  .allow-interactivity-").concat(id2, " {pointer-events: all;}\n");
+};
+var idCounter = 0;
+var lockStack = [];
+function RemoveScrollSideCar(props) {
+  var shouldPreventQueue = reactExports.useRef([]);
+  var touchStartRef = reactExports.useRef([0, 0]);
+  var activeAxis = reactExports.useRef();
+  var id2 = reactExports.useState(idCounter++)[0];
+  var Style2 = reactExports.useState(styleSingleton)[0];
+  var lastProps = reactExports.useRef(props);
+  reactExports.useEffect(function() {
+    lastProps.current = props;
+  }, [props]);
+  reactExports.useEffect(function() {
+    if (props.inert) {
+      document.body.classList.add("block-interactivity-".concat(id2));
+      var allow_1 = __spreadArray([props.lockRef.current], (props.shards || []).map(extractRef), true).filter(Boolean);
+      allow_1.forEach(function(el2) {
+        return el2.classList.add("allow-interactivity-".concat(id2));
+      });
+      return function() {
+        document.body.classList.remove("block-interactivity-".concat(id2));
+        allow_1.forEach(function(el2) {
+          return el2.classList.remove("allow-interactivity-".concat(id2));
+        });
+      };
+    }
+    return;
+  }, [props.inert, props.lockRef.current, props.shards]);
+  var shouldCancelEvent = reactExports.useCallback(function(event, parent) {
+    if ("touches" in event && event.touches.length === 2 || event.type === "wheel" && event.ctrlKey) {
+      return !lastProps.current.allowPinchZoom;
+    }
+    var touch = getTouchXY(event);
+    var touchStart = touchStartRef.current;
+    var deltaX = "deltaX" in event ? event.deltaX : touchStart[0] - touch[0];
+    var deltaY = "deltaY" in event ? event.deltaY : touchStart[1] - touch[1];
+    var currentAxis;
+    var target = event.target;
+    var moveDirection = Math.abs(deltaX) > Math.abs(deltaY) ? "h" : "v";
+    if ("touches" in event && moveDirection === "h" && target.type === "range") {
+      return false;
+    }
+    var selection = window.getSelection();
+    var anchorNode = selection && selection.anchorNode;
+    var isTouchingSelection = anchorNode ? anchorNode === target || anchorNode.contains(target) : false;
+    if (isTouchingSelection) {
+      return false;
+    }
+    var canBeScrolledInMainDirection = locationCouldBeScrolled(moveDirection, target);
+    if (!canBeScrolledInMainDirection) {
+      return true;
+    }
+    if (canBeScrolledInMainDirection) {
+      currentAxis = moveDirection;
+    } else {
+      currentAxis = moveDirection === "v" ? "h" : "v";
+      canBeScrolledInMainDirection = locationCouldBeScrolled(moveDirection, target);
+    }
+    if (!canBeScrolledInMainDirection) {
+      return false;
+    }
+    if (!activeAxis.current && "changedTouches" in event && (deltaX || deltaY)) {
+      activeAxis.current = currentAxis;
+    }
+    if (!currentAxis) {
+      return true;
+    }
+    var cancelingAxis = activeAxis.current || currentAxis;
+    return handleScroll(cancelingAxis, parent, event, cancelingAxis === "h" ? deltaX : deltaY, true);
+  }, []);
+  var shouldPrevent = reactExports.useCallback(function(_event) {
+    var event = _event;
+    if (!lockStack.length || lockStack[lockStack.length - 1] !== Style2) {
+      return;
+    }
+    var delta = "deltaY" in event ? getDeltaXY(event) : getTouchXY(event);
+    var sourceEvent = shouldPreventQueue.current.filter(function(e2) {
+      return e2.name === event.type && (e2.target === event.target || event.target === e2.shadowParent) && deltaCompare(e2.delta, delta);
+    })[0];
+    if (sourceEvent && sourceEvent.should) {
+      if (event.cancelable) {
+        event.preventDefault();
+      }
+      return;
+    }
+    if (!sourceEvent) {
+      var shardNodes = (lastProps.current.shards || []).map(extractRef).filter(Boolean).filter(function(node) {
+        return node.contains(event.target);
+      });
+      var shouldStop = shardNodes.length > 0 ? shouldCancelEvent(event, shardNodes[0]) : !lastProps.current.noIsolation;
+      if (shouldStop) {
+        if (event.cancelable) {
+          event.preventDefault();
+        }
+      }
+    }
+  }, []);
+  var shouldCancel = reactExports.useCallback(function(name, delta, target, should) {
+    var event = { name, delta, target, should, shadowParent: getOutermostShadowParent(target) };
+    shouldPreventQueue.current.push(event);
+    setTimeout(function() {
+      shouldPreventQueue.current = shouldPreventQueue.current.filter(function(e2) {
+        return e2 !== event;
+      });
+    }, 1);
+  }, []);
+  var scrollTouchStart = reactExports.useCallback(function(event) {
+    touchStartRef.current = getTouchXY(event);
+    activeAxis.current = void 0;
+  }, []);
+  var scrollWheel = reactExports.useCallback(function(event) {
+    shouldCancel(event.type, getDeltaXY(event), event.target, shouldCancelEvent(event, props.lockRef.current));
+  }, []);
+  var scrollTouchMove = reactExports.useCallback(function(event) {
+    shouldCancel(event.type, getTouchXY(event), event.target, shouldCancelEvent(event, props.lockRef.current));
+  }, []);
+  reactExports.useEffect(function() {
+    lockStack.push(Style2);
+    props.setCallbacks({
+      onScrollCapture: scrollWheel,
+      onWheelCapture: scrollWheel,
+      onTouchMoveCapture: scrollTouchMove
+    });
+    document.addEventListener("wheel", shouldPrevent, nonPassive);
+    document.addEventListener("touchmove", shouldPrevent, nonPassive);
+    document.addEventListener("touchstart", scrollTouchStart, nonPassive);
+    return function() {
+      lockStack = lockStack.filter(function(inst) {
+        return inst !== Style2;
+      });
+      document.removeEventListener("wheel", shouldPrevent, nonPassive);
+      document.removeEventListener("touchmove", shouldPrevent, nonPassive);
+      document.removeEventListener("touchstart", scrollTouchStart, nonPassive);
+    };
+  }, []);
+  var removeScrollBar = props.removeScrollBar, inert = props.inert;
+  return reactExports.createElement(
+    reactExports.Fragment,
+    null,
+    inert ? reactExports.createElement(Style2, { styles: generateStyle(id2) }) : null,
+    removeScrollBar ? reactExports.createElement(RemoveScrollBar, { noRelative: props.noRelative, gapMode: props.gapMode }) : null
+  );
+}
+function getOutermostShadowParent(node) {
+  var shadowParent = null;
+  while (node !== null) {
+    if (node instanceof ShadowRoot) {
+      shadowParent = node.host;
+      node = node.host;
+    }
+    node = node.parentNode;
+  }
+  return shadowParent;
+}
+const SideCar = exportSidecar(effectCar, RemoveScrollSideCar);
+var ReactRemoveScroll = reactExports.forwardRef(function(props, ref) {
+  return reactExports.createElement(RemoveScroll$1, __assign({}, props, { ref, sideCar: SideCar }));
+});
+ReactRemoveScroll.classNames = RemoveScroll$1.classNames;
+const RemoveScroll = ReactRemoveScroll;
+var getDefaultParent = function(originalTarget) {
+  if (typeof document === "undefined") {
+    return null;
+  }
+  var sampleTarget = Array.isArray(originalTarget) ? originalTarget[0] : originalTarget;
+  return sampleTarget.ownerDocument.body;
+};
+var counterMap = /* @__PURE__ */ new WeakMap();
+var uncontrolledNodes = /* @__PURE__ */ new WeakMap();
+var markerMap = {};
+var lockCount = 0;
+var unwrapHost = function(node) {
+  return node && (node.host || unwrapHost(node.parentNode));
+};
+var correctTargets = function(parent, targets) {
+  return targets.map(function(target) {
+    if (parent.contains(target)) {
+      return target;
+    }
+    var correctedTarget = unwrapHost(target);
+    if (correctedTarget && parent.contains(correctedTarget)) {
+      return correctedTarget;
+    }
+    console.error("aria-hidden", target, "in not contained inside", parent, ". Doing nothing");
+    return null;
+  }).filter(function(x2) {
+    return Boolean(x2);
+  });
+};
+var applyAttributeToOthers = function(originalTarget, parentNode, markerName, controlAttribute) {
+  var targets = correctTargets(parentNode, Array.isArray(originalTarget) ? originalTarget : [originalTarget]);
+  if (!markerMap[markerName]) {
+    markerMap[markerName] = /* @__PURE__ */ new WeakMap();
+  }
+  var markerCounter = markerMap[markerName];
+  var hiddenNodes = [];
+  var elementsToKeep = /* @__PURE__ */ new Set();
+  var elementsToStop = new Set(targets);
+  var keep = function(el2) {
+    if (!el2 || elementsToKeep.has(el2)) {
+      return;
+    }
+    elementsToKeep.add(el2);
+    keep(el2.parentNode);
+  };
+  targets.forEach(keep);
+  var deep = function(parent) {
+    if (!parent || elementsToStop.has(parent)) {
+      return;
+    }
+    Array.prototype.forEach.call(parent.children, function(node) {
+      if (elementsToKeep.has(node)) {
+        deep(node);
+      } else {
+        try {
+          var attr = node.getAttribute(controlAttribute);
+          var alreadyHidden = attr !== null && attr !== "false";
+          var counterValue = (counterMap.get(node) || 0) + 1;
+          var markerValue = (markerCounter.get(node) || 0) + 1;
+          counterMap.set(node, counterValue);
+          markerCounter.set(node, markerValue);
+          hiddenNodes.push(node);
+          if (counterValue === 1 && alreadyHidden) {
+            uncontrolledNodes.set(node, true);
+          }
+          if (markerValue === 1) {
+            node.setAttribute(markerName, "true");
+          }
+          if (!alreadyHidden) {
+            node.setAttribute(controlAttribute, "true");
+          }
+        } catch (e2) {
+          console.error("aria-hidden: cannot operate on ", node, e2);
+        }
+      }
+    });
+  };
+  deep(parentNode);
+  elementsToKeep.clear();
+  lockCount++;
+  return function() {
+    hiddenNodes.forEach(function(node) {
+      var counterValue = counterMap.get(node) - 1;
+      var markerValue = markerCounter.get(node) - 1;
+      counterMap.set(node, counterValue);
+      markerCounter.set(node, markerValue);
+      if (!counterValue) {
+        if (!uncontrolledNodes.has(node)) {
+          node.removeAttribute(controlAttribute);
+        }
+        uncontrolledNodes.delete(node);
+      }
+      if (!markerValue) {
+        node.removeAttribute(markerName);
+      }
+    });
+    lockCount--;
+    if (!lockCount) {
+      counterMap = /* @__PURE__ */ new WeakMap();
+      counterMap = /* @__PURE__ */ new WeakMap();
+      uncontrolledNodes = /* @__PURE__ */ new WeakMap();
+      markerMap = {};
+    }
+  };
+};
+var hideOthers = function(originalTarget, parentNode, markerName) {
+  if (markerName === void 0) {
+    markerName = "data-aria-hidden";
+  }
+  var targets = Array.from(Array.isArray(originalTarget) ? originalTarget : [originalTarget]);
+  var activeParentNode = parentNode || getDefaultParent(originalTarget);
+  if (!activeParentNode) {
+    return function() {
+      return null;
+    };
+  }
+  targets.push.apply(targets, Array.from(activeParentNode.querySelectorAll("[aria-live], script")));
+  return applyAttributeToOthers(targets, activeParentNode, markerName, "aria-hidden");
+};
+// @__NO_SIDE_EFFECTS__
+function createSlot$1(ownerName) {
+  const SlotClone = /* @__PURE__ */ createSlotClone$1(ownerName);
+  const Slot2 = reactExports.forwardRef((props, forwardedRef) => {
+    const { children, ...slotProps } = props;
+    const childrenArray = reactExports.Children.toArray(children);
+    const slottable = childrenArray.find(isSlottable$1);
+    if (slottable) {
+      const newElement = slottable.props.children;
+      const newChildren = childrenArray.map((child) => {
+        if (child === slottable) {
+          if (reactExports.Children.count(newElement) > 1)
+            return reactExports.Children.only(null);
+          return reactExports.isValidElement(newElement) ? newElement.props.children : null;
+        } else {
+          return child;
+        }
+      });
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(SlotClone, { ...slotProps, ref: forwardedRef, children: reactExports.isValidElement(newElement) ? reactExports.cloneElement(newElement, void 0, newChildren) : null });
+    }
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(SlotClone, { ...slotProps, ref: forwardedRef, children });
+  });
+  Slot2.displayName = `${ownerName}.Slot`;
+  return Slot2;
+}
+// @__NO_SIDE_EFFECTS__
+function createSlotClone$1(ownerName) {
+  const SlotClone = reactExports.forwardRef((props, forwardedRef) => {
+    const { children, ...slotProps } = props;
+    if (reactExports.isValidElement(children)) {
+      const childrenRef = getElementRef$1(children);
+      const props2 = mergeProps$1(slotProps, children.props);
+      if (children.type !== reactExports.Fragment) {
+        props2.ref = forwardedRef ? composeRefs$1(forwardedRef, childrenRef) : childrenRef;
+      }
+      return reactExports.cloneElement(children, props2);
+    }
+    return reactExports.Children.count(children) > 1 ? reactExports.Children.only(null) : null;
+  });
+  SlotClone.displayName = `${ownerName}.SlotClone`;
+  return SlotClone;
+}
+var SLOTTABLE_IDENTIFIER$1 = Symbol("radix.slottable");
+function isSlottable$1(child) {
+  return reactExports.isValidElement(child) && typeof child.type === "function" && "__radixId" in child.type && child.type.__radixId === SLOTTABLE_IDENTIFIER$1;
+}
+function mergeProps$1(slotProps, childProps) {
+  const overrideProps = { ...childProps };
+  for (const propName in childProps) {
+    const slotPropValue = slotProps[propName];
+    const childPropValue = childProps[propName];
+    const isHandler = /^on[A-Z]/.test(propName);
+    if (isHandler) {
+      if (slotPropValue && childPropValue) {
+        overrideProps[propName] = (...args) => {
+          const result = childPropValue(...args);
+          slotPropValue(...args);
+          return result;
+        };
+      } else if (slotPropValue) {
+        overrideProps[propName] = slotPropValue;
+      }
+    } else if (propName === "style") {
+      overrideProps[propName] = { ...slotPropValue, ...childPropValue };
+    } else if (propName === "className") {
+      overrideProps[propName] = [slotPropValue, childPropValue].filter(Boolean).join(" ");
+    }
+  }
+  return { ...slotProps, ...overrideProps };
+}
+function getElementRef$1(element) {
+  var _a3, _b2;
+  let getter = (_a3 = Object.getOwnPropertyDescriptor(element.props, "ref")) == null ? void 0 : _a3.get;
+  let mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
+  if (mayWarn) {
+    return element.ref;
+  }
+  getter = (_b2 = Object.getOwnPropertyDescriptor(element, "ref")) == null ? void 0 : _b2.get;
+  mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
+  if (mayWarn) {
+    return element.props.ref;
+  }
+  return element.props.ref || element.ref;
+}
+var DIALOG_NAME = "Dialog";
+var [createDialogContext, createDialogScope] = createContextScope$1(DIALOG_NAME);
+var [DialogProvider, useDialogContext] = createDialogContext(DIALOG_NAME);
+var Dialog$1 = (props) => {
+  const {
+    __scopeDialog,
+    children,
+    open: openProp,
+    defaultOpen,
+    onOpenChange,
+    modal = true
+  } = props;
+  const triggerRef = reactExports.useRef(null);
+  const contentRef = reactExports.useRef(null);
+  const [open, setOpen] = useControllableState({
+    prop: openProp,
+    defaultProp: defaultOpen ?? false,
+    onChange: onOpenChange,
+    caller: DIALOG_NAME
+  });
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    DialogProvider,
+    {
+      scope: __scopeDialog,
+      triggerRef,
+      contentRef,
+      contentId: useId(),
+      titleId: useId(),
+      descriptionId: useId(),
+      open,
+      onOpenChange: setOpen,
+      onOpenToggle: reactExports.useCallback(() => setOpen((prevOpen) => !prevOpen), [setOpen]),
+      modal,
+      children
+    }
+  );
+};
+Dialog$1.displayName = DIALOG_NAME;
+var TRIGGER_NAME$2 = "DialogTrigger";
+var DialogTrigger$1 = reactExports.forwardRef(
+  (props, forwardedRef) => {
+    const { __scopeDialog, ...triggerProps } = props;
+    const context = useDialogContext(TRIGGER_NAME$2, __scopeDialog);
+    const composedTriggerRef = useComposedRefs$1(forwardedRef, context.triggerRef);
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      Primitive$2.button,
+      {
+        type: "button",
+        "aria-haspopup": "dialog",
+        "aria-expanded": context.open,
+        "aria-controls": context.contentId,
+        "data-state": getState$2(context.open),
+        ...triggerProps,
+        ref: composedTriggerRef,
+        onClick: composeEventHandlers(props.onClick, context.onOpenToggle)
+      }
+    );
+  }
+);
+DialogTrigger$1.displayName = TRIGGER_NAME$2;
+var PORTAL_NAME$1 = "DialogPortal";
+var [PortalProvider$1, usePortalContext$1] = createDialogContext(PORTAL_NAME$1, {
+  forceMount: void 0
+});
+var DialogPortal$1 = (props) => {
+  const { __scopeDialog, forceMount, children, container } = props;
+  const context = useDialogContext(PORTAL_NAME$1, __scopeDialog);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(PortalProvider$1, { scope: __scopeDialog, forceMount, children: reactExports.Children.map(children, (child) => /* @__PURE__ */ jsxRuntimeExports.jsx(Presence, { present: forceMount || context.open, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Portal$2, { asChild: true, container, children: child }) })) });
+};
+DialogPortal$1.displayName = PORTAL_NAME$1;
+var OVERLAY_NAME = "DialogOverlay";
+var DialogOverlay$1 = reactExports.forwardRef(
+  (props, forwardedRef) => {
+    const portalContext = usePortalContext$1(OVERLAY_NAME, props.__scopeDialog);
+    const { forceMount = portalContext.forceMount, ...overlayProps } = props;
+    const context = useDialogContext(OVERLAY_NAME, props.__scopeDialog);
+    return context.modal ? /* @__PURE__ */ jsxRuntimeExports.jsx(Presence, { present: forceMount || context.open, children: /* @__PURE__ */ jsxRuntimeExports.jsx(DialogOverlayImpl, { ...overlayProps, ref: forwardedRef }) }) : null;
+  }
+);
+DialogOverlay$1.displayName = OVERLAY_NAME;
+var Slot$1 = /* @__PURE__ */ createSlot$1("DialogOverlay.RemoveScroll");
+var DialogOverlayImpl = reactExports.forwardRef(
+  (props, forwardedRef) => {
+    const { __scopeDialog, ...overlayProps } = props;
+    const context = useDialogContext(OVERLAY_NAME, __scopeDialog);
+    return (
+      // Make sure `Content` is scrollable even when it doesn't live inside `RemoveScroll`
+      // ie. when `Overlay` and `Content` are siblings
+      /* @__PURE__ */ jsxRuntimeExports.jsx(RemoveScroll, { as: Slot$1, allowPinchZoom: true, shards: [context.contentRef], children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+        Primitive$2.div,
+        {
+          "data-state": getState$2(context.open),
+          ...overlayProps,
+          ref: forwardedRef,
+          style: { pointerEvents: "auto", ...overlayProps.style }
+        }
+      ) })
+    );
+  }
+);
+var CONTENT_NAME$2 = "DialogContent";
+var DialogContent$1 = reactExports.forwardRef(
+  (props, forwardedRef) => {
+    const portalContext = usePortalContext$1(CONTENT_NAME$2, props.__scopeDialog);
+    const { forceMount = portalContext.forceMount, ...contentProps } = props;
+    const context = useDialogContext(CONTENT_NAME$2, props.__scopeDialog);
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(Presence, { present: forceMount || context.open, children: context.modal ? /* @__PURE__ */ jsxRuntimeExports.jsx(DialogContentModal, { ...contentProps, ref: forwardedRef }) : /* @__PURE__ */ jsxRuntimeExports.jsx(DialogContentNonModal, { ...contentProps, ref: forwardedRef }) });
+  }
+);
+DialogContent$1.displayName = CONTENT_NAME$2;
+var DialogContentModal = reactExports.forwardRef(
+  (props, forwardedRef) => {
+    const context = useDialogContext(CONTENT_NAME$2, props.__scopeDialog);
+    const contentRef = reactExports.useRef(null);
+    const composedRefs = useComposedRefs$1(forwardedRef, context.contentRef, contentRef);
+    reactExports.useEffect(() => {
+      const content = contentRef.current;
+      if (content)
+        return hideOthers(content);
+    }, []);
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      DialogContentImpl,
+      {
+        ...props,
+        ref: composedRefs,
+        trapFocus: context.open,
+        disableOutsidePointerEvents: true,
+        onCloseAutoFocus: composeEventHandlers(props.onCloseAutoFocus, (event) => {
+          var _a3;
+          event.preventDefault();
+          (_a3 = context.triggerRef.current) == null ? void 0 : _a3.focus();
+        }),
+        onPointerDownOutside: composeEventHandlers(props.onPointerDownOutside, (event) => {
+          const originalEvent = event.detail.originalEvent;
+          const ctrlLeftClick = originalEvent.button === 0 && originalEvent.ctrlKey === true;
+          const isRightClick = originalEvent.button === 2 || ctrlLeftClick;
+          if (isRightClick)
+            event.preventDefault();
+        }),
+        onFocusOutside: composeEventHandlers(
+          props.onFocusOutside,
+          (event) => event.preventDefault()
+        )
+      }
+    );
+  }
+);
+var DialogContentNonModal = reactExports.forwardRef(
+  (props, forwardedRef) => {
+    const context = useDialogContext(CONTENT_NAME$2, props.__scopeDialog);
+    const hasInteractedOutsideRef = reactExports.useRef(false);
+    const hasPointerDownOutsideRef = reactExports.useRef(false);
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      DialogContentImpl,
+      {
+        ...props,
+        ref: forwardedRef,
+        trapFocus: false,
+        disableOutsidePointerEvents: false,
+        onCloseAutoFocus: (event) => {
+          var _a3, _b2;
+          (_a3 = props.onCloseAutoFocus) == null ? void 0 : _a3.call(props, event);
+          if (!event.defaultPrevented) {
+            if (!hasInteractedOutsideRef.current)
+              (_b2 = context.triggerRef.current) == null ? void 0 : _b2.focus();
+            event.preventDefault();
+          }
+          hasInteractedOutsideRef.current = false;
+          hasPointerDownOutsideRef.current = false;
+        },
+        onInteractOutside: (event) => {
+          var _a3, _b2;
+          (_a3 = props.onInteractOutside) == null ? void 0 : _a3.call(props, event);
+          if (!event.defaultPrevented) {
+            hasInteractedOutsideRef.current = true;
+            if (event.detail.originalEvent.type === "pointerdown") {
+              hasPointerDownOutsideRef.current = true;
+            }
+          }
+          const target = event.target;
+          const targetIsTrigger = (_b2 = context.triggerRef.current) == null ? void 0 : _b2.contains(target);
+          if (targetIsTrigger)
+            event.preventDefault();
+          if (event.detail.originalEvent.type === "focusin" && hasPointerDownOutsideRef.current) {
+            event.preventDefault();
+          }
+        }
+      }
+    );
+  }
+);
+var DialogContentImpl = reactExports.forwardRef(
+  (props, forwardedRef) => {
+    const { __scopeDialog, trapFocus, onOpenAutoFocus, onCloseAutoFocus, ...contentProps } = props;
+    const context = useDialogContext(CONTENT_NAME$2, __scopeDialog);
+    const contentRef = reactExports.useRef(null);
+    const composedRefs = useComposedRefs$1(forwardedRef, contentRef);
+    useFocusGuards();
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        FocusScope,
+        {
+          asChild: true,
+          loop: true,
+          trapped: trapFocus,
+          onMountAutoFocus: onOpenAutoFocus,
+          onUnmountAutoFocus: onCloseAutoFocus,
+          children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+            DismissableLayer,
+            {
+              role: "dialog",
+              id: context.contentId,
+              "aria-describedby": context.descriptionId,
+              "aria-labelledby": context.titleId,
+              "data-state": getState$2(context.open),
+              ...contentProps,
+              ref: composedRefs,
+              onDismiss: () => context.onOpenChange(false)
+            }
+          )
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(TitleWarning, { titleId: context.titleId }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(DescriptionWarning, { contentRef, descriptionId: context.descriptionId })
+      ] })
+    ] });
+  }
+);
+var TITLE_NAME = "DialogTitle";
+var DialogTitle$1 = reactExports.forwardRef(
+  (props, forwardedRef) => {
+    const { __scopeDialog, ...titleProps } = props;
+    const context = useDialogContext(TITLE_NAME, __scopeDialog);
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(Primitive$2.h2, { id: context.titleId, ...titleProps, ref: forwardedRef });
+  }
+);
+DialogTitle$1.displayName = TITLE_NAME;
+var DESCRIPTION_NAME = "DialogDescription";
+var DialogDescription$1 = reactExports.forwardRef(
+  (props, forwardedRef) => {
+    const { __scopeDialog, ...descriptionProps } = props;
+    const context = useDialogContext(DESCRIPTION_NAME, __scopeDialog);
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(Primitive$2.p, { id: context.descriptionId, ...descriptionProps, ref: forwardedRef });
+  }
+);
+DialogDescription$1.displayName = DESCRIPTION_NAME;
+var CLOSE_NAME$1 = "DialogClose";
+var DialogClose = reactExports.forwardRef(
+  (props, forwardedRef) => {
+    const { __scopeDialog, ...closeProps } = props;
+    const context = useDialogContext(CLOSE_NAME$1, __scopeDialog);
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      Primitive$2.button,
+      {
+        type: "button",
+        ...closeProps,
+        ref: forwardedRef,
+        onClick: composeEventHandlers(props.onClick, () => context.onOpenChange(false))
+      }
+    );
+  }
+);
+DialogClose.displayName = CLOSE_NAME$1;
+function getState$2(open) {
+  return open ? "open" : "closed";
+}
+var TITLE_WARNING_NAME = "DialogTitleWarning";
+var [WarningProvider, useWarningContext] = createContext2(TITLE_WARNING_NAME, {
+  contentName: CONTENT_NAME$2,
+  titleName: TITLE_NAME,
+  docsSlug: "dialog"
+});
+var TitleWarning = ({ titleId }) => {
+  const titleWarningContext = useWarningContext(TITLE_WARNING_NAME);
+  const MESSAGE = `\`${titleWarningContext.contentName}\` requires a \`${titleWarningContext.titleName}\` for the component to be accessible for screen reader users.
+
+If you want to hide the \`${titleWarningContext.titleName}\`, you can wrap it with our VisuallyHidden component.
+
+For more information, see https://radix-ui.com/primitives/docs/components/${titleWarningContext.docsSlug}`;
+  reactExports.useEffect(() => {
+    if (titleId) {
+      const hasTitle = document.getElementById(titleId);
+      if (!hasTitle)
+        console.error(MESSAGE);
+    }
+  }, [MESSAGE, titleId]);
+  return null;
+};
+var DESCRIPTION_WARNING_NAME = "DialogDescriptionWarning";
+var DescriptionWarning = ({ contentRef, descriptionId }) => {
+  const descriptionWarningContext = useWarningContext(DESCRIPTION_WARNING_NAME);
+  const MESSAGE = `Warning: Missing \`Description\` or \`aria-describedby={undefined}\` for {${descriptionWarningContext.contentName}}.`;
+  reactExports.useEffect(() => {
+    var _a3;
+    const describedById = (_a3 = contentRef.current) == null ? void 0 : _a3.getAttribute("aria-describedby");
+    if (descriptionId && describedById) {
+      const hasDescription = document.getElementById(descriptionId);
+      if (!hasDescription)
+        console.warn(MESSAGE);
+    }
+  }, [MESSAGE, contentRef, descriptionId]);
+  return null;
+};
+var Root$4 = Dialog$1;
+var Trigger$2 = DialogTrigger$1;
+var Portal$1 = DialogPortal$1;
+var Overlay = DialogOverlay$1;
+var Content$1 = DialogContent$1;
+var Title = DialogTitle$1;
+var Description = DialogDescription$1;
+var Close = DialogClose;
+const Dialog = Root$4;
+const DialogTrigger = Trigger$2;
+const DialogPortal = Portal$1;
+const DialogOverlay = reactExports.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+  Overlay,
+  {
+    ref,
+    className: cn$1(
+      "fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      className
+    ),
+    ...props
+  }
+));
+DialogOverlay.displayName = Overlay.displayName;
+const DialogContent = reactExports.forwardRef(({ className, children, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogPortal, { children: [
+  /* @__PURE__ */ jsxRuntimeExports.jsx(DialogOverlay, {}),
+  /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    Content$1,
+    {
+      ref,
+      className: cn$1(
+        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
+        className
+      ),
+      ...props,
+      children: [
+        children,
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(Close, { className: "absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity data-[state=open]:bg-accent data-[state=open]:text-muted-foreground hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(X$1, { className: "h-4 w-4" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "sr-only", children: "Close" })
+        ] })
+      ]
+    }
+  )
+] }));
+DialogContent.displayName = Content$1.displayName;
+const DialogHeader = ({ className, ...props }) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: cn$1("flex flex-col space-y-1.5 text-center sm:text-left", className), ...props });
+DialogHeader.displayName = "DialogHeader";
+const DialogTitle = reactExports.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+  Title,
+  {
+    ref,
+    className: cn$1("text-lg font-semibold leading-none tracking-tight", className),
+    ...props
+  }
+));
+DialogTitle.displayName = Title.displayName;
+const DialogDescription = reactExports.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Description, { ref, className: cn$1("text-sm text-muted-foreground", className), ...props }));
+DialogDescription.displayName = Description.displayName;
 const STORAGE_KEY = "fiesta-party-saved-players";
 function useSavedPlayers() {
   const [savedPlayers, setSavedPlayers] = reactExports.useState([]);
@@ -41024,81 +42532,110 @@ function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMultiplayer
                       )
                     ] })
                   ] }),
-                  /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3 max-h-[300px] overflow-y-auto", children: [
-                    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between mb-2", children: [
-                      /* @__PURE__ */ jsxRuntimeExports.jsxs("h3", { className: "text-sm font-semibold text-muted-foreground", children: [
-                        "Jugadores (",
-                        players.length,
-                        ")"
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-6", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between", children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
+                        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-2 h-2 rounded-full bg-primary animate-ping" }),
+                        /* @__PURE__ */ jsxRuntimeExports.jsxs("h3", { className: "text-xs font-black uppercase tracking-[0.2em] text-white/60", children: [
+                          "Operadores Conectados (",
+                          players.length,
+                          ")"
+                        ] })
                       ] }),
-                      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex gap-1", children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex gap-2", children: [
                         /* @__PURE__ */ jsxRuntimeExports.jsxs(
                           Button,
                           {
                             variant: "ghost",
                             size: "sm",
                             onClick: () => {
-                              const botName = `Bot ${Math.floor(Math.random() * 999)}`;
-                              handleAddPlayer(botName, "https://api.dicebear.com/7.x/bottts/svg?seed=" + Math.random());
+                              const botName = `Bot_${Math.floor(Math.random() * 999)}`;
+                              handleAddPlayer(botName, `https://api.dicebear.com/7.x/bottts/svg?seed=${botName}`);
                             },
-                            className: "text-xs hover:neon-box",
+                            className: "text-[10px] font-black uppercase tracking-widest hover:bg-white/5 border border-white/5",
                             children: [
-                              /* @__PURE__ */ jsxRuntimeExports.jsx(UserPlus, { className: "h-3 w-3 mr-1" }),
-                              "Bot"
+                              /* @__PURE__ */ jsxRuntimeExports.jsx(UserPlus, { className: "h-3 w-3 mr-1.5" }),
+                              "+ BOT"
                             ]
                           }
                         ),
-                        /* @__PURE__ */ jsxRuntimeExports.jsxs(
-                          Button,
-                          {
-                            variant: "ghost",
-                            size: "sm",
-                            onClick: () => {
-                              if (players.length > 0) {
-                                handleRemovePlayer(players[players.length - 1].id);
-                              }
-                            },
-                            className: "text-xs hover:neon-box",
-                            children: [
-                              /* @__PURE__ */ jsxRuntimeExports.jsx(UserX, { className: "h-3 w-3 mr-1" }),
-                              "Quitar"
-                            ]
-                          }
-                        )
+                        /* @__PURE__ */ jsxRuntimeExports.jsxs(Dialog, { children: [
+                          /* @__PURE__ */ jsxRuntimeExports.jsx(DialogTrigger, { asChild: true, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                            Button,
+                            {
+                              variant: "ghost",
+                              size: "sm",
+                              className: "text-[10px] font-black uppercase tracking-widest bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20",
+                              children: [
+                                /* @__PURE__ */ jsxRuntimeExports.jsx(Globe, { className: "h-3 w-3 mr-1.5" }),
+                                "Comunidad"
+                              ]
+                            }
+                          ) }),
+                          /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogContent, { className: "bg-slate-900/95 backdrop-blur-2xl border-white/10 text-white max-w-md", children: [
+                            /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogHeader, { children: [
+                              /* @__PURE__ */ jsxRuntimeExports.jsx(DialogTitle, { className: "text-xl font-black uppercase tracking-tighter", children: "🌐 Red de Operadores" }),
+                              /* @__PURE__ */ jsxRuntimeExports.jsx(DialogDescription, { className: "text-white/60", children: "Selecciona perfiles reales de la comunidad para invitarlos." })
+                            ] }),
+                            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-2 gap-3 py-4 max-h-[400px] overflow-y-auto pr-2", children: rankings.slice(0, 10).map((r2) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                              "button",
+                              {
+                                onClick: () => {
+                                  handleAddPlayer(asString(r2.name), r2.avatar_url);
+                                  ue$1.success(`Invitado: ${r2.name}`);
+                                },
+                                className: "flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5 hover:border-primary/50 transition-all text-left group",
+                                children: [
+                                  /* @__PURE__ */ jsxRuntimeExports.jsxs(Avatar, { className: "h-10 w-10 border border-white/10 group-hover:scale-110 transition-transform", children: [
+                                    /* @__PURE__ */ jsxRuntimeExports.jsx(AvatarImage, { src: r2.avatar_url || void 0 }),
+                                    /* @__PURE__ */ jsxRuntimeExports.jsx(AvatarFallback, { className: "bg-slate-800 text-[10px]", children: asString(r2.name).slice(0, 2) })
+                                  ] }),
+                                  /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-w-0", children: [
+                                    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs font-black truncate", children: asString(r2.name) }),
+                                    /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-[9px] text-white/40 font-bold uppercase tracking-widest", children: [
+                                      r2.total_xp || 0,
+                                      " XP"
+                                    ] })
+                                  ] })
+                                ]
+                              },
+                              r2.id
+                            )) })
+                          ] })
+                        ] })
                       ] })
                     ] }),
-                    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2", children: /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { mode: "popLayout", children: players.map((player) => {
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4", children: /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { mode: "popLayout", children: players.map((player) => {
                       var _a3;
                       const playerRanking = rankings.find((r2) => safeLower(r2.name) === safeLower(player.name));
                       const effectiveAvatar = ((_a3 = playerRanking == null ? void 0 : playerRanking.equipped_items) == null ? void 0 : _a3.avatar) || player.avatar_url;
                       return /* @__PURE__ */ jsxRuntimeExports.jsxs(
                         motion.div,
                         {
-                          initial: { opacity: 0, scale: 0.8 },
-                          animate: { opacity: 1, scale: 1 },
-                          exit: { opacity: 0, scale: 0.8 },
-                          className: "group relative bg-gradient-to-br from-white/5 via-white/10 to-white/5 backdrop-blur-sm rounded-full p-3 border-2 border-white/20 hover:border-white/40 transition-all cursor-pointer",
+                          initial: { opacity: 0, scale: 0.8, y: 10 },
+                          animate: { opacity: 1, scale: 1, y: 0 },
+                          exit: { opacity: 0, scale: 0.8, y: -10 },
+                          className: "group relative flex flex-col items-center gap-3 p-4 rounded-[32px] bg-slate-900/40 backdrop-blur-xl border border-white/10 hover:border-primary/50 transition-all cursor-pointer shadow-xl",
                           whileHover: { scale: 1.05 },
-                          whileTap: { scale: 0.95 },
                           children: [
-                            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center gap-2", children: [
-                              /* @__PURE__ */ jsxRuntimeExports.jsx(Avatar, { className: "h-14 w-14 ring-2 ring-white/30 group-hover:ring-white/60 transition-all", children: effectiveAvatar ? /* @__PURE__ */ jsxRuntimeExports.jsx(AvatarImage, { src: effectiveAvatar }) : /* @__PURE__ */ jsxRuntimeExports.jsx(AvatarFallback, { className: "bg-gradient-to-br from-white/20 to-white/30 text-white font-medium text-lg", children: player.name.slice(0, 2).toUpperCase() }) }),
-                              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-medium text-center truncate w-full text-white", children: player.name })
+                            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative", children: [
+                              /* @__PURE__ */ jsxRuntimeExports.jsx(Avatar, { className: "h-16 w-16 ring-4 ring-white/5 group-hover:ring-primary/20 transition-all duration-500 shadow-2xl", children: effectiveAvatar ? /* @__PURE__ */ jsxRuntimeExports.jsx(AvatarImage, { src: effectiveAvatar, className: "object-cover" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(AvatarFallback, { className: "bg-gradient-to-br from-slate-800 to-slate-900 text-white font-black text-xl", children: player.name.slice(0, 2).toUpperCase() }) }),
+                              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                                "button",
+                                {
+                                  onClick: (e2) => {
+                                    e2.stopPropagation();
+                                    handleRemovePlayer(player.id);
+                                  },
+                                  className: "absolute -top-1 -right-1 bg-red-500 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-red-600 active:scale-90",
+                                  children: /* @__PURE__ */ jsxRuntimeExports.jsx(X$1, { className: "h-3 w-3" })
+                                }
+                              )
                             ] }),
-                            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute inset-0 rounded-full bg-gradient-to-br from-white/10 via-white/15 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity" }),
-                            /* @__PURE__ */ jsxRuntimeExports.jsx(
-                              Button,
-                              {
-                                variant: "ghost",
-                                size: "icon",
-                                className: "absolute -top-2 -right-2 h-6 w-6 text-red-400 hover:text-red-300 bg-gradient-to-br from-black/30 to-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-all",
-                                onClick: (e2) => {
-                                  e2.stopPropagation();
-                                  handleRemovePlayer(player.id);
-                                },
-                                children: /* @__PURE__ */ jsxRuntimeExports.jsx(X$1, { className: "h-3 w-3" })
-                              }
-                            )
+                            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center min-w-0 w-full px-1", children: [
+                              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-[11px] font-black uppercase tracking-widest truncate block text-white/90", children: player.name }),
+                              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-[9px] font-bold text-primary/60 uppercase tracking-tighter", children: "Operador Listo" })
+                            ] })
                           ]
                         },
                         player.id
@@ -45574,1445 +47111,6 @@ function RoundSummary({
     }
   );
 }
-var AUTOFOCUS_ON_MOUNT = "focusScope.autoFocusOnMount";
-var AUTOFOCUS_ON_UNMOUNT = "focusScope.autoFocusOnUnmount";
-var EVENT_OPTIONS$1 = { bubbles: false, cancelable: true };
-var FOCUS_SCOPE_NAME = "FocusScope";
-var FocusScope = reactExports.forwardRef((props, forwardedRef) => {
-  const {
-    loop = false,
-    trapped = false,
-    onMountAutoFocus: onMountAutoFocusProp,
-    onUnmountAutoFocus: onUnmountAutoFocusProp,
-    ...scopeProps
-  } = props;
-  const [container, setContainer] = reactExports.useState(null);
-  const onMountAutoFocus = useCallbackRef$1(onMountAutoFocusProp);
-  const onUnmountAutoFocus = useCallbackRef$1(onUnmountAutoFocusProp);
-  const lastFocusedElementRef = reactExports.useRef(null);
-  const composedRefs = useComposedRefs$1(forwardedRef, (node) => setContainer(node));
-  const focusScope = reactExports.useRef({
-    paused: false,
-    pause() {
-      this.paused = true;
-    },
-    resume() {
-      this.paused = false;
-    }
-  }).current;
-  reactExports.useEffect(() => {
-    if (trapped) {
-      let handleFocusIn2 = function(event) {
-        if (focusScope.paused || !container)
-          return;
-        const target = event.target;
-        if (container.contains(target)) {
-          lastFocusedElementRef.current = target;
-        } else {
-          focus(lastFocusedElementRef.current, { select: true });
-        }
-      }, handleFocusOut2 = function(event) {
-        if (focusScope.paused || !container)
-          return;
-        const relatedTarget = event.relatedTarget;
-        if (relatedTarget === null)
-          return;
-        if (!container.contains(relatedTarget)) {
-          focus(lastFocusedElementRef.current, { select: true });
-        }
-      }, handleMutations2 = function(mutations) {
-        const focusedElement = document.activeElement;
-        if (focusedElement !== document.body)
-          return;
-        for (const mutation of mutations) {
-          if (mutation.removedNodes.length > 0)
-            focus(container);
-        }
-      };
-      document.addEventListener("focusin", handleFocusIn2);
-      document.addEventListener("focusout", handleFocusOut2);
-      const mutationObserver = new MutationObserver(handleMutations2);
-      if (container)
-        mutationObserver.observe(container, { childList: true, subtree: true });
-      return () => {
-        document.removeEventListener("focusin", handleFocusIn2);
-        document.removeEventListener("focusout", handleFocusOut2);
-        mutationObserver.disconnect();
-      };
-    }
-  }, [trapped, container, focusScope.paused]);
-  reactExports.useEffect(() => {
-    if (container) {
-      focusScopesStack.add(focusScope);
-      const previouslyFocusedElement = document.activeElement;
-      const hasFocusedCandidate = container.contains(previouslyFocusedElement);
-      if (!hasFocusedCandidate) {
-        const mountEvent = new CustomEvent(AUTOFOCUS_ON_MOUNT, EVENT_OPTIONS$1);
-        container.addEventListener(AUTOFOCUS_ON_MOUNT, onMountAutoFocus);
-        container.dispatchEvent(mountEvent);
-        if (!mountEvent.defaultPrevented) {
-          focusFirst$1(removeLinks(getTabbableCandidates(container)), { select: true });
-          if (document.activeElement === previouslyFocusedElement) {
-            focus(container);
-          }
-        }
-      }
-      return () => {
-        container.removeEventListener(AUTOFOCUS_ON_MOUNT, onMountAutoFocus);
-        setTimeout(() => {
-          const unmountEvent = new CustomEvent(AUTOFOCUS_ON_UNMOUNT, EVENT_OPTIONS$1);
-          container.addEventListener(AUTOFOCUS_ON_UNMOUNT, onUnmountAutoFocus);
-          container.dispatchEvent(unmountEvent);
-          if (!unmountEvent.defaultPrevented) {
-            focus(previouslyFocusedElement ?? document.body, { select: true });
-          }
-          container.removeEventListener(AUTOFOCUS_ON_UNMOUNT, onUnmountAutoFocus);
-          focusScopesStack.remove(focusScope);
-        }, 0);
-      };
-    }
-  }, [container, onMountAutoFocus, onUnmountAutoFocus, focusScope]);
-  const handleKeyDown = reactExports.useCallback(
-    (event) => {
-      if (!loop && !trapped)
-        return;
-      if (focusScope.paused)
-        return;
-      const isTabKey = event.key === "Tab" && !event.altKey && !event.ctrlKey && !event.metaKey;
-      const focusedElement = document.activeElement;
-      if (isTabKey && focusedElement) {
-        const container2 = event.currentTarget;
-        const [first, last] = getTabbableEdges(container2);
-        const hasTabbableElementsInside = first && last;
-        if (!hasTabbableElementsInside) {
-          if (focusedElement === container2)
-            event.preventDefault();
-        } else {
-          if (!event.shiftKey && focusedElement === last) {
-            event.preventDefault();
-            if (loop)
-              focus(first, { select: true });
-          } else if (event.shiftKey && focusedElement === first) {
-            event.preventDefault();
-            if (loop)
-              focus(last, { select: true });
-          }
-        }
-      }
-    },
-    [loop, trapped, focusScope.paused]
-  );
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(Primitive$2.div, { tabIndex: -1, ...scopeProps, ref: composedRefs, onKeyDown: handleKeyDown });
-});
-FocusScope.displayName = FOCUS_SCOPE_NAME;
-function focusFirst$1(candidates, { select = false } = {}) {
-  const previouslyFocusedElement = document.activeElement;
-  for (const candidate of candidates) {
-    focus(candidate, { select });
-    if (document.activeElement !== previouslyFocusedElement)
-      return;
-  }
-}
-function getTabbableEdges(container) {
-  const candidates = getTabbableCandidates(container);
-  const first = findVisible(candidates, container);
-  const last = findVisible(candidates.reverse(), container);
-  return [first, last];
-}
-function getTabbableCandidates(container) {
-  const nodes = [];
-  const walker = document.createTreeWalker(container, NodeFilter.SHOW_ELEMENT, {
-    acceptNode: (node) => {
-      const isHiddenInput = node.tagName === "INPUT" && node.type === "hidden";
-      if (node.disabled || node.hidden || isHiddenInput)
-        return NodeFilter.FILTER_SKIP;
-      return node.tabIndex >= 0 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
-    }
-  });
-  while (walker.nextNode())
-    nodes.push(walker.currentNode);
-  return nodes;
-}
-function findVisible(elements, container) {
-  for (const element of elements) {
-    if (!isHidden(element, { upTo: container }))
-      return element;
-  }
-}
-function isHidden(node, { upTo }) {
-  if (getComputedStyle(node).visibility === "hidden")
-    return true;
-  while (node) {
-    if (upTo !== void 0 && node === upTo)
-      return false;
-    if (getComputedStyle(node).display === "none")
-      return true;
-    node = node.parentElement;
-  }
-  return false;
-}
-function isSelectableInput(element) {
-  return element instanceof HTMLInputElement && "select" in element;
-}
-function focus(element, { select = false } = {}) {
-  if (element && element.focus) {
-    const previouslyFocusedElement = document.activeElement;
-    element.focus({ preventScroll: true });
-    if (element !== previouslyFocusedElement && isSelectableInput(element) && select)
-      element.select();
-  }
-}
-var focusScopesStack = createFocusScopesStack();
-function createFocusScopesStack() {
-  let stack = [];
-  return {
-    add(focusScope) {
-      const activeFocusScope = stack[0];
-      if (focusScope !== activeFocusScope) {
-        activeFocusScope == null ? void 0 : activeFocusScope.pause();
-      }
-      stack = arrayRemove(stack, focusScope);
-      stack.unshift(focusScope);
-    },
-    remove(focusScope) {
-      var _a3;
-      stack = arrayRemove(stack, focusScope);
-      (_a3 = stack[0]) == null ? void 0 : _a3.resume();
-    }
-  };
-}
-function arrayRemove(array, item) {
-  const updatedArray = [...array];
-  const index2 = updatedArray.indexOf(item);
-  if (index2 !== -1) {
-    updatedArray.splice(index2, 1);
-  }
-  return updatedArray;
-}
-function removeLinks(items) {
-  return items.filter((item) => item.tagName !== "A");
-}
-var count = 0;
-function useFocusGuards() {
-  reactExports.useEffect(() => {
-    const edgeGuards = document.querySelectorAll("[data-radix-focus-guard]");
-    document.body.insertAdjacentElement("afterbegin", edgeGuards[0] ?? createFocusGuard());
-    document.body.insertAdjacentElement("beforeend", edgeGuards[1] ?? createFocusGuard());
-    count++;
-    return () => {
-      if (count === 1) {
-        document.querySelectorAll("[data-radix-focus-guard]").forEach((node) => node.remove());
-      }
-      count--;
-    };
-  }, []);
-}
-function createFocusGuard() {
-  const element = document.createElement("span");
-  element.setAttribute("data-radix-focus-guard", "");
-  element.tabIndex = 0;
-  element.style.outline = "none";
-  element.style.opacity = "0";
-  element.style.position = "fixed";
-  element.style.pointerEvents = "none";
-  return element;
-}
-var zeroRightClassName = "right-scroll-bar-position";
-var fullWidthClassName = "width-before-scroll-bar";
-var noScrollbarsClassName = "with-scroll-bars-hidden";
-var removedBarSizeVariable = "--removed-body-scroll-bar-size";
-function assignRef(ref, value) {
-  if (typeof ref === "function") {
-    ref(value);
-  } else if (ref) {
-    ref.current = value;
-  }
-  return ref;
-}
-function useCallbackRef(initialValue, callback) {
-  var ref = reactExports.useState(function() {
-    return {
-      // value
-      value: initialValue,
-      // last callback
-      callback,
-      // "memoized" public interface
-      facade: {
-        get current() {
-          return ref.value;
-        },
-        set current(value) {
-          var last = ref.value;
-          if (last !== value) {
-            ref.value = value;
-            ref.callback(value, last);
-          }
-        }
-      }
-    };
-  })[0];
-  ref.callback = callback;
-  return ref.facade;
-}
-var useIsomorphicLayoutEffect = typeof window !== "undefined" ? reactExports.useLayoutEffect : reactExports.useEffect;
-var currentValues = /* @__PURE__ */ new WeakMap();
-function useMergeRefs(refs, defaultValue) {
-  var callbackRef = useCallbackRef(defaultValue || null, function(newValue) {
-    return refs.forEach(function(ref) {
-      return assignRef(ref, newValue);
-    });
-  });
-  useIsomorphicLayoutEffect(function() {
-    var oldValue = currentValues.get(callbackRef);
-    if (oldValue) {
-      var prevRefs_1 = new Set(oldValue);
-      var nextRefs_1 = new Set(refs);
-      var current_1 = callbackRef.current;
-      prevRefs_1.forEach(function(ref) {
-        if (!nextRefs_1.has(ref)) {
-          assignRef(ref, null);
-        }
-      });
-      nextRefs_1.forEach(function(ref) {
-        if (!prevRefs_1.has(ref)) {
-          assignRef(ref, current_1);
-        }
-      });
-    }
-    currentValues.set(callbackRef, refs);
-  }, [refs]);
-  return callbackRef;
-}
-function ItoI(a2) {
-  return a2;
-}
-function innerCreateMedium(defaults, middleware) {
-  if (middleware === void 0) {
-    middleware = ItoI;
-  }
-  var buffer = [];
-  var assigned = false;
-  var medium = {
-    read: function() {
-      if (assigned) {
-        throw new Error("Sidecar: could not `read` from an `assigned` medium. `read` could be used only with `useMedium`.");
-      }
-      if (buffer.length) {
-        return buffer[buffer.length - 1];
-      }
-      return defaults;
-    },
-    useMedium: function(data) {
-      var item = middleware(data, assigned);
-      buffer.push(item);
-      return function() {
-        buffer = buffer.filter(function(x2) {
-          return x2 !== item;
-        });
-      };
-    },
-    assignSyncMedium: function(cb2) {
-      assigned = true;
-      while (buffer.length) {
-        var cbs = buffer;
-        buffer = [];
-        cbs.forEach(cb2);
-      }
-      buffer = {
-        push: function(x2) {
-          return cb2(x2);
-        },
-        filter: function() {
-          return buffer;
-        }
-      };
-    },
-    assignMedium: function(cb2) {
-      assigned = true;
-      var pendingQueue = [];
-      if (buffer.length) {
-        var cbs = buffer;
-        buffer = [];
-        cbs.forEach(cb2);
-        pendingQueue = buffer;
-      }
-      var executeQueue = function() {
-        var cbs2 = pendingQueue;
-        pendingQueue = [];
-        cbs2.forEach(cb2);
-      };
-      var cycle = function() {
-        return Promise.resolve().then(executeQueue);
-      };
-      cycle();
-      buffer = {
-        push: function(x2) {
-          pendingQueue.push(x2);
-          cycle();
-        },
-        filter: function(filter2) {
-          pendingQueue = pendingQueue.filter(filter2);
-          return buffer;
-        }
-      };
-    }
-  };
-  return medium;
-}
-function createSidecarMedium(options) {
-  if (options === void 0) {
-    options = {};
-  }
-  var medium = innerCreateMedium(null);
-  medium.options = __assign({ async: true, ssr: false }, options);
-  return medium;
-}
-var SideCar$1 = function(_a3) {
-  var sideCar = _a3.sideCar, rest = __rest(_a3, ["sideCar"]);
-  if (!sideCar) {
-    throw new Error("Sidecar: please provide `sideCar` property to import the right car");
-  }
-  var Target2 = sideCar.read();
-  if (!Target2) {
-    throw new Error("Sidecar medium not found");
-  }
-  return reactExports.createElement(Target2, __assign({}, rest));
-};
-SideCar$1.isSideCarExport = true;
-function exportSidecar(medium, exported) {
-  medium.useMedium(exported);
-  return SideCar$1;
-}
-var effectCar = createSidecarMedium();
-var nothing = function() {
-  return;
-};
-var RemoveScroll$1 = reactExports.forwardRef(function(props, parentRef) {
-  var ref = reactExports.useRef(null);
-  var _a3 = reactExports.useState({
-    onScrollCapture: nothing,
-    onWheelCapture: nothing,
-    onTouchMoveCapture: nothing
-  }), callbacks = _a3[0], setCallbacks = _a3[1];
-  var forwardProps = props.forwardProps, children = props.children, className = props.className, removeScrollBar = props.removeScrollBar, enabled = props.enabled, shards = props.shards, sideCar = props.sideCar, noRelative = props.noRelative, noIsolation = props.noIsolation, inert = props.inert, allowPinchZoom = props.allowPinchZoom, _b2 = props.as, Container = _b2 === void 0 ? "div" : _b2, gapMode = props.gapMode, rest = __rest(props, ["forwardProps", "children", "className", "removeScrollBar", "enabled", "shards", "sideCar", "noRelative", "noIsolation", "inert", "allowPinchZoom", "as", "gapMode"]);
-  var SideCar2 = sideCar;
-  var containerRef = useMergeRefs([ref, parentRef]);
-  var containerProps = __assign(__assign({}, rest), callbacks);
-  return reactExports.createElement(
-    reactExports.Fragment,
-    null,
-    enabled && reactExports.createElement(SideCar2, { sideCar: effectCar, removeScrollBar, shards, noRelative, noIsolation, inert, setCallbacks, allowPinchZoom: !!allowPinchZoom, lockRef: ref, gapMode }),
-    forwardProps ? reactExports.cloneElement(reactExports.Children.only(children), __assign(__assign({}, containerProps), { ref: containerRef })) : reactExports.createElement(Container, __assign({}, containerProps, { className, ref: containerRef }), children)
-  );
-});
-RemoveScroll$1.defaultProps = {
-  enabled: true,
-  removeScrollBar: true,
-  inert: false
-};
-RemoveScroll$1.classNames = {
-  fullWidth: fullWidthClassName,
-  zeroRight: zeroRightClassName
-};
-var currentNonce;
-var getNonce = function() {
-  if (currentNonce) {
-    return currentNonce;
-  }
-  if (typeof __webpack_nonce__ !== "undefined") {
-    return __webpack_nonce__;
-  }
-  return void 0;
-};
-function makeStyleTag() {
-  if (!document)
-    return null;
-  var tag = document.createElement("style");
-  tag.type = "text/css";
-  var nonce = getNonce();
-  if (nonce) {
-    tag.setAttribute("nonce", nonce);
-  }
-  return tag;
-}
-function injectStyles(tag, css) {
-  if (tag.styleSheet) {
-    tag.styleSheet.cssText = css;
-  } else {
-    tag.appendChild(document.createTextNode(css));
-  }
-}
-function insertStyleTag(tag) {
-  var head2 = document.head || document.getElementsByTagName("head")[0];
-  head2.appendChild(tag);
-}
-var stylesheetSingleton = function() {
-  var counter = 0;
-  var stylesheet = null;
-  return {
-    add: function(style) {
-      if (counter == 0) {
-        if (stylesheet = makeStyleTag()) {
-          injectStyles(stylesheet, style);
-          insertStyleTag(stylesheet);
-        }
-      }
-      counter++;
-    },
-    remove: function() {
-      counter--;
-      if (!counter && stylesheet) {
-        stylesheet.parentNode && stylesheet.parentNode.removeChild(stylesheet);
-        stylesheet = null;
-      }
-    }
-  };
-};
-var styleHookSingleton = function() {
-  var sheet = stylesheetSingleton();
-  return function(styles, isDynamic) {
-    reactExports.useEffect(function() {
-      sheet.add(styles);
-      return function() {
-        sheet.remove();
-      };
-    }, [styles && isDynamic]);
-  };
-};
-var styleSingleton = function() {
-  var useStyle2 = styleHookSingleton();
-  var Sheet = function(_a3) {
-    var styles = _a3.styles, dynamic = _a3.dynamic;
-    useStyle2(styles, dynamic);
-    return null;
-  };
-  return Sheet;
-};
-var zeroGap = {
-  left: 0,
-  top: 0,
-  right: 0,
-  gap: 0
-};
-var parse = function(x2) {
-  return parseInt(x2 || "", 10) || 0;
-};
-var getOffset = function(gapMode) {
-  var cs2 = window.getComputedStyle(document.body);
-  var left = cs2[gapMode === "padding" ? "paddingLeft" : "marginLeft"];
-  var top = cs2[gapMode === "padding" ? "paddingTop" : "marginTop"];
-  var right = cs2[gapMode === "padding" ? "paddingRight" : "marginRight"];
-  return [parse(left), parse(top), parse(right)];
-};
-var getGapWidth = function(gapMode) {
-  if (gapMode === void 0) {
-    gapMode = "margin";
-  }
-  if (typeof window === "undefined") {
-    return zeroGap;
-  }
-  var offsets = getOffset(gapMode);
-  var documentWidth = document.documentElement.clientWidth;
-  var windowWidth = window.innerWidth;
-  return {
-    left: offsets[0],
-    top: offsets[1],
-    right: offsets[2],
-    gap: Math.max(0, windowWidth - documentWidth + offsets[2] - offsets[0])
-  };
-};
-var Style = styleSingleton();
-var lockAttribute = "data-scroll-locked";
-var getStyles = function(_a3, allowRelative, gapMode, important) {
-  var left = _a3.left, top = _a3.top, right = _a3.right, gap = _a3.gap;
-  if (gapMode === void 0) {
-    gapMode = "margin";
-  }
-  return "\n  .".concat(noScrollbarsClassName, " {\n   overflow: hidden ").concat(important, ";\n   padding-right: ").concat(gap, "px ").concat(important, ";\n  }\n  body[").concat(lockAttribute, "] {\n    overflow: hidden ").concat(important, ";\n    overscroll-behavior: contain;\n    ").concat([
-    allowRelative && "position: relative ".concat(important, ";"),
-    gapMode === "margin" && "\n    padding-left: ".concat(left, "px;\n    padding-top: ").concat(top, "px;\n    padding-right: ").concat(right, "px;\n    margin-left:0;\n    margin-top:0;\n    margin-right: ").concat(gap, "px ").concat(important, ";\n    "),
-    gapMode === "padding" && "padding-right: ".concat(gap, "px ").concat(important, ";")
-  ].filter(Boolean).join(""), "\n  }\n  \n  .").concat(zeroRightClassName, " {\n    right: ").concat(gap, "px ").concat(important, ";\n  }\n  \n  .").concat(fullWidthClassName, " {\n    margin-right: ").concat(gap, "px ").concat(important, ";\n  }\n  \n  .").concat(zeroRightClassName, " .").concat(zeroRightClassName, " {\n    right: 0 ").concat(important, ";\n  }\n  \n  .").concat(fullWidthClassName, " .").concat(fullWidthClassName, " {\n    margin-right: 0 ").concat(important, ";\n  }\n  \n  body[").concat(lockAttribute, "] {\n    ").concat(removedBarSizeVariable, ": ").concat(gap, "px;\n  }\n");
-};
-var getCurrentUseCounter = function() {
-  var counter = parseInt(document.body.getAttribute(lockAttribute) || "0", 10);
-  return isFinite(counter) ? counter : 0;
-};
-var useLockAttribute = function() {
-  reactExports.useEffect(function() {
-    document.body.setAttribute(lockAttribute, (getCurrentUseCounter() + 1).toString());
-    return function() {
-      var newCounter = getCurrentUseCounter() - 1;
-      if (newCounter <= 0) {
-        document.body.removeAttribute(lockAttribute);
-      } else {
-        document.body.setAttribute(lockAttribute, newCounter.toString());
-      }
-    };
-  }, []);
-};
-var RemoveScrollBar = function(_a3) {
-  var noRelative = _a3.noRelative, noImportant = _a3.noImportant, _b2 = _a3.gapMode, gapMode = _b2 === void 0 ? "margin" : _b2;
-  useLockAttribute();
-  var gap = reactExports.useMemo(function() {
-    return getGapWidth(gapMode);
-  }, [gapMode]);
-  return reactExports.createElement(Style, { styles: getStyles(gap, !noRelative, gapMode, !noImportant ? "!important" : "") });
-};
-var passiveSupported = false;
-if (typeof window !== "undefined") {
-  try {
-    var options = Object.defineProperty({}, "passive", {
-      get: function() {
-        passiveSupported = true;
-        return true;
-      }
-    });
-    window.addEventListener("test", options, options);
-    window.removeEventListener("test", options, options);
-  } catch (err) {
-    passiveSupported = false;
-  }
-}
-var nonPassive = passiveSupported ? { passive: false } : false;
-var alwaysContainsScroll = function(node) {
-  return node.tagName === "TEXTAREA";
-};
-var elementCanBeScrolled = function(node, overflow) {
-  if (!(node instanceof Element)) {
-    return false;
-  }
-  var styles = window.getComputedStyle(node);
-  return (
-    // not-not-scrollable
-    styles[overflow] !== "hidden" && // contains scroll inside self
-    !(styles.overflowY === styles.overflowX && !alwaysContainsScroll(node) && styles[overflow] === "visible")
-  );
-};
-var elementCouldBeVScrolled = function(node) {
-  return elementCanBeScrolled(node, "overflowY");
-};
-var elementCouldBeHScrolled = function(node) {
-  return elementCanBeScrolled(node, "overflowX");
-};
-var locationCouldBeScrolled = function(axis, node) {
-  var ownerDocument = node.ownerDocument;
-  var current = node;
-  do {
-    if (typeof ShadowRoot !== "undefined" && current instanceof ShadowRoot) {
-      current = current.host;
-    }
-    var isScrollable = elementCouldBeScrolled(axis, current);
-    if (isScrollable) {
-      var _a3 = getScrollVariables(axis, current), scrollHeight = _a3[1], clientHeight = _a3[2];
-      if (scrollHeight > clientHeight) {
-        return true;
-      }
-    }
-    current = current.parentNode;
-  } while (current && current !== ownerDocument.body);
-  return false;
-};
-var getVScrollVariables = function(_a3) {
-  var scrollTop = _a3.scrollTop, scrollHeight = _a3.scrollHeight, clientHeight = _a3.clientHeight;
-  return [
-    scrollTop,
-    scrollHeight,
-    clientHeight
-  ];
-};
-var getHScrollVariables = function(_a3) {
-  var scrollLeft = _a3.scrollLeft, scrollWidth = _a3.scrollWidth, clientWidth = _a3.clientWidth;
-  return [
-    scrollLeft,
-    scrollWidth,
-    clientWidth
-  ];
-};
-var elementCouldBeScrolled = function(axis, node) {
-  return axis === "v" ? elementCouldBeVScrolled(node) : elementCouldBeHScrolled(node);
-};
-var getScrollVariables = function(axis, node) {
-  return axis === "v" ? getVScrollVariables(node) : getHScrollVariables(node);
-};
-var getDirectionFactor = function(axis, direction) {
-  return axis === "h" && direction === "rtl" ? -1 : 1;
-};
-var handleScroll = function(axis, endTarget, event, sourceDelta, noOverscroll) {
-  var directionFactor = getDirectionFactor(axis, window.getComputedStyle(endTarget).direction);
-  var delta = directionFactor * sourceDelta;
-  var target = event.target;
-  var targetInLock = endTarget.contains(target);
-  var shouldCancelScroll = false;
-  var isDeltaPositive = delta > 0;
-  var availableScroll = 0;
-  var availableScrollTop = 0;
-  do {
-    if (!target) {
-      break;
-    }
-    var _a3 = getScrollVariables(axis, target), position = _a3[0], scroll_1 = _a3[1], capacity = _a3[2];
-    var elementScroll = scroll_1 - capacity - directionFactor * position;
-    if (position || elementScroll) {
-      if (elementCouldBeScrolled(axis, target)) {
-        availableScroll += elementScroll;
-        availableScrollTop += position;
-      }
-    }
-    var parent_1 = target.parentNode;
-    target = parent_1 && parent_1.nodeType === Node.DOCUMENT_FRAGMENT_NODE ? parent_1.host : parent_1;
-  } while (
-    // portaled content
-    !targetInLock && target !== document.body || // self content
-    targetInLock && (endTarget.contains(target) || endTarget === target)
-  );
-  if (isDeltaPositive && (noOverscroll && Math.abs(availableScroll) < 1 || !noOverscroll && delta > availableScroll)) {
-    shouldCancelScroll = true;
-  } else if (!isDeltaPositive && (noOverscroll && Math.abs(availableScrollTop) < 1 || !noOverscroll && -delta > availableScrollTop)) {
-    shouldCancelScroll = true;
-  }
-  return shouldCancelScroll;
-};
-var getTouchXY = function(event) {
-  return "changedTouches" in event ? [event.changedTouches[0].clientX, event.changedTouches[0].clientY] : [0, 0];
-};
-var getDeltaXY = function(event) {
-  return [event.deltaX, event.deltaY];
-};
-var extractRef = function(ref) {
-  return ref && "current" in ref ? ref.current : ref;
-};
-var deltaCompare = function(x2, y2) {
-  return x2[0] === y2[0] && x2[1] === y2[1];
-};
-var generateStyle = function(id2) {
-  return "\n  .block-interactivity-".concat(id2, " {pointer-events: none;}\n  .allow-interactivity-").concat(id2, " {pointer-events: all;}\n");
-};
-var idCounter = 0;
-var lockStack = [];
-function RemoveScrollSideCar(props) {
-  var shouldPreventQueue = reactExports.useRef([]);
-  var touchStartRef = reactExports.useRef([0, 0]);
-  var activeAxis = reactExports.useRef();
-  var id2 = reactExports.useState(idCounter++)[0];
-  var Style2 = reactExports.useState(styleSingleton)[0];
-  var lastProps = reactExports.useRef(props);
-  reactExports.useEffect(function() {
-    lastProps.current = props;
-  }, [props]);
-  reactExports.useEffect(function() {
-    if (props.inert) {
-      document.body.classList.add("block-interactivity-".concat(id2));
-      var allow_1 = __spreadArray([props.lockRef.current], (props.shards || []).map(extractRef), true).filter(Boolean);
-      allow_1.forEach(function(el2) {
-        return el2.classList.add("allow-interactivity-".concat(id2));
-      });
-      return function() {
-        document.body.classList.remove("block-interactivity-".concat(id2));
-        allow_1.forEach(function(el2) {
-          return el2.classList.remove("allow-interactivity-".concat(id2));
-        });
-      };
-    }
-    return;
-  }, [props.inert, props.lockRef.current, props.shards]);
-  var shouldCancelEvent = reactExports.useCallback(function(event, parent) {
-    if ("touches" in event && event.touches.length === 2 || event.type === "wheel" && event.ctrlKey) {
-      return !lastProps.current.allowPinchZoom;
-    }
-    var touch = getTouchXY(event);
-    var touchStart = touchStartRef.current;
-    var deltaX = "deltaX" in event ? event.deltaX : touchStart[0] - touch[0];
-    var deltaY = "deltaY" in event ? event.deltaY : touchStart[1] - touch[1];
-    var currentAxis;
-    var target = event.target;
-    var moveDirection = Math.abs(deltaX) > Math.abs(deltaY) ? "h" : "v";
-    if ("touches" in event && moveDirection === "h" && target.type === "range") {
-      return false;
-    }
-    var selection = window.getSelection();
-    var anchorNode = selection && selection.anchorNode;
-    var isTouchingSelection = anchorNode ? anchorNode === target || anchorNode.contains(target) : false;
-    if (isTouchingSelection) {
-      return false;
-    }
-    var canBeScrolledInMainDirection = locationCouldBeScrolled(moveDirection, target);
-    if (!canBeScrolledInMainDirection) {
-      return true;
-    }
-    if (canBeScrolledInMainDirection) {
-      currentAxis = moveDirection;
-    } else {
-      currentAxis = moveDirection === "v" ? "h" : "v";
-      canBeScrolledInMainDirection = locationCouldBeScrolled(moveDirection, target);
-    }
-    if (!canBeScrolledInMainDirection) {
-      return false;
-    }
-    if (!activeAxis.current && "changedTouches" in event && (deltaX || deltaY)) {
-      activeAxis.current = currentAxis;
-    }
-    if (!currentAxis) {
-      return true;
-    }
-    var cancelingAxis = activeAxis.current || currentAxis;
-    return handleScroll(cancelingAxis, parent, event, cancelingAxis === "h" ? deltaX : deltaY, true);
-  }, []);
-  var shouldPrevent = reactExports.useCallback(function(_event) {
-    var event = _event;
-    if (!lockStack.length || lockStack[lockStack.length - 1] !== Style2) {
-      return;
-    }
-    var delta = "deltaY" in event ? getDeltaXY(event) : getTouchXY(event);
-    var sourceEvent = shouldPreventQueue.current.filter(function(e2) {
-      return e2.name === event.type && (e2.target === event.target || event.target === e2.shadowParent) && deltaCompare(e2.delta, delta);
-    })[0];
-    if (sourceEvent && sourceEvent.should) {
-      if (event.cancelable) {
-        event.preventDefault();
-      }
-      return;
-    }
-    if (!sourceEvent) {
-      var shardNodes = (lastProps.current.shards || []).map(extractRef).filter(Boolean).filter(function(node) {
-        return node.contains(event.target);
-      });
-      var shouldStop = shardNodes.length > 0 ? shouldCancelEvent(event, shardNodes[0]) : !lastProps.current.noIsolation;
-      if (shouldStop) {
-        if (event.cancelable) {
-          event.preventDefault();
-        }
-      }
-    }
-  }, []);
-  var shouldCancel = reactExports.useCallback(function(name, delta, target, should) {
-    var event = { name, delta, target, should, shadowParent: getOutermostShadowParent(target) };
-    shouldPreventQueue.current.push(event);
-    setTimeout(function() {
-      shouldPreventQueue.current = shouldPreventQueue.current.filter(function(e2) {
-        return e2 !== event;
-      });
-    }, 1);
-  }, []);
-  var scrollTouchStart = reactExports.useCallback(function(event) {
-    touchStartRef.current = getTouchXY(event);
-    activeAxis.current = void 0;
-  }, []);
-  var scrollWheel = reactExports.useCallback(function(event) {
-    shouldCancel(event.type, getDeltaXY(event), event.target, shouldCancelEvent(event, props.lockRef.current));
-  }, []);
-  var scrollTouchMove = reactExports.useCallback(function(event) {
-    shouldCancel(event.type, getTouchXY(event), event.target, shouldCancelEvent(event, props.lockRef.current));
-  }, []);
-  reactExports.useEffect(function() {
-    lockStack.push(Style2);
-    props.setCallbacks({
-      onScrollCapture: scrollWheel,
-      onWheelCapture: scrollWheel,
-      onTouchMoveCapture: scrollTouchMove
-    });
-    document.addEventListener("wheel", shouldPrevent, nonPassive);
-    document.addEventListener("touchmove", shouldPrevent, nonPassive);
-    document.addEventListener("touchstart", scrollTouchStart, nonPassive);
-    return function() {
-      lockStack = lockStack.filter(function(inst) {
-        return inst !== Style2;
-      });
-      document.removeEventListener("wheel", shouldPrevent, nonPassive);
-      document.removeEventListener("touchmove", shouldPrevent, nonPassive);
-      document.removeEventListener("touchstart", scrollTouchStart, nonPassive);
-    };
-  }, []);
-  var removeScrollBar = props.removeScrollBar, inert = props.inert;
-  return reactExports.createElement(
-    reactExports.Fragment,
-    null,
-    inert ? reactExports.createElement(Style2, { styles: generateStyle(id2) }) : null,
-    removeScrollBar ? reactExports.createElement(RemoveScrollBar, { noRelative: props.noRelative, gapMode: props.gapMode }) : null
-  );
-}
-function getOutermostShadowParent(node) {
-  var shadowParent = null;
-  while (node !== null) {
-    if (node instanceof ShadowRoot) {
-      shadowParent = node.host;
-      node = node.host;
-    }
-    node = node.parentNode;
-  }
-  return shadowParent;
-}
-const SideCar = exportSidecar(effectCar, RemoveScrollSideCar);
-var ReactRemoveScroll = reactExports.forwardRef(function(props, ref) {
-  return reactExports.createElement(RemoveScroll$1, __assign({}, props, { ref, sideCar: SideCar }));
-});
-ReactRemoveScroll.classNames = RemoveScroll$1.classNames;
-const RemoveScroll = ReactRemoveScroll;
-var getDefaultParent = function(originalTarget) {
-  if (typeof document === "undefined") {
-    return null;
-  }
-  var sampleTarget = Array.isArray(originalTarget) ? originalTarget[0] : originalTarget;
-  return sampleTarget.ownerDocument.body;
-};
-var counterMap = /* @__PURE__ */ new WeakMap();
-var uncontrolledNodes = /* @__PURE__ */ new WeakMap();
-var markerMap = {};
-var lockCount = 0;
-var unwrapHost = function(node) {
-  return node && (node.host || unwrapHost(node.parentNode));
-};
-var correctTargets = function(parent, targets) {
-  return targets.map(function(target) {
-    if (parent.contains(target)) {
-      return target;
-    }
-    var correctedTarget = unwrapHost(target);
-    if (correctedTarget && parent.contains(correctedTarget)) {
-      return correctedTarget;
-    }
-    console.error("aria-hidden", target, "in not contained inside", parent, ". Doing nothing");
-    return null;
-  }).filter(function(x2) {
-    return Boolean(x2);
-  });
-};
-var applyAttributeToOthers = function(originalTarget, parentNode, markerName, controlAttribute) {
-  var targets = correctTargets(parentNode, Array.isArray(originalTarget) ? originalTarget : [originalTarget]);
-  if (!markerMap[markerName]) {
-    markerMap[markerName] = /* @__PURE__ */ new WeakMap();
-  }
-  var markerCounter = markerMap[markerName];
-  var hiddenNodes = [];
-  var elementsToKeep = /* @__PURE__ */ new Set();
-  var elementsToStop = new Set(targets);
-  var keep = function(el2) {
-    if (!el2 || elementsToKeep.has(el2)) {
-      return;
-    }
-    elementsToKeep.add(el2);
-    keep(el2.parentNode);
-  };
-  targets.forEach(keep);
-  var deep = function(parent) {
-    if (!parent || elementsToStop.has(parent)) {
-      return;
-    }
-    Array.prototype.forEach.call(parent.children, function(node) {
-      if (elementsToKeep.has(node)) {
-        deep(node);
-      } else {
-        try {
-          var attr = node.getAttribute(controlAttribute);
-          var alreadyHidden = attr !== null && attr !== "false";
-          var counterValue = (counterMap.get(node) || 0) + 1;
-          var markerValue = (markerCounter.get(node) || 0) + 1;
-          counterMap.set(node, counterValue);
-          markerCounter.set(node, markerValue);
-          hiddenNodes.push(node);
-          if (counterValue === 1 && alreadyHidden) {
-            uncontrolledNodes.set(node, true);
-          }
-          if (markerValue === 1) {
-            node.setAttribute(markerName, "true");
-          }
-          if (!alreadyHidden) {
-            node.setAttribute(controlAttribute, "true");
-          }
-        } catch (e2) {
-          console.error("aria-hidden: cannot operate on ", node, e2);
-        }
-      }
-    });
-  };
-  deep(parentNode);
-  elementsToKeep.clear();
-  lockCount++;
-  return function() {
-    hiddenNodes.forEach(function(node) {
-      var counterValue = counterMap.get(node) - 1;
-      var markerValue = markerCounter.get(node) - 1;
-      counterMap.set(node, counterValue);
-      markerCounter.set(node, markerValue);
-      if (!counterValue) {
-        if (!uncontrolledNodes.has(node)) {
-          node.removeAttribute(controlAttribute);
-        }
-        uncontrolledNodes.delete(node);
-      }
-      if (!markerValue) {
-        node.removeAttribute(markerName);
-      }
-    });
-    lockCount--;
-    if (!lockCount) {
-      counterMap = /* @__PURE__ */ new WeakMap();
-      counterMap = /* @__PURE__ */ new WeakMap();
-      uncontrolledNodes = /* @__PURE__ */ new WeakMap();
-      markerMap = {};
-    }
-  };
-};
-var hideOthers = function(originalTarget, parentNode, markerName) {
-  if (markerName === void 0) {
-    markerName = "data-aria-hidden";
-  }
-  var targets = Array.from(Array.isArray(originalTarget) ? originalTarget : [originalTarget]);
-  var activeParentNode = parentNode || getDefaultParent(originalTarget);
-  if (!activeParentNode) {
-    return function() {
-      return null;
-    };
-  }
-  targets.push.apply(targets, Array.from(activeParentNode.querySelectorAll("[aria-live], script")));
-  return applyAttributeToOthers(targets, activeParentNode, markerName, "aria-hidden");
-};
-// @__NO_SIDE_EFFECTS__
-function createSlot$1(ownerName) {
-  const SlotClone = /* @__PURE__ */ createSlotClone$1(ownerName);
-  const Slot2 = reactExports.forwardRef((props, forwardedRef) => {
-    const { children, ...slotProps } = props;
-    const childrenArray = reactExports.Children.toArray(children);
-    const slottable = childrenArray.find(isSlottable$1);
-    if (slottable) {
-      const newElement = slottable.props.children;
-      const newChildren = childrenArray.map((child) => {
-        if (child === slottable) {
-          if (reactExports.Children.count(newElement) > 1)
-            return reactExports.Children.only(null);
-          return reactExports.isValidElement(newElement) ? newElement.props.children : null;
-        } else {
-          return child;
-        }
-      });
-      return /* @__PURE__ */ jsxRuntimeExports.jsx(SlotClone, { ...slotProps, ref: forwardedRef, children: reactExports.isValidElement(newElement) ? reactExports.cloneElement(newElement, void 0, newChildren) : null });
-    }
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(SlotClone, { ...slotProps, ref: forwardedRef, children });
-  });
-  Slot2.displayName = `${ownerName}.Slot`;
-  return Slot2;
-}
-// @__NO_SIDE_EFFECTS__
-function createSlotClone$1(ownerName) {
-  const SlotClone = reactExports.forwardRef((props, forwardedRef) => {
-    const { children, ...slotProps } = props;
-    if (reactExports.isValidElement(children)) {
-      const childrenRef = getElementRef$1(children);
-      const props2 = mergeProps$1(slotProps, children.props);
-      if (children.type !== reactExports.Fragment) {
-        props2.ref = forwardedRef ? composeRefs$1(forwardedRef, childrenRef) : childrenRef;
-      }
-      return reactExports.cloneElement(children, props2);
-    }
-    return reactExports.Children.count(children) > 1 ? reactExports.Children.only(null) : null;
-  });
-  SlotClone.displayName = `${ownerName}.SlotClone`;
-  return SlotClone;
-}
-var SLOTTABLE_IDENTIFIER$1 = Symbol("radix.slottable");
-function isSlottable$1(child) {
-  return reactExports.isValidElement(child) && typeof child.type === "function" && "__radixId" in child.type && child.type.__radixId === SLOTTABLE_IDENTIFIER$1;
-}
-function mergeProps$1(slotProps, childProps) {
-  const overrideProps = { ...childProps };
-  for (const propName in childProps) {
-    const slotPropValue = slotProps[propName];
-    const childPropValue = childProps[propName];
-    const isHandler = /^on[A-Z]/.test(propName);
-    if (isHandler) {
-      if (slotPropValue && childPropValue) {
-        overrideProps[propName] = (...args) => {
-          const result = childPropValue(...args);
-          slotPropValue(...args);
-          return result;
-        };
-      } else if (slotPropValue) {
-        overrideProps[propName] = slotPropValue;
-      }
-    } else if (propName === "style") {
-      overrideProps[propName] = { ...slotPropValue, ...childPropValue };
-    } else if (propName === "className") {
-      overrideProps[propName] = [slotPropValue, childPropValue].filter(Boolean).join(" ");
-    }
-  }
-  return { ...slotProps, ...overrideProps };
-}
-function getElementRef$1(element) {
-  var _a3, _b2;
-  let getter = (_a3 = Object.getOwnPropertyDescriptor(element.props, "ref")) == null ? void 0 : _a3.get;
-  let mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
-  if (mayWarn) {
-    return element.ref;
-  }
-  getter = (_b2 = Object.getOwnPropertyDescriptor(element, "ref")) == null ? void 0 : _b2.get;
-  mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
-  if (mayWarn) {
-    return element.props.ref;
-  }
-  return element.props.ref || element.ref;
-}
-var DIALOG_NAME = "Dialog";
-var [createDialogContext, createDialogScope] = createContextScope$1(DIALOG_NAME);
-var [DialogProvider, useDialogContext] = createDialogContext(DIALOG_NAME);
-var Dialog$1 = (props) => {
-  const {
-    __scopeDialog,
-    children,
-    open: openProp,
-    defaultOpen,
-    onOpenChange,
-    modal = true
-  } = props;
-  const triggerRef = reactExports.useRef(null);
-  const contentRef = reactExports.useRef(null);
-  const [open, setOpen] = useControllableState({
-    prop: openProp,
-    defaultProp: defaultOpen ?? false,
-    onChange: onOpenChange,
-    caller: DIALOG_NAME
-  });
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(
-    DialogProvider,
-    {
-      scope: __scopeDialog,
-      triggerRef,
-      contentRef,
-      contentId: useId(),
-      titleId: useId(),
-      descriptionId: useId(),
-      open,
-      onOpenChange: setOpen,
-      onOpenToggle: reactExports.useCallback(() => setOpen((prevOpen) => !prevOpen), [setOpen]),
-      modal,
-      children
-    }
-  );
-};
-Dialog$1.displayName = DIALOG_NAME;
-var TRIGGER_NAME$2 = "DialogTrigger";
-var DialogTrigger$1 = reactExports.forwardRef(
-  (props, forwardedRef) => {
-    const { __scopeDialog, ...triggerProps } = props;
-    const context = useDialogContext(TRIGGER_NAME$2, __scopeDialog);
-    const composedTriggerRef = useComposedRefs$1(forwardedRef, context.triggerRef);
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(
-      Primitive$2.button,
-      {
-        type: "button",
-        "aria-haspopup": "dialog",
-        "aria-expanded": context.open,
-        "aria-controls": context.contentId,
-        "data-state": getState$2(context.open),
-        ...triggerProps,
-        ref: composedTriggerRef,
-        onClick: composeEventHandlers(props.onClick, context.onOpenToggle)
-      }
-    );
-  }
-);
-DialogTrigger$1.displayName = TRIGGER_NAME$2;
-var PORTAL_NAME$1 = "DialogPortal";
-var [PortalProvider$1, usePortalContext$1] = createDialogContext(PORTAL_NAME$1, {
-  forceMount: void 0
-});
-var DialogPortal$1 = (props) => {
-  const { __scopeDialog, forceMount, children, container } = props;
-  const context = useDialogContext(PORTAL_NAME$1, __scopeDialog);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(PortalProvider$1, { scope: __scopeDialog, forceMount, children: reactExports.Children.map(children, (child) => /* @__PURE__ */ jsxRuntimeExports.jsx(Presence, { present: forceMount || context.open, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Portal$2, { asChild: true, container, children: child }) })) });
-};
-DialogPortal$1.displayName = PORTAL_NAME$1;
-var OVERLAY_NAME = "DialogOverlay";
-var DialogOverlay$1 = reactExports.forwardRef(
-  (props, forwardedRef) => {
-    const portalContext = usePortalContext$1(OVERLAY_NAME, props.__scopeDialog);
-    const { forceMount = portalContext.forceMount, ...overlayProps } = props;
-    const context = useDialogContext(OVERLAY_NAME, props.__scopeDialog);
-    return context.modal ? /* @__PURE__ */ jsxRuntimeExports.jsx(Presence, { present: forceMount || context.open, children: /* @__PURE__ */ jsxRuntimeExports.jsx(DialogOverlayImpl, { ...overlayProps, ref: forwardedRef }) }) : null;
-  }
-);
-DialogOverlay$1.displayName = OVERLAY_NAME;
-var Slot$1 = /* @__PURE__ */ createSlot$1("DialogOverlay.RemoveScroll");
-var DialogOverlayImpl = reactExports.forwardRef(
-  (props, forwardedRef) => {
-    const { __scopeDialog, ...overlayProps } = props;
-    const context = useDialogContext(OVERLAY_NAME, __scopeDialog);
-    return (
-      // Make sure `Content` is scrollable even when it doesn't live inside `RemoveScroll`
-      // ie. when `Overlay` and `Content` are siblings
-      /* @__PURE__ */ jsxRuntimeExports.jsx(RemoveScroll, { as: Slot$1, allowPinchZoom: true, shards: [context.contentRef], children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-        Primitive$2.div,
-        {
-          "data-state": getState$2(context.open),
-          ...overlayProps,
-          ref: forwardedRef,
-          style: { pointerEvents: "auto", ...overlayProps.style }
-        }
-      ) })
-    );
-  }
-);
-var CONTENT_NAME$2 = "DialogContent";
-var DialogContent$1 = reactExports.forwardRef(
-  (props, forwardedRef) => {
-    const portalContext = usePortalContext$1(CONTENT_NAME$2, props.__scopeDialog);
-    const { forceMount = portalContext.forceMount, ...contentProps } = props;
-    const context = useDialogContext(CONTENT_NAME$2, props.__scopeDialog);
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(Presence, { present: forceMount || context.open, children: context.modal ? /* @__PURE__ */ jsxRuntimeExports.jsx(DialogContentModal, { ...contentProps, ref: forwardedRef }) : /* @__PURE__ */ jsxRuntimeExports.jsx(DialogContentNonModal, { ...contentProps, ref: forwardedRef }) });
-  }
-);
-DialogContent$1.displayName = CONTENT_NAME$2;
-var DialogContentModal = reactExports.forwardRef(
-  (props, forwardedRef) => {
-    const context = useDialogContext(CONTENT_NAME$2, props.__scopeDialog);
-    const contentRef = reactExports.useRef(null);
-    const composedRefs = useComposedRefs$1(forwardedRef, context.contentRef, contentRef);
-    reactExports.useEffect(() => {
-      const content = contentRef.current;
-      if (content)
-        return hideOthers(content);
-    }, []);
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(
-      DialogContentImpl,
-      {
-        ...props,
-        ref: composedRefs,
-        trapFocus: context.open,
-        disableOutsidePointerEvents: true,
-        onCloseAutoFocus: composeEventHandlers(props.onCloseAutoFocus, (event) => {
-          var _a3;
-          event.preventDefault();
-          (_a3 = context.triggerRef.current) == null ? void 0 : _a3.focus();
-        }),
-        onPointerDownOutside: composeEventHandlers(props.onPointerDownOutside, (event) => {
-          const originalEvent = event.detail.originalEvent;
-          const ctrlLeftClick = originalEvent.button === 0 && originalEvent.ctrlKey === true;
-          const isRightClick = originalEvent.button === 2 || ctrlLeftClick;
-          if (isRightClick)
-            event.preventDefault();
-        }),
-        onFocusOutside: composeEventHandlers(
-          props.onFocusOutside,
-          (event) => event.preventDefault()
-        )
-      }
-    );
-  }
-);
-var DialogContentNonModal = reactExports.forwardRef(
-  (props, forwardedRef) => {
-    const context = useDialogContext(CONTENT_NAME$2, props.__scopeDialog);
-    const hasInteractedOutsideRef = reactExports.useRef(false);
-    const hasPointerDownOutsideRef = reactExports.useRef(false);
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(
-      DialogContentImpl,
-      {
-        ...props,
-        ref: forwardedRef,
-        trapFocus: false,
-        disableOutsidePointerEvents: false,
-        onCloseAutoFocus: (event) => {
-          var _a3, _b2;
-          (_a3 = props.onCloseAutoFocus) == null ? void 0 : _a3.call(props, event);
-          if (!event.defaultPrevented) {
-            if (!hasInteractedOutsideRef.current)
-              (_b2 = context.triggerRef.current) == null ? void 0 : _b2.focus();
-            event.preventDefault();
-          }
-          hasInteractedOutsideRef.current = false;
-          hasPointerDownOutsideRef.current = false;
-        },
-        onInteractOutside: (event) => {
-          var _a3, _b2;
-          (_a3 = props.onInteractOutside) == null ? void 0 : _a3.call(props, event);
-          if (!event.defaultPrevented) {
-            hasInteractedOutsideRef.current = true;
-            if (event.detail.originalEvent.type === "pointerdown") {
-              hasPointerDownOutsideRef.current = true;
-            }
-          }
-          const target = event.target;
-          const targetIsTrigger = (_b2 = context.triggerRef.current) == null ? void 0 : _b2.contains(target);
-          if (targetIsTrigger)
-            event.preventDefault();
-          if (event.detail.originalEvent.type === "focusin" && hasPointerDownOutsideRef.current) {
-            event.preventDefault();
-          }
-        }
-      }
-    );
-  }
-);
-var DialogContentImpl = reactExports.forwardRef(
-  (props, forwardedRef) => {
-    const { __scopeDialog, trapFocus, onOpenAutoFocus, onCloseAutoFocus, ...contentProps } = props;
-    const context = useDialogContext(CONTENT_NAME$2, __scopeDialog);
-    const contentRef = reactExports.useRef(null);
-    const composedRefs = useComposedRefs$1(forwardedRef, contentRef);
-    useFocusGuards();
-    return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        FocusScope,
-        {
-          asChild: true,
-          loop: true,
-          trapped: trapFocus,
-          onMountAutoFocus: onOpenAutoFocus,
-          onUnmountAutoFocus: onCloseAutoFocus,
-          children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-            DismissableLayer,
-            {
-              role: "dialog",
-              id: context.contentId,
-              "aria-describedby": context.descriptionId,
-              "aria-labelledby": context.titleId,
-              "data-state": getState$2(context.open),
-              ...contentProps,
-              ref: composedRefs,
-              onDismiss: () => context.onOpenChange(false)
-            }
-          )
-        }
-      ),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(TitleWarning, { titleId: context.titleId }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(DescriptionWarning, { contentRef, descriptionId: context.descriptionId })
-      ] })
-    ] });
-  }
-);
-var TITLE_NAME = "DialogTitle";
-var DialogTitle$1 = reactExports.forwardRef(
-  (props, forwardedRef) => {
-    const { __scopeDialog, ...titleProps } = props;
-    const context = useDialogContext(TITLE_NAME, __scopeDialog);
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(Primitive$2.h2, { id: context.titleId, ...titleProps, ref: forwardedRef });
-  }
-);
-DialogTitle$1.displayName = TITLE_NAME;
-var DESCRIPTION_NAME = "DialogDescription";
-var DialogDescription$1 = reactExports.forwardRef(
-  (props, forwardedRef) => {
-    const { __scopeDialog, ...descriptionProps } = props;
-    const context = useDialogContext(DESCRIPTION_NAME, __scopeDialog);
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(Primitive$2.p, { id: context.descriptionId, ...descriptionProps, ref: forwardedRef });
-  }
-);
-DialogDescription$1.displayName = DESCRIPTION_NAME;
-var CLOSE_NAME$1 = "DialogClose";
-var DialogClose = reactExports.forwardRef(
-  (props, forwardedRef) => {
-    const { __scopeDialog, ...closeProps } = props;
-    const context = useDialogContext(CLOSE_NAME$1, __scopeDialog);
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(
-      Primitive$2.button,
-      {
-        type: "button",
-        ...closeProps,
-        ref: forwardedRef,
-        onClick: composeEventHandlers(props.onClick, () => context.onOpenChange(false))
-      }
-    );
-  }
-);
-DialogClose.displayName = CLOSE_NAME$1;
-function getState$2(open) {
-  return open ? "open" : "closed";
-}
-var TITLE_WARNING_NAME = "DialogTitleWarning";
-var [WarningProvider, useWarningContext] = createContext2(TITLE_WARNING_NAME, {
-  contentName: CONTENT_NAME$2,
-  titleName: TITLE_NAME,
-  docsSlug: "dialog"
-});
-var TitleWarning = ({ titleId }) => {
-  const titleWarningContext = useWarningContext(TITLE_WARNING_NAME);
-  const MESSAGE = `\`${titleWarningContext.contentName}\` requires a \`${titleWarningContext.titleName}\` for the component to be accessible for screen reader users.
-
-If you want to hide the \`${titleWarningContext.titleName}\`, you can wrap it with our VisuallyHidden component.
-
-For more information, see https://radix-ui.com/primitives/docs/components/${titleWarningContext.docsSlug}`;
-  reactExports.useEffect(() => {
-    if (titleId) {
-      const hasTitle = document.getElementById(titleId);
-      if (!hasTitle)
-        console.error(MESSAGE);
-    }
-  }, [MESSAGE, titleId]);
-  return null;
-};
-var DESCRIPTION_WARNING_NAME = "DialogDescriptionWarning";
-var DescriptionWarning = ({ contentRef, descriptionId }) => {
-  const descriptionWarningContext = useWarningContext(DESCRIPTION_WARNING_NAME);
-  const MESSAGE = `Warning: Missing \`Description\` or \`aria-describedby={undefined}\` for {${descriptionWarningContext.contentName}}.`;
-  reactExports.useEffect(() => {
-    var _a3;
-    const describedById = (_a3 = contentRef.current) == null ? void 0 : _a3.getAttribute("aria-describedby");
-    if (descriptionId && describedById) {
-      const hasDescription = document.getElementById(descriptionId);
-      if (!hasDescription)
-        console.warn(MESSAGE);
-    }
-  }, [MESSAGE, contentRef, descriptionId]);
-  return null;
-};
-var Root$4 = Dialog$1;
-var Trigger$2 = DialogTrigger$1;
-var Portal$1 = DialogPortal$1;
-var Overlay = DialogOverlay$1;
-var Content$1 = DialogContent$1;
-var Title = DialogTitle$1;
-var Description = DialogDescription$1;
-var Close = DialogClose;
-const Dialog = Root$4;
-const DialogTrigger = Trigger$2;
-const DialogPortal = Portal$1;
-const DialogOverlay = reactExports.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(
-  Overlay,
-  {
-    ref,
-    className: cn$1(
-      "fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-      className
-    ),
-    ...props
-  }
-));
-DialogOverlay.displayName = Overlay.displayName;
-const DialogContent = reactExports.forwardRef(({ className, children, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogPortal, { children: [
-  /* @__PURE__ */ jsxRuntimeExports.jsx(DialogOverlay, {}),
-  /* @__PURE__ */ jsxRuntimeExports.jsxs(
-    Content$1,
-    {
-      ref,
-      className: cn$1(
-        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
-        className
-      ),
-      ...props,
-      children: [
-        children,
-        /* @__PURE__ */ jsxRuntimeExports.jsxs(Close, { className: "absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity data-[state=open]:bg-accent data-[state=open]:text-muted-foreground hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(X$1, { className: "h-4 w-4" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "sr-only", children: "Close" })
-        ] })
-      ]
-    }
-  )
-] }));
-DialogContent.displayName = Content$1.displayName;
-const DialogHeader = ({ className, ...props }) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: cn$1("flex flex-col space-y-1.5 text-center sm:text-left", className), ...props });
-DialogHeader.displayName = "DialogHeader";
-const DialogTitle = reactExports.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(
-  Title,
-  {
-    ref,
-    className: cn$1("text-lg font-semibold leading-none tracking-tight", className),
-    ...props
-  }
-));
-DialogTitle.displayName = Title.displayName;
-const DialogDescription = reactExports.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Description, { ref, className: cn$1("text-sm text-muted-foreground", className), ...props }));
-DialogDescription.displayName = Description.displayName;
 const useGameEngine = (mode2) => {
   const { players, teams } = useGameContext();
   const [currentIndex, setCurrentIndex] = reactExports.useState(0);
@@ -47023,7 +47121,14 @@ const useGameEngine = (mode2) => {
   const [showRoundSummary, setShowRoundSummary] = reactExports.useState(false);
   const [roundSnapshot, setRoundSnapshot] = reactExports.useState(null);
   const [gameState, setGameState] = reactExports.useState({
+    phase: "setup",
     round: 1,
+    currentCardIndex: 0,
+    players,
+    deck: [],
+    currentCard: null,
+    showNormaReveal: false,
+    showVirusReveal: false,
     currentNorma: null,
     currentNormaTurnsRemaining: 0,
     showDuel: false,
@@ -47034,20 +47139,20 @@ const useGameEngine = (mode2) => {
     showMimica: false,
     showBocaCerrada: false,
     showBocaCerradaWarning: false,
-    // Added
+    showMimicaReveal: false,
+    showBocaCerradaReveal: false,
     showImpostorWord: false,
     showCaptainPass: false,
     showVirusAlert: false,
     showVirusCycleAlert: false,
-    // Added
     showImpostorWarning: false,
     showCaptainSelection: true,
-    // Default to true so it asks on startup
+    showNormaGlobal: false,
+    virusPlayerId: null,
     currentDrinkingGame: null,
     currentMimicaText: null,
     currentBocaCerradaText: null,
     bocaCerradaData: void 0,
-    // Added
     currentImpostorWord: null,
     votingQuestion: null,
     duelPlayers: [],
@@ -47063,13 +47168,11 @@ const useGameEngine = (mode2) => {
     captainId: null,
     virusAlertData: null,
     virusCycleData: void 0,
-    // Added
     yoNuncaEquiposPhase: "idle",
     yoNuncaTargetTeamId: null,
     yoNuncaTruthVotes: {},
     yoNuncaGuessVotes: {},
     votingSelections: []
-    // Initial state
   });
   reactExports.useEffect(() => {
     const savedScores = localStorage.getItem("partyGameScores");
@@ -47106,7 +47209,25 @@ const useGameEngine = (mode2) => {
   const advanceTurn = () => {
     setCurrentIndex((prev) => prev + 1);
     if ((currentPlayerIndex + 1) % players.length === 0) {
-      setGameState((prev) => ({ ...prev, round: prev.round + 1 }));
+      setGameState((prev) => {
+        const nextRound = prev.round + 1;
+        let showNormaGlobal = prev.showNormaGlobal;
+        if (nextRound % 5 === 0) {
+          showNormaGlobal = true;
+        }
+        let nextVirusId = prev.virusPlayerId;
+        if (nextRound % 8 === 0 && players.length > 0) {
+          const currentIndex2 = players.findIndex((p2) => p2.id === prev.virusPlayerId);
+          const nextIndex = (currentIndex2 + 1) % players.length;
+          nextVirusId = players[nextIndex].id;
+        }
+        return {
+          ...prev,
+          round: nextRound,
+          showNormaGlobal,
+          virusPlayerId: nextVirusId
+        };
+      });
       if (gameState.round >= 20) {
         setGameOver(true);
       }
@@ -47124,22 +47245,23 @@ const useGameEngine = (mode2) => {
     setCurrentPlayerIndex((prev) => (prev + 1) % players.length);
   };
   const addScore = (playerId, points) => {
-    setScores((prev) => {
-      const newScores = {
-        ...prev,
-        [playerId]: (prev[playerId] || 0) + points
-      };
-      return newScores;
+    setScores((prev) => ({
+      ...prev,
+      [playerId]: Math.max(0, (prev[playerId] || 0) + points)
+    }));
+  };
+  const handleGameEnd = async () => {
+    setGameOver(true);
+    setRoundSnapshot({
+      round: gameState.round,
+      scores: { ...scores }
     });
   };
   const addWin = (playerId) => {
-    setGamesWon((prev) => {
-      const newWins = {
-        ...prev,
-        [playerId]: (prev[playerId] || 0) + 1
-      };
-      return newWins;
-    });
+    setGamesWon((prev) => ({
+      ...prev,
+      [playerId]: (prev[playerId] || 0) + 1
+    }));
   };
   return {
     players,
@@ -47163,6 +47285,7 @@ const useGameEngine = (mode2) => {
     advanceTurn,
     addScore,
     addWin,
+    handleGameEnd,
     showRoundSummary,
     setShowRoundSummary,
     roundSnapshot,
@@ -54568,7 +54691,7 @@ const categoriasReto = [
   "🎯 RETO: Aguanta la mirada con el de enfrente 20 segundos. Quien parpadee, bebe."
 ];
 function getRandomItems(array, count2) {
-  const shuffled = shuffleArray$1(array);
+  const shuffled = shuffleArray$2(array);
   return shuffled.slice(0, count2);
 }
 function withDrinks(arr) {
@@ -54655,31 +54778,31 @@ function getStructuredMegamix(count2, playersCount = 4) {
     const pool = intensity === "leve" ? tragosLeves : intensity === "medio" ? tragosMedios : intensity === "fuerte" ? tragosFuertes : intensity === "grupo" ? tragosGrupo : tragosReparte;
     return card + pool[Math.floor(Math.random() * pool.length)];
   }
-  const yoNuncaCards = [...yoNunca, ...yoNuncaExtra || [], ...yoNuncaExtra2 || []].map(
-    (q2) => addDrinking(`🙈 Yo nunca... ${q2}`, Math.random() < 0.4 ? "medio" : "leve")
-  );
-  const masProbableCards = [...quienEsMasProbable, ...masProbableExtra || [], ...quienEsMasProbableExtra2 || []].map(
-    (q2) => addDrinking(`🗳️ ${q2}`, Math.random() < 0.3 ? "medio" : "leve")
-  );
-  const retosCards = [...categoriasReto, ...categoriasRetoExtra || [], ...categoriasRetoExtra2 || []].map(
-    (q2) => addDrinking(`🎯 ${q2}`, Math.random() < 0.5 ? "medio" : "reparte")
-  );
-  const clasicoCards = [...clasico, ...clasicoExtra || [], ...clasicoExtra2 || []].map(
-    (q2) => addDrinking(q2, Math.random() < 0.5 ? "leve" : "grupo")
-  );
-  const pacoversCards = [...pacovers, ...pacoversExtra || [], ...pacoversExtra2 || []].map(
-    (q2) => addDrinking(`🇪🇸 ${q2}`, "leve")
-  );
-  const picanteCards = [...picante, ...picanteExtra || [], ...picanteExtra2 || []].map(
-    (q2) => addDrinking(`🌶️ ${q2}`, Math.random() < 0.5 ? "medio" : "fuerte")
-  );
-  const enLaCamaCards = [...enLaCamaY, ...enLaCamaYExtra || [], ...enLaCamaYExtra2 || []].map(
-    (q2) => addDrinking(`🛌 ${q2}`, "medio")
-  );
-  const categoriasCards = [...categoriasLetras, ...categoriasLetrasExtra || [], ...categoriasLetrasExtra2 || []].map(
-    (q2) => addDrinking(`🔤 ${q2}`, "reparte")
-  );
-  const weightedContent = shuffleArray$1([
+  const yoNuncaPool = [...yoNunca, ...yoNuncaExtra || [], ...yoNuncaExtra2 || []];
+  const yoNuncaItems = getRandomItems(yoNuncaPool, yoNuncaPool.length);
+  const yoNuncaCards = yoNuncaItems.map((q2) => addDrinking(`🙈 Yo nunca... ${q2}`, Math.random() < 0.4 ? "medio" : "leve"));
+  const masProbablePool = [...quienEsMasProbable, ...masProbableExtra || [], ...quienEsMasProbableExtra2 || []];
+  const masProbableItems = getRandomItems(masProbablePool, masProbablePool.length);
+  const masProbableCards = masProbableItems.map((q2) => addDrinking(`🗳️ ${q2}`, Math.random() < 0.3 ? "medio" : "leve"));
+  const retosPool = [...categoriasReto, ...categoriasRetoExtra || [], ...categoriasRetoExtra2 || []];
+  const retosItems = getRandomItems(retosPool, retosPool.length);
+  const retosCards = retosItems.map((q2) => addDrinking(`🎯 ${q2}`, Math.random() < 0.5 ? "medio" : "reparte"));
+  const clasicoPool = [...clasico, ...clasicoExtra || [], ...clasicoExtra2 || []];
+  const clasicoItems = getRandomItems(clasicoPool, clasicoPool.length);
+  const clasicoCards = clasicoItems.map((q2) => addDrinking(q2, Math.random() < 0.5 ? "leve" : "grupo"));
+  const pacoversPool = [...pacovers, ...pacoversExtra || [], ...pacoversExtra2 || []];
+  const pacoversItems = getRandomItems(pacoversPool, pacoversPool.length);
+  const pacoversCards = pacoversItems.map((q2) => addDrinking(`🇪🇸 ${q2}`, "leve"));
+  const picantePool = [...picante, ...picanteExtra || [], ...picanteExtra2 || []];
+  const picanteItems = getRandomItems(picantePool, picantePool.length);
+  const picanteCards = picanteItems.map((q2) => addDrinking(`🌶️ ${q2}`, Math.random() < 0.5 ? "medio" : "fuerte"));
+  const enLaCamaPool = [...enLaCamaY, ...enLaCamaYExtra || [], ...enLaCamaYExtra2 || []];
+  const enLaCamaItems = getRandomItems(enLaCamaPool, enLaCamaPool.length);
+  const enLaCamaCards = enLaCamaItems.map((q2) => addDrinking(`🛌 ${q2}`, "medio"));
+  const categoriasPool = [...categoriasLetras, ...categoriasLetrasExtra || [], ...categoriasLetrasExtra2 || []];
+  const categoriasItems = getRandomItems(categoriasPool, categoriasPool.length);
+  const categoriasCards = categoriasItems.map((q2) => addDrinking(`🔤 ${q2}`, "reparte"));
+  const weightedContent = shuffleArray$2([
     // 5x weight — most frequent
     ...yoNuncaCards,
     ...yoNuncaCards,
@@ -54718,7 +54841,7 @@ function getStructuredMegamix(count2, playersCount = 4) {
     ...Array(12).fill("TRIGGER:TRIVIA_FUTBOL"),
     ...Array(12).fill("TRIGGER:TRIVIA_CULTURA")
   ];
-  const allCards = shuffleArray$1([...weightedContent, ...triggers]);
+  const allCards = shuffleArray$2([...weightedContent, ...triggers]);
   const deck = [];
   for (let i2 = 0; i2 < count2 && allCards.length > 0; i2++) {
     deck.push(allCards.pop());
@@ -54729,9 +54852,9 @@ function getStructuredMegamix(count2, playersCount = 4) {
   const selectedNormas = getRandomItems(normasRonda, 12).map(
     (n2) => `📜 NORMA: ${n2.replace(/NORMA:|NORMA: |📜 |\\\./g, "").trim()}`
   );
-  return shuffleArray$1([...deck, ...selectedNormas]);
+  return shuffleArray$2([...deck, ...selectedNormas]);
 }
-function shuffleArray$1(array) {
+function shuffleArray$2(array) {
   const shuffled = [...array];
   for (let pass = 0; pass < 2; pass++) {
     for (let i2 = shuffled.length - 1; i2 > 0; i2--) {
@@ -54741,6 +54864,267 @@ function shuffleArray$1(array) {
   }
   return shuffled;
 }
+const clasicoExtra3 = [
+  "Reto: {player} abre TikTok y enseña el primer vídeo de tu 'Para Ti'. Si es cringe, bebe.",
+  "Reto: {player} haz tu mejor moonwalk por la habitación. Si pisas algo, bebe doble.",
+  "Reto: {player} cuenta una historia usando solo 5 palabras. Si no tiene sentido, bebe.",
+  "Reto: {player} imita al jugador más callado del grupo durante 30 segundos.",
+  "Reto: {player} di tu contraseña Wi-Fi de casa en voz alta o bebe 3 tragos.",
+  "Reto: {player} graba un audio de 10 segundos declarándote al de tu izquierda. Envíalo o bebe.",
+  "Reto: {player} haz una flexión por cada año que tienes. Si no puedes, bebe la diferencia.",
+  "Reto: {player} canta el último audio que mandaste en WhatsApp como si fuera ópera.",
+  "Reto: {player} cambia tu foto de perfil de WhatsApp por la que elija el grupo durante 24h o bebe el vaso.",
+  "Reto: {player} enseña tu tiempo de pantalla de hoy. Si supera las 4h, bebe.",
+  "Reto: {player} di 3 cosas que no soportas de alguien del grupo sin decir quién. Si lo adivinan, bebe.",
+  "Reto: {player} haz tu mejor imitación de Cristiano Ronaldo celebrando un gol.",
+  "Reto: {player} enseña la última búsqueda de Google. Si da vergüenza, bebe 2 tragos.",
+  "Reto: {player} di el nombre de 5 presidentes del gobierno de España en 10 segundos.",
+  "Reto: {player} haz un beatbox de 15 segundos. Si paras, bebe.",
+  "Reto: {player} cuenta el momento más vergonzoso de tu vida en version épica como película.",
+  "Reto: {player} manda un sticker random al primer chat de WhatsApp o bebe 3.",
+  "Reto: {player} haz 10 abdominales mientras cuentas chistes. Si paras de reír o de hacer abs, bebe.",
+  "Reto: {player} imita un anuncio de televisión usando objetos de la mesa.",
+  "Reto: {player} enseña tu lista de Spotify más reciente. El grupo elige una canción y la cantas.",
+  "Reto: {player} di algo bonito sobre cada jugador en 30 segundos o bebe por cada uno que falte.",
+  "Reto: {player} haz un ASMR con tu bebida durante 15 segundos mirando a cámara.",
+  "Reto: {player} pon tu canción más escuchada de Spotify y baila durante el estribillo.",
+  "Reto: {player} deja que alguien del grupo escriba un tweet/post desde tu cuenta o bebe el vaso.",
+  "Reto: {player} haz de presentador de telediario leyendo el último reto como noticia de última hora.",
+  "Si has dicho 'ChatGPT' o 'inteligencia artificial' en una conversación esta semana, bebe.",
+  "Si has hecho swipe right a alguien solo por su perro en la foto, bebe.",
+  "Si has visto un reel de comida a las 3 de la mañana, bebe.",
+  "Si tienes más de 50 chats archivados en WhatsApp, bebe.",
+  "Si has cancelado planes por quedarte viendo una serie, bebe.",
+  "Si tu tiempo de pantalla supera las 5 horas diarias, bebe doble.",
+  "Si has usado un filtro de belleza en una videollamada, bebe.",
+  "Si has pedido comida a domicilio teniendo comida en casa, bebe.",
+  "Si has mentido sobre tu ubicación usando la fake location, bebe.",
+  "Si has buscado tu propio nombre en Google, bebe.",
+  "Si has fingido hablar por teléfono para evitar a alguien, bebe.",
+  "Si tu playlist se llama algo tipo 'chill vibes' o 'sad boi hours', bebe.",
+  "Si has llorado con un TikTok de mascotas, bebe.",
+  "Si alguna vez has sido ghosteado y luego has stalkeado al 'ghoster', bebe doble.",
+  "Si has comprado algo por un haul de TikTok, bebe.",
+  "Categorías: Filtros de Instagram.",
+  "Categorías: Plataformas de streaming.",
+  "Categorías: Comidas virales de TikTok.",
+  "Categorías: Aplicaciones que has borrado y vuelto a instalar.",
+  "Categorías: Nombres de podcasts famosos.",
+  "Categorías: Marcas de proteínas o suplementos.",
+  "Categorías: Series que empezaste y nunca terminaste.",
+  "Categorías: Palabras que solo dice la Gen Z.",
+  "Categorías: Tiktokers o streamers españoles.",
+  "Categorías: Nombres de memes virales.",
+  "Categorías: Juegos de móvil adictivos.",
+  "Categorías: Canciones que fueron virales en TikTok.",
+  "Categorías: Tipos de café de Starbucks.",
+  "Categorías: Nombres de criptomonedas.",
+  "Categorías: Festivales de música en España.",
+  "Categorías: Estilos de tatuajes.",
+  "Categorías: Marcas de ropa deportiva.",
+  "Categorías: Tipos de rosquilla o donut.",
+  "Categorías: Países donde el grupo ha viajado.",
+  "Categorías: Emojis que más usas.",
+  "Acción: 'Duelo de Imitaciones IA'. Dos jugadores imitan a Siri vs Alexa. El grupo vota al peor y bebe.",
+  "Acción: 'Phone Stack'. Todos los móviles al centro. El primero en coger el suyo bebe el vaso entero.",
+  "Acción: 'Alto el troll'. {player} dice algo polémico (falso). El primero que reaccione enfadado, bebe.",
+  "Acción: 'Reacción en cadena'. {player} hace un gesto ridículo. Cada uno añade uno. El que se trabe bebe.",
+  "Acción: 'Ruleta de contactos'. {player} el grupo elige un contacto al azar de tu agenda y le mandas un emoji.",
+  "Acción: 'Speed Dating'. Todos tienen 15 segundos para decir algo atractivo. El peor ligón bebe.",
+  "Acción: 'El sumiller'. Todos cierran los ojos. Alguien mezcla dos bebidas. El que adivine reparte, el que no bebe.",
+  "Acción: 'Batalla de Dad Jokes'. Cada jugador cuenta un chiste de padre. El que haga reír a todos, reparte 3.",
+  "Acción: 'Emoji Charadas'. {player} explica una película solo con emojis (dibujando). El que acierte reparte.",
+  "Acción: 'Confesionario Express'. Todos escriben un secreto anónimo en un papel. Se leen en voz alta y se adivina quién lo escribió.",
+  "Pregunta: ¿Quién del grupo sería el peor concursante de La Isla de las Tentaciones?",
+  "Pregunta: ¿Quién sería el más viral en TikTok y por qué?",
+  "Pregunta: ¿A quién le confiarías tu contraseña de Netflix?",
+  "Pregunta: ¿Quién del grupo tiene la relación más tóxica con su móvil?",
+  "Pregunta: ¿Quién es más probable que termine en un reality show?",
+  "Pregunta: ¿Quién es el que más miente sobre 'estoy llegando'?",
+  "Pregunta: ¿Quién tiene el peor gusto musical del grupo?",
+  "Pregunta: ¿Quién mandará el primer WhatsApp mañana diciendo 'qué resacón'?"
+];
+const yoNuncaExtra3 = [
+  "Yo nunca he stalkeado a mi ex durante más de una hora seguida.",
+  "Yo nunca he fingido que mi cámara no funciona en una videollamada.",
+  "Yo nunca he puesto 'jajaja' sin haber reído de verdad.",
+  "Yo nunca he buscado 'cómo ser millonario' en Google.",
+  "Yo nunca he borrado conversaciones antes de dejar mi móvil a alguien.",
+  "Yo nunca he fingido leer un artículo para tener algo de qué opinar.",
+  "Yo nunca he visto un tutorial de algo y luego no haberlo hecho.",
+  "Yo nunca he mandado un mensaje a la persona equivocada y luego borrado para todos.",
+  "Yo nunca he usado ChatGPT para hacer deberes o trabajo.",
+  "Yo nunca me he quedado sin plan un viernes y he fingido que quería estar en casa.",
+  "Yo nunca he dicho que estaba 'saliendo' cuando en realidad estaba en pijama.",
+  "Yo nunca he hecho unfollow a alguien por subir demasiadas stories.",
+  "Yo nunca he escuchado una nota de voz a x2 porque era demasiado larga.",
+  "Yo nunca me he comido la comida de mi compañero de piso sin pedir permiso.",
+  "Yo nunca he llorado con un TikTok de reencuentros.",
+  "Yo nunca he comprado algo solo porque lo vi en un haul de YouTube.",
+  "Yo nunca me he hecho el interesante para que me pregunten qué me pasa.",
+  "Yo nunca he mandado capturas de una conversación a otro grupo para pedir opiniones.",
+  "Yo nunca he buscado mi nombre en redes para ver qué sale.",
+  "Yo nunca he dicho 'qué interesante' sin haberlo entendido.",
+  "Yo nunca he inventado una excusa para no ir a una boda.",
+  "Yo nunca he buscado los síntomas de una enfermedad y pensado que me moría.",
+  "Yo nunca he cambiado de acera para evitar a alguien.",
+  "Yo nunca he vuelto a ver los mensajes de una conversación antigua y sentido vergüenza de mí mismo.",
+  "Yo nunca he seguido a alguien en Instagram solo para que me siga de vuelta.",
+  "Yo nunca he tenido un crush con alguien solo por cómo escribe.",
+  "Yo nunca he fingido que me gusta el café para parecer más adulto.",
+  "Yo nunca he puesto ruido blanco para dormir.",
+  "Yo nunca he creado un perfil falso para espiar a alguien.",
+  "Yo nunca he comprado ropa online y devuelto todo.",
+  "Yo nunca he escrito un mensaje super largo, lo he releído y lo he borrado entero.",
+  "Yo nunca he pedido un Uber para un trayecto de menos de 500 metros.",
+  "Yo nunca me he suscrito a un gimnasio y no haber ido ni una vez.",
+  "Yo nunca he dicho 'es mi última copa' y luego seguir 3 horas más.",
+  "Yo nunca he fingido escuchar una canción que me recomiendan y poner la que quiero.",
+  "Yo nunca he buscado 'a qué edad se considera mayor'.",
+  "Yo nunca he comido directamente de la olla por no ensuciar un plato.",
+  "Yo nunca he votado en una encuesta de Instagram sin que me importara.",
+  "Yo nunca he hecho una foto de mi comida antes de probarla.",
+  "Yo nunca he cambiado mi personalidad según las personas con las que estoy."
+];
+const picanteExtra3 = [
+  "{player}: Describe tu beso perfecto en 10 segundos o bebe.",
+  "{player}: Di cuál crees que es la fantasía menos confesable de alguien del grupo. Si lo niega, bebe.",
+  "{player}: ¿Cuál es el sitio más extraño donde has mandado un mensaje subidito de tono?",
+  "{player}: Susurra algo picante al oído del jugador de tu derecha o bebe 3.",
+  "{player}: Enseña tu última foto 'borrada recientemente' o bebe el vaso.",
+  "{player}: Di cuántas veces has buscado a tu ex en 'personas cercanas' de apps.",
+  "{player}: Cuenta tu peor experiencia con alguien de una app de citas o bebe doble.",
+  "{player}: Manda un emoji de fuego al tercer contacto de tu WhatsApp o bebe.",
+  "{player}: ¿Cuál fue el primer nombre que pusiste en una app de citas?",
+  "{player}: Di qué persona del grupo crees que besa mejor basándote solo en cómo come.",
+  "{player}: Enseña el último DM que mandaste o bebe 3.",
+  "{player}: Cuenta algo que hiciste borracho/a y que juraste no contar nunca.",
+  "{player}: Haz un baile seductor de 10 segundos dedicado a la persona de enfrente.",
+  "{player}: Enseña la conversación más picante que has tenido... o bebe medio vaso.",
+  "{player}: Di cuál fue tu peor ghosting y por qué.",
+  "{player}: ¿Cuántas personas has besado este año? Bebe un trago por cada una.",
+  "{player}: Di tu peor red flag y defiéndela.",
+  "{player}: Manda un 'te echo de menos' al último match de una app o bebe.",
+  "{player}: ¿Cuál ha sido tu mejor 'move' para ligar? Demuéstralo.",
+  "{player}: Confiesa: ¿has tenido un crush con alguien de este grupo?",
+  "{player}: Di algo que suene inocente pero que en realidad tenga doble sentido.",
+  "{player}: ¿Cuál es la diferencia de edad más grande que has tenido en una cita?",
+  "{player}: Haz una videollamada imaginaria de 10 segundos como si estuvieras ligando.",
+  "{player}: Enseña tu mensaje más cringe enviado a alguien que te gustaba.",
+  "{player}: Cuenta tu mayor hazaña de ligoteo en una discoteca."
+];
+const masProbableExtra3 = [
+  "¿Quién es más probable que se duerma en una fiesta?",
+  "¿Quién es más probable que haga un podcast sobre su vida amorosa?",
+  "¿Quién es más probable que se vuelva influencer de fitness?",
+  "¿Quién es más probable que se quede sin batería en el peor momento?",
+  "¿Quién es más probable que acabe siendo famoso por un meme?",
+  "¿Quién es más probable que llore en una boda (incluida la suya)?",
+  "¿Quién es más probable que monte una estafa piramidal (sin querer)?",
+  "¿Quién es más probable que se tatúe algo borracho?",
+  "¿Quién es más probable que viva en el extranjero?",
+  "¿Quién es más probable que pida perdón primero después de una pelea?",
+  "¿Quién es más probable que se case antes de los 30?",
+  "¿Quién es más probable que tenga una doble vida secreta?",
+  "¿Quién es más probable que haga un viaje solo/a por el mundo?",
+  "¿Quién es más probable que se gaste todo el sueldo en una noche?",
+  "¿Quién es más probable que se convierta en tiktoker?",
+  "¿Quién es más probable que tenga un OnlyFans secreto?",
+  "¿Quién es más probable que pierda el móvil esta noche?",
+  "¿Quién es más probable que se quede en casa viendo Netflix un sábado?",
+  "¿Quién es más probable que diga 'no bebo más' y luego pida otra copa?",
+  "¿Quién es más probable que acabe siendo youtuber?",
+  "¿Quién es más probable que se compre un Tesla?",
+  "¿Quién es más probable que escriba un libro sobre su vida?",
+  "¿Quién es más probable que gane un reality show?",
+  "¿Quién es más probable que termine la noche cantando karaoke?",
+  "¿Quién es más probable que se mude a Bali?",
+  "¿Quién es más probable que se quede dormido en el Uber?",
+  "¿Quién es más probable que deje plantado a alguien en una cita?",
+  "¿Quién es más probable que haga una llamada borracho/a a su ex?",
+  "¿Quién es más probable que tenga un hijo el primero del grupo?",
+  "¿Quién es más probable que acabe en la tele?"
+];
+const pacoversExtra3 = [
+  "Si has usado la frase 'es que ya no hacen las cosas como antes', bebe.",
+  "Si te emocionas con un documental de La 2, bebe.",
+  "Si has pedido factura en un restaurante para 'desgravar', bebe.",
+  "Si alguna vez has dicho 'internet no es fiable, mejor ir en persona', bebe.",
+  "Si has comparado el Mercadona de tu barrio con el de otro barrio, bebe.",
+  "Si tienes un tarro para monedas sueltas, bebe.",
+  "Si alguna vez te has emocionado al encontrar un Lidl nuevo, bebe.",
+  "Si usas el temporizador del horno con el reloj del móvil, bebe.",
+  "Si tu WhatsApp tiene la letra grande, bebe.",
+  "Si alguna vez has gritado al GPS del coche, bebe.",
+  "Si tienes un calendario de papel en la cocina, bebe.",
+  "Si llevas tu propia bolsa al supermercado SIEMPRE, bebe. Si se te olvida a veces, bebe doble.",
+  "Si conoces la canción de Bimbo, canta el estribillo o bebe.",
+  "Si alguna vez has guardado una caja vacía 'por si acaso', bebe.",
+  "Si has mandado un audio de más de 3 minutos, bebe por chapista.",
+  "Si tu idea de una noche loca es cenar fuera un martes, bebe.",
+  "Si tienes más de 3 manteles distintos para diferentes ocasiones, bebe.",
+  "Si tu plan ideal de viernes es sofá, manta y croquetas, bebe con orgullo.",
+  "Si alguna vez te has quejado del precio del aceite de oliva, bebe.",
+  "Si te sabes los horarios del Antena 3 Noticias, bebe."
+];
+const espanaExtra3 = [
+  "Si has jugado a 'La brisca' con tus abuelos, bebe con nostalgia.",
+  "Si te sabías la sintonía del 'Un, dos, tres', tararéala o bebe.",
+  "Si tenías un tazo de Dragon Ball, bebe.",
+  "Si has comido un Phoskito en el recreo, bebe.",
+  "Si has jugado al pilla pilla en la calle hasta que se hacía de noche, bebe.",
+  "Si has visto Bola de Dragón en Antena 3 antes de ir al cole, bebe.",
+  "Si tu familia veraneaba en un pueblo de interior, bebe.",
+  "Si has montado en un burro alguna vez, bebe.",
+  "Si has comprado chuches a granel con monedas de céntimo, bebe.",
+  "Si has bailado la macarena en una boda, bebe.",
+  "Si has jugado al Tragabolas, bebe.",
+  "Si te compraron un Sega Mega Drive o Super Nintendo, bebe con orgullo.",
+  "Si recuerdas los cromos de Liga Este, bebe.",
+  "Si has jugado a 'La oca' en la playa, bebe.",
+  "Si has visto Boing en la tele, bebe.",
+  "Si has comprado un Bollycao solo por el cromo, bebe.",
+  "Si has ido a un parque acuático de pueblo, bebe.",
+  "Si tu abuela te daba dinero a escondidas de tus padres, bebe.",
+  "Si has cantado 'Bienvenidos' de Miguel Ríos en una fiesta, bebe.",
+  "Si te sabes la letra del Cola-Cao, canta un trozo o bebe."
+];
+const enLaCamaYExtra3 = [
+  "En la cama y... dices '¡Se lo voy a contar a ChatGPT!'. Bebe 2.",
+  "En la cama y... te suena una alarma que olvidaste quitar. Bebe.",
+  "En la cama y... recibes un bizum de 1€. ¿De quién? Bebe.",
+  "En la cama y... tu gato decide que es el mejor momento para jugar. Bebe.",
+  "En la cama y... empiezas a ver TikToks. Bebe por cada 15 min que pases.",
+  "En la cama y... te da un calambre en la pierna. Quien haya tenido uno, bebe.",
+  "En la cama y... tu vecino pone reguetón a las 3AM. Bebe con rabia.",
+  "En la cama y... dices el nombre equivocado. Bebe el vaso.",
+  "En la cama y... tu Apple Watch dice que no has cerrado los anillos. Bebe.",
+  "En la cama y... se te cae el móvil en la cara. Bebe por torpe."
+];
+const categoriasLetrasExtra3 = [
+  "Letras: Di palabras que empiecen por la letra 'M' relacionadas con el verano.",
+  "Letras: Di nombres propios que empiecen por 'J'.",
+  "Letras: Di marcas que empiecen por 'N'.",
+  "Letras: Di comidas que empiecen por 'C'.",
+  "Letras: Di países que empiecen por 'A'.",
+  "Letras: Di series que empiecen por 'L'.",
+  "Letras: Di animales que empiecen por 'P'.",
+  "Letras: Di canciones que empiecen por 'B'.",
+  "Letras: Di profesiones que empiecen por 'D'.",
+  "Letras: Di ciudades españolas que empiecen por 'S'."
+];
+const categoriasRetoExtra3 = [
+  "Reto Categoría: Di 3 tipos de queso en 5 segundos. Si fallas, bebe.",
+  "Reto Categoría: Di 5 marcas de coches alemanes. Si repites, bebe.",
+  "Reto Categoría: Di 3 capitales de Asia. Si tardas más de 8 segundos, bebe.",
+  "Reto Categoría: Di 4 ingredientes de un mojito. Si fallas uno, bebe.",
+  "Reto Categoría: Di 3 islas de España. Si repites una de otro jugador, bebe.",
+  "Reto Categoría: Di 5 películas de Marvel. Si tardas más de 10 segundos, bebe.",
+  "Reto Categoría: Di 3 platos típicos de España. Si repites, bebe.",
+  "Reto Categoría: Di 4 nombres de ex presidentes del gobierno. Si fallas, bebe.",
+  "Reto Categoría: Di 3 marcas de cerveza española. Si repites, bebe.",
+  "Reto Categoría: Di 5 comunidades autónomas. Si tardas más de 8 segundos, bebe."
+];
 const customPartyRetos = [
   { id: "custom-001", text: "Si has enviado un audio de WhatsApp porque te daba pereza escribir, bebe.", tags: ["vida"], weight: 1 },
   { id: "custom-002", text: "Si has dicho 'estoy muy mayor para esto' hoy, bebe.", tags: ["vida"], weight: 1 },
@@ -55318,15 +55702,122 @@ const cultureQuestions = [
   { question: "¿Qué es la 'Socialdemocracia'?", options: ["Comunismo extremo", "Sistema capitalista con fuerte protección social", "Dictadura del pueblo", "Gobierno de las redes sociales"], correctIndex: 1, difficulty: 3, category: "politica", hint: "Muy común en Europa del Norte" },
   { question: "¿Qué país tiene un 'Emperador' como figura simbólica hoy?", options: ["China", "Japón", "Tailandia", "Corea"], correctIndex: 1, difficulty: 2, category: "politica", hint: "El Trono del Crisantemo" }
 ];
-function shuffleArray(array) {
-  const shuffled = [...array];
-  for (let pass = 0; pass < 2; pass++) {
+const cultureQuestionsNew2025 = [
+  // ─── TECNOLOGÍA & IA ─────────────────────────────────────────────────
+  { category: "Tecnología", question: "¿Qué empresa creó ChatGPT?", options: ["Google", "OpenAI", "Meta", "Microsoft"], correct_answer: "OpenAI", difficulty: 1 },
+  { category: "Tecnología", question: "¿En qué año se lanzó ChatGPT?", options: ["2021", "2022", "2023", "2020"], correct_answer: "2022", difficulty: 2 },
+  { category: "Tecnología", question: "¿Qué significa 'IA' en tecnología?", options: ["Internet Avanzado", "Inteligencia Artificial", "Información Automática", "Interfaz Adaptativa"], correct_answer: "Inteligencia Artificial", difficulty: 1 },
+  { category: "Tecnología", question: "¿Cuál es el nombre del modelo de IA de Google?", options: ["Claude", "GPT", "Gemini", "Llama"], correct_answer: "Gemini", difficulty: 2 },
+  { category: "Tecnología", question: "¿Qué red social compró Elon Musk en 2022?", options: ["Facebook", "TikTok", "Twitter", "Instagram"], correct_answer: "Twitter", difficulty: 1 },
+  { category: "Tecnología", question: "¿Cómo se llama ahora Twitter?", options: ["Z", "X", "Y", "Tweet"], correct_answer: "X", difficulty: 1 },
+  { category: "Tecnología", question: "¿Qué empresa creó las gafas Vision Pro?", options: ["Google", "Meta", "Apple", "Samsung"], correct_answer: "Apple", difficulty: 2 },
+  { category: "Tecnología", question: "¿Qué tecnología usa Bitcoin?", options: ["Cloud Computing", "Blockchain", "Machine Learning", "5G"], correct_answer: "Blockchain", difficulty: 2 },
+  { category: "Tecnología", question: "¿Qué significa NFT?", options: ["New File Transfer", "Non-Fungible Token", "Network Function Tool", "Next Future Tech"], correct_answer: "Non-Fungible Token", difficulty: 2 },
+  { category: "Tecnología", question: "¿Cuál es la app de mensajería más usada en España?", options: ["Telegram", "WhatsApp", "iMessage", "Signal"], correct_answer: "WhatsApp", difficulty: 1 },
+  { category: "Tecnología", question: "¿Qué empresa creó el metaverso y se renombró?", options: ["Google", "Apple", "Facebook/Meta", "Amazon"], correct_answer: "Facebook/Meta", difficulty: 1 },
+  { category: "Tecnología", question: "¿Qué país lidera la fabricación de chips semiconductores?", options: ["China", "Taiwán", "Japón", "EE.UU."], correct_answer: "Taiwán", difficulty: 3 },
+  // ─── CIENCIA ──────────────────────────────────────────────────────────
+  { category: "Ciencia", question: "¿Cuál es el hueso más largo del cuerpo humano?", options: ["Húmero", "Tibia", "Fémur", "Peroné"], correct_answer: "Fémur", difficulty: 1 },
+  { category: "Ciencia", question: "¿Qué gas respiramos principalmente?", options: ["Oxígeno", "Nitrógeno", "Carbono", "Hidrógeno"], correct_answer: "Nitrógeno", difficulty: 2 },
+  { category: "Ciencia", question: "¿Cuántos cromosomas tiene el ser humano?", options: ["23", "46", "48", "44"], correct_answer: "46", difficulty: 2 },
+  { category: "Ciencia", question: "¿Qué planeta tiene los anillos más visibles?", options: ["Júpiter", "Urano", "Saturno", "Neptuno"], correct_answer: "Saturno", difficulty: 1 },
+  { category: "Ciencia", question: "¿Cuál es el elemento químico más abundante en el universo?", options: ["Oxígeno", "Helio", "Hidrógeno", "Carbono"], correct_answer: "Hidrógeno", difficulty: 2 },
+  { category: "Ciencia", question: "¿Qué vitamina nos da el sol?", options: ["Vitamina A", "Vitamina C", "Vitamina D", "Vitamina B12"], correct_answer: "Vitamina D", difficulty: 1 },
+  { category: "Ciencia", question: "¿Cuál es la velocidad de la luz?", options: ["200.000 km/s", "300.000 km/s", "400.000 km/s", "150.000 km/s"], correct_answer: "300.000 km/s", difficulty: 2 },
+  { category: "Ciencia", question: "¿Qué órgano produce la insulina?", options: ["Hígado", "Riñón", "Páncreas", "Estómago"], correct_answer: "Páncreas", difficulty: 2 },
+  { category: "Ciencia", question: "¿Cuál es el animal más rápido del mundo?", options: ["Guepardo", "Halcón peregrino", "León", "Águila real"], correct_answer: "Halcón peregrino", difficulty: 2 },
+  { category: "Ciencia", question: "¿Cuántos litros de sangre tiene un adulto aproximadamente?", options: ["3 litros", "5 litros", "7 litros", "10 litros"], correct_answer: "5 litros", difficulty: 2 },
+  // ─── HISTORIA ─────────────────────────────────────────────────────────
+  { category: "Historia", question: "¿En qué año llegó el hombre a la Luna?", options: ["1967", "1969", "1971", "1965"], correct_answer: "1969", difficulty: 1 },
+  { category: "Historia", question: "¿Quién fue el primer presidente de Estados Unidos?", options: ["Lincoln", "Jefferson", "Washington", "Adams"], correct_answer: "Washington", difficulty: 1 },
+  { category: "Historia", question: "¿En qué año comenzó la Segunda Guerra Mundial?", options: ["1935", "1937", "1939", "1941"], correct_answer: "1939", difficulty: 1 },
+  { category: "Historia", question: "¿Quién pintó la Capilla Sixtina?", options: ["Da Vinci", "Miguel Ángel", "Rafael", "Caravaggio"], correct_answer: "Miguel Ángel", difficulty: 1 },
+  { category: "Historia", question: "¿En qué año se descubrió América?", options: ["1490", "1492", "1494", "1500"], correct_answer: "1492", difficulty: 1 },
+  { category: "Historia", question: "¿Qué civilización construyó las pirámides de Giza?", options: ["Romana", "Griega", "Egipcia", "Mesopotámica"], correct_answer: "Egipcia", difficulty: 1 },
+  { category: "Historia", question: "¿Quién fue Cleopatra?", options: ["Emperatriz romana", "Reina de Egipto", "Diosa griega", "Sultana otomana"], correct_answer: "Reina de Egipto", difficulty: 1 },
+  { category: "Historia", question: "¿En qué año cayó el Imperio Romano de Occidente?", options: ["376", "410", "476", "500"], correct_answer: "476", difficulty: 3 },
+  { category: "Historia", question: "¿Qué tratado puso fin a la Primera Guerra Mundial?", options: ["Versalles", "Viena", "París", "Roma"], correct_answer: "Versalles", difficulty: 2 },
+  { category: "Historia", question: "¿En qué año se reunificó Alemania?", options: ["1989", "1990", "1991", "1988"], correct_answer: "1990", difficulty: 2 },
+  // ─── GEOGRAFÍA ────────────────────────────────────────────────────────
+  { category: "Geografía", question: "¿Cuál es el río más largo del mundo?", options: ["Nilo", "Amazonas", "Yangtsé", "Misisipi"], correct_answer: "Amazonas", difficulty: 2 },
+  { category: "Geografía", question: "¿Cuál es el país más grande del mundo?", options: ["China", "Canadá", "EE.UU.", "Rusia"], correct_answer: "Rusia", difficulty: 1 },
+  { category: "Geografía", question: "¿Cuál es la montaña más alta del mundo?", options: ["K2", "Kilimanjaro", "Everest", "Mont Blanc"], correct_answer: "Everest", difficulty: 1 },
+  { category: "Geografía", question: "¿Cuál es el océano más grande?", options: ["Atlántico", "Índico", "Pacífico", "Ártico"], correct_answer: "Pacífico", difficulty: 1 },
+  { category: "Geografía", question: "¿Cuántas comunidades autónomas tiene España?", options: ["15", "17", "19", "20"], correct_answer: "17", difficulty: 1 },
+  { category: "Geografía", question: "¿Cuál es la capital de Canadá?", options: ["Toronto", "Montreal", "Ottawa", "Vancouver"], correct_answer: "Ottawa", difficulty: 2 },
+  { category: "Geografía", question: "¿En qué continente está Marruecos?", options: ["Asia", "Europa", "África", "América"], correct_answer: "África", difficulty: 1 },
+  { category: "Geografía", question: "¿Cuál es el desierto más grande del mundo?", options: ["Sahara", "Gobi", "Antártida", "Kalahari"], correct_answer: "Antártida", difficulty: 3 },
+  { category: "Geografía", question: "¿Qué país tiene forma de bota?", options: ["España", "Grecia", "Italia", "Portugal"], correct_answer: "Italia", difficulty: 1 },
+  { category: "Geografía", question: "¿Cuál es la isla más grande del mundo?", options: ["Madagascar", "Borneo", "Groenlandia", "Nueva Guinea"], correct_answer: "Groenlandia", difficulty: 2 },
+  // ─── CINE & SERIES 2024-2025 ──────────────────────────────────────────
+  { category: "Cine", question: "¿Quién dirigió Oppenheimer (2023)?", options: ["Spielberg", "Nolan", "Villeneuve", "Scorsese"], correct_answer: "Nolan", difficulty: 1 },
+  { category: "Cine", question: "¿Qué película de Barbie fue un éxito en 2023?", options: ["Barbie Dream", "Barbie", "Barbie World", "Barbie Life"], correct_answer: "Barbie", difficulty: 1 },
+  { category: "Series", question: "¿En qué plataforma se estrenó 'El Juego del Calamar'?", options: ["HBO", "Netflix", "Amazon", "Disney+"], correct_answer: "Netflix", difficulty: 1 },
+  { category: "Series", question: "¿Cómo se llama el protagonista de Breaking Bad?", options: ["Jesse Pinkman", "Hank Schrader", "Walter White", "Gus Fring"], correct_answer: "Walter White", difficulty: 1 },
+  { category: "Cine", question: "¿Qué animal es Simba en El Rey León?", options: ["Tigre", "León", "Pantera", "Leopardo"], correct_answer: "León", difficulty: 1 },
+  { category: "Series", question: "¿Quién es el creador de 'La Casa de Papel'?", options: ["Álex de la Iglesia", "Álex Pina", "Pedro Almodóvar", "Santiago Segura"], correct_answer: "Álex Pina", difficulty: 2 },
+  { category: "Cine", question: "¿Cuántas películas de Harry Potter hay?", options: ["6", "7", "8", "9"], correct_answer: "8", difficulty: 1 },
+  { category: "Cine", question: "¿Qué superhéroe es Peter Parker?", options: ["Batman", "Superman", "Spider-Man", "Iron Man"], correct_answer: "Spider-Man", difficulty: 1 },
+  { category: "Series", question: "¿En qué ciudad se desarrolla 'Friends'?", options: ["Los Ángeles", "Chicago", "Nueva York", "San Francisco"], correct_answer: "Nueva York", difficulty: 1 },
+  { category: "Cine", question: "¿Quién interpreta a Jack Sparrow?", options: ["Brad Pitt", "Johnny Depp", "Leonardo DiCaprio", "Tom Cruise"], correct_answer: "Johnny Depp", difficulty: 1 },
+  // ─── MÚSICA ACTUAL ────────────────────────────────────────────────────
+  { category: "Música", question: "¿De qué país es Bad Bunny?", options: ["Colombia", "Puerto Rico", "República Dominicana", "Cuba"], correct_answer: "Puerto Rico", difficulty: 1 },
+  { category: "Música", question: "¿Quién canta 'Dakiti'?", options: ["Daddy Yankee", "Bad Bunny", "J Balvin", "Ozuna"], correct_answer: "Bad Bunny", difficulty: 1 },
+  { category: "Música", question: "¿Qué artista español canta 'Quédate'?", options: ["Rosalía", "Quevedo", "C. Tangana", "Aitana"], correct_answer: "Quevedo", difficulty: 1 },
+  { category: "Música", question: "¿Cómo se llama la canción viral de Bizarrap con Shakira?", options: ["Session 50", "Session 53", "Session 44", "Session 51"], correct_answer: "Session 53", difficulty: 2 },
+  { category: "Música", question: "¿De qué país es Rosalía?", options: ["México", "Argentina", "España", "Colombia"], correct_answer: "España", difficulty: 1 },
+  { category: "Música", question: "¿Qué género musical es el 'amapiano'?", options: ["Electrónica sudafricana", "Reggaetón", "Pop coreano", "Jazz moderno"], correct_answer: "Electrónica sudafricana", difficulty: 3 },
+  { category: "Música", question: "¿Qué artista publicó 'Un Verano Sin Ti' en 2022?", options: ["Daddy Yankee", "Maluma", "Bad Bunny", "Ozuna"], correct_answer: "Bad Bunny", difficulty: 1 },
+  { category: "Música", question: "¿Qué grupo español canta 'La Plata'?", options: ["Vetusta Morla", "Izal", "Juanes (no es grupo)", "Love of Lesbian"], correct_answer: "Vetusta Morla", difficulty: 3 },
+  { category: "Música", question: "¿Quién ganó Eurovisión 2024 para España?", options: ["Chanel", "Nebulossa", "Blanca Paloma", "Ruth Lorenzo"], correct_answer: "Nebulossa", difficulty: 2 },
+  { category: "Música", question: "¿Cómo se llama Taylor Swift's Eras Tour?", options: ["World Tour", "Eras Tour", "Folklore Tour", "Midnight Tour"], correct_answer: "Eras Tour", difficulty: 1 },
+  // ─── INTERNET & MEMES ─────────────────────────────────────────────────
+  { category: "Internet", question: "¿Qué significa 'LOL'?", options: ["Lots of Luck", "Laugh Out Loud", "Little Old Lady", "Love of Life"], correct_answer: "Laugh Out Loud", difficulty: 1 },
+  { category: "Internet", question: "¿Qué plataforma compró YouTube?", options: ["Facebook", "Apple", "Google", "Amazon"], correct_answer: "Google", difficulty: 1 },
+  { category: "Internet", question: "¿De qué país es TikTok?", options: ["EE.UU.", "Japón", "China", "Corea del Sur"], correct_answer: "China", difficulty: 1 },
+  { category: "Internet", question: "¿Qué significa 'ratio' en redes sociales?", options: ["Tener más likes", "Tener más respuestas negativas que likes", "Ser viral", "Tener muchos seguidores"], correct_answer: "Tener más respuestas negativas que likes", difficulty: 2 },
+  { category: "Internet", question: "¿Qué es un 'subreddit'?", options: ["Un tipo de tweet", "Un foro temático en Reddit", "Un grupo de WhatsApp", "Un canal de Telegram"], correct_answer: "Un foro temático en Reddit", difficulty: 2 },
+  { category: "Internet", question: "¿Qué streamer español tiene más seguidores en Twitch?", options: ["Rubius", "Ibai", "Auronplay", "TheGrefg"], correct_answer: "Ibai", difficulty: 2 },
+  { category: "Internet", question: "¿Qué significa 'GOAT' en internet?", options: ["Cabra", "Greatest Of All Time", "Getting Over All Things", "Go After Them"], correct_answer: "Greatest Of All Time", difficulty: 1 },
+  { category: "Internet", question: "¿Qué fue el 'Ice Bucket Challenge'?", options: ["Un reto de cocina", "Tirarse agua helada para concienciar sobre ELA", "Un concurso de helados", "Un juego de videojuegos"], correct_answer: "Tirarse agua helada para concienciar sobre ELA", difficulty: 1 },
+  // ─── DEPORTES GENERAL ─────────────────────────────────────────────────
+  { category: "Deportes", question: "¿Cuántos jugadores tiene un equipo de fútbol en el campo?", options: ["9", "10", "11", "12"], correct_answer: "11", difficulty: 1 },
+  { category: "Deportes", question: "¿En qué país se celebraron los Juegos Olímpicos de 2024?", options: ["Japón", "Francia", "EE.UU.", "Australia"], correct_answer: "Francia", difficulty: 1 },
+  { category: "Deportes", question: "¿Qué deporte practica Carlos Alcaraz?", options: ["Fútbol", "Baloncesto", "Tenis", "Natación"], correct_answer: "Tenis", difficulty: 1 },
+  { category: "Deportes", question: "¿En qué año ganó España el Mundial de Fútbol?", options: ["2006", "2008", "2010", "2012"], correct_answer: "2010", difficulty: 1 },
+  { category: "Deportes", question: "¿Quién tiene más Balones de Oro?", options: ["Cristiano Ronaldo", "Messi", "Zidane", "Pelé"], correct_answer: "Messi", difficulty: 1 },
+  { category: "Deportes", question: "¿Cuánto dura un partido de baloncesto NBA?", options: ["40 min", "48 min", "60 min", "45 min"], correct_answer: "48 min", difficulty: 2 },
+  { category: "Deportes", question: "¿Qué tenista ha ganado más Grand Slams?", options: ["Federer", "Nadal", "Djokovic", "Sampras"], correct_answer: "Djokovic", difficulty: 2 },
+  { category: "Deportes", question: "¿En qué ciudad están los Lakers?", options: ["Nueva York", "Chicago", "Los Ángeles", "Miami"], correct_answer: "Los Ángeles", difficulty: 1 },
+  // ─── ACTUALIDAD 2024-2025 ─────────────────────────────────────────────
+  { category: "Actualidad", question: "¿Qué país albergó la COP28 en 2023?", options: ["Brasil", "Emiratos Árabes", "Egipto", "India"], correct_answer: "Emiratos Árabes", difficulty: 2 },
+  { category: "Actualidad", question: "¿Qué sonda espacial de la NASA aterrizó en un asteroide en 2023?", options: ["Perseverance", "OSIRIS-REx", "Voyager", "Juno"], correct_answer: "OSIRIS-REx", difficulty: 3 },
+  { category: "Actualidad", question: "¿Qué país ganó la Eurocopa 2024?", options: ["Francia", "Inglaterra", "España", "Alemania"], correct_answer: "España", difficulty: 1 },
+  { category: "Actualidad", question: "¿Qué país fue sede de la Eurocopa 2024?", options: ["Francia", "España", "Alemania", "Italia"], correct_answer: "Alemania", difficulty: 1 },
+  { category: "Actualidad", question: "¿Quién ganó el Balón de Oro 2024?", options: ["Messi", "Haaland", "Vinicius Jr", "Rodri"], correct_answer: "Rodri", difficulty: 2 },
+  { category: "Actualidad", question: "¿Qué empresa superó los 3 billones de dólares de capitalización en 2024?", options: ["Google", "Amazon", "Apple", "Microsoft"], correct_answer: "Apple", difficulty: 2 },
+  // ─── COMIDA & GASTRONOMÍA ─────────────────────────────────────────────
+  { category: "Gastronomía", question: "¿De qué país es originario el sushi?", options: ["China", "Corea", "Japón", "Tailandia"], correct_answer: "Japón", difficulty: 1 },
+  { category: "Gastronomía", question: "¿Cuál es el ingrediente principal de una paella valenciana?", options: ["Pasta", "Arroz", "Quinoa", "Cuscús"], correct_answer: "Arroz", difficulty: 1 },
+  { category: "Gastronomía", question: "¿Qué especia da el color amarillo al curry?", options: ["Azafrán", "Cúrcuma", "Pimentón", "Comino"], correct_answer: "Cúrcuma", difficulty: 2 },
+  { category: "Gastronomía", question: "¿De qué país es la feijoada?", options: ["México", "Argentina", "Brasil", "Portugal"], correct_answer: "Brasil", difficulty: 2 },
+  { category: "Gastronomía", question: "¿Qué plato español lleva bacalao, tomate y pimiento?", options: ["Gazpacho", "Pisto", "Bacalao a la vizcaína", "Escalivada"], correct_answer: "Bacalao a la vizcaína", difficulty: 3 },
+  // ─── NATURALEZA ───────────────────────────────────────────────────────
+  { category: "Naturaleza", question: "¿Cuánto tarda la Tierra en dar una vuelta al Sol?", options: ["364 días", "365 días", "366 días", "360 días"], correct_answer: "365 días", difficulty: 1 },
+  { category: "Naturaleza", question: "¿Cuál es el mamífero más grande del mundo?", options: ["Elefante", "Ballena azul", "Jirafa", "Hipopótamo"], correct_answer: "Ballena azul", difficulty: 1 },
+  { category: "Naturaleza", question: "¿Cuántas patas tiene una araña?", options: ["6", "8", "10", "12"], correct_answer: "8", difficulty: 1 },
+  { category: "Naturaleza", question: "¿Qué gas producen las plantas durante la fotosíntesis?", options: ["CO2", "Nitrógeno", "Oxígeno", "Hidrógeno"], correct_answer: "Oxígeno", difficulty: 1 },
+  { category: "Naturaleza", question: "¿Cuál es el ave más grande del mundo?", options: ["Cóndor", "Águila", "Avestruz", "Albatros"], correct_answer: "Avestruz", difficulty: 1 }
+];
+function shuffleArray$1(array) {
+  let shuffled = [...array];
+  for (let pass = 0; pass < 3; pass++) {
     for (let i2 = shuffled.length - 1; i2 > 0; i2--) {
       const j2 = Math.floor(Math.random() * (i2 + 1));
       [shuffled[i2], shuffled[j2]] = [shuffled[j2], shuffled[i2]];
     }
   }
-  return shuffled;
+  return shuffled.sort(() => Math.random() - 0.5);
 }
 function applyVoteWeights(items, category) {
   try {
@@ -55362,50 +55853,59 @@ const useGameContent = (mode2, currentIndex, currentPlayerName, playersCount = 4
         modeContent = getStructuredMegamix(500, playersCount);
         break;
       case "clasico":
-        modeContent = shuffleArray([
+        modeContent = shuffleArray$1([
           ...clasico,
           ...clasicoExtra,
           ...clasicoExtra2,
+          ...clasicoExtra3,
           ...yoNunca.map((q2) => `🙈 ${q2}`),
           ...yoNuncaExtra.map((q2) => `🙈 ${q2}`),
           ...yoNuncaExtra2.map((q2) => `🙈 ${q2}`),
+          ...yoNuncaExtra3.map((q2) => `🙈 ${q2}`),
           ...picante.map((q2) => `🌶️ ${q2}`),
           ...picanteExtra.map((q2) => `🌶️ ${q2}`),
           ...picanteExtra2.map((q2) => `🌶️ ${q2}`),
+          ...picanteExtra3.map((q2) => `🌶️ ${q2}`),
           ...pacovers.map((q2) => `🇪🇸 ${q2}`),
           ...pacoversExtra.map((q2) => `🇪🇸 ${q2}`),
           ...pacoversExtra2.map((q2) => `🇪🇸 ${q2}`),
+          ...pacoversExtra3.map((q2) => `🇪🇸 ${q2}`),
           ...quienEsMasProbable.map((q2) => `🗳️ ${q2}`),
           ...masProbableExtra.map((q2) => `🗳️ ${q2}`),
           ...quienEsMasProbableExtra2.map((q2) => `🗳️ ${q2}`),
+          ...masProbableExtra3.map((q2) => `🗳️ ${q2}`),
           ...enLaCamaY.map((q2) => `🛌 ${q2}`),
           ...enLaCamaYExtra.map((q2) => `🛌 ${q2}`),
           ...enLaCamaYExtra2.map((q2) => `🛌 ${q2}`),
+          ...enLaCamaYExtra3.map((q2) => `🛌 ${q2}`),
           ...categoriasLetras.map((q2) => `🔤 ${q2}`),
           ...categoriasLetrasExtra.map((q2) => `🔤 ${q2}`),
           ...categoriasLetrasExtra2.map((q2) => `🔤 ${q2}`),
+          ...categoriasLetrasExtra3.map((q2) => `🔤 ${q2}`),
           ...categoriasReto.map((q2) => `🎯 ${q2}`),
           ...categoriasRetoExtra.map((q2) => `🎯 ${q2}`),
           ...categoriasRetoExtra2.map((q2) => `🎯 ${q2}`),
+          ...categoriasRetoExtra3.map((q2) => `🎯 ${q2}`),
+          ...espanaExtra3.map((q2) => `🇪🇸 ${q2}`),
           ...normasRonda.map((q2) => `NORMA: ${q2}`),
           ...customPartyRetos
         ]);
         break;
       case "yo_nunca":
       case "yo_nunca_equipos":
-        modeContent = shuffleArray([...yoNunca, ...yoNuncaExtra, ...yoNuncaExtra2]);
+        modeContent = shuffleArray$1([...yoNunca, ...yoNuncaExtra, ...yoNuncaExtra2, ...yoNuncaExtra3]);
         break;
       case "picante":
-        modeContent = shuffleArray([...picante, ...picanteExtra, ...picanteExtra2]);
+        modeContent = shuffleArray$1([...picante, ...picanteExtra, ...picanteExtra2, ...picanteExtra3]);
         break;
       case "espana":
-        modeContent = shuffleArray([...nostalgia, ...pacoversExtra, ...pacoversExtra2]);
+        modeContent = shuffleArray$1([...nostalgia, ...pacoversExtra, ...pacoversExtra2, ...espanaExtra3]);
         break;
       case "votacion":
-        modeContent = shuffleArray([...quienEsMasProbable, ...masProbableExtra, ...quienEsMasProbableExtra2]);
+        modeContent = shuffleArray$1([...quienEsMasProbable, ...masProbableExtra, ...quienEsMasProbableExtra2, ...masProbableExtra3]);
         break;
       case "pacovers":
-        modeContent = shuffleArray([...pacovers, ...pacoversExtra, ...pacoversExtra2]);
+        modeContent = shuffleArray$1([...pacovers, ...pacoversExtra, ...pacoversExtra2, ...pacoversExtra3]);
         break;
       default:
         modeContent = getMegamixContent(200);
@@ -55416,9 +55916,9 @@ const useGameContent = (mode2, currentIndex, currentPlayerName, playersCount = 4
     setQuestionNumber(0);
     if (mode2 === "trivia_futbol" || mode2 === "cultura") {
       const isFootball = mode2 === "trivia_futbol";
-      const sourceQuestions = isFootball ? footballQuestions : cultureQuestions;
+      const sourceQuestions = isFootball ? footballQuestions : [...cultureQuestions, ...cultureQuestionsNew2025];
       if (sourceQuestions && sourceQuestions.length > 0) {
-        const shuffled = shuffleArray(sourceQuestions);
+        const shuffled = shuffleArray$1(sourceQuestions);
         setCurrentQuestion(shuffled[0]);
         setUsedQuestionIds(/* @__PURE__ */ new Set([shuffled[0].question]));
         setQuestionNumber(1);
@@ -55428,11 +55928,11 @@ const useGameContent = (mode2, currentIndex, currentPlayerName, playersCount = 4
   const loadNextQuestion = reactExports.useCallback(() => {
     setQuestionNumber((prev) => prev + 1);
     const isFootball = mode2 === "trivia_futbol";
-    const sourceQuestions = isFootball ? footballQuestions : cultureQuestions;
+    const sourceQuestions = isFootball ? footballQuestions : [...cultureQuestions, ...cultureQuestionsNew2025];
     if (!sourceQuestions || sourceQuestions.length === 0) {
       return;
     }
-    const shuffledQuestions = shuffleArray(sourceQuestions);
+    const shuffledQuestions = shuffleArray$1(sourceQuestions);
     const availableQuestions = shuffledQuestions.filter((q2) => !usedQuestionIds.has(q2.question));
     if (availableQuestions.length > 0) {
       const randomQ = availableQuestions[0];
@@ -55458,7 +55958,7 @@ const useGameContent = (mode2, currentIndex, currentPlayerName, playersCount = 4
       });
       return;
     }
-    const shuffledQuestions = shuffleArray(sourceQuestions);
+    const shuffledQuestions = shuffleArray$1(sourceQuestions);
     const availableQuestions = shuffledQuestions.filter((q2) => !usedQuestionIds.has(q2.question));
     if (availableQuestions.length > 0) {
       const randomQ = availableQuestions[0];
@@ -56353,7 +56853,14 @@ const useDrinkingMicroGames = (mode2, playersCount) => {
         ok: canUse("mimica", 6),
         run: () => {
           const mimica = getRandomMimica();
-          setGameState((prev) => ({ ...prev, showMimica: true, currentMimicaText: formatMimicaChallenge(mimica, currentPlayerName) }));
+          setGameState((prev) => ({
+            ...prev,
+            showMimica: false,
+            // Don't show immediately
+            showMimicaReveal: true,
+            // Show handover first
+            currentMimicaText: formatMimicaChallenge(mimica, currentPlayerName)
+          }));
         }
       },
       {
@@ -56375,7 +56882,14 @@ const useDrinkingMicroGames = (mode2, playersCount) => {
         ok: canUse("boca", 14),
         run: () => {
           const bocaCerrada = getRandomBocaCerrada();
-          setGameState((prev) => ({ ...prev, showBocaCerrada: true, currentBocaCerradaText: formatBocaCerradaChallenge(bocaCerrada, currentPlayerName) }));
+          setGameState((prev) => ({
+            ...prev,
+            showBocaCerrada: false,
+            // Don't show immediately
+            showBocaCerradaReveal: true,
+            // Show handover first
+            currentBocaCerradaText: formatBocaCerradaChallenge(bocaCerrada, currentPlayerName)
+          }));
         }
       },
       {
@@ -56662,49 +57176,51 @@ const useGameEffects = (mode2, players) => {
   const manageMegamixViruses = (currentRound) => {
     if (mode2 !== "megamix")
       return null;
-    if (currentRound > 0 && currentRound % 8 === 0 && currentRound !== lastVirusRoundRef.current) {
+    if (currentRound === 1 && lastVirusRoundRef.current === -1) {
+      lastVirusRoundRef.current = 1;
+      const randomVirus = virusEffects[Math.floor(Math.random() * virusEffects.length)];
+      const targetPlayer = players[Math.floor(Math.random() * players.length)];
+      const newVirus = {
+        playerId: targetPlayer.id,
+        virusName: randomVirus.name,
+        virusDescription: randomVirus.description,
+        turnsRemaining: 7
+      };
+      setPlayerViruses([newVirus]);
+      return { type: "INFECTION", title: "¡VIRUS DETECTADO!", message: `El virus inicial ha infectado a ${targetPlayer.name}.` };
+    }
+    if (currentRound > 1 && currentRound % 7 === 0 && currentRound !== lastVirusRoundRef.current) {
       lastVirusRoundRef.current = currentRound;
-      const cycleIndex = currentRound / 5;
-      const isRestRound = cycleIndex % 2 === 0;
-      if (isRestRound) {
-        setPlayerViruses([]);
-        return { type: "REST", title: "¡RONDA DE DESCANSO!", message: "Todos los virus han sido eliminados por ahora..." };
-      } else {
-        setPlayerViruses([]);
-        const newViruses = players.map((p2) => {
-          const randomVirus = virusEffects[Math.floor(Math.random() * virusEffects.length)];
-          setVirusReceivedByPlayer((prev) => ({ ...prev, [p2.id]: (prev[p2.id] || 0) + 1 }));
-          setBrutalCounts((prev) => {
-            var _a3, _b2, _c3, _d2;
-            return {
-              ...prev,
-              [p2.id]: {
-                ...prev[p2.id],
-                virusesReceived: (((_a3 = prev[p2.id]) == null ? void 0 : _a3.virusesReceived) || 0) + 1,
-                legendaryDrops: ((_b2 = prev[p2.id]) == null ? void 0 : _b2.legendaryDrops) || 0,
-                chaosEvents: ((_c3 = prev[p2.id]) == null ? void 0 : _c3.chaosEvents) || 0,
-                cursedEvents: ((_d2 = prev[p2.id]) == null ? void 0 : _d2.cursedEvents) || 0
-              }
-            };
-          });
-          return {
-            playerId: p2.id,
-            virusName: randomVirus.name,
-            virusDescription: randomVirus.description,
-            turnsRemaining: players.length * 2
-            // Lasts 2 rounds
-          };
-        });
-        setPlayerViruses(newViruses);
-        return { type: "INFECTION", title: "¡NUEVA RONDA DE VIRUS!", message: "Todos los jugadores han sido infectados con un nuevo virus aleatorio." };
-      }
+      setPlayerViruses([]);
+      const randomVirus = virusEffects[Math.floor(Math.random() * virusEffects.length)];
+      const nextIndex = currentRound / 7 % players.length;
+      const targetPlayer = players[nextIndex];
+      const newVirus = {
+        playerId: targetPlayer.id,
+        virusName: randomVirus.name,
+        virusDescription: randomVirus.description,
+        turnsRemaining: 7
+        // Lasts until next cycle
+      };
+      setPlayerViruses([newVirus]);
+      return { type: "INFECTION", title: "¡EL VIRUS HA MUTADO!", message: `El virus se ha propagado a ${targetPlayer.name}. ¡Suerte!` };
     }
     return null;
   };
   const manageMegamixNormas = (currentRound) => {
     if (mode2 !== "megamix")
       return null;
-    if (currentRound > 0 && currentRound % 5 === 0 && currentRound !== lastNormaRoundRef.current) {
+    if (currentRound === 1 && lastNormaRoundRef.current === -1) {
+      lastNormaRoundRef.current = 1;
+      const randomNorma = normasRonda[Math.floor(Math.random() * normasRonda.length)];
+      return {
+        type: "NORMA",
+        title: "¡NORMA INICIAL!",
+        message: randomNorma,
+        duration: players.length * 2
+      };
+    }
+    if (currentRound > 1 && currentRound % 3 === 0 && currentRound !== lastNormaRoundRef.current) {
       lastNormaRoundRef.current = currentRound;
       const randomNorma = normasRonda[Math.floor(Math.random() * normasRonda.length)];
       return {
@@ -56723,16 +57239,6 @@ const useGameEffects = (mode2, players) => {
     const roll = Math.random();
     const lastImpostorTurn = lastMiniTurnRef.current["impostor_round"] ?? -9999;
     Math.max(players.length * 2, 18);
-    if (roll < 0.12) {
-      const randomNorma = normasRonda[Math.floor(Math.random() * normasRonda.length)];
-      setGameState((prev) => ({
-        ...prev,
-        currentNorma: randomNorma,
-        currentNormaTurnsRemaining: Math.max(players.length * 2, 4),
-        showNormaGlobal: true
-      }));
-      return false;
-    }
     const targetImpostorTurns = players.length * 12;
     if (players.length >= 3 && roll < 0.06 && currentIndex > 0 && currentIndex - lastImpostorTurn >= targetImpostorTurns) {
       const randomImpostor = impostorRounds[Math.floor(Math.random() * impostorRounds.length)];
@@ -56741,6 +57247,8 @@ const useGameEffects = (mode2, players) => {
         ...prev,
         showImpostorWarning: true,
         // NEW state for anti-spoiler
+        showImpostor: false,
+        // Don't show the main screen yet
         impostorData: {
           currentImpostorReal: randomImpostor.normalQuestion,
           currentImpostorFake: randomImpostor.impostorQuestion,
@@ -56953,6 +57461,78 @@ function processDrinkingMultiplier(text, round2 = 1) {
 }
 function CardDisplay({ content, type = "common", onClick, gameMode, players, round: round2 = 1 }) {
   const [voted, setVoted] = reactExports.useState(null);
+  const getModeStyles = () => {
+    switch (gameMode) {
+      case "megamix":
+        return {
+          border: "border-purple-500/50",
+          glow: "bg-purple-500",
+          gradient: "from-purple-600/20 to-pink-600/20",
+          icon: "🔮"
+        };
+      case "clasico":
+        return {
+          border: "border-emerald-500/50",
+          glow: "bg-emerald-500",
+          gradient: "from-emerald-600/20 to-lime-600/20",
+          icon: "🎲"
+        };
+      case "yo_nunca":
+      case "yo_nunca_equipos":
+        return {
+          border: "border-blue-500/50",
+          glow: "bg-blue-500",
+          gradient: "from-blue-600/20 to-indigo-600/20",
+          icon: "🌊"
+        };
+      case "picante":
+        return {
+          border: "border-magenta-500/50",
+          glow: "bg-pink-600",
+          gradient: "from-magenta-600/20 to-pink-600/20",
+          icon: "🔥"
+        };
+      case "espana":
+        return {
+          border: "border-orange-500/50",
+          glow: "bg-orange-500",
+          gradient: "from-orange-600/20 to-red-600/20",
+          icon: "💃"
+        };
+      case "votacion":
+        return {
+          border: "border-violet-500/50",
+          glow: "bg-violet-500",
+          gradient: "from-violet-600/20 to-purple-600/20",
+          icon: "🗳️"
+        };
+      case "pacovers":
+      case "veteranos":
+        return {
+          border: "border-amber-500/50",
+          glow: "bg-amber-500",
+          gradient: "from-amber-600/20 to-yellow-600/20",
+          icon: "🏆"
+        };
+      case "impostor":
+      case "mimica":
+      case "boca_cerrada":
+        return {
+          border: "border-purple-900/50",
+          glow: "bg-purple-950",
+          gradient: "from-black to-slate-900",
+          icon: "🕵️"
+        };
+      default:
+        return {
+          border: "border-white/20",
+          glow: "bg-primary/20",
+          gradient: "from-white/5 to-transparent",
+          icon: "🎲"
+        };
+    }
+  };
+  const styles = getModeStyles();
   reactExports.useEffect(() => {
     setVoted(null);
   }, [content]);
@@ -56972,33 +57552,35 @@ function CardDisplay({ content, type = "common", onClick, gameMode, players, rou
   return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "perspective-1000 w-full max-w-md mx-auto aspect-[3/4] cursor-pointer", onClick, children: /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { mode: "wait", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
     motion.div,
     {
+      layout: true,
       initial: { rotateY: 90, opacity: 0, scale: 0.8 },
       animate: { rotateY: 0, opacity: 1, scale: 1 },
       exit: { rotateY: -90, opacity: 0, scale: 0.8 },
-      transition: { type: "spring", stiffness: 260, damping: 20 },
-      className: "w-full h-full",
+      transition: { type: "spring", stiffness: 100, damping: 20 },
+      className: "w-full h-full group",
       children: /* @__PURE__ */ jsxRuntimeExports.jsxs(Card, { className: `
-            w-full h-full p-8 flex flex-col items-center justify-center text-center relative overflow-hidden
-            ${type === "legendary" ? "!border-yellow-400 !border-2 shadow-[0_0_30px_rgba(250,204,21,0.5)]" : ""}
-            ${type === "virus" ? "!border-green-500 !border-2 shadow-[0_0_30px_rgba(34,197,94,0.5)]" : ""}
-            ${type === "chaos" ? "!border-red-600 !border-2 shadow-[0_0_30px_rgba(220,38,38,0.5)]" : ""}
-            ${type === "rare" ? "!border-blue-400 !border-2 shadow-[0_0_20px_rgba(96,165,250,0.5)]" : ""}
-            !bg-gradient-to-br from-slate-800/90 via-slate-900/95 to-slate-800/90 backdrop-blur-xl !border !border-white/20 text-white
+            w-full h-full p-8 flex flex-col items-center justify-center text-center relative overflow-hidden rounded-[2.5rem] transition-all duration-500
+            !bg-slate-950 backdrop-blur-none !border-2 shadow-2xl
+            ${type === "legendary" ? "!border-yellow-400 shadow-[0_0_40px_rgba(250,204,21,0.4)]" : type === "virus" ? "!border-green-500 shadow-[0_0_40px_rgba(34,197,94,0.4)]" : type === "chaos" ? "!border-red-600 shadow-[0_0_40px_rgba(220,38,38,0.4)]" : type === "rare" ? "!border-blue-400 shadow-[0_0_30px_rgba(96,165,250,0.4)]" : `!${styles.border} shadow-xl`}
           `, children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute top-0 right-0 p-4 opacity-10", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-6xl", children: gameMode === "picante" ? "🔥" : gameMode === "cultura" ? "🧠" : "🎲" }) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: `absolute inset-0 bg-gradient-to-br ${styles.gradient} opacity-[0.15] group-hover:opacity-30 transition-opacity` }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: `absolute -inset-4 opacity-20 group-hover:opacity-40 transition-opacity blur-[60px] pointer-events-none
+                            ${type === "legendary" ? "bg-yellow-400" : type === "virus" ? "bg-green-500" : type === "chaos" ? "bg-red-600" : type === "rare" ? "bg-blue-400" : styles.glow}
+                        ` }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute top-0 right-0 p-6 opacity-20 group-hover:opacity-40 transition-opacity", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-7xl drop-shadow-2xl", children: styles.icon }) }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative z-10 flex flex-col items-center gap-6 w-full", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx(RarityBadge, { rarity: type }),
           /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl md:text-3xl font-bold leading-tight balance-text text-white w-full", children: (() => {
             const isNormaCard = content.toUpperCase().includes("NORMA:") || content.toUpperCase().startsWith("NORMA");
             if (isNormaCard) {
               return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center gap-6", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-6xl mb-2", children: "📜" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-yellow-500 text-3xl md:text-4xl font-black tracking-widest uppercase drop-shadow-[0_0_10px_rgba(234,179,8,0.5)]", children: "¡NUEVA NORMA!" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-lg text-white/60 font-medium italic", children: "(Lee la norma en la parte superior)" })
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-7xl mb-2 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)]", children: "📜" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-yellow-500 text-3xl md:text-4xl font-black tracking-widest uppercase drop-shadow-[0_0_15px_rgba(234,179,8,0.6)]", children: "¡NUEVA NORMA!" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-lg text-white/70 font-black italic tracking-tight bg-white/5 px-4 py-1 rounded-full border border-white/10", children: "(Lee arriba)" })
               ] });
             }
             const sanitized = sanitizeCardText(content);
-            return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-3xl md:text-4xl lg:text-5xl font-black tracking-tight balance-text text-white w-full drop-shadow-sm", children: processDrinkingMultiplier(sanitized, round2) });
+            return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-3xl md:text-4xl lg:text-5xl font-black tracking-tighter balance-text text-white w-full drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] leading-[1.1]", children: processDrinkingMultiplier(sanitized, round2) });
           })() }),
           /* @__PURE__ */ jsxRuntimeExports.jsxs(
             motion.div,
@@ -57106,29 +57688,37 @@ function beep(freq = 440, ms2 = 90, vol = 0.08) {
   } catch {
   }
 }
-async function playFile(path, fallbackFreq) {
-  try {
-    const a2 = new Audio(path);
-    a2.volume = 0.35;
-    await new Promise((resolve, reject) => {
-      a2.oncanplaythrough = () => resolve();
-      a2.onerror = () => reject(new Error("Audio not found"));
-      a2.load();
-    });
-    await a2.play();
-  } catch {
+const sfx = {
+  click: () => {
     try {
-      beep(fallbackFreq);
+      beep(520);
+    } catch {
+    }
+  },
+  legendary: () => {
+    try {
+      beep(780, 400, 0.1);
+    } catch {
+    }
+  },
+  cursed: () => {
+    try {
+      beep(180, 600, 0.15);
+    } catch {
+    }
+  },
+  chaos: () => {
+    try {
+      beep(100, 800, 0.2);
+    } catch {
+    }
+  },
+  whoosh: () => {
+    try {
+      beep(400, 200, 0.05);
     } catch {
     }
   }
-}
-const sfx = {
-  click: () => playFile("sounds/click.mp3", 520),
-  legendary: () => playFile("sounds/legendary.mp3", 780),
-  cursed: () => playFile("sounds/cursed.mp3", 180),
-  chaos: () => playFile("sounds/chaos.mp3", 100),
-  whoosh: () => playFile("sounds/whoosh.mp3", 400)
 };
 function vibe(pattern = 40) {
   try {
@@ -57152,6 +57742,7 @@ function ImpostorRound({
   const [votes, setVotes] = reactExports.useState({});
   const [discussionTime, setDiscussionTime] = reactExports.useState(30);
   const [mostVotedId, setMostVotedId] = reactExports.useState("");
+  const [isRevealing, setIsRevealing] = reactExports.useState(null);
   reactExports.useEffect(() => {
     if (phase !== "discussion" || discussionTime <= 0)
       return;
@@ -57221,39 +57812,71 @@ function ImpostorRound({
       ),
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-10" })
     ] }),
-    phase === "reveal" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-center text-white/60 mb-4 text-sm", children: "Cada jugador debe tocar su nombre para ver su pregunta en secreto" }),
-      players.map((player) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+    phase === "reveal" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-6", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center space-y-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-white/60 text-sm", children: "Cada jugador debe mantener pulsado su nombre para ver su secreto." }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-red-400 font-bold uppercase tracking-widest text-[10px] animate-pulse", children: "¡No muestres tu pantalla a los demás!" })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid gap-4", children: players.map((player) => /* @__PURE__ */ jsxRuntimeExports.jsx(
         motion.div,
         {
           initial: { opacity: 0, x: -20 },
           animate: { opacity: 1, x: 0 },
-          children: revealedPlayers.has(player.id) ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-4 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-xl border border-white/10 backdrop-blur-sm text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-green-400 text-sm", children: [
-            "✓ ",
-            player.name,
-            " ya vio su pregunta"
-          ] }) }) : /* @__PURE__ */ jsxRuntimeExports.jsxs(
-            Button,
+          className: "relative",
+          children: revealedPlayers.has(player.id) && isRevealing !== player.id ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-4 bg-green-500/10 rounded-2xl border border-green-500/20 text-center flex items-center justify-center gap-2", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(ThumbsUp, { className: "w-4 h-4 text-green-400" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-green-400 font-bold text-sm uppercase tracking-tighter", children: [
+              player.name,
+              " listo"
+            ] })
+          ] }) : /* @__PURE__ */ jsxRuntimeExports.jsx(
+            motion.button,
             {
-              onClick: () => {
-                alert(`🤫 ${player.name}, tu pregunta es:
-
-"${getPlayerQuestion(player.id)}"
-
-¡No la digas en voz alta!`);
+              onMouseDown: () => {
+                setIsRevealing(player.id);
                 handleReveal(player.id);
               },
-              className: "w-full py-6 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 border border-white/10 backdrop-blur-sm",
-              children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(UserX, { className: "w-5 h-5 mr-2" }),
-                player.name,
-                ": Toca para ver tu pregunta"
-              ]
+              onMouseUp: () => setIsRevealing(null),
+              onTouchStart: () => {
+                setIsRevealing(player.id);
+                handleReveal(player.id);
+              },
+              onTouchEnd: () => setIsRevealing(null),
+              className: `w-full p-6 rounded-2xl border-2 transition-all flex flex-col items-center justify-center gap-2 relative overflow-hidden ${isRevealing === player.id ? "bg-white border-white scale-[1.02] shadow-[0_0_30px_rgba(255,255,255,0.4)]" : "bg-slate-800/40 border-white/10 hover:border-primary/50"}`,
+              children: /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { mode: "wait", children: isRevealing === player.id ? /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                motion.div,
+                {
+                  initial: { opacity: 0, scale: 0.9 },
+                  animate: { opacity: 1, scale: 1 },
+                  exit: { opacity: 0 },
+                  className: "text-center",
+                  children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[10px] font-bold text-slate-500 uppercase mb-1", children: "Tu palabra es:" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-2xl font-black text-slate-900 leading-tight", children: getPlayerQuestion(player.id) })
+                  ]
+                },
+                "secret"
+              ) : /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                motion.div,
+                {
+                  initial: { opacity: 0 },
+                  animate: { opacity: 1 },
+                  className: "flex items-center gap-3",
+                  children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx(EyeOff, { className: "w-4 h-4 text-primary" }) }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "font-bold text-white uppercase tracking-tighter", children: [
+                      player.name,
+                      ": Mantén pulsado"
+                    ] })
+                  ]
+                },
+                "prompt"
+              ) })
             }
           )
         },
         player.id
-      ))
+      )) })
     ] }),
     phase === "discussion" && /* @__PURE__ */ jsxRuntimeExports.jsxs(
       motion.div,
@@ -57463,8 +58086,67 @@ function DueloComponent({ dueloText, player1, player2, onWinner, onSkip }) {
 function CaptainPassScreen({
   captainName = "Capitán",
   targetPlayerName = "Siguiente Jugador",
-  onComplete
+  onComplete,
+  isCaptainTurn = false,
+  challengePreview
 }) {
+  const [showContent, setShowContent] = reactExports.useState(false);
+  if (isCaptainTurn) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      motion.div,
+      {
+        initial: { opacity: 0 },
+        animate: { opacity: 1 },
+        exit: { opacity: 0 },
+        className: "fixed inset-0 bg-gradient-to-br from-emerald-700 to-teal-800 flex items-center justify-center p-4 z-50",
+        children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          motion.div,
+          {
+            initial: { scale: 0.8, opacity: 0 },
+            animate: { scale: 1, opacity: 1 },
+            transition: { delay: 0.2 },
+            className: "bg-white/10 backdrop-blur-lg rounded-3xl p-8 max-w-md w-full text-center text-white border border-white/20",
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                motion.div,
+                {
+                  animate: { rotate: [0, 10, -10, 0] },
+                  transition: { duration: 1, repeat: Infinity },
+                  className: "inline-block mb-6",
+                  children: /* @__PURE__ */ jsxRuntimeExports.jsx(Crown, { className: "w-16 h-16 text-amber-300" })
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: "text-2xl font-bold mb-4", children: [
+                "¡TU TURNO, ",
+                captainName.toUpperCase(),
+                "!"
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-lg mb-4 leading-relaxed", children: [
+                "Como ",
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-bold text-amber-300", children: "Capitán" }),
+                ", también juegas. Este reto es ",
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-bold text-emerald-300", children: "TUYO" }),
+                "."
+              ] }),
+              challengePreview && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white/20 rounded-xl p-4 mb-6", children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-base font-medium", children: challengePreview }) }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                Button,
+                {
+                  onClick: onComplete,
+                  className: "w-full py-6 text-lg bg-white text-emerald-700 hover:bg-gray-100 font-bold",
+                  children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(Gamepad2, { className: "w-5 h-5 mr-2" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "¡A jugar!" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(ArrowRight, { className: "w-5 h-5 ml-2" })
+                  ]
+                }
+              )
+            ]
+          }
+        )
+      }
+    );
+  }
   return /* @__PURE__ */ jsxRuntimeExports.jsx(
     motion.div,
     {
@@ -57494,16 +58176,38 @@ function CaptainPassScreen({
               captainName.toUpperCase(),
               "!"
             ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-lg mb-6 leading-relaxed", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-lg mb-4 leading-relaxed", children: [
               "La respuesta de este reto es ",
               /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-bold text-yellow-300", children: "SECRETA" }),
               "."
             ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white/20 rounded-xl p-4 mb-6", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-base", children: [
-              "📱 Lee el reto en voz alta y pásale el móvil a ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white/20 rounded-xl p-4 mb-4", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-base mb-2", children: [
+              "📱 Lee el reto en voz alta y pásale el móvil a",
+              " ",
               /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-bold text-yellow-300", children: targetPlayerName }),
-              " para que responda sin que tú veas."
+              " ",
+              "para que responda sin que tú veas."
             ] }) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              "button",
+              {
+                onClick: () => setShowContent(!showContent),
+                className: "flex items-center gap-2 mx-auto text-xs text-white/40 hover:text-white/60 transition-colors mb-4",
+                children: [
+                  showContent ? /* @__PURE__ */ jsxRuntimeExports.jsx(EyeOff, { className: "w-3 h-3" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Eye, { className: "w-3 h-3" }),
+                  showContent ? "Ocultar contenido" : "Vista previa (solo capitán)"
+                ]
+              }
+            ),
+            showContent && challengePreview && /* @__PURE__ */ jsxRuntimeExports.jsx(
+              motion.div,
+              {
+                initial: { opacity: 0, height: 0 },
+                animate: { opacity: 1, height: "auto" },
+                className: "bg-white/10 rounded-xl p-3 mb-4 text-sm text-white/70 border border-white/10",
+                children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: challengePreview })
+              }
+            ),
             /* @__PURE__ */ jsxRuntimeExports.jsxs(
               Button,
               {
@@ -57528,7 +58232,7 @@ function YoNuncaEquiposFlow({
   players,
   teams,
   onNext,
-  localPlayerId,
+  localPlayerId: localPlayerId2,
   isHost,
   isMultiplayer,
   // Extracted
@@ -57542,11 +58246,11 @@ function YoNuncaEquiposFlow({
   const targetTeam = teams.find((t2) => t2.id === targetTeamId);
   const targetPlayers = players.filter((p2) => p2.team_id === targetTeamId);
   teams.filter((t2) => t2.id !== targetTeamId);
-  const localPlayer = players.find((p2) => p2.id === localPlayerId);
+  const localPlayer = players.find((p2) => p2.id === localPlayerId2);
   const isLocalInTargetTeam = (localPlayer == null ? void 0 : localPlayer.team_id) === targetTeamId;
   const cleanQuestion = questionText.replace(/^(🙈\s*|🌶️\s*|🇪🇸\s*)/, "");
   const handleTruthPlayerVote = (playerId, didIt) => {
-    if (localPlayerId && !isLocalInTargetTeam && !isHost)
+    if (localPlayerId2 && !isLocalInTargetTeam && !isHost)
       return;
     sfx.click();
     setGameState((prev) => ({
@@ -57564,7 +58268,7 @@ function YoNuncaEquiposFlow({
   };
   const handleGuessVote = (playerId) => {
     var _a3;
-    if (localPlayerId && isLocalInTargetTeam && !isHost)
+    if (localPlayerId2 && isLocalInTargetTeam && !isHost)
       return;
     sfx.click();
     const newVal = !((_a3 = gameState.yoNuncaGuessVotes) == null ? void 0 : _a3[playerId]);
@@ -57580,7 +58284,7 @@ function YoNuncaEquiposFlow({
     }
   };
   const confirmTruth = () => {
-    if (localPlayerId && !isLocalInTargetTeam && !isHost)
+    if (localPlayerId2 && !isLocalInTargetTeam && !isHost)
       return;
     sfx.click();
     setGameState((prev) => ({
@@ -57592,7 +58296,7 @@ function YoNuncaEquiposFlow({
     }
   };
   const confirmGuess = () => {
-    if (localPlayerId && isLocalInTargetTeam && !isHost)
+    if (localPlayerId2 && isLocalInTargetTeam && !isHost)
       return;
     sfx.click();
     const truthMap = gameState.yoNuncaTruthVotes || {};
@@ -57643,8 +58347,8 @@ function YoNuncaEquiposFlow({
     var _a3;
     return (_a3 = gameState.yoNuncaTruthVotes) == null ? void 0 : _a3[p2.id];
   }).length;
-  const canInteractTruth = !localPlayerId || isLocalInTargetTeam || isHost;
-  const canInteractGuess = !localPlayerId || !isLocalInTargetTeam || isHost;
+  const canInteractTruth = !localPlayerId2 || isLocalInTargetTeam || isHost;
+  const canInteractGuess = !localPlayerId2 || !isLocalInTargetTeam || isHost;
   return /* @__PURE__ */ jsxRuntimeExports.jsx(
     motion.div,
     {
@@ -57842,24 +58546,43 @@ function YoNuncaEquiposFlow({
     }
   );
 }
-const PlayerProfilesBottom = ({ players, currentPlayer, scores, playerViruses = [], mode: mode2, remoteStreams = [] }) => {
-  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute bottom-0 left-0 right-0 h-24 md:h-28 bg-gradient-to-r from-slate-900/80 to-slate-800/80 backdrop-blur-xl border-t border-white/10 flex items-center justify-center px-6 gap-6 z-[100] overflow-x-auto no-scrollbar", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex items-center gap-4 md:gap-8", children: players.map((p2) => {
+const PlayerProfilesBottom = ({ players, currentPlayer, scores, playerViruses = [], mode: mode2, remoteStreams = [], captainId, onAdjustXP }) => {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed bottom-0 left-0 right-0 h-28 md:h-32 bg-slate-900/40 backdrop-blur-[16px] border-t border-white/10 flex items-center justify-center px-6 gap-6 z-[100] overflow-x-auto no-scrollbar", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex items-center gap-4 md:gap-8", children: players.map((p2) => {
     const isTurn = (currentPlayer == null ? void 0 : currentPlayer.id) === p2.id;
     const hasVirus = playerViruses.some((v2) => v2.playerId === p2.id);
-    playerViruses.find((v2) => v2.playerId === p2.id);
+    const isCaptain = captainId === p2.id;
     const showVirus = hasVirus && (mode2 === "megamix" || mode2 === "clasico");
     const remotePeer = remoteStreams == null ? void 0 : remoteStreams.find((s2) => s2.peerId === p2.id);
     return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center gap-1 relative group shrink-0", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "absolute -top-12 left-1/2 -translate-x-1/2 flex gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 scale-90 group-hover:scale-100 z-[110]", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            onClick: () => onAdjustXP == null ? void 0 : onAdjustXP(p2.id, -5),
+            className: "w-10 h-10 rounded-xl bg-red-500/90 text-white flex items-center justify-center shadow-[0_0_15px_rgba(239,68,68,0.4)] border border-white/20 hover:bg-red-600 active:scale-90 transition-all",
+            children: /* @__PURE__ */ jsxRuntimeExports.jsx(Minus, { className: "w-5 h-5" })
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            onClick: () => onAdjustXP == null ? void 0 : onAdjustXP(p2.id, 5),
+            className: "w-10 h-10 rounded-xl bg-green-500/90 text-white flex items-center justify-center shadow-[0_0_15px_rgba(34,197,94,0.4)] border border-white/20 hover:bg-green-600 active:scale-90 transition-all",
+            children: /* @__PURE__ */ jsxRuntimeExports.jsx(Plus, { className: "w-5 h-5" })
+          }
+        )
+      ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs(
         motion.div,
         {
           animate: {
-            scale: isTurn ? 1.1 : 1,
-            borderColor: hasVirus ? "#22c55e" : isTurn ? "var(--primary)" : "transparent",
-            boxShadow: hasVirus ? "0 0 15px #22c55e" : isTurn ? "0 0 15px var(--primary)" : "none"
+            scale: isTurn ? 1.15 : 1,
+            borderColor: isCaptain ? "#fbbf24" : hasVirus ? "#22c55e" : isTurn ? "var(--primary)" : "transparent",
+            boxShadow: isCaptain ? "0 0 20px #fbbf24" : hasVirus ? "0 0 15px #22c55e" : isTurn ? "0 0 15px var(--primary)" : "none"
           },
-          className: `w-12 h-12 md:w-14 md:h-14 rounded-full bg-gradient-to-r from-slate-800/80 to-slate-700/80 border-2 flex items-center justify-center text-lg font-bold relative overflow-hidden ${isTurn ? "border-white/20 text-white" : "border-white/10 text-white/60"}`,
+          className: `w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-slate-800/60 backdrop-blur-xl border-2 flex items-center justify-center text-lg font-bold relative overflow-hidden transition-all duration-500 ${isTurn ? "border-primary shadow-lg shadow-primary/20" : "border-white/10 opacity-70 hover:opacity-100"}`,
           children: [
+            isCaptain && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute top-0 right-0 p-1 bg-amber-500 rounded-bl-lg z-10", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Crown, { className: "w-3 h-3 text-black" }) }),
             remotePeer ? /* @__PURE__ */ jsxRuntimeExports.jsx(
               "video",
               {
@@ -57871,44 +58594,76 @@ const PlayerProfilesBottom = ({ players, currentPlayer, scores, playerViruses = 
                 },
                 className: "w-full h-full object-cover"
               }
-            ) : p2.avatar_url ? /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: p2.avatar_url, alt: p2.name, className: "w-full h-full object-cover rounded-full" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children: p2.name.substring(0, 2).toUpperCase() }),
-            scores[p2.id] > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute -top-1 -right-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-black text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm z-10", children: scores[p2.id] })
+            ) : p2.avatar_url ? /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: p2.avatar_url, alt: p2.name, className: "w-full h-full object-cover" }) : /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-white/40", children: p2.name[0].toUpperCase() }),
+            showVirus && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute inset-0 bg-green-500/20 animate-pulse pointer-events-none" })
           ]
         }
       ),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `text-[10px] md:text-[11px] font-black max-w-full truncate px-1 uppercase tracking-tighter ${showVirus ? "text-green-400" : isTurn ? "text-white" : "text-white/60"}`, children: p2.name })
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `text-[10px] font-black uppercase tracking-widest ${isTurn ? "text-primary" : isCaptain ? "text-amber-400" : "text-white/40"}`, children: p2.name }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-[11px] font-bold text-white/90 tabular-nums", children: [
+          scores[p2.id] || 0,
+          " XP"
+        ] })
+      ] })
     ] }, p2.id);
   }) }) });
 };
 function PartyGame({ mode: mode2, onExit, isMultiplayer = false, isHost = false, roomId = null }) {
-  var _a3, _b2, _c3, _d2, _e3;
+  var _a3, _b2, _c3, _d2, _e3, _f2, _g2, _h2, _i2;
   const {
     currentPlayer,
     players,
-    // Added this
     teams,
-    // Added this
     currentIndex,
     setCurrentIndex,
-    // Added setter
     gameState,
     setGameState,
     advanceTurn,
     addScore,
     addWin,
-    // Added addWin to useGameEngine
+    handleGameEnd,
     showRoundSummary,
     setShowRoundSummary,
     roundSnapshot,
     setRoundSnapshot,
     scores,
     setGamesWon,
-    // Automatically extracted from useGameEngine
     gameOver,
     setGameOver
-    // Expose setter for manual ending
   } = useGameEngine();
+  reactExports.useEffect(() => {
+    if (players.length > 0 && !gameState.captainId) {
+      const randomCaptain = players[Math.floor(Math.random() * players.length)];
+      setGameState((prev) => ({ ...prev, captainId: randomCaptain.id }));
+      ue$1.success(`¡CAPITÁN DESIGNADO: ${randomCaptain.name}!`, {
+        icon: /* @__PURE__ */ jsxRuntimeExports.jsx(Crown, { className: "w-5 h-5 text-amber-500" }),
+        className: "bg-slate-900 border-amber-500/50 text-white font-black"
+      });
+    }
+  }, [players, gameState.captainId]);
+  const handleAdjustXP = (playerId, delta) => {
+    addScore(playerId, delta);
+    if (delta > 0)
+      sfx.click();
+    else
+      vibe(20);
+  };
   const { game } = useGame(roomId);
+  const [screencastActive, setScreencastActive] = reactExports.useState(false);
+  const handleScreenShare = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+      setScreencastActive(true);
+      ue$1.success("¡Pantalla compartida! Proyecta a tu TV.");
+      stream.getVideoTracks()[0].onended = () => {
+        setScreencastActive(false);
+        ue$1.info("Se detuvo la pantalla compartida.");
+      };
+    } catch {
+      ue$1.error("No se pudo compartir pantalla.");
+    }
+  };
   const [showVideo, setShowVideo] = reactExports.useState(true);
   const {
     content,
@@ -57945,9 +58700,13 @@ function PartyGame({ mode: mode2, onExit, isMultiplayer = false, isHost = false,
   const [virusReceived, setVirusReceived] = reactExports.useState({});
   const trackVote = (playerId) => {
     setVoteCounts((prev) => ({ ...prev, [playerId]: (prev[playerId] || 0) + 1 }));
+    sfx.click();
+    vibe(5);
   };
   const trackDrink = (playerId) => {
     setDrinkCounts((prev) => ({ ...prev, [playerId]: (prev[playerId] || 0) + 1 }));
+    sfx.click();
+    vibe(5);
   };
   const { broadcastState, sendActionToHost } = useMultiplayer(roomId, isHost, (currentPlayer == null ? void 0 : currentPlayer.name) || "Observer", (remoteState) => {
     if (!isHost && remoteState) {
@@ -57980,25 +58739,43 @@ function PartyGame({ mode: mode2, onExit, isMultiplayer = false, isHost = false,
     }
   });
   reactExports.useEffect(() => {
+    var _a4;
     const txt = getCurrentContent();
-    if (typeof txt === "string" && txt.startsWith("NORMA:")) {
-      const rule = txt.replace("NORMA:", "").trim();
-      setGameState((prev) => ({ ...prev, currentNorma: rule }));
+    if (typeof txt === "string" && (txt.toUpperCase().startsWith("NORMA:") || txt.toUpperCase().startsWith("NUEVA NORMA:"))) {
+      const rule = ((_a4 = txt.split(":")[1]) == null ? void 0 : _a4.trim()) || txt;
+      setGameState((prev) => ({
+        ...prev,
+        currentNorma: rule,
+        showNormaGlobal: true
+        // Force show if it was hidden
+      }));
       ue$1.success("¡Nueva Norma Activa!", { description: rule, duration: 4e3 });
       setTimeout(() => {
-        advanceTurn();
-      }, 300);
+        performTurnAdvance();
+      }, 500);
     }
   }, [currentIndex, isHost, mode2]);
   reactExports.useEffect(() => {
     if (mode2 === "megamix" && gameState.round === 1 && currentIndex === 0) {
-      setGameState((prev) => ({ ...prev, showNormaGlobal: true }));
-      const virusResult = applyRandomVirus(true);
-      if (virusResult) {
-        setGameState((prev) => ({ ...prev, showVirusAlert: true, virusAlertData: virusResult }));
+      setGameState((prev) => ({
+        ...prev,
+        showNormaGlobal: true,
+        // Also trigger a virus and norma for the first round as requested
+        currentNorma: "Prohibido decir nombres de jugadores",
+        currentNormaTurnsRemaining: players.length * 2
+      }));
+      const randomVirus = applyRandomVirus(true);
+      if (randomVirus) {
+        setGameState((prev) => ({
+          ...prev,
+          showVirusAlert: true,
+          virusAlertData: randomVirus,
+          virusPlayerId: randomVirus.player.id
+        }));
       }
+      ue$1.info("¡RONDA 1: Norma Global + Virus activados!");
     }
-  }, [gameState.round, currentIndex, mode2]);
+  }, [gameState.round, currentIndex, mode2, players]);
   reactExports.useEffect(() => {
     if (isMultiplayer && isHost) {
       broadcastState({
@@ -58115,6 +58892,10 @@ function PartyGame({ mode: mode2, onExit, isMultiplayer = false, isHost = false,
     if (onExit)
       onExit();
   };
+  const performTurnAdvance = () => {
+    sfx.whoosh();
+    advanceTurn();
+  };
   const handleNext = () => {
     sfx.click();
     vibe(10);
@@ -58138,20 +58919,28 @@ function PartyGame({ mode: mode2, onExit, isMultiplayer = false, isHost = false,
           const autoXp = Math.min(20, 3 + Math.floor(gameState.round / 2));
           addScore(currentPlayer.id, autoXp);
         }
+        const normaEvent = manageMegamixNormas(gameState.round);
+        if (normaEvent) {
+          setGameState((prev) => ({
+            ...prev,
+            showVirusCycleAlert: true,
+            virusCycleData: normaEvent,
+            currentNorma: normaEvent.message,
+            currentNormaTurnsRemaining: normaEvent.duration
+          }));
+        }
       }
       const virusResult = applyRandomVirus();
       if (virusResult) {
         setGameState((prev) => ({ ...prev, showVirusAlert: true, virusAlertData: virusResult }));
+        return;
       }
       if (checkMegamixSpecialEvents(
         currentIndex,
         gameState.round,
-        // Pass round for periodic checks
         currentPlayer,
         usedQuestionIds,
-        // Passed from content hook
         setCurrentQuestion,
-        // Real setter
         setUsedQuestionIds,
         setGameState,
         lastMiniTurnRef
@@ -58160,8 +58949,7 @@ function PartyGame({ mode: mode2, onExit, isMultiplayer = false, isHost = false,
         return;
       }
     }
-    sfx.whoosh();
-    advanceTurn();
+    performTurnAdvance();
   };
   const currentText = getCurrentContent();
   const rarity = detectRarity(currentText);
@@ -58250,6 +59038,24 @@ function PartyGame({ mode: mode2, onExit, isMultiplayer = false, isHost = false,
   }, [currentText, rarity]);
   reactExports.useEffect(() => {
     if (gameOver && !showRoundSummary) {
+      const syncAllPlayers = async () => {
+        try {
+          const updates = players.map((p2) => {
+            const currentScore = scores[p2.id] || 0;
+            return {
+              id: p2.id,
+              total_xp: currentScore,
+              // This should be cumulative in real logic
+              games_played: 1
+              // badges: calculateBadges(p.id)
+            };
+          });
+          ue$1.success("¡Sincronización Cyber-Party Elite completada!");
+        } catch (err) {
+          console.error("Sync error:", err);
+        }
+      };
+      syncAllPlayers();
       saveGameToHistory();
       setRoundSnapshot({
         round: gameState.round,
@@ -58257,8 +59063,13 @@ function PartyGame({ mode: mode2, onExit, isMultiplayer = false, isHost = false,
       });
       setShowRoundSummary(true);
     }
-  }, [gameOver, showRoundSummary, gameState.round, scores]);
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-h-screen bg-gradient-to-br from-slate-900/80 via-slate-800/80 to-slate-900/80 flex flex-col relative overflow-hidden pb-24 md:pb-32", children: [
+  }, [gameOver, showRoundSummary, gameState.round, scores, players]);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-h-screen bg-slate-950 flex flex-col relative overflow-hidden pb-24 md:pb-32", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "fixed inset-0 z-0", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute top-0 left-0 w-full h-full bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px] animate-pulse" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/10 rounded-full blur-[120px] animate-pulse delay-700" })
+    ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(
       PlayerProfilesBottom,
       {
@@ -58267,7 +59078,9 @@ function PartyGame({ mode: mode2, onExit, isMultiplayer = false, isHost = false,
         scores,
         playerViruses,
         mode: mode2,
-        remoteStreams: []
+        remoteStreams: [],
+        captainId: gameState.captainId,
+        onAdjustXP: handleAdjustXP
       }
     ),
     (() => {
@@ -58298,9 +59111,9 @@ function PartyGame({ mode: mode2, onExit, isMultiplayer = false, isHost = false,
               onClick: () => {
                 const currentSelections = gameState.votingSelections || [];
                 if (maxVotes === 1) {
-                  addScore(p2.id, 2);
+                  handleAdjustXP(p2.id, 5);
                   trackVote(p2.id);
-                  ue$1.success(`${p2.name} ha sido elegido! (+2 ptos)`);
+                  ue$1.success(`${p2.name} ha sido elegido! (+5 XP)`);
                   handleNext();
                 } else {
                   if (currentSelections.includes(p2.id)) {
@@ -58310,10 +59123,10 @@ function PartyGame({ mode: mode2, onExit, isMultiplayer = false, isHost = false,
                   }
                 }
               },
-              className: `flex flex-col items-center gap-3 p-5 rounded-2xl transition-all border-2 ${isSelected ? "bg-primary/40 border-primary shadow-[0_0_20px_rgba(var(--primary-rgb),0.4)]" : "bg-gradient-to-r from-slate-800/80 to-slate-700/80 border-white/10 hover:border-primary/50"}`,
+              className: `flex flex-col items-center gap-3 p-5 rounded-3xl transition-all border-2 ${isSelected ? "bg-primary/40 border-primary shadow-[0_0_20px_rgba(var(--primary-rgb),0.4)]" : "bg-slate-800/40 border-white/10 hover:border-primary/50"}`,
               children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: `w-16 h-16 rounded-full overflow-hidden border-2 transition-transform ${isSelected ? "border-primary scale-110" : "border-white/20"}`, children: p2.avatar_url ? /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: p2.avatar_url, className: "w-full h-full object-cover" }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-full h-full bg-gradient-to-r from-slate-800/80 to-slate-700/80 flex items-center justify-center text-2xl font-bold", children: p2.name.substring(0, 2).toUpperCase() }) }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-black text-base tracking-tight text-white", children: p2.name })
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: `w-20 h-20 rounded-full overflow-hidden border-4 transition-transform ${isSelected ? "border-primary scale-110" : "border-white/20"}`, children: p2.avatar_url ? /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: p2.avatar_url, className: "w-full h-full object-cover" }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-full h-full bg-slate-800 flex items-center justify-center text-2xl font-black", children: p2.name.substring(0, 2).toUpperCase() }) }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-black text-lg tracking-tight text-white uppercase", children: p2.name })
               ]
             },
             p2.id
@@ -58329,10 +59142,10 @@ function PartyGame({ mode: mode2, onExit, isMultiplayer = false, isHost = false,
               const selections = gameState.votingSelections || [];
               selections.forEach((id2) => {
                 var _a5;
-                addScore(id2, 2);
+                handleAdjustXP(id2, 5);
                 trackVote(id2);
                 const name = (_a5 = players.find((p2) => p2.id === id2)) == null ? void 0 : _a5.name;
-                ue$1.success(`${name} elegido! (+2 ptos)`);
+                ue$1.success(`${name} elegido! (+5 XP)`);
               });
               setGameState((prev) => ({ ...prev, votingSelections: [] }));
               handleNext();
@@ -58353,18 +59166,33 @@ function PartyGame({ mode: mode2, onExit, isMultiplayer = false, isHost = false,
       ] }) });
     })(),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("header", { className: "p-4 flex justify-between items-center z-10 relative", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(Button, { variant: "ghost", size: "icon", onClick: () => {
-        if (window.confirm("¿Seguro que quieres salir?")) {
-          onExit();
-        }
-      }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(ArrowLeft, { className: "h-6 w-6 text-white/80" }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex gap-2 items-center", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Button, { variant: "ghost", size: "icon", onClick: () => {
+          if (window.confirm("¿Seguro que quieres salir?")) {
+            onExit();
+          }
+        }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(ArrowLeft, { className: "h-6 w-6 text-white/80" }) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          Button,
+          {
+            variant: "ghost",
+            size: "sm",
+            onClick: handleScreenShare,
+            className: `h-9 rounded-xl px-3 font-bold text-[10px] gap-1.5 transition-all ${screencastActive ? "bg-green-500/20 text-green-400 border border-green-500/30" : "bg-white/5 text-white/50 border border-white/10"}`,
+            children: [
+              screencastActive ? /* @__PURE__ */ jsxRuntimeExports.jsx(Monitor, { className: "w-3.5 h-3.5" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Video, { className: "w-3.5 h-3.5" }),
+              screencastActive ? "EMITIENDO" : "COMPARTIR TV"
+            ]
+          }
+        )
+      ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex gap-2", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx(
           Button,
           {
             variant: "destructive",
             size: "sm",
-            className: "text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-red-500/20 to-red-600/20 text-red-200 border border-red-500/50",
+            className: "text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-red-500/10 to-red-600/10 text-red-300 border border-red-500/30",
             onClick: () => {
               if (window.confirm("¿Terminar partida y ver resultados?")) {
                 setGameOver(true);
@@ -58560,6 +59388,82 @@ function PartyGame({ mode: mode2, onExit, isMultiplayer = false, isHost = false,
         ] })
       ] })
     ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(Dialog, { open: gameState.showMimicaReveal || gameState.showBocaCerradaReveal, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogContent, { className: "sm:max-w-md bg-slate-900/90 backdrop-blur-xl border-primary/50 text-white z-[70]", "aria-describedby": void 0, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(DialogHeader, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(DialogTitle, { className: "text-2xl font-black text-center text-primary flex items-center justify-center gap-2 uppercase tracking-tighter", children: "¡TU TURNO!" }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center py-6 space-y-6", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-lg text-white/70", children: "Toca realizar la prueba a:" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-4xl font-black text-white bg-white/5 p-4 rounded-2xl border border-white/10 shadow-2xl", children: currentPlayer == null ? void 0 : currentPlayer.name }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-red-400 font-bold animate-pulse text-sm uppercase tracking-widest mt-4", children: "¡QUE LOS DEMÁS NO MIREN LA PANTALLA!" })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "relative group", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+          motion.button,
+          {
+            onMouseDown: () => {
+              if (gameState.showMimicaReveal)
+                setGameState((prev) => ({ ...prev, showMimica: true }));
+              if (gameState.showBocaCerradaReveal)
+                setGameState((prev) => ({ ...prev, showBocaCerrada: true }));
+            },
+            onMouseUp: () => {
+              setGameState((prev) => ({ ...prev, showMimica: false, showBocaCerrada: false }));
+            },
+            onTouchStart: () => {
+              if (gameState.showMimicaReveal)
+                setGameState((prev) => ({ ...prev, showMimica: true }));
+              if (gameState.showBocaCerradaReveal)
+                setGameState((prev) => ({ ...prev, showBocaCerrada: true }));
+            },
+            onTouchEnd: () => {
+              setGameState((prev) => ({ ...prev, showMimica: false, showBocaCerrada: false }));
+            },
+            className: "w-full h-40 rounded-3xl bg-gradient-to-br from-primary/20 to-purple-600/20 border-2 border-dashed border-primary/40 flex flex-col items-center justify-center gap-4 transition-all active:scale-95 active:bg-primary/30 overflow-hidden relative",
+            children: /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { mode: "wait", children: !(gameState.showMimica || gameState.showBocaCerrada) ? /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              motion.div,
+              {
+                initial: { opacity: 0 },
+                animate: { opacity: 1 },
+                exit: { opacity: 0 },
+                className: "flex flex-col items-center gap-2",
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(EyeOff, { className: "w-12 h-12 text-primary/60" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "font-bold text-primary/80 uppercase tracking-widest text-xs", children: "Mantén pulsado para ver" })
+                ]
+              },
+              "hidden"
+            ) : /* @__PURE__ */ jsxRuntimeExports.jsx(
+              motion.div,
+              {
+                initial: { opacity: 0, scale: 0.9 },
+                animate: { opacity: 1, scale: 1 },
+                exit: { opacity: 0, scale: 1.1 },
+                className: "p-6",
+                children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-2xl font-black text-white leading-tight", children: gameState.showMimicaReveal ? gameState.currentMimicaText : gameState.currentBocaCerradaText })
+              },
+              "visible"
+            ) })
+          }
+        ) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          Button,
+          {
+            variant: "outline",
+            className: "w-full h-14 rounded-2xl border-white/10 bg-white/5 hover:bg-white/10 font-bold uppercase tracking-widest text-xs",
+            onClick: () => {
+              setGameState((prev) => ({
+                ...prev,
+                showMimicaReveal: false,
+                showBocaCerradaReveal: false,
+                showMimica: false,
+                showBocaCerrada: false
+              }));
+              handleNext();
+            },
+            children: "Ya lo he visto, cerrar ⏭"
+          }
+        )
+      ] })
+    ] }) }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(Dialog, { open: gameState.showCaptainSelection, onOpenChange: () => {
     }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogContent, { className: "sm:max-w-md bg-gradient-to-r from-slate-900/80 to-slate-800/80 border-yellow-500/50 text-white z-[60]", "aria-describedby": void 0, children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(DialogHeader, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(DialogTitle, { className: "text-3xl font-black text-center text-yellow-500 flex items-center justify-center gap-3", children: "👑 ELIGE AL CAPITÁN" }) }),
@@ -58595,156 +59499,295 @@ function PartyGame({ mode: mode2, onExit, isMultiplayer = false, isHost = false,
         )) })
       ] })
     ] }) }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(Dialog, { open: gameState.showImpostorWarning, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogContent, { className: "sm:max-w-md bg-gradient-to-r from-red-900/80 to-red-800/80 border-red-500/50 text-white z-[60]", "aria-describedby": void 0, children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(DialogHeader, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogTitle, { className: "text-2xl font-black text-center text-red-500 flex items-center justify-center gap-2", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(CircleAlert, {}),
-        " ATENCIÓN CAPITÁN"
-      ] }) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center py-6 space-y-4", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-lg", children: "Por favor, pasa el móvil a:" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-4xl font-black text-white bg-gradient-to-r from-slate-800/80 to-slate-700/80 p-4 rounded-xl border border-red-500/30", children: ((_b2 = players.find((p2) => {
-          var _a4;
-          return p2.id === ((_a4 = gameState.impostorData) == null ? void 0 : _a4.impostorPlayerId);
-        })) == null ? void 0 : _b2.name) || (currentPlayer == null ? void 0 : currentPlayer.name) }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-red-200 mt-4", children: "¡Que nadie más mire la pantalla!" })
+    /* @__PURE__ */ jsxRuntimeExports.jsx(Dialog, { open: gameState.showImpostorWarning, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogContent, { className: "sm:max-w-md bg-slate-900/95 backdrop-blur-2xl border-red-500/50 text-white z-[80]", "aria-describedby": void 0, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(DialogHeader, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(DialogTitle, { className: "text-3xl font-black text-center text-red-500 flex items-center justify-center gap-3 uppercase tracking-tighter", children: "⚠️ ACCESO RESTRINGIDO" }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center py-8 space-y-8", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-lg text-white/60 font-bold uppercase tracking-widest", children: "Entrega el dispositivo a:" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-5xl font-black text-white bg-red-500/10 p-6 rounded-[32px] border border-red-500/30 shadow-[0_0_30px_rgba(239,68,68,0.2)]", children: ((_b2 = players.find((p2) => {
+            var _a4;
+            return p2.id === ((_a4 = gameState.impostorData) == null ? void 0 : _a4.impostorPlayerId);
+          })) == null ? void 0 : _b2.name) || (currentPlayer == null ? void 0 : currentPlayer.name) })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-slate-800/50 p-4 rounded-2xl border border-white/5", children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-red-400 font-black animate-pulse text-sm uppercase tracking-[0.3em]", children: "¡CAPITÁN! NO MIRES LA PANTALLA" }) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "relative", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+          motion.button,
+          {
+            onMouseDown: () => setGameState((prev) => ({ ...prev, showImpostorWord: true })),
+            onMouseUp: () => setGameState((prev) => ({ ...prev, showImpostorWord: false })),
+            onTouchStart: () => setGameState((prev) => ({ ...prev, showImpostorWord: true })),
+            onTouchEnd: () => setGameState((prev) => ({ ...prev, showImpostorWord: false })),
+            className: "w-full h-48 rounded-[40px] bg-gradient-to-br from-red-500/20 to-slate-900 border-2 border-dashed border-red-500/40 flex flex-col items-center justify-center gap-4 transition-all active:scale-95 active:bg-red-500/30 overflow-hidden shadow-2xl",
+            children: /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { mode: "wait", children: !gameState.showImpostorWord ? /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              motion.div,
+              {
+                initial: { opacity: 0 },
+                animate: { opacity: 1 },
+                exit: { opacity: 0 },
+                className: "flex flex-col items-center gap-3",
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center border border-red-500/30", children: /* @__PURE__ */ jsxRuntimeExports.jsx(EyeOff, { className: "w-8 h-8 text-red-500" }) }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "font-black text-red-500 uppercase tracking-[0.2em] text-[10px]", children: "MANTÉN PULSADO PARA REVELAR" })
+                ]
+              },
+              "locked"
+            ) : /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              motion.div,
+              {
+                initial: { opacity: 0, scale: 0.8 },
+                animate: { opacity: 1, scale: 1 },
+                className: "flex flex-col items-center gap-4 px-6 text-center",
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs font-black text-red-400 uppercase tracking-widest mb-1", children: "Tu Identidad Secreta" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-4 bg-white/5 rounded-2xl border border-white/10 w-full", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    ImpostorRound,
+                    {
+                      players,
+                      impostorPlayerId: ((_c3 = gameState.impostorData) == null ? void 0 : _c3.impostorPlayerId) || "",
+                      realQuestion: ((_d2 = gameState.impostorData) == null ? void 0 : _d2.currentImpostorReal) || "",
+                      impostorQuestion: ((_e3 = gameState.impostorData) == null ? void 0 : _e3.currentImpostorFake) || "",
+                      onComplete: (impostorCaught, votedPlayerId) => {
+                        var _a4;
+                        if (impostorCaught) {
+                          players.forEach((p2) => {
+                            var _a5;
+                            if (p2.id !== ((_a5 = gameState.impostorData) == null ? void 0 : _a5.impostorPlayerId))
+                              addScore(p2.id, 20);
+                          });
+                        } else {
+                          addScore(((_a4 = gameState.impostorData) == null ? void 0 : _a4.impostorPlayerId) || "", 50);
+                        }
+                        setGameState((prev) => ({ ...prev, showImpostorWarning: false, showImpostorWord: false }));
+                        handleNext();
+                      },
+                      onExit: () => {
+                        setGameState((prev) => ({ ...prev, showImpostorWarning: false, showImpostorWord: false }));
+                      }
+                    }
+                  ) })
+                ]
+              },
+              "revealed"
+            ) })
+          }
+        ) })
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(
         Button,
         {
-          className: "w-full h-14 text-lg font-bold bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 border border-white/10 backdrop-blur-sm",
-          onClick: () => {
-            setGameState((prev) => {
-              var _a4, _b3, _c4;
-              return {
-                ...prev,
-                showImpostorWarning: false,
-                showImpostor: true,
-                // proceed to actual logic
-                currentImpostorReal: (_a4 = prev.impostorData) == null ? void 0 : _a4.currentImpostorReal,
-                currentImpostorFake: (_b3 = prev.impostorData) == null ? void 0 : _b3.currentImpostorFake,
-                impostorPlayerId: (_c4 = prev.impostorData) == null ? void 0 : _c4.impostorPlayerId
-              };
-            });
-          },
-          children: "Ya lo tengo yo, mostrar secreto"
-        }
-      )
-    ] }) }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(Dialog, { open: gameState.showBocaCerradaWarning, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogContent, { className: "sm:max-w-md bg-gradient-to-r from-orange-900/80 to-orange-800/80 border-orange-500/50 text-white z-[60]", "aria-describedby": void 0, children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(DialogHeader, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogTitle, { className: "text-2xl font-black text-center text-orange-500 flex items-center justify-center gap-2", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(CircleAlert, {}),
-        " ATENCIÓN CAPITÁN"
-      ] }) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center py-6 space-y-4", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-lg", children: "Por favor, pasa el móvil a:" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-4xl font-black text-white bg-gradient-to-r from-slate-800/80 to-slate-700/80 p-4 rounded-xl border border-orange-500/30", children: ((_c3 = gameState.bocaCerradaData) == null ? void 0 : _c3.playerName) || (currentPlayer == null ? void 0 : currentPlayer.name) }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-orange-200 mt-4", children: "¡Tu reto de BOCA CERRADA está a punto de empezar!" })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        Button,
-        {
-          className: "w-full h-14 text-lg font-bold bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 border border-white/10 backdrop-blur-sm",
+          className: "w-full h-16 text-lg font-black bg-white text-black hover:bg-white/90 rounded-[24px] shadow-xl transition-all",
           onClick: () => {
             setGameState((prev) => ({
               ...prev,
-              showBocaCerradaWarning: false,
-              showBocaCerrada: true
-              // proceed to actual logic
+              showImpostorWarning: false,
+              showImpostor: false
+              // Already revealed via long press
             }));
+            handleNext();
           },
-          children: "Ya lo tengo yo, mostrar reto"
+          children: "ENTENDIDO, CONTINUAR ⏭"
         }
       )
     ] }) }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(Dialog, { open: gameState.showBocaCerrada, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogContent, { className: "sm:max-w-md bg-gradient-to-r from-orange-900/80 to-orange-800/80 border-orange-500/50 text-white z-[60]", "aria-describedby": void 0, children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(DialogHeader, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(DialogTitle, { className: "text-2xl font-black text-center text-orange-500", children: "BOCA CERRADA 🤐" }) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center py-6", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-lg mb-4 text-orange-100", children: "Intenta que el grupo adivine una palabra o concepto." }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-gradient-to-r from-slate-800/80 to-slate-700/80 p-4 rounded-xl border border-orange-500/30 text-xl font-bold text-white mb-4", children: [
-          "¡REGLAS!",
-          /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}),
-          "❌ No puedes abrir la boca",
-          /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}),
-          "❌ No puedes usar las manos",
-          /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}),
-          "✅ Solo sonidos nasales (Mmm, mmmm)"
+    /* @__PURE__ */ jsxRuntimeExports.jsx(Dialog, { open: gameState.showMimicaReveal, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogContent, { className: "sm:max-w-md bg-slate-900/95 backdrop-blur-2xl border-purple-500/50 text-white z-[80]", "aria-describedby": void 0, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(DialogHeader, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(DialogTitle, { className: "text-3xl font-black text-center text-purple-400 flex items-center justify-center gap-3 uppercase tracking-tighter", children: "🎭 ACCIÓN SECRETA" }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center py-8 space-y-8", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-lg text-white/60 font-bold uppercase tracking-widest", children: "Entrega el dispositivo a:" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-5xl font-black text-white bg-purple-500/10 p-6 rounded-[32px] border border-purple-500/30 shadow-[0_0_30px_rgba(168,85,247,0.2)]", children: currentPlayer == null ? void 0 : currentPlayer.name })
         ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-orange-200 uppercase font-bold text-center mt-2 animate-pulse", children: "🍺 SI NADIE ACIERTA, BEBES 3 TRAGOS" })
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-slate-800/50 p-4 rounded-2xl border border-white/5", children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-purple-400 font-black animate-pulse text-sm uppercase tracking-[0.3em]", children: "¡CAPITÁN! NO MIRES LA PANTALLA" }) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "relative", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+          motion.button,
+          {
+            onMouseDown: () => setGameState((prev) => ({ ...prev, showMimica: true })),
+            onMouseUp: () => setGameState((prev) => ({ ...prev, showMimica: false })),
+            onTouchStart: () => setGameState((prev) => ({ ...prev, showMimica: true })),
+            onTouchEnd: () => setGameState((prev) => ({ ...prev, showMimica: false })),
+            className: "w-full h-48 rounded-[40px] bg-gradient-to-br from-purple-500/20 to-slate-900 border-2 border-dashed border-purple-500/40 flex flex-col items-center justify-center gap-4 transition-all active:scale-95 active:bg-purple-500/30 overflow-hidden shadow-2xl",
+            children: /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { mode: "wait", children: !gameState.showMimica ? /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              motion.div,
+              {
+                initial: { opacity: 0 },
+                animate: { opacity: 1 },
+                exit: { opacity: 0 },
+                className: "flex flex-col items-center gap-3",
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-16 h-16 rounded-full bg-purple-500/20 flex items-center justify-center border border-purple-500/30", children: /* @__PURE__ */ jsxRuntimeExports.jsx(EyeOff, { className: "w-8 h-8 text-purple-400" }) }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "font-black text-purple-400 uppercase tracking-[0.2em] text-[10px]", children: "MANTÉN PULSADO PARA VER EL RETO" })
+                ]
+              },
+              "locked"
+            ) : /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              motion.div,
+              {
+                initial: { opacity: 0, scale: 0.8 },
+                animate: { opacity: 1, scale: 1 },
+                className: "flex flex-col items-center gap-4 px-6 text-center",
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs font-black text-purple-300 uppercase tracking-widest mb-1", children: "Tu Reto de Mímica" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-6 bg-white/5 rounded-2xl border border-white/10 w-full", children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-2xl font-black text-white drop-shadow-lg", children: gameState.currentMimicaText }) })
+                ]
+              },
+              "revealed"
+            ) })
+          }
+        ) })
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(
         Button,
         {
-          className: "w-full h-14 text-lg font-bold bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 border border-white/10 backdrop-blur-sm",
+          className: "w-full h-16 text-lg font-black bg-white text-black hover:bg-white/90 rounded-[24px] shadow-xl transition-all",
           onClick: () => {
-            setGameState((prev) => ({ ...prev, showBocaCerrada: false }));
+            setGameState((prev) => ({ ...prev, showMimicaReveal: false, showMimica: false }));
             handleNext();
           },
-          children: "Prueba Completada ⏭"
+          children: "LISTO, EMPEZAR 🎭"
         }
       )
     ] }) }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(Dialog, { open: gameState.showVirusCycleAlert, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogContent, { className: "sm:max-w-md bg-gradient-to-r from-purple-900/80 to-purple-800/80 border-purple-500/50 text-white z-[70]", "aria-describedby": void 0, children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(DialogHeader, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(DialogTitle, { className: "text-2xl font-black text-center text-purple-400", children: (_d2 = gameState.virusCycleData) == null ? void 0 : _d2.title }) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center py-6", children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-lg", children: (_e3 = gameState.virusCycleData) == null ? void 0 : _e3.message }) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(Dialog, { open: gameState.showBocaCerradaWarning, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogContent, { className: "sm:max-w-md bg-slate-900/95 backdrop-blur-2xl border-orange-500/50 text-white z-[80]", "aria-describedby": void 0, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(DialogHeader, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(DialogTitle, { className: "text-3xl font-black text-center text-orange-400 flex items-center justify-center gap-3 uppercase tracking-tighter", children: "🙊 BOCA CERRADA" }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center py-8 space-y-8", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-lg text-white/60 font-bold uppercase tracking-widest", children: "Entrega el dispositivo a:" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-5xl font-black text-white bg-orange-500/10 p-6 rounded-[32px] border border-orange-500/30 shadow-[0_0_30px_rgba(249,115,22,0.2)]", children: ((_f2 = gameState.bocaCerradaData) == null ? void 0 : _f2.playerName) || (currentPlayer == null ? void 0 : currentPlayer.name) })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-slate-800/50 p-4 rounded-2xl border border-white/5", children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-orange-400 font-black animate-pulse text-sm uppercase tracking-[0.3em]", children: "¡CAPITÁN! NO MIRES LA PANTALLA" }) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "relative", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+          motion.button,
+          {
+            onMouseDown: () => setGameState((prev) => ({ ...prev, showBocaCerrada: true })),
+            onMouseUp: () => setGameState((prev) => ({ ...prev, showBocaCerrada: false })),
+            onTouchStart: () => setGameState((prev) => ({ ...prev, showBocaCerrada: true })),
+            onTouchEnd: () => setGameState((prev) => ({ ...prev, showBocaCerrada: false })),
+            className: "w-full h-48 rounded-[40px] bg-gradient-to-br from-orange-500/20 to-slate-900 border-2 border-dashed border-orange-500/40 flex flex-col items-center justify-center gap-4 transition-all active:scale-95 active:bg-orange-500/30 overflow-hidden shadow-2xl",
+            children: /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { mode: "wait", children: !gameState.showBocaCerrada ? /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              motion.div,
+              {
+                initial: { opacity: 0 },
+                animate: { opacity: 1 },
+                exit: { opacity: 0 },
+                className: "flex flex-col items-center gap-3",
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-16 h-16 rounded-full bg-orange-500/20 flex items-center justify-center border border-orange-500/30", children: /* @__PURE__ */ jsxRuntimeExports.jsx(EyeOff, { className: "w-8 h-8 text-orange-400" }) }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "font-black text-orange-400 uppercase tracking-[0.2em] text-[10px]", children: "MANTÉN PULSADO PARA VER EL RETO" })
+                ]
+              },
+              "locked"
+            ) : /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              motion.div,
+              {
+                initial: { opacity: 0, scale: 0.8 },
+                animate: { opacity: 1, scale: 1 },
+                className: "flex flex-col items-center gap-4 px-6 text-center",
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs font-black text-orange-300 uppercase tracking-widest mb-1", children: "Tu Reto Boca Cerrada" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-6 bg-white/5 rounded-2xl border border-white/10 w-full", children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-2xl font-black text-white drop-shadow-lg", children: gameState.currentBocaCerradaText }) })
+                ]
+              },
+              "revealed"
+            ) })
+          }
+        ) })
+      ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(
         Button,
         {
-          className: "w-full h-12 font-bold bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 border border-white/10 backdrop-blur-sm",
-          onClick: () => setGameState((prev) => ({ ...prev, showVirusCycleAlert: false })),
-          children: "Continuar"
+          className: "w-full h-16 text-lg font-black bg-white text-black hover:bg-white/90 rounded-[24px] shadow-xl transition-all",
+          onClick: () => {
+            setGameState((prev) => ({ ...prev, showBocaCerradaWarning: false, showBocaCerrada: false }));
+            handleNext();
+          },
+          children: "LISTO, EMPEZAR 🙊"
+        }
+      )
+    ] }) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(Dialog, { open: gameState.showVirusCycleAlert, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogContent, { className: "sm:max-w-md bg-slate-900/95 backdrop-blur-2xl border-purple-500/50 text-white z-[70]", "aria-describedby": void 0, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(DialogHeader, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(DialogTitle, { className: "text-3xl font-black text-center text-purple-400 uppercase tracking-tighter", children: (_g2 = gameState.virusCycleData) == null ? void 0 : _g2.title }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center py-8", children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xl font-bold text-white/90", children: (_h2 = gameState.virusCycleData) == null ? void 0 : _h2.message }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        Button,
+        {
+          className: "w-full h-16 text-lg font-black bg-purple-600 hover:bg-purple-500 text-white rounded-2xl shadow-xl transition-all",
+          onClick: () => {
+            setGameState((prev) => ({ ...prev, showVirusCycleAlert: false }));
+            performTurnAdvance();
+          },
+          children: "ENTENDIDO"
         }
       )
     ] }) }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("main", { className: `flex-1 flex flex-col items-center justify-center p-4 relative transition-opacity duration-300 ${isMultiplayer && !isHost && (currentPlayer == null ? void 0 : currentPlayer.id) !== (currentPlayer == null ? void 0 : currentPlayer.id) ? "opacity-80 pointer-events-none" : ""}`, children: [
       isMultiplayer && !isHost && false,
-      gameState.currentNorma && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mb-6 mx-auto max-w-sm z-10 pointer-events-none relative", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-gradient-to-r from-yellow-900/40 to-amber-900/40 border border-yellow-500/50 backdrop-blur-md rounded-xl p-3 text-center shadow-[0_0_15px_rgba(234,179,8,0.2)] animate-pulse", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[10px] uppercase tracking-[0.2em] text-yellow-500 font-bold mb-1", children: "📜 NORMA ACTIVA" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-yellow-100 font-medium leading-tight", children: gameState.currentNorma })
+      (gameState.currentNorma || gameState.showNormaGlobal) && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mb-6 mx-auto max-w-sm z-10 pointer-events-none relative", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-gradient-to-r from-orange-600/40 to-orange-900/40 border-2 border-orange-500 backdrop-blur-md rounded-2xl p-4 text-center shadow-[0_0_20px_rgba(249,115,22,0.3)] animate-pulse", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[10px] uppercase tracking-[0.3em] text-orange-400 font-black mb-1", children: "📜 NORMA GLOBAL ACTIVA" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-base text-white font-black leading-tight uppercase tracking-tight", children: gameState.currentNorma || "¡Preparando nueva norma!" })
       ] }) }),
-      !gameState.showTrivia && !gameState.showVoting && !gameState.showDuel && !gameState.showImpostor && !gameState.showMimica && !gameState.showBocaCerrada && !gameState.showImpostorWord && mode2 !== "cultura" && mode2 !== "trivia_futbol" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-full max-w-sm mt-4 mb-2 z-10 flex flex-col items-center", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[10px] text-white/60 uppercase font-bold tracking-widest mb-2 opacity-70", children: "Panel del Capitán" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap justify-center gap-3", children: players.map((p2) => {
-          const captainXp = Math.min(50, 10 + Math.floor(gameState.round / 2) * 5);
-          return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center gap-1", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: `relative w-12 h-12 rounded-full border-2 shadow-lg overflow-hidden
-                      ${(currentPlayer == null ? void 0 : currentPlayer.id) === p2.id ? "border-yellow-400 ring-2 ring-yellow-400/40 scale-110" : "border-white/10"}`, children: p2.avatar_url ? /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: p2.avatar_url, className: "w-full h-full object-cover", alt: p2.name }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-full h-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-sm font-black text-white/90", children: p2.name.substring(0, 2).toUpperCase() }) }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-[9px] text-white/60 truncate max-w-[48px] text-center", children: p2.name }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex gap-1", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(
-                motion.button,
-                {
-                  whileTap: { scale: 0.85 },
-                  onClick: () => {
-                    if (isMultiplayer && !isHost)
-                      return;
-                    const penalty = Math.max(5, Math.floor(captainXp / 2));
-                    addScore(p2.id, -penalty);
-                    ue$1(`❌ -${penalty} XP para ${p2.name}`, { duration: 1200, position: "top-center" });
-                  },
-                  className: "w-6 h-6 rounded-full bg-red-500/80 hover:bg-red-500 border border-red-400/50 flex items-center justify-center text-white font-black text-sm shadow-[0_0_8px_rgba(239,68,68,0.4)] transition-all",
-                  children: "−"
-                }
-              ),
-              /* @__PURE__ */ jsxRuntimeExports.jsx(
-                motion.button,
-                {
-                  whileTap: { scale: 0.85 },
-                  onClick: () => {
-                    if (isMultiplayer && !isHost)
-                      return;
-                    addScore(p2.id, captainXp);
-                    setGamesWon((prev) => ({ ...prev, [p2.id]: (prev[p2.id] || 0) + 1 }));
-                    ue$1.success(`+${captainXp} XP para ${p2.name}! 🔥`, { duration: 1200, position: "top-center" });
-                  },
-                  className: "w-6 h-6 rounded-full bg-emerald-500/80 hover:bg-emerald-500 border border-emerald-400/50 flex items-center justify-center text-white font-black text-sm shadow-[0_0_8px_rgba(16,185,129,0.4)] transition-all",
-                  children: "+"
-                }
-              )
-            ] })
+      !gameState.showTrivia && !gameState.showVoting && !gameState.showDuel && !gameState.showImpostor && !gameState.showMimica && !gameState.showBocaCerrada && !gameState.showImpostorWord && mode2 !== "cultura" && mode2 !== "trivia_futbol" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-full max-w-md mt-4 mb-2 z-10 flex flex-col items-center bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-[32px] p-4 shadow-2xl", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2 mb-3", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[10px] text-amber-400/80 uppercase font-black tracking-[0.2em]", children: "Panel de Control del Capitán" })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap justify-center gap-4", children: players.map((p2) => {
+          const isCaptain = gameState.captainId === p2.id;
+          const baseXP = 10 + Math.floor(gameState.round / 2) * 5;
+          const rewardXP = Math.min(50, baseXP);
+          const penaltyXP = Math.max(5, Math.floor(rewardXP / 2));
+          return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center gap-2 group/player", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `w-14 h-14 rounded-2xl border-2 transition-all duration-300 overflow-hidden
+                        ${(currentPlayer == null ? void 0 : currentPlayer.id) === p2.id ? "border-primary ring-4 ring-primary/20 scale-105 shadow-lg shadow-primary/20" : "border-white/10 opacity-80 group-hover/player:opacity-100 group-hover/player:border-white/30"}`, children: [
+                p2.avatar_url ? /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: p2.avatar_url, className: "w-full h-full object-cover", alt: p2.name }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-full h-full bg-slate-800 flex items-center justify-center text-sm font-black text-white/40", children: p2.name.substring(0, 2).toUpperCase() }),
+                isCaptain && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute top-0 right-0 p-1 bg-amber-500 rounded-bl-lg z-10 shadow-md", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Crown, { className: "w-2.5 h-2.5 text-black" }) })
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "absolute -bottom-2 -right-2 flex flex-col gap-1.5", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  motion.button,
+                  {
+                    whileTap: { scale: 0.8 },
+                    onClick: () => {
+                      if (isMultiplayer && !isHost)
+                        return;
+                      handleAdjustXP(p2.id, rewardXP);
+                      ue$1.success(`+${rewardXP} XP para ${p2.name}! 🔥`, {
+                        className: "bg-slate-900 border-emerald-500/50 text-emerald-400 font-bold"
+                      });
+                    },
+                    className: "w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center shadow-lg hover:bg-emerald-400 transition-colors",
+                    children: /* @__PURE__ */ jsxRuntimeExports.jsx(Plus, { className: "w-4 h-4" })
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  motion.button,
+                  {
+                    whileTap: { scale: 0.8 },
+                    onClick: () => {
+                      if (isMultiplayer && !isHost)
+                        return;
+                      handleAdjustXP(p2.id, -penaltyXP);
+                      ue$1.error(`-${penaltyXP} XP para ${p2.name} ❌`, {
+                        className: "bg-slate-900 border-red-500/50 text-red-400 font-bold"
+                      });
+                    },
+                    className: "w-7 h-7 rounded-lg bg-red-500 text-white flex items-center justify-center shadow-lg hover:bg-red-400 transition-colors",
+                    children: /* @__PURE__ */ jsxRuntimeExports.jsx(Minus, { className: "w-4 h-4" })
+                  }
+                )
+              ] })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `text-[10px] font-black uppercase tracking-tight truncate max-w-[60px] 
+                      ${(currentPlayer == null ? void 0 : currentPlayer.id) === p2.id ? "text-primary" : isCaptain ? "text-amber-400" : "text-white/40"}`, children: p2.name })
           ] }, p2.id);
         }) }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[10px] text-white/60 mt-2 text-center leading-tight", children: "Verde = +XP por cumplir · Rojo = −XP por fallar" })
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mt-4 pt-3 border-t border-white/5 w-full text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-[9px] text-white/30 uppercase font-bold tracking-widest", children: [
+          "Recompensa actual: ",
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-emerald-400", children: [
+            "+",
+            Math.min(50, 10 + Math.floor(gameState.round / 2) * 5),
+            " XP"
+          ] })
+        ] }) })
       ] }),
       currentText && (currentText.toLowerCase().includes("yo nunca") || mode2 === "yo_nunca" || mode2 === "yo_nunca_equipos") && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-full max-w-sm mt-3 mb-2 z-10", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-gradient-to-r from-amber-900/40 to-orange-900/40 border border-amber-500/40 rounded-xl p-3", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[10px] text-amber-400 uppercase font-bold tracking-widest mb-2 text-center", children: "🍺 ¿Quién ha bebido? (toca para registrar)" }),
@@ -58950,11 +59993,14 @@ function PartyGame({ mode: mode2, onExit, isMultiplayer = false, isHost = false,
         )
       ] }) }),
       gameState.showImpostorWord && gameState.currentImpostorWord && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute inset-0 z-20 bg-gradient-to-br from-slate-950/95 via-red-950/80 to-slate-950/95 backdrop-blur-xl flex items-center justify-center p-6 text-center text-white", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(motion.div, { initial: { scale: 0.8, opacity: 0 }, animate: { scale: 1, opacity: 1 }, className: "w-full max-w-sm", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-3xl font-black mb-2 text-red-400", children: "🕵️ Palabra Impostor" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-3xl font-black mb-2 text-red-400", children: "🕵️ ¡Eres el Impostor!" }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-base mb-6 text-red-200/80", children: [
-          "Pasa el móvil a los ",
-          /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-white", children: "NO impostores" }),
-          ". ¡El impostor NO debe ver esto!"
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("strong", { className: "text-white text-xl", children: [
+            "¡",
+            currentPlayer == null ? void 0 : currentPlayer.name,
+            "!"
+          ] }),
+          " Te ha tocado. Mira tu palabra secreta y realízala para que los demás la adivinen."
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsx(
           "div",
@@ -58974,7 +60020,7 @@ function PartyGame({ mode: mode2, onExit, isMultiplayer = false, isHost = false,
             ] })
           }
         ),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-red-300/60 mb-6", children: "Solo los jugadores normales deben ver la palabra. El impostor intentará adivinarla." }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-red-300/60 mb-6", children: "Asegúrate de que nadie más vea la pantalla." }),
         /* @__PURE__ */ jsxRuntimeExports.jsx(
           Button,
           {
@@ -59002,43 +60048,50 @@ function PartyGame({ mode: mode2, onExit, isMultiplayer = false, isHost = false,
           handleNext();
         }, children: "Continuar" })
       ] }),
-      gameState.showVirusAlert && gameState.virusAlertData && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed inset-0 z-[100] bg-gradient-to-r from-slate-900/80 to-slate-800/80 flex items-center justify-center p-6 text-center text-white animate-in fade-in duration-300", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      gameState.showVirusAlert && gameState.virusAlertData && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed inset-0 z-[100] bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4 text-center text-white animate-in fade-in duration-300", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
         motion.div,
         {
-          initial: { scale: 0.5, opacity: 0 },
+          initial: { scale: 0.8, opacity: 0 },
           animate: { scale: 1, opacity: 1 },
-          className: "max-w-md w-full bg-slate-900 border-2 border-green-500 p-6 rounded-xl shadow-[0_0_100px_rgba(34,197,94,0.6)] relative overflow-hidden",
-          children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute inset-0 bg-[linear-gradient(transparent_0%,rgba(34,197,94,0.1)_50%,transparent_100%)] animate-scan pointer-events-none", style: { backgroundSize: "100% 200%" } }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative z-10", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex justify-center mb-6", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-4 bg-green-500/20 rounded-full animate-pulse ring-4 ring-green-500/30", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-5xl", children: "🦠" }) }) }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-4xl font-black mb-2 text-green-400 font-mono tracking-tighter shadow-green-glow", children: "¡VIRUS DETECTADO!" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "my-6 p-6 bg-black/60 rounded-xl border border-green-500/50 backdrop-blur-sm", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-green-400/80 mb-1 uppercase tracking-widest font-bold", children: "Infectado" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-3xl font-black text-white mb-6 tracking-wide", children: gameState.virusAlertData.player.name }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "h-px bg-gradient-to-r from-transparent via-green-500/50 to-transparent w-full mb-6" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-green-400/80 mb-1 uppercase tracking-widest font-bold", children: "Efecto" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-2xl font-bold text-green-300 leading-tight mb-2", children: gameState.virusAlertData.virus.name }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-gray-300 font-medium", children: gameState.virusAlertData.virus.description })
+          className: "max-w-xs w-full bg-slate-900 border-2 border-green-500 p-5 rounded-[2.5rem] shadow-[0_0_50px_rgba(34,197,94,0.4)] relative overflow-hidden",
+          children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative z-10 space-y-4", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex justify-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-14 h-14 bg-green-500/20 rounded-full flex items-center justify-center border border-green-500/30 animate-pulse", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Zap, { className: "w-7 h-7 text-green-500" }) }) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-1", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-lg font-black text-green-500 tracking-tighter uppercase", children: "¡VIRUS DETECTADO!" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "h-px w-8 bg-green-500/30 mx-auto" })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-black/40 p-4 rounded-2xl border border-white/5 space-y-3", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[9px] text-white/40 font-black uppercase tracking-widest mb-0.5", children: "Infectado" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xl font-black text-white leading-tight", children: gameState.virusAlertData.player.name })
               ] }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx(
-                Button,
-                {
-                  className: "w-full bg-green-600 hover:bg-green-500 text-white font-bold py-6 text-xl shadow-[0_0_20px_rgba(34,197,94,0.4)] transition-all hover:scale-[1.02]",
-                  onClick: () => {
-                    setGameState((prev) => ({ ...prev, showVirusAlert: false, virusAlertData: null }));
-                    handleNext();
-                  },
-                  children: "ACEPTAR DESTINO"
-                }
-              )
-            ] })
-          ]
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "pt-3 border-t border-white/5", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[9px] text-green-400 font-black uppercase tracking-widest mb-0.5", children: "Efecto" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-base font-black text-white uppercase leading-tight", children: gameState.virusAlertData.virus.virusName || gameState.virusAlertData.virus.name }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[11px] text-white/60 font-medium leading-snug mt-1", children: gameState.virusAlertData.virus.virusDescription || gameState.virusAlertData.virus.description })
+              ] })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              Button,
+              {
+                className: "w-full bg-green-600 hover:bg-green-500 text-white font-black py-3 text-base rounded-xl shadow-lg transition-all active:scale-95",
+                onClick: () => {
+                  setGameState((prev) => ({ ...prev, showVirusAlert: false, virusAlertData: null }));
+                  performTurnAdvance();
+                },
+                children: "ACEPTAR DESTINO"
+              }
+            )
+          ] })
         }
       ) }),
       gameState.showCaptainPass && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute inset-0 z-30 bg-gradient-to-r from-slate-900/80 to-slate-800/80 overflow-y-auto", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
         CaptainPassScreen,
         {
+          captainName: ((_i2 = players.find((p2) => p2.id === gameState.captainId)) == null ? void 0 : _i2.name) || "Capitán",
+          targetPlayerName: (currentPlayer == null ? void 0 : currentPlayer.name) || "Siguiente Jugador",
+          isCaptainTurn: (currentPlayer == null ? void 0 : currentPlayer.id) === gameState.captainId,
+          challengePreview: currentText,
           onComplete: () => {
             setGameState((prev) => ({ ...prev, showCaptainPass: false }));
             handleNext();
@@ -66128,7 +67181,7 @@ function VideoTrack({ track: track2, muted = false, className = "" }) {
   }, [track2]);
   return /* @__PURE__ */ jsxRuntimeExports.jsx("video", { ref: videoRef, autoPlay: true, playsInline: true, muted, className });
 }
-function PokerTable({ players, gameState, localPlayerId, myCards = [], remoteStreams = [], localStream, equippedCards }) {
+function PokerTable({ players, gameState, localPlayerId: localPlayerId2, myCards = [], remoteStreams = [], localStream, equippedCards }) {
   var _a3;
   const { participants: dailyParticipants } = useDailyVideo();
   const pot = (gameState == null ? void 0 : gameState.pot) || 0;
@@ -66204,7 +67257,7 @@ function PokerTable({ players, gameState, localPlayerId, myCards = [], remoteStr
       }) })
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute inset-0 overflow-visible", children: (() => {
-      const localIdx = players.findIndex((p2) => p2.id === localPlayerId);
+      const localIdx = players.findIndex((p2) => p2.id === localPlayerId2);
       const shiftedPlayers = localIdx === -1 ? players : [...players.slice(localIdx), ...players.slice(0, localIdx)];
       return shiftedPlayers.map((p2, i2) => {
         var _a4;
@@ -66213,7 +67266,7 @@ function PokerTable({ players, gameState, localPlayerId, myCards = [], remoteStr
         const ry = isMobile ? 42 : 36;
         const x2 = 50 + Math.cos(angle) * rx;
         const y2 = 50 + Math.sin(angle) * ry;
-        const isLocal = p2.id === localPlayerId;
+        const isLocal = p2.id === localPlayerId2;
         const isTurn = p2.id === currentTurn;
         const isFolded = (_a4 = gameState == null ? void 0 : gameState.folded_players) == null ? void 0 : _a4.includes(p2.id);
         const hasCards = (gameState == null ? void 0 : gameState.status) !== "waiting" && (gameState == null ? void 0 : gameState.status) !== "finished";
@@ -66288,7 +67341,7 @@ function PokerTable({ players, gameState, localPlayerId, myCards = [], remoteStr
         );
       });
     })() }),
-    myCards.length === 2 && (gameState == null ? void 0 : gameState.status) !== "waiting" && (gameState == null ? void 0 : gameState.status) !== "finished" && !((_a3 = gameState == null ? void 0 : gameState.folded_players) == null ? void 0 : _a3.includes(localPlayerId)) && /* @__PURE__ */ jsxRuntimeExports.jsx(
+    myCards.length === 2 && (gameState == null ? void 0 : gameState.status) !== "waiting" && (gameState == null ? void 0 : gameState.status) !== "finished" && !((_a3 = gameState == null ? void 0 : gameState.folded_players) == null ? void 0 : _a3.includes(localPlayerId2)) && /* @__PURE__ */ jsxRuntimeExports.jsx(
       motion.div,
       {
         initial: { y: 60, opacity: 0 },
@@ -67055,7 +68108,7 @@ const getHandRank = (cards) => {
 function PokerRoom({ onExit, roomId, isHost: isHostParam }) {
   var _a3, _b2, _c3;
   const { localPlayerId: contextPlayerId, players, addPlayer, remoteStreams, localStream } = useGameContext();
-  const localPlayerId = contextPlayerId || ((_a3 = players.find((p2) => !p2.name.includes("Bot"))) == null ? void 0 : _a3.id) || ((_b2 = players[0]) == null ? void 0 : _b2.id);
+  const localPlayerId2 = contextPlayerId || ((_a3 = players.find((p2) => !p2.name.includes("Bot"))) == null ? void 0 : _a3.id) || ((_b2 = players[0]) == null ? void 0 : _b2.id);
   const isHost = isHostParam || !roomId;
   const { profile, syncEconomy } = useAuth();
   reactExports.useEffect(() => {
@@ -67092,7 +68145,7 @@ function PokerRoom({ onExit, roomId, isHost: isHostParam }) {
     const persisted = loadPersistedChips();
     const initial = {};
     for (const p2 of players) {
-      if (p2.id === localPlayerId && profile) {
+      if (p2.id === localPlayerId2 && profile) {
         initial[p2.id] = profile.coins;
       } else {
         initial[p2.id] = persisted[p2.name] !== void 0 ? persisted[p2.name] : p2.score || STARTING_CHIPS;
@@ -67110,14 +68163,14 @@ function PokerRoom({ onExit, roomId, isHost: isHostParam }) {
   reactExports.useEffect(() => {
     var _a4;
     const rankings = loadLocalRankings();
-    const mePlayer = players.find((p2) => p2.id === localPlayerId);
+    const mePlayer = players.find((p2) => p2.id === localPlayerId2);
     if (mePlayer) {
       const meRanking = rankings.find((r2) => r2.player_name.toLowerCase() === mePlayer.name.toLowerCase());
       if ((_a4 = meRanking == null ? void 0 : meRanking.equipped_items) == null ? void 0 : _a4.carta) {
-        setEquippedCards({ [localPlayerId]: meRanking.equipped_items.carta });
+        setEquippedCards({ [localPlayerId2]: meRanking.equipped_items.carta });
       }
     }
-  }, [players, localPlayerId]);
+  }, [players, localPlayerId2]);
   reactExports.useEffect(() => {
     if (Object.keys(localScores).length === 0)
       return;
@@ -67128,12 +68181,12 @@ function PokerRoom({ onExit, roomId, isHost: isHostParam }) {
       }
     }
     localStorage.setItem("poker_chips", JSON.stringify(chipsByName));
-    if (localPlayerId && localScores[localPlayerId] !== void 0 && profile) {
-      if (localScores[localPlayerId] !== profile.coins) {
-        syncEconomy(localScores[localPlayerId], profile.gems);
+    if (localPlayerId2 && localScores[localPlayerId2] !== void 0 && profile) {
+      if (localScores[localPlayerId2] !== profile.coins) {
+        syncEconomy(localScores[localPlayerId2], profile.gems);
       }
     }
-  }, [localScores, players, localPlayerId, profile, syncEconomy]);
+  }, [localScores, players, localPlayerId2, profile, syncEconomy]);
   const broadcastState = (state) => {
     if (roomId && channelRef.current) {
       channelRef.current.send({
@@ -67206,10 +68259,10 @@ function PokerRoom({ onExit, roomId, isHost: isHostParam }) {
     }
   }, [pokerState.current_turn, isHost, pokerState.status, pokerState.current_bet, players]);
   reactExports.useEffect(() => {
-    if (!localPlayerId)
+    if (!localPlayerId2)
       return;
     if (roomId) {
-      supabase.from("poker_hands").select("cards").eq("room_id", roomId).eq("player_id", localPlayerId).maybeSingle().then(({ data }) => {
+      supabase.from("poker_hands").select("cards").eq("room_id", roomId).eq("player_id", localPlayerId2).maybeSingle().then(({ data }) => {
         if (data == null ? void 0 : data.cards)
           setMyCards(data.cards);
       });
@@ -67222,7 +68275,7 @@ function PokerRoom({ onExit, roomId, isHost: isHostParam }) {
             setLocalScores(payload.state.player_chips);
           }
         }
-      }).on("broadcast", { event: `private_hand_${localPlayerId}` }, ({ payload }) => {
+      }).on("broadcast", { event: `private_hand_${localPlayerId2}` }, ({ payload }) => {
         setMyCards(payload.cards);
       }).on("broadcast", { event: "poker_action" }, ({ payload }) => {
         if (isHost)
@@ -67232,10 +68285,10 @@ function PokerRoom({ onExit, roomId, isHost: isHostParam }) {
         supabase.removeChannel(channel);
       };
     }
-  }, [roomId, localPlayerId, isHost]);
+  }, [roomId, localPlayerId2, isHost]);
   const handleAction = (action, amount = 0, playerId) => {
     var _a4;
-    const actingId = playerId || localPlayerId;
+    const actingId = playerId || localPlayerId2;
     if (!actingId)
       return;
     if (!isHost && roomId) {
@@ -67412,7 +68465,7 @@ function PokerRoom({ onExit, roomId, isHost: isHostParam }) {
       folded_players: []
     };
     setPokerState(newState);
-    setMyCards(hands[localPlayerId] || []);
+    setMyCards(hands[localPlayerId2] || []);
     if (roomId) {
       broadcastState(newState);
       players.forEach((p2) => {
@@ -67442,7 +68495,7 @@ function PokerRoom({ onExit, roomId, isHost: isHostParam }) {
             score: localScores[p2.id] !== void 0 ? localScores[p2.id] : p2.score || STARTING_CHIPS
           })),
           gameState: pokerState,
-          localPlayerId,
+          localPlayerId: localPlayerId2,
           myCards,
           remoteStreams,
           localStream,
@@ -67489,9 +68542,9 @@ function PokerRoom({ onExit, roomId, isHost: isHostParam }) {
         PokerControls,
         {
           onAction: (a2, am) => handleAction(a2, am),
-          isActive: pokerState.status !== "waiting" && pokerState.current_turn === localPlayerId,
-          currentBetToMatch: pokerState.current_bet - (((_c3 = pokerState.player_bets) == null ? void 0 : _c3[localPlayerId || ""]) || 0),
-          myChips: localScores[localPlayerId || ""] || 0,
+          isActive: pokerState.status !== "waiting" && pokerState.current_turn === localPlayerId2,
+          currentBetToMatch: pokerState.current_bet - (((_c3 = pokerState.player_bets) == null ? void 0 : _c3[localPlayerId2 || ""]) || 0),
+          myChips: localScores[localPlayerId2 || ""] || 0,
           pot: pokerState.pot || 0
         }
       )
@@ -68499,6 +69552,724 @@ function ParchisGame({ roomId, isHost, onExit, localPlayerName, localPlayerAvata
     )
   ] });
 }
+function shuffleArray(array) {
+  const shuffled = [...array];
+  for (let i2 = shuffled.length - 1; i2 > 0; i2--) {
+    const j2 = Math.floor(Math.random() * (i2 + 1));
+    [shuffled[i2], shuffled[j2]] = [shuffled[j2], shuffled[i2]];
+  }
+  return shuffled;
+}
+const sessionTrackers = /* @__PURE__ */ new Map();
+function getRandomWithoutRepeat(key, items) {
+  if (items.length === 0)
+    throw new Error("Empty items array");
+  let used = sessionTrackers.get(key);
+  if (!used || used.size >= items.length) {
+    used = /* @__PURE__ */ new Set();
+    sessionTrackers.set(key, used);
+  }
+  let index2;
+  do {
+    index2 = Math.floor(Math.random() * items.length);
+  } while (used.has(index2));
+  used.add(index2);
+  return items[index2];
+}
+function resetSessionTracker(key) {
+  sessionTrackers.delete(key);
+}
+const TILE_CONFIG = {
+  start: { emoji: "🏠", color: "from-green-400 to-emerald-500", label: "Salida" },
+  challenge: { emoji: "🎯", color: "from-blue-400 to-indigo-500", label: "Reto" },
+  trivia: { emoji: "🧠", color: "from-pink-400 to-rose-500", label: "Trivia" },
+  duel: { emoji: "⚔️", color: "from-red-400 to-orange-500", label: "Duelo" },
+  drink: { emoji: "🍺", color: "from-amber-400 to-yellow-500", label: "Tragos" },
+  bonus: { emoji: "⭐", color: "from-yellow-300 to-amber-400", label: "Bonus" },
+  trap: { emoji: "💀", color: "from-gray-600 to-gray-800", label: "Trampa" },
+  mimica: { emoji: "🎭", color: "from-purple-400 to-violet-500", label: "Mímica" },
+  random: { emoji: "🎲", color: "from-cyan-400 to-teal-500", label: "Azar" },
+  norma: { emoji: "📜", color: "from-orange-400 to-red-500", label: "Norma" },
+  finish: { emoji: "🏆", color: "from-yellow-400 to-amber-600", label: "Meta" },
+  oca: { emoji: "🦢", color: "from-white to-gray-200", label: "Oca" },
+  puente: { emoji: "🌉", color: "from-stone-400 to-stone-600", label: "Puente" },
+  posada: { emoji: "🏨", color: "from-amber-700 to-amber-900", label: "Posada" },
+  pozo: { emoji: "🕳️", color: "from-blue-800 to-indigo-900", label: "Pozo" },
+  laberinto: { emoji: "🧭", color: "from-green-700 to-green-900", label: "Laberinto" },
+  carcel: { emoji: "⛓️", color: "from-slate-700 to-slate-900", label: "Cárcel" },
+  calavera: { emoji: "☠️", color: "from-black to-gray-900", label: "Muerte" }
+};
+const ocaTilesList = [5, 9, 14, 18, 23, 27, 32, 36, 41, 45, 50, 54, 59, 63, 68, 72, 77, 81, 86, 90, 95];
+function generateBoard() {
+  const tileSequence = [
+    "challenge",
+    "drink",
+    "trivia",
+    "challenge",
+    "random",
+    "duel",
+    "challenge",
+    "bonus",
+    "drink",
+    "trivia",
+    "trap",
+    "challenge",
+    "mimica",
+    "drink",
+    "challenge",
+    "norma",
+    "trivia",
+    "duel",
+    "challenge",
+    "drink"
+  ];
+  const tiles = [{ id: 0, type: "start", ...TILE_CONFIG.start }];
+  for (let i2 = 1; i2 < 99; i2++) {
+    const type = tileSequence[i2 % tileSequence.length];
+    const cfg = TILE_CONFIG[type];
+    tiles.push({ id: i2, type, label: cfg.label, emoji: cfg.emoji, color: cfg.color });
+  }
+  ocaTilesList.forEach((i2) => {
+    if (i2 < 99)
+      tiles[i2] = { id: i2, type: "oca", ...TILE_CONFIG.oca };
+  });
+  tiles[6] = { id: 6, type: "puente", ...TILE_CONFIG.puente };
+  tiles[12] = { id: 12, type: "puente", ...TILE_CONFIG.puente };
+  tiles[19] = { id: 19, type: "posada", ...TILE_CONFIG.posada };
+  tiles[31] = { id: 31, type: "pozo", ...TILE_CONFIG.pozo };
+  tiles[42] = { id: 42, type: "laberinto", ...TILE_CONFIG.laberinto };
+  tiles[56] = { id: 56, type: "carcel", ...TILE_CONFIG.carcel };
+  tiles[58] = { id: 58, type: "calavera", ...TILE_CONFIG.calavera };
+  tiles.push({ id: 99, type: "finish", ...TILE_CONFIG.finish });
+  return tiles;
+}
+const DRINK_EVENTS = [
+  "🍻 ¡Brindis grupal! Todos beben un trago.",
+  "🍺 El jugador reparte 3 tragos a quien quiera.",
+  "🥂 Cascada: el jugador empieza a beber y todos le siguen. Nadie para hasta que pare el de su derecha.",
+  "🍹 El jugador inventa un cóctel con nombre ridículo. Si a alguien le gusta el nombre, bebe.",
+  "🍻 Duelo de tragos: el jugador elige a alguien. El primero en terminar, reparte 5 tragos.",
+  "🍺 El jugador da un trago por cada vocal en su nombre.",
+  "🥤 Todos los que tengan el móvil en la mano, beben.",
+  "🍻 El jugador cuenta un chiste. Si nadie se ríe, bebe doble.",
+  "🍺 El más alto bebe. Si hay empate, beben los dos.",
+  "🥂 El jugador brinda por algo épico. Si el grupo no aplaude, bebe.",
+  "🍻 Todos los que hayan bebido Ya en esta partida, vuelven a beber.",
+  "🍺 Modo Cascada Inversa: el último jugador empieza y sube hasta el primero.",
+  "🥂 El jugador elige: ¿verdad o trago? Si elige verdad, responde la pregunta más comprometida del grupo.",
+  "🍹 Ronda de shots! Todos beben a la vez.",
+  "🍻 El jugador que estornude primero, reparte 3 tragos extra."
+];
+const BONUS_EVENTS = [
+  "⭐ ¡Avanza 3 casillas extra!",
+  "⭐ ¡Tira otra vez!",
+  "⭐ Eres inmune al próximo trap. ¡Escudo activado!",
+  "⭐ ¡Doble XP en esta ronda! (+20 puntos extra)",
+  "⭐ Elige a un jugador y retrocédelo 2 casillas.",
+  "⭐ ¡Comodín! Puedes saltarte la próxima casilla negativa.",
+  "⭐ ¡Roba 5 puntos de XP a otro jugador!"
+];
+const TRAP_EVENTS = [
+  "💀 ¡Retrocede 3 casillas!",
+  "💀 Pierdes tu próximo turno.",
+  "💀 Bebe 3 tragos y retrocede 1 casilla.",
+  "💀 Todos te señalan y bebes 2 tragos.",
+  "💀 Vuelves a la casilla 1! (si estás antes de la 20, solo retrocedes 5)",
+  "💀 Haz 10 sentadillas o bebe 5 tragos.",
+  "💀 El grupo te pone un mote. Te llaman así hasta que acabe la partida."
+];
+const RANDOM_EVENTS = [
+  "🎲 ¡Cambio de posiciones! Los dos jugadores más adelantados intercambian lugar.",
+  "🎲 Todos tiran un dado imaginario (di un número del 1-6). El más alto avanza 2 extra.",
+  "🎲 El jugador decide: ¿doble o nada? Tira otro dado. Si es par, avanza el doble. Si es impar, retrocede.",
+  "🎲 ¡Tormenta! Todos retroceden 1 casilla excepto el jugador actual.",
+  "🎲 Reto relámpago: di 5 países en 10 segundos o pierdes tu turno.",
+  "🎲 ¡Intercambio! Cambia posición con el jugador de tu izquierda.",
+  "🎲 Lotería: si el dado salió par, ganas 15 XP. Si salió impar, pierdes 10."
+];
+function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }) {
+  var _a3;
+  const [board] = reactExports.useState(() => generateBoard());
+  const [players, setPlayers] = reactExports.useState([]);
+  const [currentPlayerIdx, setCurrentPlayerIdx] = reactExports.useState(0);
+  const [diceValue, setDiceValue] = reactExports.useState(null);
+  const [rolling, setRolling] = reactExports.useState(false);
+  const [gamePhase, setGamePhase] = reactExports.useState("setup");
+  const [eventText, setEventText] = reactExports.useState("");
+  const [eventEmoji, setEventEmoji] = reactExports.useState("");
+  const [eventType, setEventType] = reactExports.useState("info");
+  const [showReward, setShowReward] = reactExports.useState(false);
+  const [rewardData, setRewardData] = reactExports.useState({ coins: 0, xp: 0, oldLevel: 1, newLevel: 1, streak: 0 });
+  const [setupNames, setSetupNames] = reactExports.useState([localPlayerName, "", "", ""]);
+  const [triviaQuestion, setTriviaQuestion] = reactExports.useState(null);
+  const [triviaAnswered, setTriviaAnswered] = reactExports.useState(false);
+  const [activeNorma, setActiveNorma] = reactExports.useState(null);
+  const [screencastActive, setScreencastActive] = reactExports.useState(false);
+  const { updateMultiplePlayers } = useRanking();
+  const handleScreenShare = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+      setScreencastActive(true);
+      ue$1.success("¡Pantalla compartida! Proyecta a tu TV.");
+      stream.getVideoTracks()[0].onended = () => {
+        setScreencastActive(false);
+        ue$1.info("Se detuvo la pantalla compartida.");
+      };
+    } catch {
+      ue$1.error("No se pudo compartir pantalla.");
+    }
+  };
+  const currentPlayer = players[currentPlayerIdx];
+  reactExports.useEffect(() => {
+    resetSessionTracker("megaboard_challenge");
+    resetSessionTracker("megaboard_drink");
+    resetSessionTracker("megaboard_trivia");
+    resetSessionTracker("megaboard_duel");
+    resetSessionTracker("megaboard_mimica");
+  }, []);
+  const startGame = () => {
+    const activePlayers = setupNames.filter((n2) => n2.trim().length > 0).map((name, i2) => ({
+      id: `p${i2}`,
+      name: name.trim(),
+      avatarUrl: i2 === 0 ? localPlayerAvatar : void 0,
+      position: 0,
+      score: 0,
+      skipNextTurn: false,
+      shielded: false
+    }));
+    if (activePlayers.length < 2) {
+      ue$1.error("Necesitas al menos 2 jugadores.");
+      return;
+    }
+    setPlayers(shuffleArray(activePlayers));
+    setGamePhase("playing");
+  };
+  const rollDice = () => {
+    if (rolling || gamePhase !== "playing")
+      return;
+    if (currentPlayer.skipNextTurn) {
+      ue$1.info(`${currentPlayer.name} pierde turno.`);
+      setPlayers((prev) => prev.map((p2, i2) => i2 === currentPlayerIdx ? { ...p2, skipNextTurn: false } : p2));
+      nextTurn();
+      return;
+    }
+    setRolling(true);
+    setDiceValue(null);
+    setTimeout(() => {
+      const value = Math.floor(Math.random() * 6) + 1;
+      setDiceValue(value);
+      setRolling(false);
+      movePlayer(value);
+    }, 800);
+  };
+  const movePlayer = (steps) => {
+    const newPos = Math.min(currentPlayer.position + steps, 99);
+    setPlayers((prev) => prev.map(
+      (p2, i2) => i2 === currentPlayerIdx ? { ...p2, position: newPos } : p2
+    ));
+    if (newPos >= 99) {
+      handleWin();
+      return;
+    }
+    const tile = board[newPos];
+    setTimeout(() => triggerTileEvent(tile, newPos), 400);
+  };
+  const triggerTileEvent = (tile, pos) => {
+    switch (tile.type) {
+      case "challenge": {
+        const challenge = getRandomWithoutRepeat("megaboard_challenge", clasico);
+        const text = challenge.replace(/{player}/g, currentPlayer.name);
+        setEventEmoji("🎯");
+        setEventText(text);
+        setEventType("challenge");
+        setGamePhase("event");
+        break;
+      }
+      case "drink": {
+        const drink = getRandomWithoutRepeat("megaboard_drink", DRINK_EVENTS);
+        setEventEmoji("🍺");
+        setEventText(drink);
+        setEventType("info");
+        setGamePhase("event");
+        break;
+      }
+      case "trivia": {
+        const q2 = getRandomWithoutRepeat("megaboard_trivia", cultureQuestionsNew2025);
+        setTriviaQuestion(q2);
+        setTriviaAnswered(false);
+        setEventEmoji("🧠");
+        setEventText(`TRIVIA: ${q2.question}`);
+        setEventType("trivia");
+        setGamePhase("event");
+        break;
+      }
+      case "duel": {
+        const duel = getRandomWithoutRepeat("megaboard_duel", duelos);
+        setEventEmoji("⚔️");
+        setEventText(`${duel.name}: ${duel.description}`);
+        setEventType("duel");
+        setGamePhase("event");
+        break;
+      }
+      case "bonus": {
+        const bonus = BONUS_EVENTS[Math.floor(Math.random() * BONUS_EVENTS.length)];
+        setEventEmoji("⭐");
+        setEventText(bonus);
+        applyBonus(bonus);
+        setEventType("info");
+        setGamePhase("event");
+        break;
+      }
+      case "trap": {
+        if (currentPlayer.shielded) {
+          setEventEmoji("🛡️");
+          setEventText("¡Tu escudo te protegió! La trampa no tiene efecto.");
+          setPlayers((prev) => prev.map((p2, i2) => i2 === currentPlayerIdx ? { ...p2, shielded: false } : p2));
+        } else {
+          const trap = TRAP_EVENTS[Math.floor(Math.random() * TRAP_EVENTS.length)];
+          setEventEmoji("💀");
+          setEventText(trap);
+          applyTrap(trap);
+        }
+        setEventType("info");
+        setGamePhase("event");
+        break;
+      }
+      case "mimica": {
+        const mimica = getRandomWithoutRepeat("megaboard_mimica", mimicaChallenges);
+        setEventEmoji("🎭");
+        setEventText(`${currentPlayer.name}, representa sin hablar:
+
+"${mimica.text}"
+
+Si te adivinan ganas XP, si fallan pierdes.`);
+        setEventType("challenge");
+        setGamePhase("event");
+        break;
+      }
+      case "random": {
+        const random = RANDOM_EVENTS[Math.floor(Math.random() * RANDOM_EVENTS.length)];
+        setEventEmoji("🎲");
+        setEventText(random);
+        setEventType("info");
+        setGamePhase("event");
+        break;
+      }
+      case "norma": {
+        const norma = normasRonda[Math.floor(Math.random() * normasRonda.length)];
+        const cleanNorma = norma.replace(/^NORMA:\s*/, "");
+        setActiveNorma(cleanNorma);
+        setEventEmoji("📜");
+        setEventText(`¡NUEVA NORMA para todos!
+
+${cleanNorma}`);
+        setGamePhase("event");
+        break;
+      }
+      case "oca": {
+        setEventEmoji("🦢");
+        setEventText("¡De Oca a Oca y tiro porque me toca!\nAvanzas a la siguiente Oca y VUELVES A TIRAR.");
+        const nextOca = ocaTilesList.find((o2) => o2 > pos);
+        if (nextOca) {
+          setTimeout(() => {
+            setPlayers((prev) => prev.map((p2, i2) => i2 === currentPlayerIdx ? { ...p2, position: nextOca } : p2));
+          }, 1500);
+        }
+        setEventType("roll_again");
+        setGamePhase("event");
+        break;
+      }
+      case "puente": {
+        setEventEmoji("🌉");
+        setEventText("¡De puente a puente y tiro porque me lleva la corriente!\nTe mueves al otro puente y VUELVES A TIRAR.");
+        if (pos === 6) {
+          setTimeout(() => setPlayers((prev) => prev.map((p2, i2) => i2 === currentPlayerIdx ? { ...p2, position: 12 } : p2)), 1500);
+        } else if (pos === 12) {
+          setTimeout(() => setPlayers((prev) => prev.map((p2, i2) => i2 === currentPlayerIdx ? { ...p2, position: 6 } : p2)), 1500);
+        }
+        setEventType("roll_again");
+        setGamePhase("event");
+        break;
+      }
+      case "posada": {
+        setEventEmoji("🏨");
+        setEventText("¡Has caído en la Posada!\nPierdes 1 turno descansando.");
+        applyTrap("próximo turno");
+        setGamePhase("event");
+        break;
+      }
+      case "pozo": {
+        setEventEmoji("🕳️");
+        setEventText("¡Has caído en el pozo!\nMientras esperas el rescate, bebe 2 tragos y pierdes 1 turno.");
+        applyTrap("próximo turno");
+        setGamePhase("event");
+        break;
+      }
+      case "laberinto": {
+        setEventEmoji("🧭");
+        setEventText("¡Te has perdido en el laberinto!\nRetrocedes a la casilla 30.");
+        setTimeout(() => setPlayers((prev) => prev.map((p2, i2) => i2 === currentPlayerIdx ? { ...p2, position: 30 } : p2)), 1500);
+        setGamePhase("event");
+        break;
+      }
+      case "carcel": {
+        setEventEmoji("⛓️");
+        setEventText("¡Vas directo a la Cárcel!\nPierdes 1 turno y bebes 3 tragos.");
+        applyTrap("próximo turno");
+        setGamePhase("event");
+        break;
+      }
+      case "calavera": {
+        setEventEmoji("☠️");
+        setEventText("¡LA CALAVERA!\nHas muerto. Vuelves a la casilla 1.");
+        applyTrap("Vuelves a la casilla 1");
+        setGamePhase("event");
+        break;
+      }
+      default:
+        nextTurn();
+    }
+  };
+  const applyBonus = (text) => {
+    if (text.includes("Avanza 3")) {
+      const newPos = Math.min(currentPlayer.position + 3, 99);
+      setPlayers((prev) => prev.map((p2, i2) => i2 === currentPlayerIdx ? { ...p2, position: newPos } : p2));
+    } else if (text.includes("Doble XP") || text.includes("+20")) {
+      setPlayers((prev) => prev.map((p2, i2) => i2 === currentPlayerIdx ? { ...p2, score: p2.score + 20 } : p2));
+    } else if (text.includes("Escudo")) {
+      setPlayers((prev) => prev.map((p2, i2) => i2 === currentPlayerIdx ? { ...p2, shielded: true } : p2));
+    } else if (text.includes("Roba 5")) {
+      const others = players.filter((_2, i2) => i2 !== currentPlayerIdx);
+      if (others.length > 0) {
+        const victim = others[Math.floor(Math.random() * others.length)];
+        setPlayers((prev) => prev.map((p2) => {
+          if (p2.id === victim.id)
+            return { ...p2, score: Math.max(0, p2.score - 5) };
+          if (p2.id === currentPlayer.id)
+            return { ...p2, score: p2.score + 5 };
+          return p2;
+        }));
+      }
+    }
+  };
+  const applyTrap = (text) => {
+    if (text.includes("Retrocede 3")) {
+      setPlayers((prev) => prev.map((p2, i2) => i2 === currentPlayerIdx ? { ...p2, position: Math.max(0, p2.position - 3) } : p2));
+    } else if (text.includes("próximo turno")) {
+      setPlayers((prev) => prev.map((p2, i2) => i2 === currentPlayerIdx ? { ...p2, skipNextTurn: true } : p2));
+    } else if (text.includes("Vuelves a la casilla 1")) {
+      setPlayers((prev) => prev.map((p2, i2) => i2 === currentPlayerIdx ? { ...p2, position: p2.position < 20 ? Math.max(0, p2.position - 5) : 0 } : p2));
+    } else if (text.includes("retrocede 1")) {
+      setPlayers((prev) => prev.map((p2, i2) => i2 === currentPlayerIdx ? { ...p2, position: Math.max(0, p2.position - 1) } : p2));
+    }
+  };
+  const handleTriviaAnswer = (answer) => {
+    if (triviaAnswered)
+      return;
+    setTriviaAnswered(true);
+    const correct = answer === (triviaQuestion == null ? void 0 : triviaQuestion.correct_answer);
+    if (correct) {
+      ue$1.success("¡Correcto! +15 XP");
+      setPlayers((prev) => prev.map((p2, i2) => i2 === currentPlayerIdx ? { ...p2, score: p2.score + 15 } : p2));
+    } else {
+      ue$1.error(`Incorrecto. Retrocedes 1 casilla.`);
+      setPlayers((prev) => prev.map((p2, i2) => i2 === currentPlayerIdx ? { ...p2, position: Math.max(0, p2.position - 1) } : p2));
+    }
+  };
+  const handleChallengeResult = (passed) => {
+    if (!passed) {
+      const penalty = currentPlayer.position >= 70 ? 3 : currentPlayer.position >= 40 ? 2 : 1;
+      ue$1.error(`❌ Has fallado. Retrocedes ${penalty} casilla${penalty > 1 ? "s" : ""}.`);
+      setPlayers((prev) => prev.map((p2, i2) => i2 === currentPlayerIdx ? { ...p2, position: Math.max(0, p2.position - penalty) } : p2));
+    } else {
+      ue$1.success("✨ ¡Reto superado! +10 XP");
+      setPlayers((prev) => prev.map((p2, i2) => i2 === currentPlayerIdx ? { ...p2, score: p2.score + 10 } : p2));
+    }
+    dismissEvent();
+  };
+  const handleDuelResult = (won) => {
+    if (won) {
+      ue$1.success("👑 ¡Has ganado el duelo! +15 XP");
+      setPlayers((prev) => prev.map((p2, i2) => i2 === currentPlayerIdx ? { ...p2, score: p2.score + 15 } : p2));
+    } else {
+      const penalty = currentPlayer.position >= 70 ? 3 : currentPlayer.position >= 40 ? 2 : 1;
+      ue$1.error(`💀 Has perdido. Retrocedes ${penalty} casilla${penalty > 1 ? "s" : ""}.`);
+      setPlayers((prev) => prev.map((p2, i2) => i2 === currentPlayerIdx ? { ...p2, position: Math.max(0, p2.position - penalty) } : p2));
+    }
+    dismissEvent();
+  };
+  const dismissEvent = () => {
+    setTriviaQuestion(null);
+    setTriviaAnswered(false);
+    setGamePhase("playing");
+    if (eventType !== "roll_again") {
+      nextTurn();
+    } else {
+      setEventType("info");
+    }
+  };
+  const nextTurn = () => {
+    setDiceValue(null);
+    setCurrentPlayerIdx((prev) => (prev + 1) % players.length);
+  };
+  const handleWin = async () => {
+    setGamePhase("finished");
+    await updateMultiplePlayers(players.map((p2) => ({
+      name: p2.name,
+      score: p2.id === (currentPlayer == null ? void 0 : currentPlayer.id) ? p2.score + 50 : p2.score,
+      won: p2.id === (currentPlayer == null ? void 0 : currentPlayer.id),
+      avatarUrl: p2.avatarUrl,
+      gameMode: "megaboard"
+    })));
+    const rankings = loadLocalRankings();
+    const result = rankings.find((r2) => r2.player_name.toLowerCase() === currentPlayer.name.toLowerCase());
+    setRewardData({
+      coins: 30,
+      xp: currentPlayer.score + 50,
+      oldLevel: (result == null ? void 0 : result.level) || 1,
+      newLevel: (result == null ? void 0 : result.level) || 1,
+      streak: (result == null ? void 0 : result.win_streak) || 0
+    });
+    setShowReward(true);
+  };
+  const VISIBLE_RANGE = 20;
+  const getVisibleTiles = () => {
+    if (players.length === 0)
+      return board.slice(0, 20);
+    const minPos = Math.max(0, Math.min(...players.map((p2) => p2.position)) - 3);
+    const maxPos = Math.min(99, Math.max(...players.map((p2) => p2.position)) + VISIBLE_RANGE);
+    return board.slice(minPos, maxPos + 1);
+  };
+  const sortedPlayers = [...players].sort((a2, b2) => {
+    if (a2.position !== b2.position)
+      return b2.position - a2.position;
+    return b2.score - a2.score;
+  });
+  if (gamePhase === "setup") {
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed inset-0 z-50 bg-gradient-to-br from-slate-950 via-purple-950/30 to-slate-950 flex items-center justify-center p-4", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(motion.div, { initial: { scale: 0.9, opacity: 0 }, animate: { scale: 1, opacity: 1 }, className: "bg-slate-900/80 backdrop-blur-xl rounded-3xl p-8 max-w-md w-full border border-white/10 shadow-2xl", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center mb-6", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-6xl mb-3", children: "🏰" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-3xl font-black bg-gradient-to-r from-amber-400 to-rose-500 bg-clip-text text-transparent", children: "MegaBoard 3D" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-white/50 mt-1", children: "100 casillas · Retos · Trivia · Duelos · Trampas" })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-3 mb-6", children: setupNames.map((name, i2) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: `w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold text-white ${i2 === 0 ? "bg-gradient-to-br from-amber-500 to-rose-500" : "bg-white/10"}`, children: i2 === 0 ? "👑" : `${i2 + 1}` }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "input",
+          {
+            type: "text",
+            value: name,
+            onChange: (e2) => {
+              const newNames = [...setupNames];
+              newNames[i2] = e2.target.value;
+              setSetupNames(newNames);
+            },
+            placeholder: i2 === 0 ? localPlayerName : `Jugador ${i2 + 1} (opcional)`,
+            className: "flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/30 focus:border-amber-500/50 focus:outline-none transition-colors",
+            readOnly: i2 === 0
+          }
+        )
+      ] }, i2)) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Button, { onClick: startGame, className: "w-full h-14 rounded-xl font-black text-lg bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-400 hover:to-rose-500 text-white shadow-[0_0_20px_rgba(245,158,11,0.4)] border border-amber-400/50", children: "🎲 ¡EMPEZAR PARTIDA!" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Button, { variant: "ghost", onClick: onExit, className: "w-full mt-3 text-white/40 hover:text-white/60", children: "← Volver" })
+    ] }) });
+  }
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "fixed inset-0 z-50 bg-gradient-to-br from-slate-950 via-indigo-950/20 to-slate-950 text-white flex flex-col overflow-hidden", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between px-4 py-3 bg-black/40 border-b border-white/10 shrink-0", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-lg font-black bg-gradient-to-r from-amber-400 to-rose-500 bg-clip-text text-transparent", children: "🏰 MegaBoard" }),
+        activeNorma && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "hidden md:flex items-center gap-1 bg-orange-500/20 border border-orange-500/30 rounded-full px-3 py-1 text-xs text-orange-300 max-w-[200px] truncate", children: [
+          "📜 ",
+          activeNorma
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(Button, { variant: "ghost", size: "sm", onClick: handleScreenShare, className: `text-xs ${screencastActive ? "text-green-400" : "text-white/50"}`, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Monitor, { className: "w-4 h-4 mr-1" }),
+          " ",
+          screencastActive ? "Emitiendo" : "Compartir"
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(Button, { variant: "destructive", size: "sm", onClick: onExit, className: "rounded-xl font-bold", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(LogOut, { className: "w-4 h-4 mr-1" }),
+          " Salir"
+        ] })
+      ] })
+    ] }),
+    activeNorma && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "md:hidden px-4 py-2 bg-orange-500/10 border-b border-orange-500/20", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-orange-300 truncate", children: [
+      "📜 ",
+      activeNorma
+    ] }) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 flex flex-col md:flex-row overflow-hidden", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex-1 overflow-auto p-4", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "relative", style: { perspective: "800px" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-5 md:grid-cols-10 gap-1 md:gap-2", style: { transform: "rotateX(15deg) rotateZ(-2deg)", transformStyle: "preserve-3d" }, children: getVisibleTiles().map((tile) => {
+        const playersOnTile = players.filter((p2) => p2.position === tile.id);
+        const isCurrentTile = currentPlayer && currentPlayer.position === tile.id;
+        return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          motion.div,
+          {
+            initial: { opacity: 0, y: 20 },
+            animate: { opacity: 1, y: 0 },
+            transition: { delay: tile.id % 20 * 0.02 },
+            className: `relative w-full aspect-square rounded-xl border flex flex-col items-center justify-center text-center
+                      ${isCurrentTile ? "ring-2 ring-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.5)]" : ""}
+                      bg-gradient-to-br ${tile.color} border-white/20 shadow-lg`,
+            style: { transform: "translateZ(4px)", transformStyle: "preserve-3d" },
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "absolute top-0.5 left-1 text-[8px] font-bold text-white/50", children: tile.id }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-lg md:text-xl", children: tile.emoji }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-[7px] md:text-[9px] font-bold text-white/80 leading-tight", children: tile.label }),
+              playersOnTile.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute -bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5", children: playersOnTile.map((p2) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: `w-5 h-5 md:w-6 md:h-6 rounded-full border-2 overflow-hidden ${p2.id === (currentPlayer == null ? void 0 : currentPlayer.id) ? "border-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.6)]" : "border-white/50"}`, children: p2.avatarUrl ? /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: p2.avatarUrl, alt: p2.name, className: "w-full h-full object-cover" }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-full h-full bg-slate-800 flex items-center justify-center text-[8px] font-bold", children: p2.name[0].toUpperCase() }) }, p2.id)) })
+            ]
+          },
+          tile.id
+        );
+      }) }) }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-full md:w-72 bg-black/30 border-t md:border-t-0 md:border-l border-white/10 p-4 flex flex-col gap-3 shrink-0", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white/5 rounded-2xl p-3 border border-white/10", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("h3", { className: "text-xs font-black uppercase tracking-widest text-white/50 mb-2 flex items-center gap-1", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(Trophy, { className: "w-3 h-3" }),
+            " Clasificación"
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-2", children: sortedPlayers.map((p2, i2) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `flex items-center gap-2 p-2 rounded-xl transition-colors ${p2.id === (currentPlayer == null ? void 0 : currentPlayer.id) ? "bg-amber-500/20 border border-amber-500/30" : "bg-white/5"}`, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-black w-5 text-center", children: i2 === 0 ? "🥇" : i2 === 1 ? "🥈" : i2 === 2 ? "🥉" : `${i2 + 1}` }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-7 h-7 rounded-full overflow-hidden border border-white/20 shrink-0", children: p2.avatarUrl ? /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: p2.avatarUrl, className: "w-full h-full object-cover" }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-full h-full bg-slate-700 flex items-center justify-center text-[10px] font-bold", children: p2.name[0] }) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 min-w-0", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-xs font-bold truncate", children: p2.name }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-[10px] text-white/40", children: [
+                "Casilla ",
+                p2.position,
+                " · ",
+                p2.score,
+                " XP"
+              ] })
+            ] }),
+            p2.shielded && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs", children: "🛡️" }),
+            p2.skipNextTurn && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs", children: "⏭️" })
+          ] }, p2.id)) })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white/5 rounded-2xl p-4 border border-white/10 text-center", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-white/50 mb-1", children: "Turno de" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-lg font-black text-amber-400 mb-3", children: (currentPlayer == null ? void 0 : currentPlayer.name) || "..." }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex justify-center mb-3", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+            motion.div,
+            {
+              animate: rolling ? { rotateX: [0, 360, 720], rotateY: [0, 180, 360] } : {},
+              transition: { duration: 0.8 },
+              className: "w-16 h-16 rounded-2xl bg-white text-slate-900 flex items-center justify-center text-3xl font-black shadow-lg border-2 border-white/50",
+              children: rolling ? "🎲" : diceValue || "?"
+            }
+          ) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            Button,
+            {
+              onClick: rollDice,
+              disabled: rolling || gamePhase !== "playing",
+              className: "w-full h-12 rounded-xl font-black bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-400 hover:to-rose-500 text-white shadow-[0_0_15px_rgba(245,158,11,0.4)] border border-amber-400/50 disabled:opacity-30",
+              children: rolling ? "Tirando..." : "🎲 TIRAR DADO"
+            }
+          )
+        ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: gamePhase === "event" && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      motion.div,
+      {
+        initial: { opacity: 0 },
+        animate: { opacity: 1 },
+        exit: { opacity: 0 },
+        className: "fixed inset-0 z-[60] bg-black/80 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none flex md:items-end md:justify-end items-center justify-center p-4 md:p-8 pointer-events-none",
+        children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+          motion.div,
+          {
+            initial: { scale: 0.8, y: 30 },
+            animate: { scale: 1, y: 0 },
+            exit: { scale: 0.8, y: -30 },
+            className: "bg-slate-900/95 backdrop-blur-xl rounded-3xl p-6 md:p-8 max-w-sm md:max-w-md w-full border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.8)] pointer-events-auto",
+            children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(motion.div, { animate: { scale: [1, 1.2, 1] }, transition: { duration: 1, repeat: Infinity }, className: "text-6xl mb-4", children: eventEmoji }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-2xl font-black mb-4 text-white", children: currentPlayer == null ? void 0 : currentPlayer.name }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-lg text-white/90 leading-relaxed mb-6 whitespace-pre-line", children: eventText }),
+              triviaQuestion && !triviaAnswered && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-2 gap-3 mb-4", children: (_a3 = triviaQuestion.options) == null ? void 0 : _a3.map((opt, i2) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+                Button,
+                {
+                  onClick: () => handleTriviaAnswer(opt),
+                  className: "h-14 rounded-xl font-bold text-sm bg-white/10 hover:bg-white/20 border border-white/10 text-white",
+                  children: opt
+                },
+                i2
+              )) }),
+              triviaAnswered && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: `p-3 rounded-xl mb-4 ${(triviaQuestion == null ? void 0 : triviaQuestion.correct_answer) === "answered" ? "bg-green-500/20" : "bg-white/5"}`, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm", children: [
+                "Respuesta correcta: ",
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-bold text-green-400", children: triviaQuestion == null ? void 0 : triviaQuestion.correct_answer })
+              ] }) }),
+              eventType === "challenge" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex gap-3", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(Button, { onClick: () => handleChallengeResult(true), className: "flex-1 h-14 bg-green-600 hover:bg-green-500 text-white font-bold rounded-xl whitespace-normal break-words py-2 px-2 h-auto text-sm leading-tight leading-4", children: "✅ Superado" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(Button, { onClick: () => handleChallengeResult(false), className: "flex-1 h-14 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl whitespace-normal break-words py-2 px-2 h-auto text-sm leading-tight border border-red-500/50", children: [
+                  "❌ He Fallado",
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}),
+                  "(Atrás 1)"
+                ] })
+              ] }),
+              eventType === "duel" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex gap-3", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(Button, { onClick: () => handleDuelResult(true), className: "flex-1 h-14 bg-amber-500 hover:bg-amber-400 text-slate-900 font-black rounded-xl text-lg", children: "👑 ¡Gané yo!" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(Button, { onClick: () => handleDuelResult(false), className: "flex-1 h-14 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-sm leading-tight", children: [
+                  "💀 Perdí el duelo",
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}),
+                  "(Atrás 1)"
+                ] })
+              ] }),
+              (eventType === "info" || eventType === "roll_again" || eventType === "trivia" && triviaAnswered) && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                Button,
+                {
+                  onClick: dismissEvent,
+                  className: "w-full h-14 rounded-xl font-black text-lg bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-400 hover:to-rose-500 text-white",
+                  children: [
+                    "Continuar ",
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(ArrowRight, { className: "ml-2 w-5 h-5" })
+                  ]
+                }
+              )
+            ] })
+          }
+        )
+      }
+    ) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: gamePhase === "finished" && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      motion.div,
+      {
+        initial: { opacity: 0 },
+        animate: { opacity: 1 },
+        className: "fixed inset-0 z-[70] bg-gradient-to-br from-amber-900/90 to-rose-900/90 backdrop-blur-md flex items-center justify-center p-4",
+        children: /* @__PURE__ */ jsxRuntimeExports.jsxs(motion.div, { initial: { scale: 0.5 }, animate: { scale: 1 }, className: "text-center", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(motion.div, { animate: { rotate: [0, 10, -10, 0], scale: [1, 1.1, 1] }, transition: { repeat: Infinity, duration: 2 }, className: "text-8xl mb-6", children: "🏆" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: "text-4xl font-black text-white mb-2", children: [
+            "¡",
+            currentPlayer == null ? void 0 : currentPlayer.name,
+            " GANA!"
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xl text-white/70 mb-6", children: [
+            "Ha llegado a la meta con ",
+            currentPlayer == null ? void 0 : currentPlayer.score,
+            " XP"
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex gap-3 justify-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Button, { onClick: onExit, className: "h-14 px-8 rounded-xl font-bold bg-white/20 hover:bg-white/30 text-white border border-white/20", children: "Volver al Menú" }) })
+        ] })
+      }
+    ) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      RewardPopup,
+      {
+        isOpen: showReward,
+        onClose: () => setShowReward(false),
+        result: "win",
+        coinsEarned: rewardData.coins,
+        xpEarned: rewardData.xp,
+        oldLevel: rewardData.oldLevel,
+        newLevel: rewardData.newLevel,
+        streak: rewardData.streak
+      }
+    )
+  ] });
+}
 function GamePlay({ onExit, isTeamMode = false, roomId = null, isHost = false }) {
   const {
     game,
@@ -68558,6 +70329,20 @@ function GamePlay({ onExit, isTeamMode = false, roomId = null, isHost = false })
         onExit,
         roomId: roomId || void 0,
         isHost,
+        localPlayerName: localName,
+        localPlayerAvatar: localAvatar
+      }
+    );
+  }
+  if ((game == null ? void 0 : game.mode) === "megaboard") {
+    const storedId = localStorage.getItem("fiesta_player_id");
+    const localP = players == null ? void 0 : players.find((p2) => p2.id === storedId);
+    const localName = (localP == null ? void 0 : localP.name) || localStorage.getItem("fiesta_player_name") || "Jugador";
+    const localAvatar = (localP == null ? void 0 : localP.avatar_url) || void 0;
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      MegaBoardGame,
+      {
+        onExit,
         localPlayerName: localName,
         localPlayerAvatar: localAvatar
       }
@@ -70612,6 +72397,7 @@ const Label = reactExports.forwardRef(({ className, ...props }, ref) => /* @__PU
 Label.displayName = Root$1.displayName;
 function WelcomeScreen() {
   const { signIn, signUp, isLoading, setAuthOverlayOpen } = useAuth();
+  const [step, setStep] = reactExports.useState("initial");
   const [isLogin, setIsLogin] = reactExports.useState(true);
   const [email, setEmail] = reactExports.useState("");
   const [password, setPassword] = reactExports.useState("");
@@ -70620,6 +72406,18 @@ function WelcomeScreen() {
   const [submitting, setSubmitting] = reactExports.useState(false);
   const [cooldown, setCooldown] = reactExports.useState(0);
   const [errorMsg, setErrorMsg] = reactExports.useState(null);
+  const [recentUsers, setRecentUsers] = reactExports.useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("fiesta_recent_users") || "[]");
+    } catch {
+      return [];
+    }
+  });
+  const saveToRecent = (email2, name, avatar) => {
+    const updated = [{ email: email2, name, avatar }, ...recentUsers.filter((u2) => u2.email !== email2)].slice(0, 3);
+    setRecentUsers(updated);
+    localStorage.setItem("fiesta_recent_users", JSON.stringify(updated));
+  };
   const handleAvatarChange = async (e2) => {
     var _a3;
     const file = (_a3 = e2.target.files) == null ? void 0 : _a3[0];
@@ -70647,11 +72445,13 @@ function WelcomeScreen() {
     try {
       if (isLogin) {
         await signIn(email, password);
-        ue$1.success("¡Bienvenido de nuevo!");
+        ue$1.success(`¡Bienvenido de nuevo!`);
       } else {
         await signUp(email, password, username || "Jugador", avatarPreview || void 0);
         ue$1.success("¡Cuenta creada! Bienvenido.");
       }
+      saveToRecent(email, username || email.split("@")[0], avatarPreview || "");
+      localStorage.setItem("fiesta_player_name", username || "Jugador");
       setAuthOverlayOpen(false);
     } catch (err) {
       const msg = (err == null ? void 0 : err.message) || "";
@@ -70675,141 +72475,332 @@ function WelcomeScreen() {
     }
   };
   const busy = submitting || isLoading;
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "fixed inset-0 z-[200] bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 flex items-center justify-center p-4 overflow-y-auto", children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "fixed inset-0 z-[200] bg-[#020617] flex items-center justify-center p-4 overflow-y-auto font-sans", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "absolute inset-0 overflow-hidden pointer-events-none", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute top-1/4 left-1/4 w-64 h-64 bg-purple-500/20 rounded-full blur-[100px] animate-pulse" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute bottom-1/4 right-1/4 w-48 h-48 bg-pink-500/20 rounded-full blur-[80px] animate-pulse", style: { animationDelay: "1s" } }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute top-1/2 right-1/3 w-32 h-32 bg-blue-500/15 rounded-full blur-[60px] animate-pulse", style: { animationDelay: "2s" } })
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-600/20 rounded-full blur-[120px] animate-pulse" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-600/20 rounded-full blur-[120px] animate-pulse", style: { animationDelay: "2s" } }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute top-[20%] right-[10%] w-[30%] h-[30%] bg-pink-600/10 rounded-full blur-[100px] animate-pulse", style: { animationDelay: "4s" } }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] mix-blend-overlay" })
     ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative w-full max-w-md bg-white/[0.07] backdrop-blur-xl rounded-3xl p-8 shadow-[0_20px_60px_rgba(0,0,0,0.5)] border border-white/[0.12]", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center mb-8", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 mb-2 tracking-tight", children: "Fiesta Party" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-white/60 text-sm", children: "Juega con amigos y gana recompensas" })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("form", { onSubmit: handleSubmit, className: "space-y-5", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center gap-3", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs(Avatar, { className: "w-20 h-20 ring-4 ring-purple-500/30 shadow-[0_0_30px_rgba(168,85,247,0.3)]", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(AvatarImage, { src: avatarPreview || void 0 }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(AvatarFallback, { className: "bg-gradient-to-br from-purple-600 to-pink-600 text-white text-2xl font-bold", children: username ? username[0].toUpperCase() : /* @__PURE__ */ jsxRuntimeExports.jsx(User, { className: "w-8 h-8" }) })
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      motion.div,
+      {
+        initial: { opacity: 0, scale: 0.95, y: 20 },
+        animate: { opacity: 1, scale: 1, y: 0 },
+        className: "relative w-full max-w-[440px] bg-slate-900/40 backdrop-blur-[20px] rounded-[32px] p-8 md:p-10 shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10",
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent rounded-full blur-sm" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center mb-10", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              motion.div,
+              {
+                initial: { rotate: -10, scale: 0.8 },
+                animate: { rotate: 0, scale: 1 },
+                transition: { type: "spring", damping: 12 },
+                className: "inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-600 to-blue-600 shadow-[0_0_20px_rgba(147,51,234,0.4)] mb-6",
+                children: /* @__PURE__ */ jsxRuntimeExports.jsx(Sparkles, { className: "w-8 h-8 text-white" })
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("h1", { className: "text-4xl font-black text-white mb-3 tracking-tight", children: [
+              "CYBER",
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400", children: "PARTY" })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-slate-400 text-sm font-medium", children: "Experiencia Premium de Juego Social" })
           ] }),
-          !isLogin && /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "cursor-pointer bg-white/10 hover:bg-white/20 text-white/80 hover:text-white px-4 py-1.5 rounded-full flex items-center gap-2 transition-all text-sm border border-white/10", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Camera, { className: "w-3.5 h-3.5" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Subir foto" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "file", accept: "image/*", onChange: handleAvatarChange, className: "hidden" })
-          ] })
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Label, { htmlFor: "email", className: "text-white/60 text-xs uppercase tracking-wider font-bold", children: "Correo" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative mt-1", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(Mail, { className: "absolute left-3 top-1/2 -translate-y-1/2 text-white/40 w-4 h-4" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx(
-                Input,
-                {
-                  id: "email",
-                  type: "email",
-                  value: email,
-                  onChange: (e2) => setEmail(e2.target.value),
-                  className: "pl-10 bg-white/[0.06] border-white/[0.12] text-white placeholder-white/40 rounded-xl h-11 focus:border-purple-500/50 focus:ring-purple-500/20",
-                  placeholder: "tu@correo.com",
-                  required: true,
-                  disabled: busy
-                }
-              )
-            ] })
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Label, { htmlFor: "password", className: "text-white/60 text-xs uppercase tracking-wider font-bold", children: "Contraseña" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative mt-1", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(Lock, { className: "absolute left-3 top-1/2 -translate-y-1/2 text-white/40 w-4 h-4" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx(
-                Input,
-                {
-                  id: "password",
-                  type: "password",
-                  value: password,
-                  onChange: (e2) => setPassword(e2.target.value),
-                  className: "pl-10 bg-white/[0.06] border-white/[0.12] text-white placeholder-white/40 rounded-xl h-11 focus:border-purple-500/50 focus:ring-purple-500/20",
-                  placeholder: "••••••••",
-                  required: true,
-                  minLength: 6,
-                  disabled: busy
-                }
-              )
-            ] })
-          ] }),
-          !isLogin && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Label, { htmlFor: "username", className: "text-white/60 text-xs uppercase tracking-wider font-bold", children: "Nombre de usuario" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative mt-1", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(User, { className: "absolute left-3 top-1/2 -translate-y-1/2 text-white/40 w-4 h-4" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx(
-                Input,
-                {
-                  id: "username",
-                  value: username,
-                  onChange: (e2) => setUsername(e2.target.value),
-                  className: "pl-10 bg-white/[0.06] border-white/[0.12] text-white placeholder-white/40 rounded-xl h-11 focus:border-purple-500/50 focus:ring-purple-500/20",
-                  placeholder: "Tu nombre",
-                  required: true,
-                  disabled: busy
-                }
-              )
-            ] })
-          ] })
-        ] }),
-        errorMsg && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-red-500/20 border border-red-500/40 rounded-xl px-4 py-3 text-sm text-red-200 text-center", children: [
-          errorMsg,
-          cooldown > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-1 font-bold text-red-300", children: [
-            "Reintenta en ",
-            cooldown,
-            "s"
-          ] })
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          Button,
-          {
-            type: "submit",
-            className: "w-full h-12 text-base font-bold rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-[0_8px_30px_rgba(168,85,247,0.4)] transition-all hover:scale-[1.02] active:scale-[0.98] border-0 disabled:opacity-50 disabled:cursor-not-allowed",
-            disabled: busy || cooldown > 0,
-            children: busy ? /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "flex items-center gap-2", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(LoaderCircle, { className: "w-4 h-4 animate-spin" }),
-              "Procesando..."
-            ] }) : cooldown > 0 ? `Espera ${cooldown}s...` : isLogin ? "Iniciar Sesión" : "Crear Cuenta"
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "button",
-          {
-            type: "button",
-            onClick: () => {
-              setIsLogin(!isLogin);
-              setEmail("");
-              setPassword("");
-              setUsername("");
-              setAvatarPreview(null);
+          /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { mode: "wait", children: step === "initial" ? /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            motion.div,
+            {
+              initial: { opacity: 0, x: 20 },
+              animate: { opacity: 1, x: 0 },
+              exit: { opacity: 0, x: -20 },
+              className: "space-y-8",
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center space-y-2", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl font-black text-white uppercase tracking-tight", children: "¿Estuviste aquí antes?" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-slate-400 text-sm", children: "Sincroniza tus monedas y rango global" })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid gap-4", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                    Button,
+                    {
+                      onClick: () => {
+                        if (recentUsers.length > 0)
+                          setStep("recent");
+                        else {
+                          setIsLogin(true);
+                          setStep("auth");
+                        }
+                      },
+                      className: "h-20 rounded-[2rem] bg-gradient-to-r from-purple-600 to-blue-600 hover:scale-[1.02] transition-all border-0 flex flex-col items-center justify-center gap-1 group",
+                      children: [
+                        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-lg font-black tracking-widest uppercase", children: "SÍ, HE JUGADO" }),
+                        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-[10px] opacity-60 font-bold group-hover:opacity-100 transition-opacity", children: "ACCEDER A MI PERFIL" })
+                      ]
+                    }
+                  ),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                    Button,
+                    {
+                      variant: "outline",
+                      onClick: () => {
+                        setIsLogin(false);
+                        setStep("auth");
+                      },
+                      className: "h-20 rounded-[2rem] bg-white/5 border-white/10 hover:bg-white/10 hover:border-purple-500/30 transition-all flex flex-col items-center justify-center gap-1",
+                      children: [
+                        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-lg font-black tracking-widest uppercase text-white", children: "SOY NUEVO" }),
+                        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-[10px] text-slate-500 font-bold", children: "CREAR PERFIL / INVITADO" })
+                      ]
+                    }
+                  )
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-4 py-2", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "h-px flex-1 bg-white/5" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(ShieldCheck, { className: "w-5 h-5 text-purple-500/50" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "h-px flex-1 bg-white/5" })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                  "button",
+                  {
+                    onClick: () => setAuthOverlayOpen(false),
+                    className: "w-full h-12 text-xs font-black text-slate-500 hover:text-white uppercase tracking-widest transition-colors flex items-center justify-center gap-2",
+                    children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(Ghost, { className: "w-4 h-4" }),
+                      "Jugar como Invitado Anónimo"
+                    ]
+                  }
+                )
+              ]
             },
-            className: "text-white/50 hover:text-white/80 transition-colors text-sm",
-            disabled: busy,
-            children: isLogin ? "¿No tienes cuenta? Regístrate" : "¿Ya tienes cuenta? Inicia sesión"
-          }
-        ) })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-6 pt-6 border-t border-white/[0.08] text-center space-y-3", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-white/40 text-xs", children: "O continúa sin cuenta (sin límites)" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "button",
-          {
-            onClick: () => {
-              if (username)
-                localStorage.setItem("fiesta_player_name", username);
-              setAuthOverlayOpen(false);
+            "initial"
+          ) : step === "recent" ? /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            motion.div,
+            {
+              initial: { opacity: 0, x: 20 },
+              animate: { opacity: 1, x: 0 },
+              exit: { opacity: 0, x: -20 },
+              className: "space-y-6",
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center space-y-1", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-black text-white uppercase tracking-tight", children: "Selecciona tu Perfil" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-slate-400 text-xs", children: "Usuarios detectados en este dispositivo" })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
+                  recentUsers.map((u2) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                    "button",
+                    {
+                      onClick: () => {
+                        setEmail(u2.email);
+                        setIsLogin(true);
+                        setStep("auth");
+                      },
+                      className: "w-full p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-purple-500/50 hover:bg-purple-500/10 transition-all flex items-center gap-4 text-left group",
+                      children: [
+                        /* @__PURE__ */ jsxRuntimeExports.jsxs(Avatar, { className: "w-12 h-12 ring-2 ring-purple-500/20 group-hover:ring-purple-500/50 transition-all", children: [
+                          /* @__PURE__ */ jsxRuntimeExports.jsx(AvatarImage, { src: u2.avatar }),
+                          /* @__PURE__ */ jsxRuntimeExports.jsx(AvatarFallback, { className: "bg-slate-800 text-white font-black", children: u2.name[0].toUpperCase() })
+                        ] }),
+                        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1", children: [
+                          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "font-black text-white uppercase leading-none mb-1", children: u2.name }),
+                          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[10px] text-slate-500 font-bold truncate", children: u2.email })
+                        ] }),
+                        /* @__PURE__ */ jsxRuntimeExports.jsx(Lock, { className: "w-4 h-4 text-slate-600 group-hover:text-purple-400" })
+                      ]
+                    },
+                    u2.email
+                  )),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    Button,
+                    {
+                      variant: "ghost",
+                      onClick: () => {
+                        setEmail("");
+                        setIsLogin(true);
+                        setStep("auth");
+                      },
+                      className: "w-full h-14 rounded-2xl border border-dashed border-white/10 text-slate-500 hover:text-white",
+                      children: "Usar otra cuenta"
+                    }
+                  )
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Button,
+                  {
+                    variant: "ghost",
+                    onClick: () => setStep("initial"),
+                    className: "w-full text-slate-500 hover:text-white text-xs font-bold uppercase",
+                    children: "← Volver"
+                  }
+                )
+              ]
             },
-            className: "w-full py-3 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.12] hover:border-purple-500/40 text-white/80 hover:text-white font-bold text-sm transition-all",
-            children: "🎮 Jugar como invitado →"
-          }
-        )
-      ] })
-    ] })
+            "recent"
+          ) : /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            motion.div,
+            {
+              initial: { opacity: 0, x: 20 },
+              animate: { opacity: 1, x: 0 },
+              exit: { opacity: 0, x: -20 },
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("form", { onSubmit: handleSubmit, className: "space-y-6", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2 mb-4", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: () => setStep("initial"), className: "p-2 hover:bg-white/5 rounded-full text-slate-500 transition-colors", children: /* @__PURE__ */ jsxRuntimeExports.jsx(ArrowLeft, { className: "w-5 h-5" }) }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-[10px] font-black text-slate-500 uppercase tracking-widest", children: "Configuración de Acceso" })
+                  ] }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { mode: "wait", children: !isLogin && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                    motion.div,
+                    {
+                      initial: { opacity: 0, height: 0 },
+                      animate: { opacity: 1, height: "auto" },
+                      exit: { opacity: 0, height: 0 },
+                      className: "flex flex-col items-center gap-4 mb-2",
+                      children: [
+                        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative group", children: [
+                          /* @__PURE__ */ jsxRuntimeExports.jsxs(Avatar, { className: "w-24 h-24 ring-4 ring-purple-500/20 shadow-2xl transition-transform group-hover:scale-105", children: [
+                            /* @__PURE__ */ jsxRuntimeExports.jsx(AvatarImage, { src: avatarPreview || void 0 }),
+                            /* @__PURE__ */ jsxRuntimeExports.jsx(AvatarFallback, { className: "bg-slate-800 text-slate-400 text-3xl font-bold border border-white/10", children: username ? username[0].toUpperCase() : /* @__PURE__ */ jsxRuntimeExports.jsx(User, { className: "w-10 h-10" }) })
+                          ] }),
+                          /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "absolute bottom-0 right-0 cursor-pointer bg-purple-600 hover:bg-purple-500 text-white p-2 rounded-full shadow-lg transition-all border-2 border-slate-900", children: [
+                            /* @__PURE__ */ jsxRuntimeExports.jsx(Camera, { className: "w-4 h-4" }),
+                            /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "file", accept: "image/*", onChange: handleAvatarChange, className: "hidden" })
+                          ] })
+                        ] }),
+                        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold text-purple-400 uppercase tracking-widest", children: "Personaliza tu Avatar" })
+                      ]
+                    }
+                  ) }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-1.5", children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(Label, { htmlFor: "email", className: "text-slate-400 text-[10px] uppercase tracking-[0.2em] font-black ml-1", children: "Identidad Digital (Email)" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative group", children: [
+                        /* @__PURE__ */ jsxRuntimeExports.jsx(Mail, { className: "absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-purple-400 transition-colors w-4.5 h-4.5" }),
+                        /* @__PURE__ */ jsxRuntimeExports.jsx(
+                          Input,
+                          {
+                            id: "email",
+                            type: "email",
+                            value: email,
+                            onChange: (e2) => setEmail(e2.target.value),
+                            className: "pl-12 bg-slate-950/50 border-white/5 text-white placeholder-slate-600 rounded-2xl h-14 focus:border-purple-500/50 focus:ring-purple-500/10 transition-all text-base",
+                            placeholder: "nombre@ejemplo.com",
+                            required: true,
+                            disabled: busy
+                          }
+                        )
+                      ] })
+                    ] }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-1.5", children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(Label, { htmlFor: "password", className: "text-slate-400 text-[10px] uppercase tracking-[0.2em] font-black ml-1", children: "Código de Acceso" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative group", children: [
+                        /* @__PURE__ */ jsxRuntimeExports.jsx(Lock, { className: "absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-purple-400 transition-colors w-4.5 h-4.5" }),
+                        /* @__PURE__ */ jsxRuntimeExports.jsx(
+                          Input,
+                          {
+                            id: "password",
+                            type: "password",
+                            value: password,
+                            onChange: (e2) => setPassword(e2.target.value),
+                            className: "pl-12 bg-slate-950/50 border-white/5 text-white placeholder-slate-600 rounded-2xl h-14 focus:border-purple-500/50 focus:ring-purple-500/10 transition-all text-base",
+                            placeholder: "••••••••",
+                            required: true,
+                            minLength: 6,
+                            autoFocus: true,
+                            disabled: busy
+                          }
+                        )
+                      ] })
+                    ] }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: !isLogin && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                      motion.div,
+                      {
+                        initial: { opacity: 0, x: -10 },
+                        animate: { opacity: 1, x: 0 },
+                        className: "space-y-1.5",
+                        children: [
+                          /* @__PURE__ */ jsxRuntimeExports.jsx(Label, { htmlFor: "username", className: "text-slate-400 text-[10px] uppercase tracking-[0.2em] font-black ml-1", children: "Nombre de Operador" }),
+                          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative group", children: [
+                            /* @__PURE__ */ jsxRuntimeExports.jsx(User, { className: "absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-purple-400 transition-colors w-4.5 h-4.5" }),
+                            /* @__PURE__ */ jsxRuntimeExports.jsx(
+                              Input,
+                              {
+                                id: "username",
+                                value: username,
+                                onChange: (e2) => setUsername(e2.target.value),
+                                className: "pl-12 bg-slate-950/50 border-white/5 text-white placeholder-slate-600 rounded-2xl h-14 focus:border-purple-500/50 focus:ring-purple-500/10 transition-all text-base",
+                                placeholder: "Tu alias",
+                                required: true,
+                                disabled: busy
+                              }
+                            )
+                          ] })
+                        ]
+                      }
+                    ) })
+                  ] }),
+                  errorMsg && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                    motion.div,
+                    {
+                      initial: { opacity: 0, scale: 0.9 },
+                      animate: { opacity: 1, scale: 1 },
+                      className: "bg-red-500/10 border border-red-500/20 rounded-2xl px-4 py-3 text-sm text-red-400 flex items-center gap-3",
+                      children: [
+                        /* @__PURE__ */ jsxRuntimeExports.jsx(CircleAlert, { className: "w-5 h-5 shrink-0" }),
+                        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+                          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "font-bold", children: "Error de Sistema" }),
+                          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs opacity-80", children: errorMsg })
+                        ] })
+                      ]
+                    }
+                  ),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(
+                      Button,
+                      {
+                        type: "submit",
+                        className: "w-full h-14 text-base font-black rounded-2xl bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white shadow-[0_10px_30px_rgba(147,51,234,0.3)] transition-all hover:scale-[1.02] active:scale-[0.98] border-0 disabled:opacity-50",
+                        disabled: busy || cooldown > 0,
+                        children: busy ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-3", children: [
+                          /* @__PURE__ */ jsxRuntimeExports.jsx(LoaderCircle, { className: "w-5 h-5 animate-spin" }),
+                          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "SINCRONIZANDO..." })
+                        ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
+                          /* @__PURE__ */ jsxRuntimeExports.jsx(ShieldCheck, { className: "w-5 h-5" }),
+                          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: isLogin ? "ACCEDER AL NÚCLEO" : "REGISTRAR OPERADOR" })
+                        ] })
+                      }
+                    ),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(
+                      "button",
+                      {
+                        type: "button",
+                        onClick: () => {
+                          setIsLogin(!isLogin);
+                          setErrorMsg(null);
+                        },
+                        className: "w-full text-slate-500 hover:text-purple-400 transition-colors text-xs font-black uppercase tracking-widest",
+                        disabled: busy,
+                        children: isLogin ? "¿Nuevo aquí? Crear Perfil" : "¿Ya tienes perfil? Identifícate"
+                      }
+                    )
+                  ] })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mt-8 pt-6 border-t border-white/5", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  "button",
+                  {
+                    onClick: () => {
+                      localStorage.setItem("fiesta_player_name", username || "Jugador");
+                      setAuthOverlayOpen(false);
+                    },
+                    className: "w-full text-slate-600 hover:text-white transition-colors text-[10px] font-black uppercase tracking-widest",
+                    children: "Continuar sin cuenta (Modo Invitado)"
+                  }
+                ) })
+              ]
+            },
+            "form"
+          ) })
+        ]
+      }
+    )
   ] });
 }
 const tabs = [
@@ -72402,9 +74393,10 @@ function SimonSays({ onAddGems }) {
     isPlaying && !isShowingSequence && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-white font-bold text-xl", children: "Tu turno" })
   ] });
 }
-function ArcadeQuickDraw({ roomId, onClose }) {
-  const { localPlayerId, players } = useGameContext();
-  players.find((p2) => p2.id === localPlayerId) || players[0];
+function ArcadeQuickDraw({ roomId, playerId, onClose }) {
+  const { localPlayerId: contextPlayerId, players } = useGameContext();
+  const effectivePlayerId = playerId || contextPlayerId || "guest";
+  players.find((p2) => p2.id === effectivePlayerId) || players[0];
   const [phase, setPhase] = reactExports.useState("waiting_sync");
   const [remotePlayerReady, setRemotePlayerReady] = reactExports.useState(false);
   const [myReactionTime, setMyReactionTime] = reactExports.useState(null);
@@ -72415,17 +74407,17 @@ function ArcadeQuickDraw({ roomId, onClose }) {
   const drawStartTimeRef = reactExports.useRef(0);
   const timeoutRef = reactExports.useRef(null);
   reactExports.useEffect(() => {
-    if (!localPlayerId)
+    if (!effectivePlayerId)
       return;
     const channel = supabase.channel(`quickdraw-${roomId}`);
     channelRef.current = channel;
     channel.on("broadcast", { event: "ready" }, () => {
       setRemotePlayerReady(true);
     }).on("broadcast", { event: "draw_time" }, ({ payload }) => {
-      if (payload.playerId !== localPlayerId) {
+      if (payload.playerId !== effectivePlayerId) {
         setRemoteReactionTime(payload.time);
         if (payload.early) {
-          setWinner(localPlayerId);
+          setWinner(effectivePlayerId);
           setPhase("result");
         }
       }
@@ -72436,7 +74428,7 @@ function ArcadeQuickDraw({ roomId, onClose }) {
         channel.send({
           type: "broadcast",
           event: "ready",
-          payload: { playerId: localPlayerId }
+          payload: { playerId: effectivePlayerId }
         });
       }
     });
@@ -72445,7 +74437,7 @@ function ArcadeQuickDraw({ roomId, onClose }) {
         clearTimeout(timeoutRef.current);
       supabase.removeChannel(channel);
     };
-  }, [roomId, localPlayerId]);
+  }, [roomId, effectivePlayerId]);
   reactExports.useEffect(() => {
   }, [remotePlayerReady]);
   const handleStartSync = () => {
@@ -72476,7 +74468,7 @@ function ArcadeQuickDraw({ roomId, onClose }) {
       (_a3 = channelRef.current) == null ? void 0 : _a3.send({
         type: "broadcast",
         event: "draw_time",
-        payload: { playerId: localPlayerId, time: 0, early: true }
+        payload: { playerId: effectivePlayerId, time: 0, early: true }
       });
       ue$1.error("¡Te has precipitado!");
       return;
@@ -72487,7 +74479,7 @@ function ArcadeQuickDraw({ roomId, onClose }) {
       (_b2 = channelRef.current) == null ? void 0 : _b2.send({
         type: "broadcast",
         event: "draw_time",
-        payload: { playerId: localPlayerId, time: rt2, early: false }
+        payload: { playerId: effectivePlayerId, time: rt2, early: false }
       });
     }
   };
@@ -72495,7 +74487,7 @@ function ArcadeQuickDraw({ roomId, onClose }) {
     if (myReactionTime !== null && remoteReactionTime !== null && phase !== "result") {
       setPhase("result");
       if (myReactionTime < remoteReactionTime) {
-        setWinner(localPlayerId);
+        setWinner(effectivePlayerId);
         ue$1.success("¡Eres el jugador más rápido del Oeste! 🤠");
       } else if (remoteReactionTime < myReactionTime) {
         setWinner("remote");
@@ -72505,10 +74497,10 @@ function ArcadeQuickDraw({ roomId, onClose }) {
         ue$1("¡Empate exacto! Matemáticamente improbable...");
       }
     }
-  }, [myReactionTime, remoteReactionTime, phase, localPlayerId]);
+  }, [myReactionTime, remoteReactionTime, phase, effectivePlayerId]);
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "absolute inset-0 z-50 bg-black flex flex-col user-select-none", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "absolute top-0 inset-x-0 p-4 flex justify-between items-center z-10 bg-gradient-to-b from-black/80 to-transparent", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(Button, { variant: "ghost", className: "text-white.50", onClick: onClose, children: "Abandonar" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Button, { variant: "ghost", className: "text-white/50", onClick: onClose, children: "Abandonar" }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-white font-black tracking-widest text-xl", children: "REFLEJOS" }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-20" })
     ] }),
@@ -72529,15 +74521,15 @@ function ArcadeQuickDraw({ roomId, onClose }) {
           ] }),
           phase === "draw" && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-7xl md:text-9xl font-black text-white drop-shadow-[0_0_50px_rgba(255,255,255,0.8)] scale-110", children: "¡DISPARA!" }) }),
           phase === "result" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center bg-black/60 p-8 rounded-3xl backdrop-blur-md border border-white/10 w-full max-w-md mx-4", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-4xl font-black text-white mb-8", children: winner === localPlayerId ? "✨ ¡GANASTE! ✨" : winner === "tie" ? "EMPATE" : "❌ PERDISTE ❌" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-4xl font-black text-white mb-8", children: winner === effectivePlayerId ? "✨ ¡GANASTE! ✨" : winner === "tie" ? "EMPATE" : "❌ PERDISTE ❌" }),
             /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4 mb-8 text-left", children: [
               /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex justify-between items-center bg-white/5 p-4 rounded-xl", children: [
                 /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-white/80", children: "Tu tiempo:" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `text-xl font-bold ${winner === localPlayerId ? "text-green-400" : "text-white"}`, children: earlyDraw ? "Falso inicio" : myReactionTime ? `${myReactionTime}ms` : "---" })
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `text-xl font-bold ${winner === effectivePlayerId ? "text-green-400" : "text-white"}`, children: earlyDraw ? "Falso inicio" : myReactionTime ? `${myReactionTime}ms` : "---" })
               ] }),
               /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex justify-between items-center bg-white/5 p-4 rounded-xl", children: [
                 /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-white/80", children: "Rival:" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `text-xl font-bold ${winner === "remote" ? "text-green-400" : "text-white"}`, children: remoteReactionTime ? `${remoteReactionTime}ms` : winner === localPlayerId ? "Falso inicio" : "---" })
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `text-xl font-bold ${winner === "remote" ? "text-green-400" : "text-white"}`, children: remoteReactionTime ? `${remoteReactionTime}ms` : winner === effectivePlayerId ? "Falso inicio" : "---" })
               ] })
             ] }),
             /* @__PURE__ */ jsxRuntimeExports.jsx(Button, { size: "lg", className: "w-full h-16 text-xl", onClick: handleStartSync, children: "Revancha" })
@@ -72548,9 +74540,10 @@ function ArcadeQuickDraw({ roomId, onClose }) {
     phase === "waiting_sync" && remotePlayerReady && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute bottom-10 inset-x-0 flex justify-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Button, { size: "lg", className: "h-16 px-8 text-xl animate-bounce", onClick: () => setPhase("ready"), children: "¡Rival encontrado! (Empezar)" }) })
   ] });
 }
-function ArcadeTapRace({ roomId, onClose }) {
-  const { localPlayerId, players } = useGameContext();
-  players.find((p2) => p2.id === localPlayerId) || players[0];
+function ArcadeTapRace({ roomId, playerId, onClose }) {
+  const { localPlayerId: contextPlayerId, players } = useGameContext();
+  const effectivePlayerId = playerId || contextPlayerId || "guest";
+  players.find((p2) => p2.id === effectivePlayerId) || players[0];
   const [phase, setPhase] = reactExports.useState("waiting_sync");
   const [remotePlayerReady, setRemotePlayerReady] = reactExports.useState(false);
   const [timeLeft, setTimeLeft] = reactExports.useState(10);
@@ -72561,14 +74554,14 @@ function ArcadeTapRace({ roomId, onClose }) {
   const timerRef = reactExports.useRef(null);
   const scoreRef = reactExports.useRef(0);
   reactExports.useEffect(() => {
-    if (!localPlayerId)
+    if (!effectivePlayerId)
       return;
     const channel = supabase.channel(`taprace-${roomId}`);
     channelRef.current = channel;
     channel.on("broadcast", { event: "ready" }, () => {
       setRemotePlayerReady(true);
     }).on("broadcast", { event: "score_update" }, ({ payload }) => {
-      if (payload.playerId !== localPlayerId) {
+      if (payload.playerId !== effectivePlayerId) {
         setRemoteScore(payload.score);
       }
     }).on("broadcast", { event: "start_game" }, () => {
@@ -72578,7 +74571,7 @@ function ArcadeTapRace({ roomId, onClose }) {
         channel.send({
           type: "broadcast",
           event: "ready",
-          payload: { playerId: localPlayerId }
+          payload: { playerId: effectivePlayerId }
         });
       }
     });
@@ -72587,7 +74580,7 @@ function ArcadeTapRace({ roomId, onClose }) {
         clearInterval(timerRef.current);
       supabase.removeChannel(channel);
     };
-  }, [roomId, localPlayerId]);
+  }, [roomId, effectivePlayerId]);
   const handleStartSync = () => {
     var _a3;
     (_a3 = channelRef.current) == null ? void 0 : _a3.send({ type: "broadcast", event: "start_game" });
@@ -72631,7 +74624,7 @@ function ArcadeTapRace({ roomId, onClose }) {
     (_a3 = channelRef.current) == null ? void 0 : _a3.send({
       type: "broadcast",
       event: "score_update",
-      payload: { playerId: localPlayerId, score: scoreRef.current }
+      payload: { playerId: effectivePlayerId, score: scoreRef.current }
     });
     setTimeout(() => {
       setRemoteScore((prevRemote) => {
@@ -72657,7 +74650,7 @@ function ArcadeTapRace({ roomId, onClose }) {
     (_a3 = channelRef.current) == null ? void 0 : _a3.send({
       type: "broadcast",
       event: "score_update",
-      payload: { playerId: localPlayerId, score: newScore }
+      payload: { playerId: effectivePlayerId, score: newScore }
     });
     if (navigator.vibrate)
       navigator.vibrate(10);
@@ -72741,7 +74734,7 @@ function ArcadeTapRace({ roomId, onClose }) {
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex justify-around items-center bg-white/5 p-6 rounded-3xl mb-8", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-white/50 text-sm uppercase tracking-widest mb-2 font-bold", children: "Tú" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `text-5xl font-black ${winner === localPlayerId ? "text-green-400" : "text-white"}`, children: myScore })
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `text-5xl font-black ${winner === effectivePlayerId ? "text-green-400" : "text-white"}`, children: myScore })
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-3xl text-white/20 font-light", children: "VS" }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center", children: [
@@ -72758,42 +74751,49 @@ const CHOICES = [
   { id: "paper", name: "PAPEL", emoji: "📄", color: "bg-blue-400" },
   { id: "scissors", name: "TIJERA", emoji: "✂️", color: "bg-red-500" }
 ];
-function ArcadeRPS({ roomId, onClose }) {
+function ArcadeRPS({ roomId, playerId, onClose }) {
   var _a3, _b2, _c3, _d2;
-  const { localPlayerId, players } = useGameContext();
-  players.find((p2) => p2.id === localPlayerId) || players[0];
+  const { localPlayerId: contextPlayerId, players } = useGameContext();
+  const effectivePlayerId = playerId || contextPlayerId || "guest";
+  const localPlayer = players.find((p2) => p2.id === effectivePlayerId) || players[0];
   const [phase, setPhase] = reactExports.useState("waiting_sync");
   const [remotePlayerReady, setRemotePlayerReady] = reactExports.useState(false);
+  const isBotMatch = roomId.startsWith("bot_");
   const [myChoice, setMyChoice] = reactExports.useState(null);
   const [remoteChoice, setRemoteChoice] = reactExports.useState(null);
   const [winner, setWinner] = reactExports.useState(null);
   const channelRef = reactExports.useRef(null);
   reactExports.useEffect(() => {
-    if (!localPlayerId)
+    if (!effectivePlayerId)
       return;
     const channel = supabase.channel(`rps-${roomId}`);
     channelRef.current = channel;
     channel.on("broadcast", { event: "ready" }, () => {
       setRemotePlayerReady(true);
     }).on("broadcast", { event: "choice_locked" }, ({ payload }) => {
-      if (payload.playerId !== localPlayerId) {
+      if (payload.playerId !== effectivePlayerId) {
         setRemoteChoice(payload.choice);
       }
     }).on("broadcast", { event: "start_round" }, () => {
       startRound();
     }).subscribe((status) => {
       if (status === "SUBSCRIBED") {
-        channel.send({
-          type: "broadcast",
-          event: "ready",
-          payload: { playerId: localPlayerId }
-        });
+        if (isBotMatch) {
+          setTimeout(() => setRemotePlayerReady(true), 1e3);
+        } else {
+          channel.send({
+            type: "broadcast",
+            event: "ready",
+            payload: { playerId: effectivePlayerId }
+          });
+        }
       }
     });
     return () => {
-      supabase.removeChannel(channel);
+      if (!isBotMatch)
+        supabase.removeChannel(channel);
     };
-  }, [roomId, localPlayerId]);
+  }, [roomId, effectivePlayerId, isBotMatch]);
   const handleStartSync = () => {
     var _a4;
     (_a4 = channelRef.current) == null ? void 0 : _a4.send({ type: "broadcast", event: "start_round" });
@@ -72810,12 +74810,23 @@ function ArcadeRPS({ roomId, onClose }) {
     if (myChoice)
       return;
     setMyChoice(choice);
-    (_a4 = channelRef.current) == null ? void 0 : _a4.send({
-      type: "broadcast",
-      event: "choice_locked",
-      payload: { playerId: localPlayerId, choice }
-    });
+    if (!isBotMatch) {
+      (_a4 = channelRef.current) == null ? void 0 : _a4.send({
+        type: "broadcast",
+        event: "choice_locked",
+        payload: { playerId: effectivePlayerId, choice }
+      });
+    }
   };
+  reactExports.useEffect(() => {
+    if (isBotMatch && phase === "choosing" && myChoice && !remoteChoice) {
+      const timer = setTimeout(() => {
+        const botChoice = ["rock", "paper", "scissors"][Math.floor(Math.random() * 3)];
+        setRemoteChoice(botChoice);
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [isBotMatch, phase, myChoice, remoteChoice]);
   reactExports.useEffect(() => {
     if (myChoice && remoteChoice && phase === "choosing") {
       setPhase("reveal");
@@ -72829,7 +74840,8 @@ function ArcadeRPS({ roomId, onClose }) {
     if (p1 === p2) {
       setWinner("tie");
     } else if (p1 === "rock" && p2 === "scissors" || p1 === "paper" && p2 === "rock" || p1 === "scissors" && p2 === "paper") {
-      setWinner(localPlayerId);
+      setWinner(effectivePlayerId);
+      upsertLocalRanking({ playerName: (localPlayer == null ? void 0 : localPlayer.name) || "Invitado", scoreToAdd: 30, won: true, gameMode: "arcade" });
     } else {
       setWinner("remote");
     }
@@ -72899,12 +74911,12 @@ function ArcadeRPS({ roomId, onClose }) {
         animate: { opacity: 1, scale: 1 },
         className: "absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm pointer-events-auto",
         children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-slate-900 border border-white/20 p-8 rounded-3xl text-center shadow-2xl max-w-md w-full mx-4", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-6xl mb-4", children: winner === localPlayerId ? "🎉" : winner === "tie" ? "😐" : "💀" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-4xl font-black text-white mb-2 uppercase tracking-tighter", children: winner === localPlayerId ? "¡HAS GANADO!" : winner === "tie" ? "EMPATE" : "HAS PERDIDO" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-6xl mb-4", children: winner === effectivePlayerId ? "🎉" : winner === "tie" ? "😐" : "💀" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-4xl font-black text-white mb-2 uppercase tracking-tighter", children: winner === effectivePlayerId ? "¡HAS GANADO!" : winner === "tie" ? "EMPATE" : "HAS PERDIDO" }),
           /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-muted-foreground mb-8 text-lg", children: [
             (_c3 = CHOICES.find((c2) => c2.id === myChoice)) == null ? void 0 : _c3.name,
             " ",
-            winner === localPlayerId ? "vence a" : winner === "tie" ? "iguala a" : "cae ante",
+            winner === effectivePlayerId ? "vence a" : winner === "tie" ? "iguala a" : "cae ante",
             " ",
             (_d2 = CHOICES.find((c2) => c2.id === remoteChoice)) == null ? void 0 : _d2.name
           ] }),
@@ -72914,11 +74926,13 @@ function ArcadeRPS({ roomId, onClose }) {
     )
   ] });
 }
-function ArcadeTicTacToe({ roomId, onClose }) {
-  const { localPlayerId, players } = useGameContext();
-  players.find((p2) => p2.id === localPlayerId) || players[0];
+function ArcadeTicTacToe({ roomId, playerId, onClose }) {
+  const { localPlayerId: contextPlayerId, players } = useGameContext();
+  const effectivePlayerId = playerId || contextPlayerId || "guest";
+  const localPlayer = players.find((p2) => p2.id === effectivePlayerId) || players[0];
   const [phase, setPhase] = reactExports.useState("waiting_sync");
   const [remotePlayerReady, setRemotePlayerReady] = reactExports.useState(false);
+  const isBotMatch = roomId.startsWith("bot_");
   const [board, setBoard] = reactExports.useState(Array(9).fill(null));
   const [mySymbol, setMySymbol] = reactExports.useState(null);
   const [currentTurnStr, setCurrentTurnStr] = reactExports.useState(null);
@@ -72927,13 +74941,13 @@ function ArcadeTicTacToe({ roomId, onClose }) {
   const channelRef = reactExports.useRef(null);
   const timerRef = reactExports.useRef(null);
   reactExports.useEffect(() => {
-    if (!localPlayerId)
+    if (!effectivePlayerId)
       return;
     const channel = supabase.channel(`tictactoe-${roomId}`);
     channelRef.current = channel;
     channel.on("broadcast", { event: "ready" }, ({ payload }) => {
       setRemotePlayerReady(true);
-      if (!mySymbol && payload.playerId !== localPlayerId) {
+      if (!mySymbol && payload.playerId !== effectivePlayerId) {
         const iAmX = Math.random() > 0.5;
         const hostSymbol = iAmX ? "X" : "O";
         setMySymbol(hostSymbol);
@@ -72941,18 +74955,18 @@ function ArcadeTicTacToe({ roomId, onClose }) {
           type: "broadcast",
           event: "start_game",
           payload: {
-            starterId: iAmX ? localPlayerId : payload.playerId,
-            xPlayerId: iAmX ? localPlayerId : payload.playerId,
-            oPlayerId: iAmX ? payload.playerId : localPlayerId
+            starterId: iAmX ? effectivePlayerId : payload.playerId,
+            xPlayerId: iAmX ? effectivePlayerId : payload.playerId,
+            oPlayerId: iAmX ? payload.playerId : effectivePlayerId
           }
         });
         startGame(
-          iAmX ? localPlayerId : payload.playerId
+          iAmX ? effectivePlayerId : payload.playerId
         );
       }
     }).on("broadcast", { event: "start_game" }, ({ payload }) => {
       if (!mySymbol) {
-        const sym = payload.xPlayerId === localPlayerId ? "X" : "O";
+        const sym = payload.xPlayerId === effectivePlayerId ? "X" : "O";
         setMySymbol(sym);
         startGame(payload.starterId);
       }
@@ -72964,19 +74978,28 @@ function ArcadeTicTacToe({ roomId, onClose }) {
       clearTimeout(timerRef.current);
     }).subscribe((status) => {
       if (status === "SUBSCRIBED") {
-        channel.send({
-          type: "broadcast",
-          event: "ready",
-          payload: { playerId: localPlayerId }
-        });
+        if (isBotMatch) {
+          setTimeout(() => {
+            setRemotePlayerReady(true);
+            setMySymbol("X");
+            startGame(effectivePlayerId);
+          }, 1e3);
+        } else {
+          channel.send({
+            type: "broadcast",
+            event: "ready",
+            payload: { playerId: effectivePlayerId }
+          });
+        }
       }
     });
     return () => {
       if (timerRef.current)
         clearInterval(timerRef.current);
-      supabase.removeChannel(channel);
+      if (!isBotMatch)
+        supabase.removeChannel(channel);
     };
-  }, [roomId, localPlayerId, mySymbol]);
+  }, [roomId, effectivePlayerId, mySymbol, isBotMatch]);
   const startGame = (starterId, assignedSymbol) => {
     setBoard(Array(9).fill(null));
     setWinner(null);
@@ -72988,7 +75011,7 @@ function ArcadeTicTacToe({ roomId, onClose }) {
     if (timerRef.current)
       clearInterval(timerRef.current);
     setTimeLeft(3);
-    if (whoId === localPlayerId) {
+    if (whoId === effectivePlayerId) {
       let tl2 = 3;
       timerRef.current = setInterval(() => {
         var _a3;
@@ -73016,10 +75039,22 @@ function ArcadeTicTacToe({ roomId, onClose }) {
       return newBoard;
     });
   };
+  reactExports.useEffect(() => {
+    if (isBotMatch && phase === "playing" && currentTurnStr !== effectivePlayerId && !winner) {
+      const timer = setTimeout(() => {
+        const emptyCells = board.map((c2, i2) => c2 === null ? i2 : -1).filter((i2) => i2 !== -1);
+        if (emptyCells.length > 0) {
+          const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+          handleRemoteMove(randomCell, mySymbol === "X" ? "O" : "X", effectivePlayerId);
+        }
+      }, 1e3 + Math.random() * 1e3);
+      return () => clearTimeout(timer);
+    }
+  }, [isBotMatch, phase, currentTurnStr, board, winner, effectivePlayerId, mySymbol]);
   const handleCellClick = (index2) => {
     if (phase !== "playing")
       return;
-    if (currentTurnStr !== localPlayerId)
+    if (currentTurnStr !== effectivePlayerId)
       return;
     if (board[index2] !== null)
       return;
@@ -73029,12 +75064,13 @@ function ArcadeTicTacToe({ roomId, onClose }) {
       var _a3;
       const newBoard = [...prev];
       newBoard[index2] = mySymbol;
-      (_a3 = channelRef.current) == null ? void 0 : _a3.send({
-        type: "broadcast",
-        event: "make_move",
-        payload: { index: index2, symbol: mySymbol, nextTurnId: localPlayerId }
-        // we tell them "your turn" by sending my localPlayerId so they know it's *not* my turn anymore. Usually we just toggle.
-      });
+      if (!isBotMatch) {
+        (_a3 = channelRef.current) == null ? void 0 : _a3.send({
+          type: "broadcast",
+          event: "make_move",
+          payload: { index: index2, symbol: mySymbol, nextTurnId: effectivePlayerId }
+        });
+      }
       checkPostMove(newBoard, "remote", true);
       return newBoard;
     });
@@ -73064,9 +75100,11 @@ function ArcadeTicTacToe({ roomId, onClose }) {
     if (foundWinner) {
       setPhase("result");
       if (foundWinner === mySymbol) {
-        setWinner(localPlayerId);
-        if (isMyMove)
+        setWinner(effectivePlayerId);
+        if (isMyMove) {
           ue$1.success("¡Victoria magistral!");
+          upsertLocalRanking({ playerName: localPlayer.name, scoreToAdd: 50, won: true, gameMode: "arcade" });
+        }
       } else {
         setWinner("remote");
         if (!isMyMove)
@@ -73077,8 +75115,8 @@ function ArcadeTicTacToe({ roomId, onClose }) {
       setWinner("tie");
       ue$1("¡Empate brutal!");
     } else {
-      setCurrentTurnStr(isMyMove ? "remote" : localPlayerId);
-      resetTurnTimer(isMyMove ? "remote" : localPlayerId);
+      setCurrentTurnStr(isMyMove ? "remote" : effectivePlayerId);
+      resetTurnTimer(isMyMove ? "remote" : effectivePlayerId);
     }
   };
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "absolute inset-0 z-50 bg-slate-900 flex flex-col user-select-none", children: [
@@ -73091,7 +75129,7 @@ function ArcadeTicTacToe({ roomId, onClose }) {
       phase === "playing" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "absolute top-10 flex flex-col items-center gap-2", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white/10 px-6 py-2 rounded-full border border-white/20 backdrop-blur-md", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-sm font-bold uppercase tracking-widest text-white/70", children: [
           "Turno: ",
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: currentTurnStr === localPlayerId ? "text-green-400" : "text-red-400", children: currentTurnStr === localPlayerId ? "TU TURNO" : "RIVAL" })
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: currentTurnStr === effectivePlayerId ? "text-green-400" : "text-red-400", children: currentTurnStr === effectivePlayerId ? "TU TURNO" : "RIVAL" })
         ] }) }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `text-5xl font-black ${timeLeft <= 1 ? "text-red-500 animate-pulse" : "text-white"}`, children: [
           "00:0",
@@ -73101,12 +75139,12 @@ function ArcadeTicTacToe({ roomId, onClose }) {
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-3 gap-2 bg-white/10 p-2 rounded-2xl w-full max-w-sm aspect-square shadow-[0_0_50px_rgba(0,0,0,0.5)]", children: board.map((cell, idx) => /* @__PURE__ */ jsxRuntimeExports.jsx(
         "button",
         {
-          disabled: phase !== "playing" || cell !== null || currentTurnStr !== localPlayerId,
+          disabled: phase !== "playing" || cell !== null || currentTurnStr !== effectivePlayerId,
           onClick: () => handleCellClick(idx),
           className: `rounded-xl bg-slate-800 flex items-center justify-center text-7xl font-black transition-all
                                     ${cell === "X" ? "text-blue-400 drop-shadow-[0_0_15px_rgba(96,165,250,0.8)]" : ""}
                                     ${cell === "O" ? "text-pink-400 drop-shadow-[0_0_15px_rgba(244,114,182,0.8)]" : ""}
-                                    ${!cell && currentTurnStr === localPlayerId && phase === "playing" ? "hover:bg-slate-700 cursor-pointer active:scale-95" : ""}
+                                    ${!cell && currentTurnStr === effectivePlayerId && phase === "playing" ? "hover:bg-slate-700 cursor-pointer active:scale-95" : ""}
                                 `,
           children: /* @__PURE__ */ jsxRuntimeExports.jsx(
             motion.div,
@@ -73127,7 +75165,7 @@ function ArcadeTicTacToe({ roomId, onClose }) {
           animate: { scale: 1, opacity: 1 },
           className: "absolute z-20 bg-black/80 backdrop-blur-xl border border-white/20 p-8 rounded-3xl text-center shadow-2xl",
           children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-4xl font-black text-white mb-2", children: winner === localPlayerId ? "🏆 ¡VICTORIA! 🏆" : winner === "tie" ? "🤝 EMPATE 🤝" : "💀 DERROTA 💀" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-4xl font-black text-white mb-2", children: winner === effectivePlayerId ? "🏆 ¡VICTORIA! 🏆" : winner === "tie" ? "🤝 EMPATE 🤝" : "💀 DERROTA 💀" }),
             /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-muted-foreground mb-8 text-lg", children: winner === localPlayerId ? "No hay rival para ti en 3 en Raya." : winner === "tie" ? "Defensas perfectas." : "Fuiste más lento o te engañaron..." }),
             /* @__PURE__ */ jsxRuntimeExports.jsxs(Button, { size: "lg", className: "w-full h-16 text-xl", onClick: () => setPhase("waiting_sync"), children: [
               " ",
@@ -73167,11 +75205,13 @@ const generateProblem = () => {
   options.sort(() => Math.random() - 0.5);
   return { question: `${a2} ${op} ${b2}`, options, answer: ans };
 };
-function ArcadeMathMatch({ roomId, onClose }) {
-  const { localPlayerId, players } = useGameContext();
-  players.find((p2) => p2.id === localPlayerId) || players[0];
+function ArcadeMathMatch({ roomId, playerId, onClose }) {
+  const { localPlayerId: contextPlayerId, players } = useGameContext();
+  const effectivePlayerId = playerId || contextPlayerId || "guest";
+  const localPlayer = players.find((p2) => p2.id === effectivePlayerId) || players[0];
   const [phase, setPhase] = reactExports.useState("waiting_sync");
   const [remotePlayerReady, setRemotePlayerReady] = reactExports.useState(false);
+  const isBotMatch = roomId.startsWith("bot_");
   const [myScore, setMyScore] = reactExports.useState(0);
   const [remoteScore, setRemoteScore] = reactExports.useState(0);
   const [winner, setWinner] = reactExports.useState(null);
@@ -73180,14 +75220,14 @@ function ArcadeMathMatch({ roomId, onClose }) {
   const [errorPenalty, setErrorPenalty] = reactExports.useState(false);
   const channelRef = reactExports.useRef(null);
   reactExports.useEffect(() => {
-    if (!localPlayerId)
+    if (!effectivePlayerId)
       return;
     const channel = supabase.channel(`math-${roomId}`);
     channelRef.current = channel;
     channel.on("broadcast", { event: "ready" }, () => {
       setRemotePlayerReady(true);
     }).on("broadcast", { event: "score_update" }, ({ payload }) => {
-      if (payload.playerId !== localPlayerId) {
+      if (payload.playerId !== effectivePlayerId) {
         setRemoteScore(payload.score);
         if (payload.score >= TOTAL_PROBLEMS) {
           setWinner("remote");
@@ -73198,17 +75238,22 @@ function ArcadeMathMatch({ roomId, onClose }) {
       startCountdown();
     }).subscribe((status) => {
       if (status === "SUBSCRIBED") {
-        channel.send({
-          type: "broadcast",
-          event: "ready",
-          payload: { playerId: localPlayerId }
-        });
+        if (isBotMatch) {
+          setTimeout(() => setRemotePlayerReady(true), 1e3);
+        } else {
+          channel.send({
+            type: "broadcast",
+            event: "ready",
+            payload: { playerId: effectivePlayerId }
+          });
+        }
       }
     });
     return () => {
-      supabase.removeChannel(channel);
+      if (!isBotMatch)
+        supabase.removeChannel(channel);
     };
-  }, [roomId, localPlayerId]);
+  }, [roomId, effectivePlayerId, isBotMatch]);
   const handleStartSync = () => {
     var _a3;
     (_a3 = channelRef.current) == null ? void 0 : _a3.send({ type: "broadcast", event: "start_game" });
@@ -73232,6 +75277,22 @@ function ArcadeMathMatch({ roomId, onClose }) {
       }
     }, 1e3);
   };
+  reactExports.useEffect(() => {
+    if (isBotMatch && phase === "playing" && remoteScore < TOTAL_PROBLEMS && winner === null) {
+      const botSolveTime = 3e3 + Math.random() * 2e3;
+      const timer = setTimeout(() => {
+        setRemoteScore((prev) => {
+          const next = prev + 1;
+          if (next >= TOTAL_PROBLEMS) {
+            setWinner("remote");
+            setPhase("result");
+          }
+          return next;
+        });
+      }, botSolveTime);
+      return () => clearTimeout(timer);
+    }
+  }, [isBotMatch, phase, remoteScore, winner]);
   const handleAnswer = (val) => {
     var _a3;
     if (phase !== "playing" || errorPenalty || !currentProblem)
@@ -73239,14 +75300,17 @@ function ArcadeMathMatch({ roomId, onClose }) {
     if (val === currentProblem.answer) {
       const nextScore = myScore + 1;
       setMyScore(nextScore);
-      (_a3 = channelRef.current) == null ? void 0 : _a3.send({
-        type: "broadcast",
-        event: "score_update",
-        payload: { playerId: localPlayerId, score: nextScore }
-      });
+      if (!isBotMatch) {
+        (_a3 = channelRef.current) == null ? void 0 : _a3.send({
+          type: "broadcast",
+          event: "score_update",
+          payload: { playerId: effectivePlayerId, score: nextScore }
+        });
+      }
       if (nextScore >= TOTAL_PROBLEMS) {
-        setWinner(localPlayerId);
+        setWinner(effectivePlayerId);
         setPhase("result");
+        upsertLocalRanking({ playerName: (localPlayer == null ? void 0 : localPlayer.name) || "Invitado", scoreToAdd: 40, won: true, gameMode: "arcade" });
       } else {
         setCurrentProblem(generateProblem());
       }
@@ -73322,8 +75386,8 @@ function ArcadeMathMatch({ roomId, onClose }) {
         animate: { scale: 1, opacity: 1 },
         className: "bg-black/80 p-8 rounded-[40px] backdrop-blur-xl border border-white/10 w-full max-w-md mx-auto text-center shadow-2xl",
         children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-4xl font-black text-white mb-2", children: winner === localPlayerId ? "🧠 ¡CEREBRITO! 🧠" : "📉 SUSPENSO 📉" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-muted-foreground mb-8 text-lg", children: winner === localPlayerId ? "Eres una calculadora humana." : "El rival resolvió los 5 problemas antes que tú." }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-4xl font-black text-white mb-2", children: winner === effectivePlayerId ? "🧠 ¡CEREBRITO! 🧠" : "📉 SUSPENSO 📉" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-muted-foreground mb-8 text-lg", children: winner === effectivePlayerId ? "Eres una calculadora humana." : "El rival resolvió los 5 problemas antes que tú." }),
           /* @__PURE__ */ jsxRuntimeExports.jsx(Button, { size: "lg", className: "w-full h-16 text-xl rounded-2xl font-bold bg-white text-black hover:bg-gray-200", onClick: () => setPhase("waiting_sync"), children: "Cerrar" })
         ]
       }
@@ -73339,9 +75403,10 @@ const getRandomCard = () => {
   return `${v2}${s2}`;
 };
 const WIN_STREAK_TARGET$1 = 7;
-function ArcadeHighLow({ roomId, onClose }) {
-  const { localPlayerId, players } = useGameContext();
-  players.find((p2) => p2.id === localPlayerId) || players[0];
+function ArcadeHighLow({ roomId, playerId, onClose }) {
+  const { localPlayerId: contextPlayerId, players } = useGameContext();
+  const effectivePlayerId = playerId || contextPlayerId || "guest";
+  players.find((p2) => p2.id === effectivePlayerId) || players[0];
   const [phase, setPhase] = reactExports.useState("waiting_sync");
   const [remotePlayerReady, setRemotePlayerReady] = reactExports.useState(false);
   const [myScore, setMyScore] = reactExports.useState(0);
@@ -73352,14 +75417,14 @@ function ArcadeHighLow({ roomId, onClose }) {
   const [waitingForNext, setWaitingForNext] = reactExports.useState(false);
   const channelRef = reactExports.useRef(null);
   reactExports.useEffect(() => {
-    if (!localPlayerId)
+    if (!effectivePlayerId)
       return;
     const channel = supabase.channel(`highlow-${roomId}`);
     channelRef.current = channel;
     channel.on("broadcast", { event: "ready" }, () => {
       setRemotePlayerReady(true);
     }).on("broadcast", { event: "score_update" }, ({ payload }) => {
-      if (payload.playerId !== localPlayerId) {
+      if (payload.playerId !== effectivePlayerId) {
         setRemoteScore(payload.score);
         if (payload.score >= WIN_STREAK_TARGET$1) {
           setWinner("remote");
@@ -73376,14 +75441,14 @@ function ArcadeHighLow({ roomId, onClose }) {
         channel.send({
           type: "broadcast",
           event: "ready",
-          payload: { playerId: localPlayerId }
+          payload: { playerId: effectivePlayerId }
         });
       }
     });
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [roomId, localPlayerId]);
+  }, [roomId, effectivePlayerId]);
   const handleStartSync = () => {
     var _a3;
     const initial = getRandomCard();
@@ -73425,10 +75490,10 @@ function ArcadeHighLow({ roomId, onClose }) {
         (_a3 = channelRef.current) == null ? void 0 : _a3.send({
           type: "broadcast",
           event: "score_update",
-          payload: { playerId: localPlayerId, score: nextScore }
+          payload: { playerId: effectivePlayerId, score: nextScore }
         });
         if (nextScore >= WIN_STREAK_TARGET$1) {
-          setWinner(localPlayerId);
+          setWinner(effectivePlayerId);
           setPhase("result");
         }
       } else {
@@ -73439,7 +75504,7 @@ function ArcadeHighLow({ roomId, onClose }) {
         (_b2 = channelRef.current) == null ? void 0 : _b2.send({
           type: "broadcast",
           event: "score_update",
-          payload: { playerId: localPlayerId, score: 0 }
+          payload: { playerId: effectivePlayerId, score: 0 }
         });
       }
       if (nextScore < WIN_STREAK_TARGET$1) {
@@ -73592,8 +75657,8 @@ function ArcadeHighLow({ roomId, onClose }) {
         animate: { scale: 1, opacity: 1 },
         className: "bg-black/90 p-8 rounded-[40px] backdrop-blur-xl border border-yellow-500/50 w-full max-w-md mx-auto text-center shadow-[0_0_50px_rgba(234,179,8,0.2)]",
         children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-4xl md:text-5xl font-black text-yellow-500 mb-2 drop-shadow-md", children: winner === localPlayerId ? "✨ ¡EN RACHA! ✨" : "🛑 FIN DE RACHA 🛑" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-white/80 mb-8 text-lg font-medium", children: winner === localPlayerId ? "Adivinaste 7 cartas seguidas antes que tu rival. ¡Qué visión!" : "Tu rival llegó a las 7 adivinaciones primero." }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-4xl md:text-5xl font-black text-yellow-500 mb-2 drop-shadow-md", children: winner === effectivePlayerId ? "✨ ¡EN RACHA! ✨" : "🛑 FIN DE RACHA 🛑" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-white/80 mb-8 text-lg font-medium", children: winner === effectivePlayerId ? `Adivinaste ${WIN_STREAK_TARGET$1} cartas seguidas antes que tu rival. ¡Qué visión!` : "Tu rival llegó a las 7 adivinaciones primero." }),
           /* @__PURE__ */ jsxRuntimeExports.jsx(Button, { size: "lg", className: "w-full h-16 text-xl rounded-2xl font-bold bg-yellow-500 text-black hover:bg-yellow-400 hover:scale-105 transition-all", onClick: () => setPhase("waiting_sync"), children: "Volver al Lobby" })
         ]
       }
@@ -73601,9 +75666,10 @@ function ArcadeHighLow({ roomId, onClose }) {
   ] });
 }
 const WIN_STREAK_TARGET = 5;
-function ArcadeCoinFlip({ roomId, onClose }) {
-  const { localPlayerId, players } = useGameContext();
-  players.find((p2) => p2.id === localPlayerId) || players[0];
+function ArcadeCoinFlip({ roomId, playerId, onClose }) {
+  const { localPlayerId: contextPlayerId, players } = useGameContext();
+  const effectivePlayerId = playerId || contextPlayerId || "guest";
+  players.find((p2) => p2.id === effectivePlayerId) || players[0];
   const [phase, setPhase] = reactExports.useState("waiting_sync");
   const [remotePlayerReady, setRemotePlayerReady] = reactExports.useState(false);
   const [myScore, setMyScore] = reactExports.useState(0);
@@ -73613,14 +75679,14 @@ function ArcadeCoinFlip({ roomId, onClose }) {
   const [currentSide, setCurrentSide] = reactExports.useState("heads");
   const channelRef = reactExports.useRef(null);
   reactExports.useEffect(() => {
-    if (!localPlayerId)
+    if (!effectivePlayerId)
       return;
     const channel = supabase.channel(`coinflip-${roomId}`);
     channelRef.current = channel;
     channel.on("broadcast", { event: "ready" }, () => {
       setRemotePlayerReady(true);
     }).on("broadcast", { event: "score_update" }, ({ payload }) => {
-      if (payload.playerId !== localPlayerId) {
+      if (payload.playerId !== effectivePlayerId) {
         setRemoteScore(payload.score);
         if (payload.score >= WIN_STREAK_TARGET) {
           setWinner("remote");
@@ -73634,14 +75700,14 @@ function ArcadeCoinFlip({ roomId, onClose }) {
         channel.send({
           type: "broadcast",
           event: "ready",
-          payload: { playerId: localPlayerId }
+          payload: { playerId: effectivePlayerId }
         });
       }
     });
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [roomId, localPlayerId]);
+  }, [roomId, effectivePlayerId]);
   const handleStartSync = () => {
     var _a3;
     (_a3 = channelRef.current) == null ? void 0 : _a3.send({ type: "broadcast", event: "start_game" });
@@ -73665,94 +75731,76 @@ function ArcadeCoinFlip({ roomId, onClose }) {
       var _a3, _b2;
       setCurrentSide(result);
       setIsFlipping(false);
-      const correct = guess === result;
-      let nextScore = myScore;
-      if (correct) {
-        nextScore += 1;
-        setMyScore(nextScore);
+      if (guess === result) {
+        const newScore = myScore + 1;
+        setMyScore(newScore);
         (_a3 = channelRef.current) == null ? void 0 : _a3.send({
           type: "broadcast",
           event: "score_update",
-          payload: { playerId: localPlayerId, score: nextScore }
+          payload: { playerId: effectivePlayerId, score: newScore }
         });
-        if (nextScore >= WIN_STREAK_TARGET) {
-          setWinner(localPlayerId);
+        if (newScore >= WIN_STREAK_TARGET) {
+          setWinner(effectivePlayerId);
           setPhase("result");
         }
       } else {
-        nextScore = 0;
         setMyScore(0);
-        if (navigator.vibrate)
-          navigator.vibrate([100, 50, 100]);
         (_b2 = channelRef.current) == null ? void 0 : _b2.send({
           type: "broadcast",
           event: "score_update",
-          payload: { playerId: localPlayerId, score: 0 }
+          payload: { playerId: effectivePlayerId, score: 0 }
         });
       }
-    }, 800);
+    }, 1e3);
   };
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "absolute inset-0 z-50 bg-slate-950 flex flex-col text-white user-select-none", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-4 flex justify-between items-center z-10 bg-black/40 border-b border-white/10", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(Button, { variant: "ghost", className: "text-white/50", onClick: onClose, children: "Abandonar" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "font-black tracking-widest text-xl text-yellow-500 uppercase", children: "Cara o Cruz" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-20" })
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4", children: [
+    phase === "waiting_sync" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-3xl font-black text-white mb-8 uppercase tracking-tight", children: "CARA O CRUZ 1v1" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center gap-6", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-4", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: `w-3 h-3 rounded-full ${remotePlayerReady ? "bg-emerald-500" : "bg-red-500 animate-pulse"}` }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-white/80 font-medium", children: remotePlayerReady ? "Rival Conectado" : "Esperando rival..." })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Button, { size: "lg", className: "w-64 h-16 text-xl rounded-2xl font-bold bg-amber-500 text-black hover:bg-amber-400", onClick: handleStartSync, disabled: !remotePlayerReady, children: "ENTRAR AL DUELO" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Button, { variant: "ghost", className: "text-white/40", onClick: onClose, children: "Cancelar" })
+      ] })
     ] }),
-    phase === "waiting_sync" && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex-1 flex flex-col items-center justify-center", children: !remotePlayerReady ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center animate-pulse", children: /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl font-bold mb-4", children: "Esperando rival..." }) }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-3xl font-black mb-8 text-emerald-400", children: "Rival Listo" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(Button, { size: "lg", className: "h-16 px-12 text-2xl animate-bounce bg-yellow-600 hover:bg-yellow-500 text-black border-none", onClick: handleStartSync, children: "EMPEZAR DUELO" })
-    ] }) }),
-    phase === "countdown" && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex-1 flex items-center justify-center text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
-      motion.div,
-      {
-        animate: { scale: [1, 1.5, 0], opacity: [0, 1, 0] },
-        transition: { duration: 3, times: [0, 0.2, 1] },
-        className: "text-7xl font-black text-yellow-500 drop-shadow-[0_0_30px_rgba(234,179,8,0.8)] uppercase",
-        children: [
-          "¡ADIVINA",
-          /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}),
-          "5 SEGUIDAS!"
-        ]
-      }
-    ) }),
-    phase === "playing" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 flex flex-col items-center justify-between p-4 py-8 w-full max-w-2xl mx-auto", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-full grid grid-cols-2 gap-4", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-black/40 rounded-3xl p-4 flex flex-col items-center border border-yellow-500/30", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs uppercase tracking-widest font-bold text-yellow-500", children: "Tu Racha" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-4xl font-black text-white px-4", children: [
+    (phase === "playing" || phase === "countdown") && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-full max-w-lg flex flex-col items-center", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-full flex justify-between mb-12 px-4", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-white/40 text-xs font-bold uppercase tracking-widest mb-1", children: "Tú" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-3xl font-black text-amber-500", children: [
             myScore,
-            " / 5"
+            "/",
+            WIN_STREAK_TARGET
           ] })
         ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-black/40 rounded-3xl p-4 flex flex-col items-center border border-red-500/30", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs uppercase tracking-widest font-bold text-red-500", children: "Racha Rival" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-4xl font-black text-white px-4", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-white/40 text-xs font-bold uppercase tracking-widest mb-1", children: "Rival" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-3xl font-black text-white/20", children: [
             remoteScore,
-            " / 5"
+            "/",
+            WIN_STREAK_TARGET
           ] })
         ] })
       ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex-1 flex items-center justify-center w-full my-8", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "relative w-40 h-40 mb-12", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
         motion.div,
         {
-          animate: {
-            rotateY: isFlipping ? [0, 1080] : 0,
-            scale: isFlipping ? [1, 1.5, 1] : 1,
-            y: isFlipping ? [0, -100, 0] : 0
-          },
-          transition: { duration: 0.8, ease: "easeInOut" },
-          className: "w-48 h-48 rounded-full border-8 border-yellow-600 bg-gradient-to-br from-yellow-300 to-yellow-600 shadow-[0_0_50px_rgba(234,179,8,0.5)] flex items-center justify-center",
-          children: !isFlipping && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-5xl font-black text-yellow-900 uppercase", children: currentSide === "heads" ? "Cara🧔" : "Cruz❌" })
+          animate: isFlipping ? { rotateY: 720, y: [0, -150, 0] } : {},
+          transition: { duration: 1, ease: "easeOut" },
+          className: "w-full h-full rounded-full bg-gradient-to-br from-amber-300 via-amber-500 to-amber-700 shadow-[0_0_30px_rgba(245,158,11,0.4)] flex items-center justify-center border-4 border-amber-200/50",
+          children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-6xl", children: currentSide === "heads" ? "�" : "👑" })
         }
       ) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex gap-4 w-full px-4 mb-4", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-2 gap-4 w-full px-8", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx(
           Button,
           {
             size: "lg",
-            disabled: isFlipping,
+            className: "h-20 rounded-2xl text-xl font-bold bg-white text-black hover:bg-gray-100",
             onClick: () => handleGuess("heads"),
-            className: "flex-1 h-24 rounded-3xl bg-amber-600 hover:bg-amber-500 text-white font-black text-2xl border-b-8 border-amber-800 active:border-b-0 active:translate-y-2 transition-all shadow-xl",
+            disabled: isFlipping || phase === "countdown",
             children: "CARA"
           }
         ),
@@ -73760,32 +75808,33 @@ function ArcadeCoinFlip({ roomId, onClose }) {
           Button,
           {
             size: "lg",
-            disabled: isFlipping,
+            className: "h-20 rounded-2xl text-xl font-bold bg-amber-600 text-white hover:bg-amber-500",
             onClick: () => handleGuess("tails"),
-            className: "flex-1 h-24 rounded-3xl bg-slate-600 hover:bg-slate-500 text-white font-black text-2xl border-b-8 border-slate-800 active:border-b-0 active:translate-y-2 transition-all shadow-xl",
+            disabled: isFlipping || phase === "countdown",
             children: "CRUZ"
           }
         )
       ] })
     ] }),
-    phase === "result" && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex-1 flex flex-col items-center justify-center p-4", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    phase === "result" && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-6 backdrop-blur-md", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
       motion.div,
       {
         initial: { scale: 0.8, opacity: 0 },
         animate: { scale: 1, opacity: 1 },
-        className: "bg-black/90 p-8 rounded-[40px] backdrop-blur-xl border border-yellow-500/50 w-full max-w-md mx-auto text-center shadow-[0_0_50px_rgba(234,179,8,0.2)]",
+        className: "bg-black/90 p-8 rounded-[40px] backdrop-blur-xl border border-amber-500/50 w-full max-w-md mx-auto text-center shadow-[0_0_50px_rgba(245,158,11,0.2)]",
         children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-4xl md:text-5xl font-black text-yellow-500 mb-2 drop-shadow-md", children: winner === localPlayerId ? "✨ ¡EN RACHA! ✨" : "🛑 FIN DE RACHA 🛑" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-white/80 mb-8 text-lg font-medium", children: winner === localPlayerId ? "¡5 monedas acertadas! Tienes el don." : "Tu rival completó la racha primero." }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(Button, { size: "lg", className: "w-full h-16 text-xl rounded-2xl font-bold bg-yellow-500 text-black hover:bg-yellow-400 hover:scale-105 transition-all", onClick: () => setPhase("waiting_sync"), children: "Volver al Lobby" })
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-4xl md:text-5xl font-black text-amber-500 mb-2 drop-shadow-md", children: winner === effectivePlayerId ? "✨ ¡IMBATIBLE! ✨" : "🛑 RACHA ROTA 🛑" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-white/80 mb-8 text-lg font-medium", children: winner === effectivePlayerId ? `Conseguiste ${WIN_STREAK_TARGET} aciertos seguidos. ¡Tienes el toque de Midas!` : "Tu rival fue más rápido o tuvo más suerte esta vez." }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Button, { size: "lg", className: "w-full h-16 text-xl rounded-2xl font-bold bg-amber-500 text-black hover:bg-amber-400 hover:scale-105 transition-all", onClick: () => setPhase("waiting_sync"), children: "Volver al Lobby" })
         ]
       }
     ) })
   ] });
 }
-function ArcadeRussianRoulette({ roomId, onClose }) {
-  const { localPlayerId, players } = useGameContext();
-  players.find((p2) => p2.id === localPlayerId) || players[0];
+function ArcadeRussianRoulette({ roomId, playerId, onClose }) {
+  const { localPlayerId: contextPlayerId, players } = useGameContext();
+  const effectivePlayerId = playerId || contextPlayerId || "guest";
+  players.find((p2) => p2.id === effectivePlayerId) || players[0];
   const [phase, setPhase] = reactExports.useState("waiting_sync");
   const [remotePlayerReady, setRemotePlayerReady] = reactExports.useState(false);
   const [winner, setWinner] = reactExports.useState(null);
@@ -73795,14 +75844,14 @@ function ArcadeRussianRoulette({ roomId, onClose }) {
   const [isShooting, setIsShooting] = reactExports.useState(false);
   const channelRef = reactExports.useRef(null);
   reactExports.useEffect(() => {
-    if (!localPlayerId)
+    if (!effectivePlayerId)
       return;
     const channel = supabase.channel(`roulette-${roomId}`);
     channelRef.current = channel;
     channel.on("broadcast", { event: "ready" }, ({ payload }) => {
       setRemotePlayerReady(true);
-      if (!currentTurnId && payload.playerId !== localPlayerId) {
-        const starter = Math.random() > 0.5 ? localPlayerId : payload.playerId;
+      if (!currentTurnId && payload.playerId !== effectivePlayerId) {
+        const starter = Math.random() > 0.5 ? effectivePlayerId : payload.playerId;
         const bullet = Math.floor(Math.random() * 6);
         channel.send({
           type: "broadcast",
@@ -73822,14 +75871,14 @@ function ArcadeRussianRoulette({ roomId, onClose }) {
         channel.send({
           type: "broadcast",
           event: "ready",
-          payload: { playerId: localPlayerId }
+          payload: { playerId: effectivePlayerId }
         });
       }
     });
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [roomId, localPlayerId, currentTurnId]);
+  }, [roomId, effectivePlayerId, currentTurnId]);
   const startGame = (starterId, bullet) => {
     setWinner(null);
     setPhase("countdown");
@@ -73846,7 +75895,7 @@ function ArcadeRussianRoulette({ roomId, onClose }) {
       if (died) {
         if (navigator.vibrate)
           navigator.vibrate([200, 100, 200, 100, 500]);
-        setWinner(localPlayerId);
+        setWinner(effectivePlayerId);
         setPhase("result");
       } else {
         if (navigator.vibrate)
@@ -73855,24 +75904,18 @@ function ArcadeRussianRoulette({ roomId, onClose }) {
         setCurrentTurnId(nextTurnId);
       }
       setIsShooting(false);
-    }, 1e3);
+    }, 800);
   };
   const handleShoot = () => {
-    var _a3;
-    if (isShooting || phase !== "playing" || currentTurnId !== localPlayerId)
+    if (isShooting || phase !== "playing" || currentTurnId !== effectivePlayerId)
       return;
     setIsShooting(true);
     const died = chamber === bulletIndex;
-    (_a3 = channelRef.current) == null ? void 0 : _a3.send({
-      type: "broadcast",
-      event: "shoot",
-      payload: { nextTurnId: "remote", died }
-      // 'remote' next logic
-    });
     setTimeout(() => {
+      var _a3;
       if (died) {
         if (navigator.vibrate)
-          navigator.vibrate(1e3);
+          navigator.vibrate([1e3]);
         setWinner("remote");
         setPhase("result");
       } else {
@@ -73881,8 +75924,13 @@ function ArcadeRussianRoulette({ roomId, onClose }) {
         setChamber((prev) => prev + 1);
         setCurrentTurnId("remote");
       }
+      (_a3 = channelRef.current) == null ? void 0 : _a3.send({
+        type: "broadcast",
+        event: "shoot",
+        payload: { nextTurnId: "remote", died }
+      });
       setIsShooting(false);
-    }, 1e3);
+    }, 800);
   };
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "absolute inset-0 z-50 bg-slate-950 flex flex-col text-white user-select-none overflow-hidden", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute inset-0 pointer-events-none shadow-[inset_0_0_150px_rgba(0,0,0,0.9)] z-0" }),
@@ -73995,9 +76043,10 @@ const COLORS = [
   { id: 2, twClass: "bg-green-500", activeClass: "bg-green-400 drop-shadow-[0_0_30px_rgba(34,197,94,1)]" },
   { id: 3, twClass: "bg-yellow-500", activeClass: "bg-yellow-400 drop-shadow-[0_0_30px_rgba(234,179,8,1)]" }
 ];
-function ArcadeSimonPvP({ roomId, onClose }) {
-  const { localPlayerId, players } = useGameContext();
-  players.find((p2) => p2.id === localPlayerId) || players[0];
+function ArcadeSimonPvP({ roomId, playerId, onClose }) {
+  const { localPlayerId: contextPlayerId, players } = useGameContext();
+  const effectivePlayerId = playerId || contextPlayerId || "guest";
+  players.find((p2) => p2.id === effectivePlayerId) || players[0];
   const [phase, setPhase] = reactExports.useState("waiting_sync");
   const [remotePlayerReady, setRemotePlayerReady] = reactExports.useState(false);
   const [winner, setWinner] = reactExports.useState(null);
@@ -74006,7 +76055,7 @@ function ArcadeSimonPvP({ roomId, onClose }) {
   const [activeColor, setActiveColor] = reactExports.useState(null);
   const channelRef = reactExports.useRef(null);
   reactExports.useEffect(() => {
-    if (!localPlayerId)
+    if (!effectivePlayerId)
       return;
     const channel = supabase.channel(`simon-${roomId}`);
     channelRef.current = channel;
@@ -74016,7 +76065,7 @@ function ArcadeSimonPvP({ roomId, onClose }) {
       setSequence(payload.initialSequence);
       startCountdown();
     }).on("broadcast", { event: "died" }, () => {
-      setWinner(localPlayerId);
+      setWinner(effectivePlayerId);
       setPhase("result");
     }).on("broadcast", { event: "round_cleared" }, ({ payload }) => {
       setSequence(payload.newSequence);
@@ -74026,14 +76075,14 @@ function ArcadeSimonPvP({ roomId, onClose }) {
         channel.send({
           type: "broadcast",
           event: "ready",
-          payload: { playerId: localPlayerId }
+          payload: { playerId: effectivePlayerId }
         });
       }
     });
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [roomId, localPlayerId]);
+  }, [roomId, effectivePlayerId]);
   const handleStartSync = () => {
     var _a3;
     const initialItem = Math.floor(Math.random() * 4);
@@ -74052,39 +76101,28 @@ function ArcadeSimonPvP({ roomId, onClose }) {
       playSequence(sequence.length ? sequence : [Math.floor(Math.random() * 4)]);
     }, 3e3);
   };
-  const playSequence = (seq) => {
+  const playSequence = async (seq) => {
     setPhase("observing");
-    let index2 = 0;
-    setActiveColor(null);
-    const interval = setInterval(() => {
-      if (index2 < seq.length) {
-        setActiveColor(seq[index2]);
-        if (navigator.vibrate)
-          navigator.vibrate(50);
-        setTimeout(() => {
-          setActiveColor(null);
-        }, 400);
-        index2++;
-      } else {
-        clearInterval(interval);
-        setPhase("playing");
-        setPlayerIndex(0);
-      }
-    }, 600);
+    setPlayerIndex(0);
+    for (const colorId of seq) {
+      setActiveColor(colorId);
+      await new Promise((r2) => setTimeout(r2, 600));
+      setActiveColor(null);
+      await new Promise((r2) => setTimeout(r2, 200));
+    }
+    setPhase("playing");
   };
   const handleColorClick = (colorId) => {
     var _a3, _b2;
     if (phase !== "playing")
       return;
     setActiveColor(colorId);
-    setTimeout(() => setActiveColor(null), 150);
-    if (navigator.vibrate)
-      navigator.vibrate(30);
+    setTimeout(() => setActiveColor(null), 300);
     if (colorId === sequence[playerIndex]) {
-      const nextIndex = playerIndex + 1;
-      setPlayerIndex(nextIndex);
-      if (nextIndex === sequence.length) {
-        const newSeq = [...sequence, Math.floor(Math.random() * 4)];
+      const nextIdx = playerIndex + 1;
+      if (nextIdx === sequence.length) {
+        const nextColor = Math.floor(Math.random() * 4);
+        const newSeq = [...sequence, nextColor];
         setSequence(newSeq);
         (_a3 = channelRef.current) == null ? void 0 : _a3.send({
           type: "broadcast",
@@ -74092,76 +76130,63 @@ function ArcadeSimonPvP({ roomId, onClose }) {
           payload: { newSequence: newSeq }
         });
         playSequence(newSeq);
+      } else {
+        setPlayerIndex(nextIdx);
       }
     } else {
-      if (navigator.vibrate)
-        navigator.vibrate([100, 50, 200, 50, 300]);
       setWinner("remote");
       setPhase("result");
       (_b2 = channelRef.current) == null ? void 0 : _b2.send({
         type: "broadcast",
         event: "died",
-        payload: { playerId: localPlayerId }
+        payload: { playerId: effectivePlayerId }
       });
     }
   };
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "absolute inset-0 z-50 bg-slate-950 flex flex-col text-white user-select-none", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-4 flex justify-between items-center z-10 bg-black/40 border-b border-white/10", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(Button, { variant: "ghost", className: "text-white/50", onClick: onClose, children: "Abandonar" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "font-black tracking-widest text-xl text-[hsl(var(--neon-green))] uppercase", children: "Simón PvP" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-20" })
-    ] }),
-    phase === "waiting_sync" && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex-1 flex flex-col items-center justify-center", children: !remotePlayerReady ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center animate-pulse", children: /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl font-bold mb-4", children: "Esperando memoria rival..." }) }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-3xl font-black mb-8 text-emerald-400", children: "Rival Listo" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(Button, { size: "lg", className: "h-16 px-12 text-2xl animate-bounce bg-emerald-600 hover:bg-emerald-500", onClick: handleStartSync, children: "EMPEZAR DUELO" })
-    ] }) }),
-    phase === "countdown" && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex-1 flex items-center justify-center", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
-      motion.div,
-      {
-        animate: { scale: [1, 1.5, 0], opacity: [0, 1, 0] },
-        transition: { duration: 3, times: [0, 0.2, 1] },
-        className: "text-6xl font-black text-emerald-400 drop-shadow-[0_0_30px_rgba(52,211,153,0.8)] uppercase text-center",
-        children: [
-          "PRESTA",
-          /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}),
-          "ATENCIÓN"
-        ]
-      }
-    ) }),
-    (phase === "observing" || phase === "playing") && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 flex flex-col items-center justify-center p-4 py-8 w-full max-w-lg mx-auto", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-12 text-center", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-sm font-bold uppercase tracking-widest text-white/50 bg-white/10 px-4 py-1 rounded-full", children: [
-          "Ronda ",
-          sequence.length
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4", children: [
+    phase === "waiting_sync" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-3xl font-black text-white mb-8 tracking-tighter uppercase", children: "SIMÓN PVP 🚦" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center gap-6", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-4", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: `w-3 h-3 rounded-full ${remotePlayerReady ? "bg-emerald-500" : "bg-red-500 animate-pulse"}` }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-white/80 font-medium", children: remotePlayerReady ? "Rival Conectado" : "Esperando rival..." })
         ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: `mt-6 text-3xl font-black uppercase tracking-widest transition-colors ${phase === "observing" ? "text-yellow-400 animate-pulse" : "text-emerald-400"}`, children: phase === "observing" ? "OBSERVA..." : "¡TU TURNO! (RÁPIDO)" })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-2 gap-4 w-full aspect-square p-4 bg-slate-900 rounded-[3rem] shadow-[inset_0_0_50px_rgba(0,0,0,0.8)] border-8 border-slate-800", children: COLORS.map((color2) => {
-        const isActive = activeColor === color2.id;
-        return /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "button",
-          {
-            disabled: phase !== "playing",
-            onClick: () => handleColorClick(color2.id),
-            className: `rounded-2xl w-full h-full transition-all duration-150 relative overflow-hidden group border-4 border-black/20
-                                        ${isActive ? color2.activeClass + " scale-95" : color2.twClass + " opacity-50 shadow-inner"}
-                                        ${phase === "playing" ? "hover:scale-[1.02] hover:opacity-100 active:scale-95" : "cursor-default"}
-                                    `,
-            children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" })
-          },
-          color2.id
-        );
-      }) })
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Button, { size: "lg", className: "w-64 h-16 text-xl rounded-2xl font-bold bg-emerald-500 text-white hover:bg-emerald-400", onClick: handleStartSync, disabled: !remotePlayerReady, children: "EMPEZAR DUELO" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Button, { variant: "ghost", className: "text-white/40", onClick: onClose, children: "Cancelar" })
+      ] })
     ] }),
-    phase === "result" && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex-1 flex flex-col items-center justify-center p-4", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    (phase === "playing" || phase === "observing" || phase === "countdown") && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-full max-w-md flex flex-col items-center", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-12 text-center", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-white/50 text-xs font-bold uppercase tracking-[0.2em] mb-2", children: phase === "countdown" ? "Prepárate" : phase === "observing" ? "Observa la secuencia" : "Tu turno - ¡Repite!" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-5xl font-black text-white", children: [
+          "RONDA ",
+          sequence.length
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-2 gap-4 w-full aspect-square", children: COLORS.map((color2) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "button",
+        {
+          disabled: phase !== "playing",
+          onClick: () => handleColorClick(color2.id),
+          className: `
+                                    w-full h-full rounded-[40px] transition-all duration-200 
+                                    ${activeColor === color2.id ? color2.activeClass : color2.twClass}
+                                    ${phase === "playing" ? "hover:scale-[1.02] cursor-pointer active:scale-95" : "cursor-default"}
+                                    shadow-2xl border-4 border-white/5
+                                `
+        },
+        color2.id
+      )) })
+    ] }),
+    phase === "result" && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-6 backdrop-blur-md", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
       motion.div,
       {
         initial: { scale: 0.8, opacity: 0 },
         animate: { scale: 1, opacity: 1 },
         className: "bg-black/90 p-8 rounded-[40px] backdrop-blur-xl border border-white/10 w-full max-w-md mx-auto text-center shadow-2xl",
         children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-4xl md:text-5xl font-black mb-4", children: winner === localPlayerId ? "🧠 ¡MENTE BRILLANTE! 🧠" : "💥 CORTOCIRCUITO 💥" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-white/80 mb-8 text-lg font-medium", children: winner === localPlayerId ? `Sobreviviste hasta la ronda ${sequence.length}. ¡El rival se equivocó primero!` : `Te equivocaste en la secuencia... Puntuación: ${sequence.length - 1}` }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-4xl md:text-5xl font-black mb-4", children: winner === effectivePlayerId ? "🧠 ¡MENTE BRILLANTE! 🧠" : "💥 CORTOCIRCUITO 💥" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-white/80 mb-8 text-lg font-medium", children: winner === effectivePlayerId ? `Sobreviviste hasta la ronda ${sequence.length}. ¡El rival se equivocó primero!` : `Te equivocaste en la secuencia... Puntuación: ${sequence.length - 1}` }),
           /* @__PURE__ */ jsxRuntimeExports.jsx(Button, { size: "lg", className: "w-full h-16 text-xl rounded-2xl font-bold bg-emerald-500 text-white hover:bg-emerald-400", onClick: () => setPhase("waiting_sync"), children: "Volver al Lobby" })
         ]
       }
@@ -74177,9 +76202,10 @@ const generateBombs = () => {
   }
   return Array.from(bombs);
 };
-function ArcadeMinesweeper({ roomId, onClose }) {
-  const { localPlayerId, players } = useGameContext();
-  players.find((p2) => p2.id === localPlayerId) || players[0];
+function ArcadeMinesweeper({ roomId, playerId, onClose }) {
+  const { localPlayerId: contextPlayerId, players } = useGameContext();
+  const effectivePlayerId = playerId || contextPlayerId || "guest";
+  players.find((p2) => p2.id === effectivePlayerId) || players[0];
   const [phase, setPhase] = reactExports.useState("waiting_sync");
   const [remotePlayerReady, setRemotePlayerReady] = reactExports.useState(false);
   const [winner, setWinner] = reactExports.useState(null);
@@ -74190,14 +76216,14 @@ function ArcadeMinesweeper({ roomId, onClose }) {
   const [remoteScore, setRemoteScore] = reactExports.useState(0);
   const channelRef = reactExports.useRef(null);
   reactExports.useEffect(() => {
-    if (!localPlayerId)
+    if (!effectivePlayerId)
       return;
     const channel = supabase.channel(`minesweeper-${roomId}`);
     channelRef.current = channel;
     channel.on("broadcast", { event: "ready" }, ({ payload }) => {
       setRemotePlayerReady(true);
-      if (!currentTurnId && payload.playerId !== localPlayerId) {
-        const starter = Math.random() > 0.5 ? localPlayerId : payload.playerId;
+      if (!currentTurnId && payload.playerId !== effectivePlayerId) {
+        const starter = Math.random() > 0.5 ? effectivePlayerId : payload.playerId;
         const bombs = generateBombs();
         channel.send({
           type: "broadcast",
@@ -74217,14 +76243,14 @@ function ArcadeMinesweeper({ roomId, onClose }) {
         channel.send({
           type: "broadcast",
           event: "ready",
-          payload: { playerId: localPlayerId }
+          payload: { playerId: effectivePlayerId }
         });
       }
     });
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [roomId, localPlayerId, currentTurnId]);
+  }, [roomId, effectivePlayerId, currentTurnId]);
   const startGame = (starterId, bombs) => {
     setWinner(null);
     setPhase("playing");
@@ -74234,40 +76260,34 @@ function ArcadeMinesweeper({ roomId, onClose }) {
     setMyScore(0);
     setRemoteScore(0);
   };
-  const handleRemoteClick = (index2, playerId) => {
+  const handleRemoteClick = (index2, pid) => {
     const isBomb = bombIndices.includes(index2);
-    setRevealedCells((prev) => ({ ...prev, [index2]: isBomb ? "bomb" : "safe" }));
     if (isBomb) {
-      if (navigator.vibrate)
-        navigator.vibrate([200, 100, 200]);
-      setWinner(localPlayerId);
+      setRevealedCells((prev) => ({ ...prev, [index2]: "bomb" }));
+      setWinner(effectivePlayerId);
       setPhase("result");
     } else {
-      if (navigator.vibrate)
-        navigator.vibrate(20);
+      setRevealedCells((prev) => ({ ...prev, [index2]: "safe" }));
       setRemoteScore((prev) => prev + 1);
-      setCurrentTurnId(localPlayerId);
+      setCurrentTurnId(effectivePlayerId);
     }
   };
   const handleCellClick = (index2) => {
     var _a3;
-    if (phase !== "playing" || currentTurnId !== localPlayerId || revealedCells[index2])
+    if (phase !== "playing" || currentTurnId !== effectivePlayerId || revealedCells[index2])
       return;
     const isBomb = bombIndices.includes(index2);
     (_a3 = channelRef.current) == null ? void 0 : _a3.send({
       type: "broadcast",
       event: "click_cell",
-      payload: { index: index2, playerId: localPlayerId }
+      payload: { index: index2, playerId: effectivePlayerId }
     });
-    setRevealedCells((prev) => ({ ...prev, [index2]: isBomb ? "bomb" : "safe" }));
     if (isBomb) {
-      if (navigator.vibrate)
-        navigator.vibrate(1e3);
+      setRevealedCells((prev) => ({ ...prev, [index2]: "bomb" }));
       setWinner("remote");
       setPhase("result");
     } else {
-      if (navigator.vibrate)
-        navigator.vibrate(50);
+      setRevealedCells((prev) => ({ ...prev, [index2]: "safe" }));
       setMyScore((prev) => prev + 1);
       setCurrentTurnId("remote");
     }
@@ -74360,52 +76380,106 @@ const ONLINE_GAMES = [
 ];
 function ArcadeOnlineHub({ onReturn }) {
   var _a3, _b2;
-  const { localPlayerId, players } = useGameContext();
-  const localPlayer = players.find((p2) => p2.id === localPlayerId) || players[0];
+  const { localPlayerId: localPlayerId2, players } = useGameContext();
+  const localPlayer = players.find((p2) => p2.id === localPlayerId2) || players[0];
   const [view, setView] = reactExports.useState("lobby");
   const [selectedGame, setSelectedGame] = reactExports.useState(null);
   const [matchRoomId, setMatchRoomId] = reactExports.useState(null);
+  const [myPresenceId, setMyPresenceId] = reactExports.useState(null);
+  const [screencastActive, setScreencastActive] = reactExports.useState(false);
+  const handleScreenShare = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+      setScreencastActive(true);
+      ue$1.success("¡Arcade proyectado! Disfruta en tu TV.");
+      stream.getVideoTracks()[0].onended = () => {
+        setScreencastActive(false);
+      };
+    } catch {
+      ue$1.error("No se pudo iniciar la proyección.");
+    }
+  };
+  reactExports.useEffect(() => {
+    if (view !== "finding_match" || !selectedGame)
+      return;
+    const presenceId = localPlayerId2 || `guest_${Math.random().toString(36).substring(7)}`;
+    const myName = (localPlayer == null ? void 0 : localPlayer.name) || "Invitado";
+    setMyPresenceId(presenceId);
+    const channel = supabase.channel(`matchmaking:${selectedGame}`, {
+      config: {
+        presence: {
+          key: presenceId
+        }
+      }
+    });
+    const botTimer = setTimeout(() => {
+      setMatchRoomId(`bot_${selectedGame}_${presenceId}`);
+      setView("playing");
+      ue$1.info(`¡Modo Bot activado! Jugando contra la CPU.`);
+    }, 15e3);
+    channel.on("presence", { event: "sync" }, () => {
+      var _a4;
+      const state = channel.presenceState();
+      const entries = Object.entries(state);
+      const opponentEntry = entries.find(([id2]) => id2 !== presenceId);
+      if (opponentEntry) {
+        const [opponentId, opponentData] = opponentEntry;
+        const sortedIds = [presenceId, opponentId].sort();
+        const roomId = `arcade_${selectedGame}_${sortedIds[0]}_${sortedIds[1]}`;
+        clearTimeout(botTimer);
+        setMatchRoomId(roomId);
+        setView("playing");
+        ue$1.success(`¡Rival encontrado: ${((_a4 = opponentData[0]) == null ? void 0 : _a4.name) || "Oponente"}!`);
+      }
+    }).subscribe(async (status) => {
+      if (status === "SUBSCRIBED") {
+        await channel.track({
+          id: presenceId,
+          name: myName,
+          joined_at: (/* @__PURE__ */ new Date()).toISOString()
+        });
+      }
+    });
+    return () => {
+      clearTimeout(botTimer);
+      supabase.removeChannel(channel);
+    };
+  }, [view, selectedGame, localPlayerId2, localPlayer == null ? void 0 : localPlayer.name]);
   const handleFindMatch = (gameId) => {
     setSelectedGame(gameId);
     setView("finding_match");
-    setTimeout(() => {
-      var _a4;
-      const mockRoom = `arcade_${gameId}_${Math.random().toString(36).substring(7)}`;
-      setMatchRoomId(mockRoom);
-      setView("playing");
-      ue$1.success(`Partida encontrada en ${(_a4 = ONLINE_GAMES.find((g2) => g2.id === gameId)) == null ? void 0 : _a4.name}!`);
-    }, 3e3);
   };
   if (view === "playing" && selectedGame) {
+    const playerIdToUse = myPresenceId || localPlayerId2 || "unknown";
     if (selectedGame === "quick_draw" && matchRoomId) {
-      return /* @__PURE__ */ jsxRuntimeExports.jsx(ArcadeQuickDraw, { roomId: matchRoomId, onClose: () => setView("lobby") });
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(ArcadeQuickDraw, { roomId: matchRoomId, playerId: playerIdToUse, onClose: () => setView("lobby") });
     }
     if (selectedGame === "tap_race" && matchRoomId) {
-      return /* @__PURE__ */ jsxRuntimeExports.jsx(ArcadeTapRace, { roomId: matchRoomId, onClose: () => setView("lobby") });
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(ArcadeTapRace, { roomId: matchRoomId, playerId: playerIdToUse, onClose: () => setView("lobby") });
     }
     if (selectedGame === "rps" && matchRoomId) {
-      return /* @__PURE__ */ jsxRuntimeExports.jsx(ArcadeRPS, { roomId: matchRoomId, onClose: () => setView("lobby") });
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(ArcadeRPS, { roomId: matchRoomId, playerId: playerIdToUse, onClose: () => setView("lobby") });
     }
     if (selectedGame === "tictactoe_speed" && matchRoomId) {
-      return /* @__PURE__ */ jsxRuntimeExports.jsx(ArcadeTicTacToe, { roomId: matchRoomId, onClose: () => setView("lobby") });
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(ArcadeTicTacToe, { roomId: matchRoomId, playerId: playerIdToUse, onClose: () => setView("lobby") });
     }
     if (selectedGame === "math_match" && matchRoomId) {
-      return /* @__PURE__ */ jsxRuntimeExports.jsx(ArcadeMathMatch, { roomId: matchRoomId, onClose: () => setView("lobby") });
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(ArcadeMathMatch, { roomId: matchRoomId, playerId: playerIdToUse, onClose: () => setView("lobby") });
     }
     if (selectedGame === "high_low" && matchRoomId) {
-      return /* @__PURE__ */ jsxRuntimeExports.jsx(ArcadeHighLow, { roomId: matchRoomId, onClose: () => setView("lobby") });
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(ArcadeHighLow, { roomId: matchRoomId, playerId: playerIdToUse, onClose: () => setView("lobby") });
     }
     if (selectedGame === "coin_flip" && matchRoomId) {
-      return /* @__PURE__ */ jsxRuntimeExports.jsx(ArcadeCoinFlip, { roomId: matchRoomId, onClose: () => setView("lobby") });
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(ArcadeCoinFlip, { roomId: matchRoomId, playerId: playerIdToUse, onClose: () => setView("lobby") });
     }
     if (selectedGame === "russian_roulette" && matchRoomId) {
-      return /* @__PURE__ */ jsxRuntimeExports.jsx(ArcadeRussianRoulette, { roomId: matchRoomId, onClose: () => setView("lobby") });
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(ArcadeRussianRoulette, { roomId: matchRoomId, playerId: playerIdToUse, onClose: () => setView("lobby") });
     }
     if (selectedGame === "simon_pvp" && matchRoomId) {
-      return /* @__PURE__ */ jsxRuntimeExports.jsx(ArcadeSimonPvP, { roomId: matchRoomId, onClose: () => setView("lobby") });
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(ArcadeSimonPvP, { roomId: matchRoomId, playerId: playerIdToUse, onClose: () => setView("lobby") });
     }
     if (selectedGame === "minesweeper" && matchRoomId) {
-      return /* @__PURE__ */ jsxRuntimeExports.jsx(ArcadeMinesweeper, { roomId: matchRoomId, onClose: () => setView("lobby") });
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(ArcadeMinesweeper, { roomId: matchRoomId, playerId: playerIdToUse, onClose: () => setView("lobby") });
     }
     return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "absolute inset-0 z-50 bg-slate-950 flex flex-col", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-4 flex items-center gap-4 bg-black/40 border-b border-white/10", children: [
@@ -74439,17 +76513,31 @@ function ArcadeOnlineHub({ onReturn }) {
     ] });
   }
   return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-transparent p-2", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-4xl mx-auto mt-4 px-2", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-black/60 backdrop-blur-xl border border-white/10 p-6 rounded-3xl mb-8 flex items-center justify-between shadow-xl", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-4", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg transform rotate-12", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Target, { className: "w-8 h-8 text-white" }) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl font-black text-white leading-none", children: "Lobby 1v1" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-purple-300 mt-1 font-medium flex items-center gap-1", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "w-2 h-2 rounded-full bg-emerald-400 animate-pulse" }),
-          (localPlayer == null ? void 0 : localPlayer.name) || "Jugador",
-          " conectado"
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-black/60 backdrop-blur-xl border border-white/10 p-6 rounded-3xl mb-8 flex items-center justify-between shadow-xl", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-4", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg transform rotate-12", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Target, { className: "w-8 h-8 text-white" }) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl font-black text-white leading-none", children: "Lobby 1v1" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-purple-300 mt-1 font-medium flex items-center gap-1", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "w-2 h-2 rounded-full bg-emerald-400 animate-pulse" }),
+            (localPlayer == null ? void 0 : localPlayer.name) || "Jugador",
+            " conectado"
+          ] })
         ] })
-      ] })
-    ] }) }),
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        Button,
+        {
+          variant: "outline",
+          onClick: handleScreenShare,
+          className: `h-12 px-6 rounded-2xl border-white/10 font-black transition-all ${screencastActive ? "bg-primary/20 border-primary text-primary" : "bg-white/5 text-slate-400 hover:text-white"}`,
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(Monitor, { className: `w-5 h-5 mr-3 ${screencastActive ? "animate-pulse" : ""}` }),
+            screencastActive ? "EN TV" : "PROYECTAR"
+          ]
+        }
+      )
+    ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-4", children: ONLINE_GAMES.map((game, i2) => /* @__PURE__ */ jsxRuntimeExports.jsx(
       motion.div,
       {
@@ -74481,18 +76569,18 @@ function ArcadeOnlineHub({ onReturn }) {
 function ArcadeTab() {
   const [activeGame, setActiveGame] = reactExports.useState("menu");
   const { rankings, fetchRankings } = useRanking();
-  const { localPlayerId } = useGameContext();
+  const { localPlayerId: localPlayerId2 } = useGameContext();
   const handleReturnToMenu = () => {
     setActiveGame("menu");
   };
-  const localRank = rankings.find((r2) => r2.id === localPlayerId);
+  const localRank = rankings.find((r2) => r2.id === localPlayerId2);
   const currentCoins = (localRank == null ? void 0 : localRank.coins) || 0;
   const currentGems = (localRank == null ? void 0 : localRank.gems) || 0;
   const handleAddCoins = (amount) => {
-    if (!localPlayerId)
+    if (!localPlayerId2)
       return;
     const all = loadLocalRankings();
-    const idx = all.findIndex((r2) => r2.id === localPlayerId);
+    const idx = all.findIndex((r2) => r2.id === localPlayerId2);
     if (idx >= 0) {
       all[idx].coins = (all[idx].coins || 0) + amount;
       saveLocalRankings(all);
@@ -74500,9 +76588,9 @@ function ArcadeTab() {
     }
   };
   const handleAddGems = (amount) => {
-    if (!localPlayerId)
+    if (!localPlayerId2)
       return;
-    addGemsToPlayer(localPlayerId, amount);
+    addGemsToPlayer(localPlayerId2, amount);
     fetchRankings();
   };
   if (activeGame !== "menu") {
@@ -74933,8 +77021,8 @@ function FloatingVideoBubbles({ playerName }) {
     error && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-red-500/80 text-white text-[9px] px-2 py-1 rounded-full mt-1 max-w-[120px] truncate", children: error })
   ] });
 }
-const Profiles = reactExports.lazy(() => __vitePreload(() => import("./Profiles-8acd56a8.js"), true ? [] : void 0, import.meta.url));
-const HallOfFame = reactExports.lazy(() => __vitePreload(() => import("./HallOfFame-3f115b56.js"), true ? [] : void 0, import.meta.url).then((module2) => ({ default: module2.HallOfFame })));
+const Profiles = reactExports.lazy(() => __vitePreload(() => import("./Profiles-ff9a7e6a.js"), true ? [] : void 0, import.meta.url));
+const HallOfFame = reactExports.lazy(() => __vitePreload(() => import("./HallOfFame-187e84bf.js"), true ? [] : void 0, import.meta.url).then((module2) => ({ default: module2.HallOfFame })));
 const TEAM_CAPABLE_MODES = ["cultura", "trivia_futbol", "futbol"];
 function GameAppInner() {
   var _a3, _b2, _c3;
@@ -74950,13 +77038,13 @@ function GameAppInner() {
   const [pendingPlayer, setPendingPlayer] = reactExports.useState(null);
   const [selectedModeForOptions, setSelectedModeForOptions] = reactExports.useState(null);
   const [pendingHostMode, setPendingHostMode] = reactExports.useState(null);
-  const { createGame, setGameId, players, localPlayerId, gameId, addPlayer, game, createTeam, assignPlayerToTeam, setLocalPlayerId } = useGameContext();
+  const { createGame, setGameId, players, localPlayerId: localPlayerId2, gameId, addPlayer, game, createTeam, assignPlayerToTeam, setLocalPlayerId } = useGameContext();
   const { joinRoom, leaveRoom, isJoined } = useDailyVideo();
   reactExports.useEffect(() => {
     var _a4;
     if (!roomId)
       return;
-    const playerName = (pendingPlayer == null ? void 0 : pendingPlayer.name) || ((_a4 = players.find((p2) => p2.id === localPlayerId)) == null ? void 0 : _a4.name) || "Jugador";
+    const playerName = (pendingPlayer == null ? void 0 : pendingPlayer.name) || ((_a4 = players.find((p2) => p2.id === localPlayerId2)) == null ? void 0 : _a4.name) || "Jugador";
     const joinVideo = async () => {
       if (isJoined) {
         console.log("[Daily] Already joined, skipping");
@@ -74979,7 +77067,7 @@ function GameAppInner() {
       }
     };
     joinVideo();
-  }, [roomId, isJoined, pendingPlayer, players, localPlayerId, joinRoom]);
+  }, [roomId, isJoined, pendingPlayer, players, localPlayerId2, joinRoom]);
   reactExports.useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("room")) {
@@ -74988,7 +77076,7 @@ function GameAppInner() {
   }, []);
   reactExports.useEffect(() => {
     const checkPendingJoin = async () => {
-      if (gameId && !isHost && !localPlayerId) {
+      if (gameId && !isHost && !localPlayerId2) {
         const pendingName = sessionStorage.getItem("pending_player_name");
         const pendingAvatar = sessionStorage.getItem("pending_player_avatar");
         const setupCompleted = sessionStorage.getItem("guest_setup_completed");
@@ -75033,7 +77121,7 @@ function GameAppInner() {
       }
     };
     checkPendingJoin();
-  }, [gameId, isHost, localPlayerId, addPlayer, createTeam, assignPlayerToTeam, setLocalPlayerId]);
+  }, [gameId, isHost, localPlayerId2, addPlayer, createTeam, assignPlayerToTeam, setLocalPlayerId]);
   const handleModeClick = (mode2) => {
     setSelectedModeForOptions(mode2);
   };
@@ -75182,9 +77270,9 @@ function GameAppInner() {
       if (roomData) {
         if (roomData.current_game_id)
           setGameId(roomData.current_game_id);
-        if (roomData.status === "playing" && localPlayerId) {
+        if (roomData.status === "playing" && localPlayerId2) {
           setScreen("playing");
-        } else if (roomData.status === "setup" && !localPlayerId && screen !== "guest-setup" && !hasCompletedSetup()) {
+        } else if (roomData.status === "setup" && !localPlayerId2 && screen !== "guest-setup" && !hasCompletedSetup()) {
           setScreen("guest-setup");
         }
       }
@@ -75196,8 +77284,8 @@ function GameAppInner() {
         console.log("Host broadcasted state:", payload);
         try {
           setGameId(payload.gameId);
-          if (payload.status === "setup" || !localPlayerId) {
-            if (!localPlayerId && screen !== "guest-setup" && !hasCompletedSetup()) {
+          if (payload.status === "setup" || !localPlayerId2) {
+            if (!localPlayerId2 && screen !== "guest-setup" && !hasCompletedSetup()) {
               setScreen("guest-setup");
             }
             if (!hasCompletedSetup())
@@ -75214,7 +77302,7 @@ function GameAppInner() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [roomId, screen, setGameId, isHost, localPlayerId, pendingPlayer]);
+  }, [roomId, screen, setGameId, isHost, localPlayerId2, pendingPlayer]);
   reactExports.useEffect(() => {
     if (isHost && roomId && gameId) {
       const channel = supabase.channel(`room:${roomId}`);
@@ -75265,15 +77353,15 @@ function GameAppInner() {
                 try {
                   const validMode = (_a4 = GAME_MODES.find((m2) => m2.id === mode2)) == null ? void 0 : _a4.id;
                   if (validMode) {
-                    const hostId = localPlayerId || Math.random().toString(36).substring(2, 9);
+                    const hostId = localPlayerId2 || Math.random().toString(36).substring(2, 9);
                     await supabase.from("rooms").upsert({
                       id: code,
                       host_id: hostId,
                       game_mode: validMode,
                       status: "setup"
                     });
-                    const hPlayer = players.find((p2) => p2.id === localPlayerId);
-                    if (hPlayer || localPlayerId) {
+                    const hPlayer = players.find((p2) => p2.id === localPlayerId2);
+                    if (hPlayer || localPlayerId2) {
                       await supabase.from("room_participants").upsert({
                         room_id: code,
                         player_id: (hPlayer == null ? void 0 : hPlayer.id) || hostId,
@@ -75295,7 +77383,7 @@ function GameAppInner() {
                 if (!pendingPlayer) {
                   setScreen("guest-setup");
                 } else {
-                  const guestId = localPlayerId || Math.random().toString(36).substring(2, 9);
+                  const guestId = localPlayerId2 || Math.random().toString(36).substring(2, 9);
                   await supabase.from("room_participants").upsert({
                     room_id: code,
                     player_id: guestId,
@@ -75332,7 +77420,7 @@ function GameAppInner() {
             onJoin: async (name, avatar) => {
               setPendingPlayer({ name, avatar });
               if (roomId && !isHost) {
-                const guestId = localPlayerId || Math.random().toString(36).substring(2, 9);
+                const guestId = localPlayerId2 || Math.random().toString(36).substring(2, 9);
                 await supabase.from("room_participants").upsert({
                   room_id: roomId,
                   player_id: guestId,
@@ -75450,11 +77538,11 @@ function GameAppInner() {
       ] })
     ] }) }),
     screen === "mode-select" && /* @__PURE__ */ jsxRuntimeExports.jsx(BottomNav, { activeTab, onTabChange: handleTabChange }),
-    roomId && localPlayerId && /* @__PURE__ */ jsxRuntimeExports.jsx(
+    roomId && localPlayerId2 && /* @__PURE__ */ jsxRuntimeExports.jsx(
       VideoChatComponent,
       {
         roomId,
-        playerId: localPlayerId
+        playerId: localPlayerId2
       }
     ),
     /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -75463,7 +77551,7 @@ function GameAppInner() {
         roomId: roomId || "global_lobby",
         playerName: (
           // Try to find name in established players
-          ((_c3 = players.find((p2) => p2.id === localPlayerId)) == null ? void 0 : _c3.name) || (roomId ? isHost ? "Anfitrión" : "Invitado" : `Usuario ${(localPlayerId == null ? void 0 : localPlayerId.slice(0, 4)) || Math.floor(Math.random() * 9e3) + 1e3}`)
+          ((_c3 = players.find((p2) => p2.id === localPlayerId2)) == null ? void 0 : _c3.name) || (roomId ? isHost ? "Anfitrión" : "Invitado" : `Usuario ${(localPlayerId2 == null ? void 0 : localPlayerId2.slice(0, 4)) || Math.floor(Math.random() * 9e3) + 1e3}`)
         )
       }
     ),
@@ -75488,7 +77576,7 @@ const queryClient = new QueryClient();
 const App = () => /* @__PURE__ */ jsxRuntimeExports.jsx(QueryClientProvider, { client: queryClient, children: /* @__PURE__ */ jsxRuntimeExports.jsx(AuthProvider, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs(TooltipProvider, { children: [
   /* @__PURE__ */ jsxRuntimeExports.jsx(Toaster$1, {}),
   /* @__PURE__ */ jsxRuntimeExports.jsx(Toaster, {}),
-  /* @__PURE__ */ jsxRuntimeExports.jsx(BrowserRouter, { basename: "/migranjuego", future: { v7_startTransition: true, v7_relativeSplatPath: true }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(Routes, { children: [
+  /* @__PURE__ */ jsxRuntimeExports.jsx(BrowserRouter, { future: { v7_startTransition: true, v7_relativeSplatPath: true }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(Routes, { children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: "/", element: /* @__PURE__ */ jsxRuntimeExports.jsx(Index, {}) }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: "*", element: /* @__PURE__ */ jsxRuntimeExports.jsx(NotFound, {}) })
   ] }) })
@@ -75539,6 +77627,7 @@ export {
   Gamepad2 as G,
   Crown as H,
   Lock as L,
+  Monitor as M,
   React$1 as R,
   SHOP_ITEMS as S,
   Trophy as T,

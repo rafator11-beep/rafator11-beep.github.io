@@ -3,10 +3,18 @@ import { safeLower, asString } from '@/utils/safeText';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 
-import { Plus, X, Camera, Users, Play, ArrowLeft, History, Trash2, UserPlus, UserCheck, UserX } from 'lucide-react';
+import { Plus, X, Camera, Users, Play, ArrowLeft, History, Trash2, UserPlus, UserCheck, UserX, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { useGameContext } from '@/contexts/GameContext';
 import { GAME_MODES, TEAM_COLORS } from '@/types/game';
 import { useSavedPlayers } from '@/hooks/useSavedPlayers';
@@ -486,41 +494,69 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
             </div>
 
               {/* Players List - Bubble Grid */}
-            <div className="space-y-3 max-h-[300px] overflow-y-auto">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-semibold text-muted-foreground">Jugadores ({players.length})</h3>
-                <div className="flex gap-1">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-primary animate-ping" />
+                  <h3 className="text-xs font-black uppercase tracking-[0.2em] text-white/60">Operadores Conectados ({players.length})</h3>
+                </div>
+                <div className="flex gap-2">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => {
-                      // Add a random bot
-                      const botName = `Bot ${Math.floor(Math.random() * 999)}`;
-                      handleAddPlayer(botName, 'https://api.dicebear.com/7.x/bottts/svg?seed=' + Math.random());
+                      const botName = `Bot_${Math.floor(Math.random() * 999)}`;
+                      handleAddPlayer(botName, `https://api.dicebear.com/7.x/bottts/svg?seed=${botName}`);
                     }}
-                    className="text-xs hover:neon-box"
+                    className="text-[10px] font-black uppercase tracking-widest hover:bg-white/5 border border-white/5"
                   >
-                    <UserPlus className="h-3 w-3 mr-1" />
-                    Bot
+                    <UserPlus className="h-3 w-3 mr-1.5" />
+                    + BOT
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      // Remove last player
-                      if (players.length > 0) {
-                        handleRemovePlayer(players[players.length - 1].id);
-                      }
-                    }}
-                    className="text-xs hover:neon-box"
-                  >
-                    <UserX className="h-3 w-3 mr-1" />
-                    Quitar
-                  </Button>
+                  {/* Community Bubble Trigger */}
+                   <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-[10px] font-black uppercase tracking-widest bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20"
+                      >
+                        <Globe className="h-3 w-3 mr-1.5" />
+                        Comunidad
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="bg-slate-900/95 backdrop-blur-2xl border-white/10 text-white max-w-md">
+                      <DialogHeader>
+                        <DialogTitle className="text-xl font-black uppercase tracking-tighter">🌐 Red de Operadores</DialogTitle>
+                        <DialogDescription className="text-white/60">Selecciona perfiles reales de la comunidad para invitarlos.</DialogDescription>
+                      </DialogHeader>
+                      <div className="grid grid-cols-2 gap-3 py-4 max-h-[400px] overflow-y-auto pr-2">
+                        {rankings.slice(0, 10).map(r => (
+                          <button
+                            key={r.id}
+                            onClick={() => {
+                              handleAddPlayer(asString(r.name), r.avatar_url);
+                              toast.success(`Invitado: ${r.name}`);
+                            }}
+                            className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5 hover:border-primary/50 transition-all text-left group"
+                          >
+                            <Avatar className="h-10 w-10 border border-white/10 group-hover:scale-110 transition-transform">
+                              <AvatarImage src={r.avatar_url || undefined} />
+                              <AvatarFallback className="bg-slate-800 text-[10px]">{asString(r.name).slice(0,2)}</AvatarFallback>
+                            </Avatar>
+                            <div className="min-w-0">
+                              <p className="text-xs font-black truncate">{asString(r.name)}</p>
+                              <p className="text-[9px] text-white/40 font-bold uppercase tracking-widest">{r.total_xp || 0} XP</p>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                 <AnimatePresence mode="popLayout">
                   {players.map((player) => {
                     const playerRanking = rankings.find(r => safeLower(r.name) === safeLower(player.name));
@@ -529,43 +565,40 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
                     return (
                       <motion.div
                         key={player.id}
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                        className="group relative bg-gradient-to-br from-white/5 via-white/10 to-white/5 backdrop-blur-sm rounded-full p-3 border-2 border-white/20 hover:border-white/40 transition-all cursor-pointer"
+                        initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.8, y: -10 }}
+                        className="group relative flex flex-col items-center gap-3 p-4 rounded-[32px] bg-slate-900/40 backdrop-blur-xl border border-white/10 hover:border-primary/50 transition-all cursor-pointer shadow-xl"
                         whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
                       >
-                        <div className="flex flex-col items-center gap-2">
-                          <Avatar className="h-14 w-14 ring-2 ring-white/30 group-hover:ring-white/60 transition-all">
+                        <div className="relative">
+                          <Avatar className="h-16 w-16 ring-4 ring-white/5 group-hover:ring-primary/20 transition-all duration-500 shadow-2xl">
                             {effectiveAvatar ? (
-                              <AvatarImage src={effectiveAvatar} />
+                              <AvatarImage src={effectiveAvatar} className="object-cover" />
                             ) : (
-                              <AvatarFallback className="bg-gradient-to-br from-white/20 to-white/30 text-white font-medium text-lg">
+                              <AvatarFallback className="bg-gradient-to-br from-slate-800 to-slate-900 text-white font-black text-xl">
                                 {player.name.slice(0, 2).toUpperCase()}
                               </AvatarFallback>
                             )}
                           </Avatar>
-                          <span className="text-sm font-medium text-center truncate w-full text-white">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemovePlayer(player.id);
+                            }}
+                            className="absolute -top-1 -right-1 bg-red-500 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-red-600 active:scale-90"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                        <div className="text-center min-w-0 w-full px-1">
+                          <span className="text-[11px] font-black uppercase tracking-widest truncate block text-white/90">
                             {player.name}
                           </span>
+                          <span className="text-[9px] font-bold text-primary/60 uppercase tracking-tighter">
+                            Operador Listo
+                          </span>
                         </div>
-                        
-                        {/* Selection state */}
-                        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/10 via-white/15 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-                        
-                        {/* Remove button */}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="absolute -top-2 -right-2 h-6 w-6 text-red-400 hover:text-red-300 bg-gradient-to-br from-black/30 to-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-all"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRemovePlayer(player.id);
-                          }}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
                       </motion.div>
                     );
                   })}

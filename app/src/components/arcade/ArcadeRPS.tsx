@@ -4,10 +4,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { useGameContext } from '@/contexts/GameContext';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { upsertLocalRanking } from '@/utils/localRanking';
 
 interface ArcadeRPSProps {
     roomId: string;
-    playerId?: string;
+        playerId?: string;
     onClose: () => void;
 }
 
@@ -27,6 +28,7 @@ export function ArcadeRPS({ roomId, playerId, onClose }: ArcadeRPSProps) {
 
     const [phase, setPhase] = useState<GamePhase>('waiting_sync');
     const [remotePlayerReady, setRemotePlayerReady] = useState(false);
+    const isBotMatch = roomId.startsWith('bot_');
 
     const [myChoice, setMyChoice] = useState<Choice>(null);
     const [remoteChoice, setRemoteChoice] = useState<Choice>(null);
@@ -54,18 +56,22 @@ export function ArcadeRPS({ roomId, playerId, onClose }: ArcadeRPSProps) {
             })
             .subscribe((status) => {
                 if (status === 'SUBSCRIBED') {
-                    channel.send({
-                        type: 'broadcast',
-                        event: 'ready',
-                        payload: { playerId: effectivePlayerId }
-                    });
+                    if (isBotMatch) {
+                        setTimeout(() => setRemotePlayerReady(true), 1000);
+                    } else {
+                        channel.send({
+                            type: 'broadcast',
+                            event: 'ready',
+                            payload: { playerId: effectivePlayerId }
+                        });
+                    }
                 }
             });
 
         return () => {
-            supabase.removeChannel(channel);
+            if (!isBotMatch) supabase.removeChannel(channel);
         };
-    }, [roomId, effectivePlayerId]);
+    }, [roomId, effectivePlayerId, isBotMatch]);
 
     const handleStartSync = () => {
         channelRef.current?.send({ type: 'broadcast', event: 'start_round' });
@@ -83,12 +89,26 @@ export function ArcadeRPS({ roomId, playerId, onClose }: ArcadeRPSProps) {
         if (myChoice) return; // Already locked in
 
         setMyChoice(choice);
-        channelRef.current?.send({
-            type: 'broadcast',
-            event: 'choice_locked',
-            payload: { playerId: effectivePlayerId, choice }
-        });
+        
+        if (!isBotMatch) {
+            channelRef.current?.send({
+                type: 'broadcast',
+                event: 'choice_locked',
+                payload: { playerId: effectivePlayerId, choice }
+            });
+        }
     };
+
+    // Bot move
+    useEffect(() => {
+        if (isBotMatch && phase === 'choosing' && myChoice && !remoteChoice) {
+            const timer = setTimeout(() => {
+                const botChoice = ['rock', 'paper', 'scissors'][Math.floor(Math.random() * 3)] as Choice;
+                setRemoteChoice(botChoice);
+            }, 1500);
+            return () => clearTimeout(timer);
+        }
+    }, [isBotMatch, phase, myChoice, remoteChoice]);
 
     // Calculate winner when both choices are in
     useEffect(() => {
@@ -109,7 +129,8 @@ export function ArcadeRPS({ roomId, playerId, onClose }: ArcadeRPSProps) {
             (p1 === 'paper' && p2 === 'rock') ||
             (p1 === 'scissors' && p2 === 'paper')
         ) {
-            setWinner(localPlayerId!);
+            setWinner(effectivePlayerId);
+            upsertLocalRanking({ playerName: localPlayer?.name || 'Invitado', scoreToAdd: 30, won: true, gameMode: 'arcade' });
         } else {
             setWinner('remote');
         }
@@ -233,13 +254,13 @@ export function ArcadeRPS({ roomId, playerId, onClose }: ArcadeRPSProps) {
                 >
                     <div className="bg-slate-900 border border-white/20 p-8 rounded-3xl text-center shadow-2xl max-w-md w-full mx-4">
                         <div className="text-6xl mb-4">
-                            {winner === localPlayerId ? '🎉' : winner === 'tie' ? '😐' : '💀'}
+                            {winner === effectivePlayerId ? '🎉' : winner === 'tie' ? '😐' : '💀'}
                         </div>
-                        <h2 className="text-4xl font-black text-white mb-2 uppercase tracking-tighter">
-                            {winner === localPlayerId ? '¡HAS GANADO!' : winner === 'tie' ? 'EMPATE' : 'HAS PERDIDO'}
-                        </h2>
+                            <h2 className="text-4xl font-black text-white mb-2 uppercase tracking-tighter">
+                                {winner === effectivePlayerId ? '¡HAS GANADO!' : winner === 'tie' ? 'EMPATE' : 'HAS PERDIDO'}
+                            </h2>
                         <p className="text-muted-foreground mb-8 text-lg">
-                            {CHOICES.find(c => c.id === myChoice)?.name} {winner === localPlayerId ? 'vence a' : winner === 'tie' ? 'iguala a' : 'cae ante'} {CHOICES.find(c => c.id === remoteChoice)?.name}
+                            {CHOICES.find(c => c.id === myChoice)?.name} {winner === effectivePlayerId ? 'vence a' : winner === 'tie' ? 'iguala a' : 'cae ante'} {CHOICES.find(c => c.id === remoteChoice)?.name}
                         </p>
                         <Button size="lg" className="w-full h-16 text-xl rounded-2xl font-bold bg-white text-black hover:bg-gray-200" onClick={handleStartSync}>
                             Revancha

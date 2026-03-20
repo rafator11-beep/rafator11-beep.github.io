@@ -105,7 +105,7 @@ export function ArcadeQuickDraw({ roomId, playerId, onClose }: ArcadeQuickDrawPr
             channelRef.current?.send({
                 type: 'broadcast',
                 event: 'draw_time',
-                payload: { playerId: localPlayerId, time: 0, early: true }
+                payload: { playerId: effectivePlayerId, time: 0, early: true }
             });
             toast.error("¡Te has precipitado!");
             return;
@@ -118,7 +118,7 @@ export function ArcadeQuickDraw({ roomId, playerId, onClose }: ArcadeQuickDrawPr
             channelRef.current?.send({
                 type: 'broadcast',
                 event: 'draw_time',
-                payload: { playerId: localPlayerId, time: rt, early: false }
+                payload: { playerId: effectivePlayerId, time: rt, early: false }
             });
         }
     };
@@ -128,7 +128,7 @@ export function ArcadeQuickDraw({ roomId, playerId, onClose }: ArcadeQuickDrawPr
         if (myReactionTime !== null && remoteReactionTime !== null && phase !== 'result') {
             setPhase('result');
             if (myReactionTime < remoteReactionTime) {
-                setWinner(localPlayerId!);
+                setWinner(effectivePlayerId);
                 toast.success("¡Eres el jugador más rápido del Oeste! 🤠");
             } else if (remoteReactionTime < myReactionTime) {
                 setWinner('remote');
@@ -138,13 +138,13 @@ export function ArcadeQuickDraw({ roomId, playerId, onClose }: ArcadeQuickDrawPr
                 toast("¡Empate exacto! Matemáticamente improbable...");
             }
         }
-    }, [myReactionTime, remoteReactionTime, phase, localPlayerId]);
+    }, [myReactionTime, remoteReactionTime, phase, effectivePlayerId]);
 
     return (
         <div className="absolute inset-0 z-50 bg-black flex flex-col user-select-none">
             {/* Header */}
             <div className="absolute top-0 inset-x-0 p-4 flex justify-between items-center z-10 bg-gradient-to-b from-black/80 to-transparent">
-                <Button variant="ghost" className="text-white.50" onClick={onClose}>Abandonar</Button>
+                <Button variant="ghost" className="text-white/50" onClick={onClose}>Abandonar</Button>
                 <div className="text-white font-black tracking-widest text-xl">REFLEJOS</div>
                 <div className="w-20"></div>
             </div>
@@ -186,21 +186,21 @@ export function ArcadeQuickDraw({ roomId, playerId, onClose }: ArcadeQuickDrawPr
 
                 {phase === 'result' && (
                     <div className="text-center bg-black/60 p-8 rounded-3xl backdrop-blur-md border border-white/10 w-full max-w-md mx-4">
-                        <h2 className="text-4xl font-black text-white mb-8">
-                            {winner === localPlayerId ? '✨ ¡GANASTE! ✨' : winner === 'tie' ? 'EMPATE' : '❌ PERDISTE ❌'}
-                        </h2>
+                            <h2 className="text-4xl font-black text-white mb-8">
+                                {winner === effectivePlayerId ? '✨ ¡GANASTE! ✨' : winner === 'tie' ? 'EMPATE' : '❌ PERDISTE ❌'}
+                            </h2>
 
                         <div className="space-y-4 mb-8 text-left">
                             <div className="flex justify-between items-center bg-white/5 p-4 rounded-xl">
                                 <span className="text-white/80">Tu tiempo:</span>
-                                <span className={`text-xl font-bold ${winner === localPlayerId ? 'text-green-400' : 'text-white'}`}>
+                                <span className={`text-xl font-bold ${winner === effectivePlayerId ? 'text-green-400' : 'text-white'}`}>
                                     {earlyDraw ? 'Falso inicio' : myReactionTime ? `${myReactionTime}ms` : '---'}
                                 </span>
                             </div>
                             <div className="flex justify-between items-center bg-white/5 p-4 rounded-xl">
                                 <span className="text-white/80">Rival:</span>
                                 <span className={`text-xl font-bold ${winner === 'remote' ? 'text-green-400' : 'text-white'}`}>
-                                    {remoteReactionTime ? `${remoteReactionTime}ms` : (winner === localPlayerId ? 'Falso inicio' : '---')}
+                                    {remoteReactionTime ? `${remoteReactionTime}ms` : (winner === effectivePlayerId ? 'Falso inicio' : '---')}
                                 </span>
                             </div>
                         </div>

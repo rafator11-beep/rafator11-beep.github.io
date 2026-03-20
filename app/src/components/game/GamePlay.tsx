@@ -11,6 +11,7 @@ import { RoundSummary } from './RoundSummary';
 import { PartyGame } from './PartyGame';
 import { PokerRoom } from '../poker/PokerRoom';
 import { ParchisGame } from './ParchisGame';
+import { MegaBoardGame } from './MegaBoardGame';
 import { GAME_MODES } from '@/types/game';
 
 interface GamePlayProps {
@@ -92,6 +93,22 @@ export function GamePlay({ onExit, isTeamMode = false, roomId = null, isHost = f
         onExit={onExit}
         roomId={roomId || undefined}
         isHost={isHost}
+        localPlayerName={localName}
+        localPlayerAvatar={localAvatar}
+      />
+    );
+  }
+
+  // Check if this is MegaBoard mode
+  if (game?.mode === 'megaboard') {
+    const storedId = localStorage.getItem('fiesta_player_id');
+    const localP = players?.find(p => p.id === storedId);
+    const localName = localP?.name || localStorage.getItem('fiesta_player_name') || 'Jugador';
+    const localAvatar = localP?.avatar_url || undefined;
+
+    return (
+      <MegaBoardGame
+        onExit={onExit}
         localPlayerName={localName}
         localPlayerAvatar={localAvatar}
       />

@@ -3,7 +3,14 @@ import { Player, Team, GameMode } from '@/types/game';
 import { useGameContext } from '@/contexts/GameContext';
 
 export interface GameState {
+  phase: 'setup' | 'playing' | 'voting' | 'results' | 'minigame' | 'game_over';
   round: number;
+  currentCardIndex: number;
+  players: Player[];
+  deck: any[];
+  currentCard: any | null;
+  showNormaReveal: boolean;
+  showVirusReveal: boolean;
   currentNorma: string | null;
   currentNormaTurnsRemaining?: number;
   showDuel: boolean;
@@ -14,16 +21,16 @@ export interface GameState {
   showMimica: boolean;
   showBocaCerrada: boolean;
   showBocaCerradaWarning?: boolean;
-  showMimicaReveal?: boolean;
-  showBocaCerradaReveal?: boolean;
+  showMimicaReveal: boolean;
+  showBocaCerradaReveal: boolean;
   showImpostorWord: boolean;
   showCaptainPass: boolean;
   showVirusAlert: boolean;
   showVirusCycleAlert?: boolean; // Added
   showImpostorWarning?: boolean;
   showCaptainSelection?: boolean; // Added
-  showMimicaReveal?: boolean; // Secret handover hold-to-reveal
   showNormaGlobal?: boolean; // Norma global overlay
+  virusPlayerId: string | null;
 
   // Data for specific screens
   currentDrinkingGame: any | null;
@@ -67,7 +74,14 @@ export const useGameEngine = (mode: GameMode) => {
   const [roundSnapshot, setRoundSnapshot] = useState<{ round: number; scores: Record<string, number> } | null>(null);
 
   const [gameState, setGameState] = useState<GameState>({
+    phase: 'setup',
     round: 1,
+    currentCardIndex: 0,
+    players: players,
+    deck: [],
+    currentCard: null,
+    showNormaReveal: false,
+    showVirusReveal: false,
     currentNorma: null,
     currentNormaTurnsRemaining: 0,
     showDuel: false,
@@ -83,13 +97,15 @@ export const useGameEngine = (mode: GameMode) => {
     showImpostorWord: false,
     showCaptainPass: false,
     showVirusAlert: false,
-    showVirusCycleAlert: false, // Added
+    showVirusCycleAlert: false,
     showImpostorWarning: false,
-    showCaptainSelection: true, // Default to true so it asks on startup
+    showCaptainSelection: true,
+    showNormaGlobal: false,
+    virusPlayerId: null,
     currentDrinkingGame: null,
     currentMimicaText: null,
     currentBocaCerradaText: null,
-    bocaCerradaData: undefined, // Added
+    bocaCerradaData: undefined,
     currentImpostorWord: null,
     votingQuestion: null,
     duelPlayers: [],
@@ -104,12 +120,12 @@ export const useGameEngine = (mode: GameMode) => {
     },
     captainId: null,
     virusAlertData: null,
-    virusCycleData: undefined, // Added
+    virusCycleData: undefined,
     yoNuncaEquiposPhase: 'idle',
     yoNuncaTargetTeamId: null,
     yoNuncaTruthVotes: {},
     yoNuncaGuessVotes: {},
-    votingSelections: [], // Initial state
+    votingSelections: [],
   });
 
   // Load stats from localStorage on mount
@@ -155,10 +171,33 @@ export const useGameEngine = (mode: GameMode) => {
 
     // Check if we completed a full circle of players
     if ((currentPlayerIndex + 1) % players.length === 0) {
-      setGameState(prev => ({ ...prev, round: prev.round + 1 }));
+      setGameState(prev => {
+        const nextRound = prev.round + 1;
+        
+        // Global Events: Change Norma Global every 5 rounds
+        let showNormaGlobal = prev.showNormaGlobal;
+
+        if (nextRound % 5 === 0) {
+           showNormaGlobal = true;
+        }
+
+        // Global Events: Virus changes player every 8 rounds
+        let nextVirusId = prev.virusPlayerId;
+        if (nextRound % 8 === 0 && players.length > 0) {
+          const currentIndex = players.findIndex(p => p.id === prev.virusPlayerId);
+          const nextIndex = (currentIndex + 1) % players.length;
+          nextVirusId = players[nextIndex].id;
+        }
+
+        return { 
+          ...prev, 
+          round: nextRound,
+          showNormaGlobal,
+          virusPlayerId: nextVirusId
+        };
+      });
 
       // Game Over Condition (Example: 20 Rounds)
-      // We can make this configurable later
       if (gameState.round >= 20) {
         setGameOver(true);
       }
@@ -179,23 +218,28 @@ export const useGameEngine = (mode: GameMode) => {
   };
 
   const addScore = (playerId: string, points: number) => {
-    setScores(prev => {
-      const newScores = {
-        ...prev,
-        [playerId]: (prev[playerId] || 0) + points
-      };
-      return newScores;
+    setScores(prev => ({
+      ...prev,
+      [playerId]: Math.max(0, (prev[playerId] || 0) + points)
+    }));
+  };
+
+  const handleGameEnd = async () => {
+    // 1. Calculate Session Stats for Titles
+    // This would typically involve data from useGameEffects and trackings in PartyGame
+    // For this implementation, we'll mark the game as over and let PartyGame handle the sync
+    setGameOver(true);
+    setRoundSnapshot({
+      round: gameState.round,
+      scores: { ...scores }
     });
   };
 
   const addWin = (playerId: string) => {
-    setGamesWon(prev => {
-      const newWins = {
-        ...prev,
-        [playerId]: (prev[playerId] || 0) + 1
-      };
-      return newWins;
-    });
+    setGamesWon(prev => ({
+      ...prev,
+      [playerId]: (prev[playerId] || 0) + 1
+    }));
   };
 
   return {
@@ -220,6 +264,7 @@ export const useGameEngine = (mode: GameMode) => {
     advanceTurn,
     addScore,
     addWin,
+    handleGameEnd,
     showRoundSummary,
     setShowRoundSummary,
     roundSnapshot,

@@ -1,6 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Gamepad2, Trophy, Star, Users, MapPin, ShoppingBag, Coins } from 'lucide-react';
+import { Gamepad2, Trophy, Star, Users, MapPin, ShoppingBag, Coins, Monitor } from 'lucide-react';
+import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useRanking, PlayerStats } from '@/hooks/useRanking';
@@ -96,7 +97,21 @@ export default function Profiles() {
   const [shopOpen, setShopOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [localPlayerName, setLocalPlayerName] = useState<string>('');
+  const [screencastActive, setScreencastActive] = useState(false);
   const { profile, syncEconomy } = useAuth();
+
+  const handleScreenShare = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+      setScreencastActive(true);
+      toast.success('¡Perfil proyectado! Disfruta en tu TV.');
+      stream.getVideoTracks()[0].onended = () => {
+        setScreencastActive(false);
+      };
+    } catch {
+      toast.error('No se pudo iniciar la proyección.');
+    }
+  };
 
   React.useEffect(() => {
     setLocalPlayerName(localStorage.getItem('fiesta_player_name') || '');
@@ -144,6 +159,14 @@ export default function Profiles() {
               onClick={() => setShopOpen(true)}
             >
               <ShoppingBag className="w-4 h-4" /> Tienda Web
+            </Button>
+            <Button
+              variant="outline"
+              className={`rounded-xl flex gap-2 items-center border-white/10 ${screencastActive ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5'}`}
+              onClick={handleScreenShare}
+            >
+              <Monitor className={`w-4 h-4 ${screencastActive ? 'animate-pulse' : ''}`} />
+              {screencastActive ? 'PROYECTANDO...' : 'PROYECTAR TV'}
             </Button>
           </div>
         </motion.div>

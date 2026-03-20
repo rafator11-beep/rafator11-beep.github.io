@@ -1,20 +1,37 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, Crown, Star, Flame, Zap } from 'lucide-react';
+import { Trophy, Crown, Star, Flame, Zap, Monitor } from 'lucide-react';
+import { toast } from 'sonner';
 import { supabase, isSupabaseConfigured } from '@/integrations/supabase/client';
 import { loadLocalRankings } from '@/utils/localRanking';
+import { Button } from '@/components/ui/button';
 
-// ─── Title System (10 Ranks) ─────────────────────────────────────────────────
-function getPlayerTitle(xp: number, gamesPlayed: number, wins: number) {
-  if (xp >= 5000 || wins >= 200) return { title: 'Dios de la Fiesta', emoji: '⚡', color: 'text-amber-300' };
-  if (xp >= 3000 || wins >= 100) return { title: 'Rey del Drama', emoji: '🎭', color: 'text-pink-400' };
-  if (xp >= 2000 || wins >= 75) return { title: 'El Fiestero', emoji: '🎉', color: 'text-yellow-400' };
-  if (xp >= 1000 || wins >= 50) return { title: 'Impostor Nato', emoji: '🕵️', color: 'text-purple-400' };
-  if (xp >= 700 || wins >= 30) return { title: 'Alma de la Noche', emoji: '🌙', color: 'text-indigo-400' };
-  if (xp >= 500 || wins >= 20) return { title: 'El Kamikaze', emoji: '💣', color: 'text-red-400' };
-  if (xp >= 300 || wins >= 10) return { title: 'El Invisible', emoji: '👻', color: 'text-slate-400' };
-  if (xp >= 200 || wins >= 5) return { title: 'El Diplomático', emoji: '🤝', color: 'text-blue-400' };
-  if (xp >= 100 || gamesPlayed >= 10) return { title: 'Promesa', emoji: '⭐', color: 'text-yellow-300' };
+// ─── Title System (10 Ranks based on Session Performance) ───────────────────
+function getPlayerTitle(xp: number, gamesPlayed: number, wins: number, stats?: any) {
+  // El Fiestero (🔥): Más clics en 'beber'.
+  if (stats?.mostDrinks) return { title: 'El Fiestero', emoji: '🔥', color: 'text-orange-400' };
+  // El Santito (😇): Menos tragos registrados.
+  if (stats?.leastDrinks) return { title: 'El Santito', emoji: '😇', color: 'text-blue-200' };
+  // Rey del Drama (👑): Más veces con Virus/Normas.
+  if (stats?.mostDrama) return { title: 'Rey del Drama', emoji: '👑', color: 'text-pink-400' };
+  // El Invisible (👻): Menos interacción total.
+  if (stats?.leastInteraction) return { title: 'El Invisible', emoji: '👻', color: 'text-slate-400' };
+  // El Impostor Nato (🎭): Más victorias como Impostor.
+  if (stats?.mostImpostorWins) return { title: 'Impostor Nato', emoji: '🎭', color: 'text-purple-400' };
+  // El Kamikaze (💣): Aceptó retos de +3 tragos.
+  if (stats?.mostKamikaze) return { title: 'El Kamikaze', emoji: '💣', color: 'text-red-400' };
+  // El Diplomático (🤝): Más tragos repartidos.
+  if (stats?.mostDiplomatic) return { title: 'El Diplomático', emoji: '🤝', color: 'text-blue-400' };
+  // De Hielo (🧊): Más duelos 1vs1 ganados.
+  if (stats?.mostDuelWins) return { title: 'De Hielo', emoji: '🧊', color: 'text-cyan-200' };
+  // El Diablillo (😈): Más puntos restados a otros con botón (-).
+  if (stats?.mostDevil) return { title: 'El Diablillo', emoji: '😈', color: 'text-red-500' };
+  // El Payaso (🤡): Más fallos en Mímica/Boca Cerrada.
+  if (stats?.mostClown) return { title: 'El Payaso', emoji: '🤡', color: 'text-pink-300' };
+
+  // Fallbacks based on XP
+  if (xp >= 5000) return { title: 'Dios de la Fiesta', emoji: '⚡', color: 'text-amber-300' };
+  if (xp >= 2000) return { title: 'Veterano Pro', emoji: '🎖️', color: 'text-yellow-400' };
   return { title: 'Aprendiz', emoji: '📖', color: 'text-slate-500' };
 }
 
@@ -84,53 +101,81 @@ function getClassifications(xp: number, gamesPlayed: number, wins: number): { la
 
 // ─── Player Row ──────────────────────────────────────────────────────────────
 function PlayerRowCard({ player, idx }: { player: PlayerRow; idx: number }) {
-  const titleInfo = getPlayerTitle(player.xp, player.gamesPlayed, player.wins);
+  const titleInfo = getPlayerTitle(player.xp, player.gamesPlayed, player.wins, (player as any).sessionStats);
   const neon = getNeonBorder(idx);
   const medal = getMedal(idx);
   const classifications = getClassifications(player.xp, player.gamesPlayed, player.wins);
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
       transition={{ delay: idx * 0.05 }}
-      className={`p-3 rounded-2xl bg-white/[0.05] backdrop-blur-sm border border-white/[0.08] ${neon} transition-all`}
+      className={`relative p-4 rounded-[32px] transition-all duration-500 overflow-hidden group
+        ${idx === 0 ? 'bg-gradient-to-br from-yellow-500/20 via-slate-900 to-slate-900 border-2 border-yellow-500 shadow-[0_0_30px_rgba(234,179,8,0.2)]' : 
+          idx === 1 ? 'bg-gradient-to-br from-slate-400/20 via-slate-900 to-slate-900 border border-slate-400/50 shadow-[0_0_20px_rgba(148,163,184,0.15)]' :
+          idx === 2 ? 'bg-gradient-to-br from-amber-700/20 via-slate-900 to-slate-900 border border-amber-700/50 shadow-[0_0_20px_rgba(180,83,9,0.15)]' :
+          'bg-slate-900/40 backdrop-blur-xl border border-white/5 hover:border-white/20'}`}
     >
-      <div className="flex items-center gap-3">
-        {/* Medal */}
-        <div className="text-xl w-8 text-center font-black text-white/80 shrink-0">{medal}</div>
+      <div className="flex items-center gap-4 relative z-10">
+        {/* Medal/Rank */}
+        <div className="flex flex-col items-center justify-center w-10 shrink-0">
+          <span className={`text-2xl font-black ${idx === 0 ? 'text-yellow-400' : idx === 1 ? 'text-slate-300' : idx === 2 ? 'text-amber-600' : 'text-white/20'}`}>
+            #{idx + 1}
+          </span>
+          {idx === 0 && <div className="w-1 h-1 rounded-full bg-yellow-400 animate-ping mt-1" />}
+        </div>
 
-        {/* Avatar */}
-        <PlayerAvatar url={player.avatar} name={player.name} size={idx < 3 ? 'md' : 'sm'} />
+        {/* Avatar with Glow */}
+        <div className="relative shrink-0">
+          <div className={`rounded-2xl p-1 transition-all duration-500
+            ${idx === 0 ? 'bg-gradient-to-tr from-yellow-400 to-amber-600 shadow-[0_0_15px_rgba(234,179,8,0.5)]' : 
+              idx === 1 ? 'bg-slate-400' : idx === 2 ? 'bg-amber-700' : 'bg-white/10'}`}>
+            <PlayerAvatar url={player.avatar} name={player.name} size={idx < 3 ? 'md' : 'sm'} />
+          </div>
+          {idx === 0 && <Crown className="absolute -top-3 -right-3 w-6 h-6 text-yellow-400 fill-yellow-400 rotate-12 drop-shadow-lg" />}
+        </div>
 
         {/* Info */}
         <div className="flex-1 min-w-0">
-          <div className="font-bold text-white leading-tight truncate">{player.name}</div>
-          <div className={`text-xs font-bold ${titleInfo.color} flex items-center gap-1`}>
-            <span>{titleInfo.emoji}</span>
-            <span>{titleInfo.title}</span>
-            <span className="text-white/40 font-normal ml-1">Nv.{player.level}</span>
+          <div className="font-black text-white text-lg leading-none truncate mb-1 uppercase tracking-tight group-hover:text-primary transition-colors">{player.name}</div>
+          <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/5 border border-white/5 ${titleInfo.color}`}>
+            <span className="text-xs">{titleInfo.emoji}</span>
+            <span className="text-[10px] font-black uppercase tracking-widest">{titleInfo.title}</span>
           </div>
         </div>
 
-        {/* Stats */}
+        {/* Score & Level */}
         <div className="text-right shrink-0">
-          <div className="font-black text-yellow-400 text-base">{player.xp} XP</div>
-          <div className="text-[10px] text-white/50">{player.wins}V / {player.gamesPlayed}P</div>
+          <div className="flex flex-col items-end">
+            <span className="text-2xl font-black text-white tabular-nums tracking-tighter">{player.xp}</span>
+            <span className="text-[10px] font-black text-white/30 uppercase tracking-widest -mt-1">EXP</span>
+          </div>
+          <div className="mt-1 flex items-center justify-end gap-1.5">
+             <div className="px-1.5 py-0.5 rounded bg-primary/20 text-primary text-[9px] font-black uppercase tracking-tighter border border-primary/20">
+               NV.{player.level}
+             </div>
+          </div>
         </div>
-
-        {idx === 0 && <Crown className="w-5 h-5 text-yellow-400 fill-yellow-400 shrink-0" />}
       </div>
 
-      {/* Classification Badges */}
-      {classifications.length > 0 && (
-        <div className="flex flex-wrap gap-1 mt-2 ml-10">
-          {classifications.map(b => (
-            <span key={b.label} className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${b.color} border border-white/5`}>
-              {b.emoji} {b.label}
-            </span>
-          ))}
+      {/* Stats Mini Grid */}
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        <div className="bg-white/5 rounded-xl p-2 border border-white/5 text-center">
+          <p className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em]">Partidas</p>
+          <p className="text-xs font-bold text-white/80">{player.gamesPlayed}</p>
         </div>
+        <div className="bg-white/5 rounded-xl p-2 border border-white/5 text-center">
+          <p className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em]">Victorias</p>
+          <p className="text-xs font-bold text-emerald-400">{player.wins}</p>
+        </div>
+      </div>
+
+      {/* Decorative Orbs */}
+      {idx < 3 && (
+        <div className={`absolute -right-4 -bottom-4 w-24 h-24 rounded-full blur-[40px] opacity-20 pointer-events-none
+          ${idx === 0 ? 'bg-yellow-500' : idx === 1 ? 'bg-slate-400' : 'bg-amber-700'}`} 
+        />
       )}
     </motion.div>
   );
@@ -148,37 +193,68 @@ const RANK_TITLES = [
   { emoji: '🤝', title: 'El Diplomático', req: '200+ XP', color: 'text-blue-400' },
   { emoji: '⭐', title: 'Promesa', req: '100+ XP', color: 'text-yellow-300' },
   { emoji: '📖', title: 'Aprendiz', req: 'Inicio', color: 'text-slate-500' },
+  { emoji: '😇', title: 'El Santito', req: 'Karma+', color: 'text-blue-200' },
+  { emoji: '🤡', title: 'El Payaso', req: 'Risas+', color: 'text-pink-300' },
+  { emoji: '😈', title: 'El Diablillo', req: 'Caos+', color: 'text-red-500' },
+  { emoji: '🔮', title: 'El Adivino', req: 'Votos+', color: 'text-purple-300' },
+  { emoji: '🧊', title: 'De Hielo', req: 'Sin Beber', color: 'text-cyan-200' },
 ];
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 export function HallOfFame() {
   const [loading, setLoading] = useState(true);
   const [players, setPlayers] = useState<PlayerRow[]>([]);
-  const [filter, setFilter] = useState<'xp' | 'wins' | 'played'>('xp');
+  const [filter, setFilter] = useState<'xp' | 'wins' | 'played' | 'football' | 'culture'>('xp');
   const [source, setSource] = useState<'local' | 'global'>('local');
+  const [screencastActive, setScreencastActive] = useState(false);
+
+  const handleScreenShare = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+      setScreencastActive(true);
+      toast.success('¡Ranking proyectado! Disfruta en tu TV.');
+      stream.getVideoTracks()[0].onended = () => {
+        setScreencastActive(false);
+      };
+    } catch {
+      toast.error('No se pudo iniciar la proyección.');
+    }
+  };
 
   useEffect(() => {
     loadData();
-  }, [source]);
+  }, [source, filter]);
 
   const loadData = async () => {
     setLoading(true);
     try {
       if (source === 'global' && isSupabaseConfigured) {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('username, avatar_url, total_xp, games_played, total_wins, level')
-          .order('total_xp', { ascending: false })
-          .limit(20);
+        let query = supabase
+          .from('user_stats')
+          .select('player_name, avatar_url, total_xp, games_played, total_wins, level, futbol_xp, cultura_xp');
+
+        if (filter === 'xp') query = query.order('total_xp', { ascending: false });
+        else if (filter === 'wins') query = query.order('total_wins', { ascending: false });
+        else if (filter === 'played') query = query.order('games_played', { ascending: false });
+        else if (filter === 'football') query = query.order('futbol_xp', { ascending: false });
+        else if (filter === 'culture') query = query.order('cultura_xp', { ascending: false });
+
+        const { data, error } = await query.limit(50);
 
         if (!error && data) {
           setPlayers(data.map((r: any) => ({
-            name: r.username || 'Jugador',
+            name: r.player_name || 'Jugador',
             avatar: r.avatar_url,
-            xp: r.total_xp || 0,
+            xp: filter === 'football' ? (r.futbol_xp || 0) : filter === 'culture' ? (r.cultura_xp || 0) : (r.total_xp || 0),
             gamesPlayed: r.games_played || 0,
             wins: r.total_wins || 0,
             level: r.level || 1,
+            // Extra stats for title system
+            sessionStats: {
+                xp: r.total_xp,
+                footballXp: r.futbol_xp,
+                cultureXp: r.cultura_xp
+            }
           })));
         } else {
           loadLocal();
@@ -216,6 +292,8 @@ export function HallOfFame() {
     { key: 'xp', label: 'XP', icon: '⚡' },
     { key: 'wins', label: 'Victorias', icon: '🏆' },
     { key: 'played', label: 'Partidas', icon: '🎮' },
+    { key: 'football', label: 'Fútbol', icon: '⚽' },
+    { key: 'culture', label: 'Cultura', icon: '📚' },
   ] as const;
 
   return (
@@ -236,6 +314,18 @@ export function HallOfFame() {
             </h1>
           </div>
           <p className="text-xs text-white/40 ml-10">Clasificación de leyendas del party</p>
+        </div>
+
+        {/* Chromecast Button */}
+        <div className="mb-4">
+          <Button
+            variant="outline"
+            onClick={handleScreenShare}
+            className={`w-full h-12 rounded-2xl border-white/5 font-black transition-all ${screencastActive ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 text-slate-400 hover:text-white hover:border-white/20'}`}
+          >
+            <Monitor className={`w-5 h-5 mr-3 ${screencastActive ? 'animate-pulse' : ''}`} />
+            {screencastActive ? 'TRANSMITIENDO A TV...' : 'COMPARTIR EN TV'}
+          </Button>
         </div>
 
         {/* Source Toggle */}

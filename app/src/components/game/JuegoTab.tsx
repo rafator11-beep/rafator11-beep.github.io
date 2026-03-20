@@ -56,37 +56,30 @@ export function JuegoTab({ onSelectMode }: JuegoTabProps) {
                 </div>
             </motion.div>
 
-            {/* Menu Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl mx-auto relative z-10 mb-8">
+            {/* Menu Grid - Redesigned chips */}
+            <div className="flex flex-wrap justify-center gap-3 max-w-4xl mx-auto relative z-10 mb-8">
                 {juegoModes.map((mode, index) => (
                     <motion.button
                         key={mode.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.03 }}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: index * 0.02 }}
                         onClick={() => onSelectMode(mode.id, playMode)}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className={`relative group p-4 md:p-5 rounded-2xl bg-gradient-to-br ${mode.color} text-white shadow-lg transition-all duration-300 overflow-hidden text-center`}
+                        whileHover={{ scale: 1.05, y: -2 }}
+                        whileTap={{ scale: 0.95 }}
+                        className={`relative px-6 py-3 rounded-2xl bg-slate-900/40 backdrop-blur-md border border-white/10 flex flex-col items-center gap-1 transition-all duration-300 hover:border-primary/50 hover:bg-primary/5 shadow-lg group overflow-hidden`}
                     >
-                        <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                        <div className="relative z-10 flex flex-col items-center">
-                            <span className="text-3xl md:text-4xl mb-2 drop-shadow-lg">{mode.icon}</span>
-                            <h3 className="text-base md:text-lg font-bold mb-1 drop-shadow-md">{mode.name}</h3>
-                            <p className="text-xs opacity-80 line-clamp-2 leading-tight">{mode.description}</p>
-
-                            <div className="flex flex-wrap justify-center gap-1 mt-2">
-                                {mode.badge && (
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-xs font-medium border border-white/30">
-                                        <Crown className="w-3 h-3 text-yellow-300" />
-                                        {mode.badge}
-                                    </span>
-                                )}
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <span className="text-xs font-black uppercase tracking-widest text-white/70 group-hover:text-primary transition-colors">{mode.name}</span>
+                        <span className="text-2xl drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">{mode.icon}</span>
+                        
+                        {mode.badge && (
+                            <div className="absolute -top-1 -right-1">
+                                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[8px] font-black text-white ring-2 ring-slate-900">
+                                    !
+                                </span>
                             </div>
-                        </div>
-
-                        <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-white/10 rounded-full blur-xl group-hover:bg-white/20 transition-all" />
+                        )}
                     </motion.button>
                 ))}
             </div>

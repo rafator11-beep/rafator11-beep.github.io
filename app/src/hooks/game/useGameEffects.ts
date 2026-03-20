@@ -74,51 +74,45 @@ export const useGameEffects = (mode: GameMode, players: Player[]) => {
         );
     };
 
-    // Manage Periodic Viruses (Every 8 Rounds -> Infection or Rest)
+    // Manage Periodic Viruses (Every 7 Rounds -> Infection or Rest)
     const manageMegamixViruses = (currentRound: number) => {
         if (mode !== 'megamix') return null;
 
-        // Check if round is multiple of 8 and we haven't triggered yet for this round
-        if (currentRound > 0 && currentRound % 8 === 0 && currentRound !== lastVirusRoundRef.current) {
+        // Start Virus on Round 1
+        if (currentRound === 1 && lastVirusRoundRef.current === -1) {
+            lastVirusRoundRef.current = 1;
+            const randomVirus = virusEffects[Math.floor(Math.random() * virusEffects.length)];
+            const targetPlayer = players[Math.floor(Math.random() * players.length)];
+            const newVirus: PlayerVirus = {
+                playerId: targetPlayer.id,
+                virusName: randomVirus.name,
+                virusDescription: randomVirus.description,
+                turnsRemaining: 7,
+            };
+            setPlayerViruses([newVirus]);
+            return { type: 'INFECTION', title: '¡VIRUS DETECTADO!', message: `El virus inicial ha infectado a ${targetPlayer.name}.` };
+        }
+
+        // Check if round is multiple of 7 and we haven't triggered yet for this round
+        if (currentRound > 1 && currentRound % 7 === 0 && currentRound !== lastVirusRoundRef.current) {
             lastVirusRoundRef.current = currentRound;
 
-            const cycleIndex = currentRound / 5;
-            const isRestRound = cycleIndex % 2 === 0;
+            // Logic: Rotate Virus to next player
+            setPlayerViruses([]);
+            
+            const randomVirus = virusEffects[Math.floor(Math.random() * virusEffects.length)];
+            const nextIndex = (currentRound / 7) % players.length;
+            const targetPlayer = players[nextIndex];
 
-            if (isRestRound) {
-                // Ronda de Descanso
-                setPlayerViruses([]);
-                return { type: 'REST', title: '¡RONDA DE DESCANSO!', message: 'Todos los virus han sido eliminados por ahora...' };
-            } else {
-                // Ronda de Infección
-                setPlayerViruses([]);
+            const newVirus: PlayerVirus = {
+                playerId: targetPlayer.id,
+                virusName: randomVirus.name,
+                virusDescription: randomVirus.description,
+                turnsRemaining: 7, // Lasts until next cycle
+            };
 
-                const newViruses: PlayerVirus[] = players.map(p => {
-                    const randomVirus = virusEffects[Math.floor(Math.random() * virusEffects.length)];
-                    // Update stats
-                    setVirusReceivedByPlayer(prev => ({ ...prev, [p.id]: (prev[p.id] || 0) + 1 }));
-                    setBrutalCounts(prev => ({
-                        ...prev,
-                        [p.id]: {
-                            ...prev[p.id],
-                            virusesReceived: (prev[p.id]?.virusesReceived || 0) + 1,
-                            legendaryDrops: prev[p.id]?.legendaryDrops || 0,
-                            chaosEvents: prev[p.id]?.chaosEvents || 0,
-                            cursedEvents: prev[p.id]?.cursedEvents || 0
-                        }
-                    }));
-
-                    return {
-                        playerId: p.id,
-                        virusName: randomVirus.name,
-                        virusDescription: randomVirus.description,
-                        turnsRemaining: players.length * 2, // Lasts 2 rounds
-                    };
-                });
-
-                setPlayerViruses(newViruses);
-                return { type: 'INFECTION', title: '¡NUEVA RONDA DE VIRUS!', message: 'Todos los jugadores han sido infectados con un nuevo virus aleatorio.' };
-            }
+            setPlayerViruses([newVirus]);
+            return { type: 'INFECTION', title: '¡EL VIRUS HA MUTADO!', message: `El virus se ha propagado a ${targetPlayer.name}. ¡Suerte!` };
         }
 
         return null;
@@ -128,7 +122,20 @@ export const useGameEffects = (mode: GameMode, players: Player[]) => {
     const manageMegamixNormas = (currentRound: number) => {
         if (mode !== 'megamix') return null;
 
-        if (currentRound > 0 && currentRound % 5 === 0 && currentRound !== lastNormaRoundRef.current) {
+        // Initial Norma Round 1
+        if (currentRound === 1 && lastNormaRoundRef.current === -1) {
+            lastNormaRoundRef.current = 1;
+            const randomNorma = normasRonda[Math.floor(Math.random() * normasRonda.length)];
+            return {
+                type: 'NORMA',
+                title: '¡NORMA INICIAL!',
+                message: randomNorma,
+                duration: players.length * 2
+            };
+        }
+
+        // Manage Periodic Normas (Every 3 Rounds)
+        if (currentRound > 1 && currentRound % 3 === 0 && currentRound !== lastNormaRoundRef.current) {
             lastNormaRoundRef.current = currentRound;
             const randomNorma = normasRonda[Math.floor(Math.random() * normasRonda.length)];
             return {
@@ -158,17 +165,8 @@ export const useGameEffects = (mode: GameMode, players: Player[]) => {
         const lastImpostorTurn = lastMiniTurnRef.current['impostor_round'] ?? -9999;
         const impostorCooldown = Math.max(players.length * 2, 18);
 
-        // 1. Random Norma — inject as norma overlay, NOT as trivia (avoids "Preparando pregunta" bug)
-        if (roll < 0.12) {
-            const randomNorma = normasRonda[Math.floor(Math.random() * normasRonda.length)];
-            setGameState((prev: any) => ({
-                ...prev,
-                currentNorma: randomNorma,
-                currentNormaTurnsRemaining: Math.max(players.length * 2, 4),
-                showNormaGlobal: true,
-            }));
-            return false; // Don't skip the card — just show norma banner and continue
-        }
+        // Random Norma removed - now strict every 3 rounds via manageMegamixNormas
+
 
         // Impostor round - needs at least 3 players. Reduced frequency: ~every 12 rounds per person.
         const targetImpostorTurns = players.length * 12;

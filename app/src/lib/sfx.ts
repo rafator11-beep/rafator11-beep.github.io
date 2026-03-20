@@ -37,9 +37,9 @@ async function playFile(path: string, fallbackFreq: number) {
 }
 
 export const sfx = {
-  click: () => playFile('sounds/click.mp3', 520),
-  legendary: () => playFile('sounds/legendary.mp3', 780),
-  cursed: () => playFile('sounds/cursed.mp3', 180),
-  chaos: () => playFile('sounds/chaos.mp3', 100),
-  whoosh: () => playFile('sounds/whoosh.mp3', 400),
+  click: () => { try { beep(520); } catch { } },
+  legendary: () => { try { beep(780, 400, 0.1); } catch { } },
+  cursed: () => { try { beep(180, 600, 0.15); } catch { } },
+  chaos: () => { try { beep(100, 800, 0.2); } catch { } },
+  whoosh: () => { try { beep(400, 200, 0.05); } catch { } },
 };

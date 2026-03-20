@@ -12,6 +12,8 @@ interface UserProfile {
     total_xp?: number;
     games_played?: number;
     total_wins?: number;
+    level?: number;
+    badges?: any;
 }
 
 interface AuthContextType {
@@ -164,7 +166,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
-    const syncGameEnd = async (xpGained: number, won: boolean) => {
+    const syncGameEnd = async (xpGained: number, won: boolean, gameMode: string = 'megamix') => {
         if (!user || !isSupabaseConfigured || !profile) return;
         try {
             const newXp = (profile.total_xp || 0) + xpGained;
@@ -172,18 +174,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const newWins = (profile.total_wins || 0) + (won ? 1 : 0);
             const newLevel = Math.floor(newXp / 100) + 1;
 
-            await supabase.from('profiles').update({
+            // Update stats based on mode
+            const updateData: any = {
                 total_xp: newXp,
                 games_played: newPlayed,
                 total_wins: newWins,
                 level: newLevel,
-            }).eq('id', user.id);
+            };
+
+            // Dynamic mode-specific stats if columns exist (using profiles table for consistency)
+            // Note: Our profiles table has xp, level, but not mode-specific counts yet.
+            // Let's stick to the directive: total_exp, level, avatar_url, games_played, badges.
+
+            await supabase.from('profiles').update(updateData).eq('id', user.id);
 
             setProfile(prev => prev ? {
                 ...prev,
-                total_xp: newXp,
-                games_played: newPlayed,
-                total_wins: newWins,
+                ...updateData
             } : null);
         } catch (err) {
             console.warn("syncGameEnd error:", err);

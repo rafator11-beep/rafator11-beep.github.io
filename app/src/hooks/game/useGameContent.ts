@@ -34,19 +34,29 @@ import {
     enLaCamaYExtra2,
     categoriasLetrasExtra2,
 } from '@/data/gameContentExtra2';
+import {
+    clasicoExtra3, yoNuncaExtra3, picanteExtra3, masProbableExtra3,
+    pacoversExtra3, espanaExtra3, enLaCamaYExtra3,
+    categoriasLetrasExtra3, categoriasRetoExtra3,
+} from '@/data/gameContentExtra3';
 import { customPartyRetos as importedCustomRetos } from '@/data/customPartyRetos';
 import { footballQuestions } from '@/data/footballQuestionsNew';
 import { cultureQuestions } from '@/data/cultureQuestions';
+import { cultureQuestionsNew2025 } from '@/data/cultureQuestionsNew2025';
 import { buildGodDeck } from '@/lib/godDeck';
 
-// Implementación eficiente de Fisher-Yates shuffle
+// Deep Shuffle: Multi-pass Fisher-Yates with random sort final pass
 function shuffleArray<T>(array: T[]): T[] {
-    const shuffled = [...array];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    let shuffled = [...array];
+    // Three passes of Fisher-Yates for maximum entropy
+    for (let pass = 0; pass < 3; pass++) {
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
     }
-    return shuffled;
+    // Final random sort to break any remaining patterns
+    return shuffled.sort(() => Math.random() - 0.5);
 }
 
 function applyVoteWeights(items: string[], category: string): string[] {
@@ -88,46 +98,55 @@ export const useGameContent = (mode: GameMode, currentIndex: number, currentPlay
                     ...clasico,
                     ...clasicoExtra,
                     ...clasicoExtra2,
+                    ...clasicoExtra3,
                     ...yoNunca.map(q => `🙈 ${q}`),
                     ...yoNuncaExtra.map(q => `🙈 ${q}`),
                     ...yoNuncaExtra2.map(q => `🙈 ${q}`),
+                    ...yoNuncaExtra3.map(q => `🙈 ${q}`),
                     ...picante.map(q => `🌶️ ${q}`),
                     ...picanteExtra.map(q => `🌶️ ${q}`),
                     ...picanteExtra2.map(q => `🌶️ ${q}`),
+                    ...picanteExtra3.map(q => `🌶️ ${q}`),
                     ...pacovers.map(q => `🇪🇸 ${q}`),
                     ...pacoversExtra.map(q => `🇪🇸 ${q}`),
                     ...pacoversExtra2.map(q => `🇪🇸 ${q}`),
+                    ...pacoversExtra3.map(q => `🇪🇸 ${q}`),
                     ...quienEsMasProbable.map(q => `🗳️ ${q}`),
                     ...masProbableExtra.map(q => `🗳️ ${q}`),
                     ...quienEsMasProbableExtra2.map(q => `🗳️ ${q}`),
+                    ...masProbableExtra3.map(q => `🗳️ ${q}`),
                     ...enLaCamaY.map(q => `🛌 ${q}`),
                     ...enLaCamaYExtra.map(q => `🛌 ${q}`),
                     ...enLaCamaYExtra2.map(q => `🛌 ${q}`),
+                    ...enLaCamaYExtra3.map(q => `🛌 ${q}`),
                     ...categoriasLetras.map(q => `🔤 ${q}`),
                     ...categoriasLetrasExtra.map(q => `🔤 ${q}`),
                     ...categoriasLetrasExtra2.map(q => `🔤 ${q}`),
+                    ...categoriasLetrasExtra3.map(q => `🔤 ${q}`),
                     ...categoriasReto.map(q => `🎯 ${q}`),
                     ...categoriasRetoExtra.map(q => `🎯 ${q}`),
                     ...categoriasRetoExtra2.map(q => `🎯 ${q}`),
+                    ...categoriasRetoExtra3.map(q => `🎯 ${q}`),
+                    ...espanaExtra3.map(q => `🇪🇸 ${q}`),
                     ...normasRonda.map(q => `NORMA: ${q}`),
                     ...importedCustomRetos,
                 ]);
                 break;
             case 'yo_nunca':
             case 'yo_nunca_equipos':
-                modeContent = shuffleArray([...yoNunca, ...yoNuncaExtra, ...yoNuncaExtra2]);
+                modeContent = shuffleArray([...yoNunca, ...yoNuncaExtra, ...yoNuncaExtra2, ...yoNuncaExtra3]);
                 break;
             case 'picante':
-                modeContent = shuffleArray([...picante, ...picanteExtra, ...picanteExtra2]);
+                modeContent = shuffleArray([...picante, ...picanteExtra, ...picanteExtra2, ...picanteExtra3]);
                 break;
             case 'espana':
-                modeContent = shuffleArray([...nostalgia, ...pacoversExtra, ...pacoversExtra2]);
+                modeContent = shuffleArray([...nostalgia, ...pacoversExtra, ...pacoversExtra2, ...espanaExtra3]);
                 break;
             case 'votacion':
-                modeContent = shuffleArray([...quienEsMasProbable, ...masProbableExtra, ...quienEsMasProbableExtra2]);
+                modeContent = shuffleArray([...quienEsMasProbable, ...masProbableExtra, ...quienEsMasProbableExtra2, ...masProbableExtra3]);
                 break;
             case 'pacovers':
-                modeContent = shuffleArray([...pacovers, ...pacoversExtra, ...pacoversExtra2]);
+                modeContent = shuffleArray([...pacovers, ...pacoversExtra, ...pacoversExtra2, ...pacoversExtra3]);
                 break;
             default:
                 modeContent = getMegamixContent(200);
@@ -143,7 +162,7 @@ export const useGameContent = (mode: GameMode, currentIndex: number, currentPlay
         // Pre-load first trivia question synchronously to avoid 'Cargando pregunta' flash
         if (mode === 'trivia_futbol' || mode === 'cultura') {
             const isFootball = mode === 'trivia_futbol';
-            const sourceQuestions = (isFootball ? footballQuestions : cultureQuestions) as any[];
+            const sourceQuestions = (isFootball ? footballQuestions : [...cultureQuestions, ...cultureQuestionsNew2025]) as any[];
             if (sourceQuestions && sourceQuestions.length > 0) {
                 const shuffled = shuffleArray(sourceQuestions);
                 setCurrentQuestion(shuffled[0]);
@@ -157,7 +176,7 @@ export const useGameContent = (mode: GameMode, currentIndex: number, currentPlay
         setQuestionNumber(prev => prev + 1);
 
         const isFootball = mode === 'trivia_futbol';
-        const sourceQuestions = (isFootball ? footballQuestions : cultureQuestions) as any[];
+        const sourceQuestions = (isFootball ? footballQuestions : [...cultureQuestions, ...cultureQuestionsNew2025]) as any[];
 
         // Safety check
         if (!sourceQuestions || sourceQuestions.length === 0) {

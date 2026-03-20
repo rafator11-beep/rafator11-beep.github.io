@@ -6653,45 +6653,38 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
 
   // --- Build content with weighted frequencies ---
 
-  // HIGH FREQUENCY: Yo Nunca (5x weight)
-  const yoNuncaCards = [...yoNunca, ...(yoNuncaExtra || []), ...(yoNuncaExtra2 || [])].map(q =>
-    addDrinking(`🙈 Yo nunca... ${q}`, Math.random() < 0.4 ? 'medio' : 'leve')
-  );
+  // Get unique samples to avoid duplicates, now using ALL available items
+  const yoNuncaPool = [...yoNunca, ...(yoNuncaExtra || []), ...(yoNuncaExtra2 || [])];
+  const yoNuncaItems = getRandomItems(yoNuncaPool, yoNuncaPool.length);
+  const yoNuncaCards = yoNuncaItems.map(q => addDrinking(`🙈 Yo nunca... ${q}`, Math.random() < 0.4 ? 'medio' : 'leve'));
 
-  // HIGH FREQUENCY: Quién es más probable (5x weight)
-  const masProbableCards = [...quienEsMasProbable, ...(masProbableExtra || []), ...(quienEsMasProbableExtra2 || [])].map(q =>
-    addDrinking(`🗳️ ${q}`, Math.random() < 0.3 ? 'medio' : 'leve')
-  );
+  const masProbablePool = [...quienEsMasProbable, ...(masProbableExtra || []), ...(quienEsMasProbableExtra2 || [])];
+  const masProbableItems = getRandomItems(masProbablePool, masProbablePool.length);
+  const masProbableCards = masProbableItems.map(q => addDrinking(`🗳️ ${q}`, Math.random() < 0.3 ? 'medio' : 'leve'));
 
-  // HIGH FREQUENCY: Pruebas/Retos (4x weight)
-  const retosCards = [...categoriasReto, ...(categoriasRetoExtra || []), ...(categoriasRetoExtra2 || [])].map(q =>
-    addDrinking(`🎯 ${q}`, Math.random() < 0.5 ? 'medio' : 'reparte')
-  );
+  const retosPool = [...categoriasReto, ...(categoriasRetoExtra || []), ...(categoriasRetoExtra2 || [])];
+  const retosItems = getRandomItems(retosPool, retosPool.length);
+  const retosCards = retosItems.map(q => addDrinking(`🎯 ${q}`, Math.random() < 0.5 ? 'medio' : 'reparte'));
 
-  // MEDIUM: Clásico (5x weight according to recent user tuning)
-  const clasicoCards = [...clasico, ...(clasicoExtra || []), ...(clasicoExtra2 || [])].map(q =>
-    addDrinking(q, Math.random() < 0.5 ? 'leve' : 'grupo')
-  );
+  const clasicoPool = [...clasico, ...(clasicoExtra || []), ...(clasicoExtra2 || [])];
+  const clasicoItems = getRandomItems(clasicoPool, clasicoPool.length);
+  const clasicoCards = clasicoItems.map(q => addDrinking(q, Math.random() < 0.5 ? 'leve' : 'grupo'));
 
-  // MEDIUM: Pacovers (3x weight)
-  const pacoversCards = [...pacovers, ...(pacoversExtra || []), ...(pacoversExtra2 || [])].map(q =>
-    addDrinking(`🇪🇸 ${q}`, 'leve')
-  );
+  const pacoversPool = [...pacovers, ...(pacoversExtra || []), ...(pacoversExtra2 || [])];
+  const pacoversItems = getRandomItems(pacoversPool, pacoversPool.length);
+  const pacoversCards = pacoversItems.map(q => addDrinking(`🇪🇸 ${q}`, 'leve'));
 
-  // MEDIUM: Picante (2x weight)
-  const picanteCards = [...picante, ...(picanteExtra || []), ...(picanteExtra2 || [])].map(q =>
-    addDrinking(`🌶️ ${q}`, Math.random() < 0.5 ? 'medio' : 'fuerte')
-  );
+  const picantePool = [...picante, ...(picanteExtra || []), ...(picanteExtra2 || [])];
+  const picanteItems = getRandomItems(picantePool, picantePool.length);
+  const picanteCards = picanteItems.map(q => addDrinking(`🌶️ ${q}`, Math.random() < 0.5 ? 'medio' : 'fuerte'));
 
-  // LOW-MEDIUM: En la cama (2x weight)
-  const enLaCamaCards = [...enLaCamaY, ...(enLaCamaYExtra || []), ...(enLaCamaYExtra2 || [])].map(q =>
-    addDrinking(`🛌 ${q}`, 'medio')
-  );
+  const enLaCamaPool = [...enLaCamaY, ...(enLaCamaYExtra || []), ...(enLaCamaYExtra2 || [])];
+  const enLaCamaItems = getRandomItems(enLaCamaPool, enLaCamaPool.length);
+  const enLaCamaCards = enLaCamaItems.map(q => addDrinking(`🛌 ${q}`, 'medio'));
 
-  // LOW: Categorías Letras (2x weight)
-  const categoriasCards = [...categoriasLetras, ...(categoriasLetrasExtra || []), ...(categoriasLetrasExtra2 || [])].map(q =>
-    addDrinking(`🔤 ${q}`, 'reparte')
-  );
+  const categoriasPool = [...categoriasLetras, ...(categoriasLetrasExtra || []), ...(categoriasLetrasExtra2 || [])];
+  const categoriasItems = getRandomItems(categoriasPool, categoriasPool.length);
+  const categoriasCards = categoriasItems.map(q => addDrinking(`🔤 ${q}`, 'reparte'));
 
   // Combine with weights: repeat arrays to achieve frequency
   const weightedContent = shuffleArray([

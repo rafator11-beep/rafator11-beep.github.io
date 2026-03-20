@@ -1,4 +1,4 @@
-export type GameMode = 'futbol' | 'megamix' | 'clasico' | 'yo_nunca' | 'yo_nunca_equipos' | 'picante' | 'cultura' | 'espana' | 'votacion' | 'pacovers' | 'trivia_futbol' | 'tictactoe' | 'poker' | 'parchis';
+export type GameMode = 'futbol' | 'megamix' | 'clasico' | 'yo_nunca' | 'yo_nunca_equipos' | 'picante' | 'cultura' | 'espana' | 'votacion' | 'pacovers' | 'trivia_futbol' | 'tictactoe' | 'poker' | 'parchis' | 'megaboard';
 export type TabId = 'fiesta' | 'juego';
 export type PlayMode = 'local' | 'online';
 
@@ -19,12 +19,13 @@ export enum ModeId {
   TRIVIAOS = 'trivia_futbol',
   TICTACTOE = 'tictactoe',
   POKER = 'poker',
-  PARCHIS = 'parchis'
+  PARCHIS = 'parchis',
+  MEGABOARD = 'megaboard'
 }
 
 export const TAB_MAPPING: Record<TabId, GameMode[]> = {
   fiesta: ['megamix', 'clasico', 'yo_nunca', 'yo_nunca_equipos', 'picante', 'espana', 'votacion', 'pacovers'],
-  juego: ['cultura', 'trivia_futbol', 'futbol', 'tictactoe', 'poker', 'parchis']
+  juego: ['cultura', 'trivia_futbol', 'futbol', 'tictactoe', 'poker', 'parchis', 'megaboard']
 };
 export type GameStatus = 'setup' | 'playing' | 'round_end' | 'finished';
 export type QuestionType = 'test' | 'open' | 'true_false' | 'social' | 'reto' | 'yo_nunca' | 'votacion' | 'accion';
@@ -223,6 +224,15 @@ export const GAME_MODES: GameModeInfo[] = [
     description: 'Parchís online temático del SD Huesca',
     icon: '🎲',
     color: 'from-blue-600 to-red-600',
+    teamBased: false,
+    badge: 'NUEVO',
+  },
+  {
+    id: 'megaboard',
+    name: 'MegaBoard 3D',
+    description: 'Tablero tipo Oca con 100 casillas, retos y pruebas épicas',
+    icon: '🏰',
+    color: 'from-amber-500 to-rose-600',
     teamBased: false,
     badge: 'NUEVO',
   }

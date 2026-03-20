@@ -1,4 +1,4 @@
-import { c as createLucideIcon, j as jsxRuntimeExports, D as Dialog, a as DialogContent, b as DialogHeader, d as DialogTitle, e as DialogDescription, u as useAuth, r as reactExports, R as React, l as loadLocalRankings, s as safeLower, S as SHOP_ITEMS, A as AnimatePresence, m as motion, C as Coins, X, f as RARITY_COLORS, g as RARITY_LABELS, h as Check, B as Button, L as Lock, i as ue, k as saveLocalRankings, n as useRanking, T as Trophy, G as Gamepad2, U as Users, o as Star, p as getXPProgress, q as Avatar, t as AvatarImage, v as AvatarFallback, w as Tabs, x as TabsList, y as TabsTrigger, z as TabsContent } from "./index-cc53f094.js";
+import { c as createLucideIcon, j as jsxRuntimeExports, D as Dialog, a as DialogContent, b as DialogHeader, d as DialogTitle, e as DialogDescription, u as useAuth, r as reactExports, R as React, l as loadLocalRankings, s as safeLower, S as SHOP_ITEMS, A as AnimatePresence, m as motion, C as Coins, X, f as RARITY_COLORS, g as RARITY_LABELS, h as Check, B as Button, L as Lock, i as ue, k as saveLocalRankings, n as useRanking, T as Trophy, M as Monitor, G as Gamepad2, U as Users, o as Star, p as getXPProgress, q as Avatar, t as AvatarImage, v as AvatarFallback, w as Tabs, x as TabsList, y as TabsTrigger, z as TabsContent } from "./index-4c908fdb.js";
 /**
  * @license lucide-react v0.462.0 - ISC
  *
@@ -278,7 +278,20 @@ function Profiles() {
   const [shopOpen, setShopOpen] = reactExports.useState(false);
   const [previewOpen, setPreviewOpen] = reactExports.useState(false);
   const [localPlayerName, setLocalPlayerName] = reactExports.useState("");
+  const [screencastActive, setScreencastActive] = reactExports.useState(false);
   const { profile, syncEconomy } = useAuth();
+  const handleScreenShare = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+      setScreencastActive(true);
+      ue.success("¡Perfil proyectado! Disfruta en tu TV.");
+      stream.getVideoTracks()[0].onended = () => {
+        setScreencastActive(false);
+      };
+    } catch {
+      ue.error("No se pudo iniciar la proyección.");
+    }
+  };
   React.useEffect(() => {
     setLocalPlayerName(localStorage.getItem("fiesta_player_name") || "");
   }, []);
@@ -322,6 +335,18 @@ function Profiles() {
                   children: [
                     /* @__PURE__ */ jsxRuntimeExports.jsx(ShoppingBag, { className: "w-4 h-4" }),
                     " Tienda Web"
+                  ]
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                Button,
+                {
+                  variant: "outline",
+                  className: `rounded-xl flex gap-2 items-center border-white/10 ${screencastActive ? "bg-primary/20 border-primary text-primary" : "bg-white/5"}`,
+                  onClick: handleScreenShare,
+                  children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(Monitor, { className: `w-4 h-4 ${screencastActive ? "animate-pulse" : ""}` }),
+                    screencastActive ? "PROYECTANDO..." : "PROYECTAR TV"
                   ]
                 }
               )

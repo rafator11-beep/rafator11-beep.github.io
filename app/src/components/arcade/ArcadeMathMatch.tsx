@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useGameContext } from '@/contexts/GameContext';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { upsertLocalRanking } from '@/utils/localRanking';
 
 interface ArcadeMathMatchProps {
     roomId: string;
@@ -63,6 +64,7 @@ export function ArcadeMathMatch({ roomId, playerId, onClose }: ArcadeMathMatchPr
 
     const [phase, setPhase] = useState<GamePhase>('waiting_sync');
     const [remotePlayerReady, setRemotePlayerReady] = useState(false);
+    const isBotMatch = roomId.startsWith('bot_');
 
     const [myScore, setMyScore] = useState(0);
     const [remoteScore, setRemoteScore] = useState(0);
@@ -99,18 +101,22 @@ export function ArcadeMathMatch({ roomId, playerId, onClose }: ArcadeMathMatchPr
             })
             .subscribe((status) => {
                 if (status === 'SUBSCRIBED') {
-                    channel.send({
-                        type: 'broadcast',
-                        event: 'ready',
-                        payload: { playerId: effectivePlayerId }
-                    });
+                    if (isBotMatch) {
+                        setTimeout(() => setRemotePlayerReady(true), 1000);
+                    } else {
+                        channel.send({
+                            type: 'broadcast',
+                            event: 'ready',
+                            payload: { playerId: effectivePlayerId }
+                        });
+                    }
                 }
             });
 
         return () => {
-            supabase.removeChannel(channel);
+            if (!isBotMatch) supabase.removeChannel(channel);
         };
-    }, [roomId, effectivePlayerId]);
+    }, [roomId, effectivePlayerId, isBotMatch]);
 
     const handleStartSync = () => {
         channelRef.current?.send({ type: 'broadcast', event: 'start_game' });
@@ -137,6 +143,24 @@ export function ArcadeMathMatch({ roomId, playerId, onClose }: ArcadeMathMatchPr
         }, 1000);
     };
 
+    // Bot playing logic
+    useEffect(() => {
+        if (isBotMatch && phase === 'playing' && remoteScore < TOTAL_PROBLEMS && winner === null) {
+            const botSolveTime = 3000 + Math.random() * 2000; // Bot takes 3-5 seconds per math problem
+            const timer = setTimeout(() => {
+                setRemoteScore(prev => {
+                    const next = prev + 1;
+                    if (next >= TOTAL_PROBLEMS) {
+                        setWinner('remote');
+                        setPhase('result');
+                    }
+                    return next;
+                });
+            }, botSolveTime);
+            return () => clearTimeout(timer);
+        }
+    }, [isBotMatch, phase, remoteScore, winner]);
+
     const handleAnswer = (val: number) => {
         if (phase !== 'playing' || errorPenalty || !currentProblem) return;
 
@@ -144,15 +168,18 @@ export function ArcadeMathMatch({ roomId, playerId, onClose }: ArcadeMathMatchPr
             const nextScore = myScore + 1;
             setMyScore(nextScore);
 
-            channelRef.current?.send({
-                type: 'broadcast',
-                event: 'score_update',
-                payload: { playerId: effectivePlayerId, score: nextScore }
-            });
+            if (!isBotMatch) {
+                channelRef.current?.send({
+                    type: 'broadcast',
+                    event: 'score_update',
+                    payload: { playerId: effectivePlayerId, score: nextScore }
+                });
+            }
 
             if (nextScore >= TOTAL_PROBLEMS) {
                 setWinner(effectivePlayerId);
                 setPhase('result');
+                upsertLocalRanking({ playerName: localPlayer?.name || 'Invitado', scoreToAdd: 40, won: true, gameMode: 'arcade' });
             } else {
                 setCurrentProblem(generateProblem());
             }

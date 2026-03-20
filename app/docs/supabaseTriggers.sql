@@ -29,6 +29,11 @@ CREATE TABLE IF NOT EXISTS user_stats (
     fiesta_games_won INT DEFAULT 0,
     juego_games_played INT DEFAULT 0,
     juego_games_won INT DEFAULT 0,
+    -- Temáticas
+    total_xp BIGINT DEFAULT 0,
+    futbol_xp BIGINT DEFAULT 0,
+    cultura_xp BIGINT DEFAULT 0,
+    level INT DEFAULT 1,
     -- Poker
     poker_chips_won BIGINT DEFAULT 0,
     poker_games_played INT DEFAULT 0,
@@ -111,7 +116,7 @@ CREATE POLICY "Update Room" ON poker_rooms FOR UPDATE USING (true);
 CREATE OR REPLACE FUNCTION update_user_stats_on_event()
 RETURNS TRIGGER AS $$
 BEGIN
-    INSERT INTO user_stats (user_id, games_played, games_won, fiesta_games_played, fiesta_games_won, juego_games_played, juego_games_won)
+    INSERT INTO user_stats (user_id, games_played, games_won, fiesta_games_played, fiesta_games_won, juego_games_played, juego_games_won, total_xp, futbol_xp, cultura_xp)
     VALUES (
         NEW.actor_user_id, 
         1, 
@@ -119,7 +124,10 @@ BEGIN
         CASE WHEN NEW.tab_id = 'fiesta' THEN 1 ELSE 0 END,
         CASE WHEN NEW.tab_id = 'fiesta' AND NEW.is_winner THEN 1 ELSE 0 END,
         CASE WHEN NEW.tab_id = 'juego' THEN 1 ELSE 0 END,
-        CASE WHEN NEW.tab_id = 'juego' AND NEW.is_winner THEN 1 ELSE 0 END
+        CASE WHEN NEW.tab_id = 'juego' AND NEW.is_winner THEN 1 ELSE 0 END,
+        NEW.score,
+        CASE WHEN NEW.mode_id = 'trivia_futbol' OR NEW.mode_id = 'futbol' THEN NEW.score ELSE 0 END,
+        CASE WHEN NEW.mode_id = 'cultura' THEN NEW.score ELSE 0 END
     )
     ON CONFLICT (user_id) DO UPDATE SET
         games_played = user_stats.games_played + 1,
@@ -128,6 +136,10 @@ BEGIN
         fiesta_games_won = user_stats.fiesta_games_won + CASE WHEN NEW.tab_id = 'fiesta' AND NEW.is_winner THEN 1 ELSE 0 END,
         juego_games_played = user_stats.juego_games_played + CASE WHEN NEW.tab_id = 'juego' THEN 1 ELSE 0 END,
         juego_games_won = user_stats.juego_games_won + CASE WHEN NEW.tab_id = 'juego' AND NEW.is_winner THEN 1 ELSE 0 END,
+        total_xp = user_stats.total_xp + NEW.score,
+        futbol_xp = user_stats.futbol_xp + CASE WHEN NEW.mode_id = 'trivia_futbol' OR NEW.mode_id = 'futbol' THEN NEW.score ELSE 0 END,
+        cultura_xp = user_stats.cultura_xp + CASE WHEN NEW.mode_id = 'cultura' THEN NEW.score ELSE 0 END,
+        level = FLOOR((user_stats.total_xp + NEW.score) / 100) + 1,
         updated_at = NOW();
     RETURN NEW;
 END;

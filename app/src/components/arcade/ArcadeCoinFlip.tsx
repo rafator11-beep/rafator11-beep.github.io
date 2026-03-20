@@ -210,3 +210,4 @@ export function ArcadeCoinFlip({ roomId, playerId, onClose }: ArcadeCoinFlipProp
             )}
         </div>
     );
+}
