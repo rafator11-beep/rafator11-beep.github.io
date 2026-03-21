@@ -752,7 +752,7 @@ export function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }: Me
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] bg-black/80 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none flex md:items-end md:justify-end items-center justify-center p-4 md:p-8 pointer-events-none"
+            className="fixed inset-0 z-[9999] bg-black/80 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none flex md:items-end md:justify-end items-center justify-center p-4 md:p-8 pointer-events-none"
           >
             <motion.div
               initial={{ scale: 0.8, y: 30 }}

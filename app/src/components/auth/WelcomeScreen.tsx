@@ -60,13 +60,27 @@ export function WelcomeScreen() {
 
     try {
       if (isLogin) {
-        await signIn(email, password);
-        toast.success(`¡Bienvenido de nuevo!`);
-        // We'll update recent info after successful fetch if needed, 
-        // but for now we use what we have in form
+        try {
+          await signIn(email, password);
+          toast.success(`¡Bienvenido de nuevo!`);
+        } catch (e: any) {
+          if (e.message?.includes('Supabase no está configurado')) {
+            toast.success('Modo Offline: ¡Bienvenido (Local)!');
+          } else {
+            throw e;
+          }
+        }
       } else {
-        await signUp(email, password, username || 'Jugador', avatarPreview || undefined);
-        toast.success('¡Cuenta creada! Bienvenido.');
+        try {
+          await signUp(email, password, username || 'Jugador', avatarPreview || undefined);
+          toast.success('¡Cuenta creada! Bienvenido.');
+        } catch (e: any) {
+          if (e.message?.includes('Supabase no está configurado')) {
+            toast.success('Modo Offline: ¡Perfil local creado!');
+          } else {
+            throw e;
+          }
+        }
       }
       
       // Save to recent for next time
