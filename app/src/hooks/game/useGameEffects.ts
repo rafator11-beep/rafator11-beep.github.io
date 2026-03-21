@@ -168,10 +168,10 @@ export const useGameEffects = (mode: GameMode, players: Player[]) => {
         // Random Norma removed - now strict every 3 rounds via manageMegamixNormas
 
 
-        // Impostor round - needs at least 3 players. Reduced frequency: ~every 12 rounds per person.
-        const targetImpostorTurns = players.length * 12;
+        // Impostor round - approximately every 7 rounds (we use currentIndex % (players.length * 7))
+        const isImpostorTurn = currentIndex > 0 && currentIndex % (players.length * 7) === 0;
 
-        if (players.length >= 3 && roll < 0.06 && currentIndex > 0 && (currentIndex - lastImpostorTurn) >= targetImpostorTurns) {
+        if (players.length >= 3 && isImpostorTurn) {
             const randomImpostor = impostorRounds[Math.floor(Math.random() * impostorRounds.length)];
             const impostorPlayer = players[Math.floor(Math.random() * players.length)];
             setGameState((prev: any) => ({

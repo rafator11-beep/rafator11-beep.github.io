@@ -878,10 +878,25 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
             </div>
             
             <Button 
-              className="w-full bg-primary hover:bg-primary-600 text-white font-bold h-12 rounded-xl"
-              onClick={() => setShowChromecastModal(false)}
+              className="w-full bg-primary hover:bg-primary-600 text-white font-bold h-14 rounded-xl shadow-lg border-2 border-primary/50 text-lg flex items-center justify-center gap-2"
+              onClick={async () => {
+                try {
+                  if (typeof navigator !== 'undefined' && 'presentation' in navigator && (navigator as any).presentation?.defaultRequest) {
+                      await (navigator as any).presentation.defaultRequest.start();
+                  } else if (typeof navigator !== 'undefined' && navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+                      await navigator.mediaDevices.getDisplayMedia({ video: true });
+                  } else {
+                      throw new Error("No API");
+                  }
+                  setShowChromecastModal(false);
+                } catch (e) {
+                  alert("Tu navegador no soporta el Chromecast directo. Usa el menú 'Compartir/Transmitir' o despliega las opciones de control en iOS/Android.");
+                  setShowChromecastModal(false);
+                }
+              }}
             >
-              ¡Entendido!
+              <Cast className="w-5 h-5" />
+              CONECTAR A LA TV 📺
             </Button>
           </div>
         </DialogContent>
@@ -1195,7 +1210,11 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                   key={`pick-captain-${p.id}`}
                   className="h-24 flex flex-col items-center justify-center gap-2 bg-gradient-to-r from-slate-800/80 to-slate-700/80 hover:bg-gradient-to-r hover:from-yellow-600/30 hover:to-yellow-700/30 border border-white/10 hover:border-yellow-500/50 transition-all rounded-xl relative overflow-hidden group"
                   onClick={() => {
-                    sfx.click();
+                    try {
+                        if (typeof sfx !== 'undefined' && sfx.click) sfx.click();
+                    } catch (e) {
+                        // ignore audio error gracefully
+                    }
                     setGameState(prev => ({
                       ...prev,
                       captainId: p.id,
@@ -1303,147 +1322,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         </DialogContent>
       </Dialog>
 
-      {/* NEW: Mimica Anti-Spoiler Warning */}
-      <Dialog open={gameState.showMimicaReveal}>
-        <DialogContent className="sm:max-w-md bg-slate-900/95 backdrop-blur-2xl border-purple-500/50 text-white z-[80]" aria-describedby={undefined}>
-          <DialogHeader>
-            <DialogTitle className="text-3xl font-black text-center text-purple-400 flex items-center justify-center gap-3 uppercase tracking-tighter">
-              🎭 ACCIÓN SECRETA
-            </DialogTitle>
-          </DialogHeader>
-          <div className="text-center py-8 space-y-8">
-            <div className="space-y-2">
-              <p className="text-lg text-white/60 font-bold uppercase tracking-widest">Entrega el dispositivo a:</p>
-              <p className="text-5xl font-black text-white bg-purple-500/10 p-6 rounded-[32px] border border-purple-500/30 shadow-[0_0_30px_rgba(168,85,247,0.2)]">
-                {currentPlayer?.name}
-              </p>
-            </div>
-            
-            <div className="bg-slate-800/50 p-4 rounded-2xl border border-white/5">
-              <p className="text-purple-400 font-black animate-pulse text-sm uppercase tracking-[0.3em]">¡CAPITÁN! NO MIRES LA PANTALLA</p>
-            </div>
-
-            <div className="relative">
-              <motion.button
-                onMouseDown={() => setGameState(prev => ({ ...prev, showMimica: true }))}
-                onMouseUp={() => setGameState(prev => ({ ...prev, showMimica: false }))}
-                onTouchStart={() => setGameState(prev => ({ ...prev, showMimica: true }))}
-                onTouchEnd={() => setGameState(prev => ({ ...prev, showMimica: false }))}
-                className="w-full h-48 rounded-[40px] bg-gradient-to-br from-purple-500/20 to-slate-900 border-2 border-dashed border-purple-500/40 flex flex-col items-center justify-center gap-4 transition-all active:scale-95 active:bg-purple-500/30 overflow-hidden shadow-2xl"
-              >
-                <AnimatePresence mode="wait">
-                  {!gameState.showMimica ? (
-                    <motion.div
-                      key="locked"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className="flex flex-col items-center gap-3"
-                    >
-                      <div className="w-16 h-16 rounded-full bg-purple-500/20 flex items-center justify-center border border-purple-500/30">
-                        <EyeOff className="w-8 h-8 text-purple-400" />
-                      </div>
-                      <p className="font-black text-purple-400 uppercase tracking-[0.2em] text-[10px]">MANTÉN PULSADO PARA VER EL RETO</p>
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="revealed"
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="flex flex-col items-center gap-4 px-6 text-center"
-                    >
-                      <p className="text-xs font-black text-purple-300 uppercase tracking-widest mb-1">Tu Reto de Mímica</p>
-                      <div className="p-6 bg-white/5 rounded-2xl border border-white/10 w-full">
-                        <p className="text-2xl font-black text-white drop-shadow-lg">{gameState.currentMimicaText}</p>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.button>
-            </div>
-          </div>
-          <Button
-            className="w-full h-16 text-lg font-black bg-white text-black hover:bg-white/90 rounded-[24px] shadow-xl transition-all"
-            onClick={() => {
-              setGameState(prev => ({ ...prev, showMimicaReveal: false, showMimica: false }));
-              handleNext();
-            }}
-          >
-            LISTO, EMPEZAR 🎭
-          </Button>
-        </DialogContent>
-      </Dialog>
-
-      {/* Boca Cerrada Warning */}
-      <Dialog open={gameState.showBocaCerradaWarning}>
-        <DialogContent className="sm:max-w-md bg-slate-900/95 backdrop-blur-2xl border-orange-500/50 text-white z-[80]" aria-describedby={undefined}>
-          <DialogHeader>
-            <DialogTitle className="text-3xl font-black text-center text-orange-400 flex items-center justify-center gap-3 uppercase tracking-tighter">
-              🙊 BOCA CERRADA
-            </DialogTitle>
-          </DialogHeader>
-          <div className="text-center py-8 space-y-8">
-            <div className="space-y-2">
-              <p className="text-lg text-white/60 font-bold uppercase tracking-widest">Entrega el dispositivo a:</p>
-              <p className="text-5xl font-black text-white bg-orange-500/10 p-6 rounded-[32px] border border-orange-500/30 shadow-[0_0_30px_rgba(249,115,22,0.2)]">
-                {gameState.bocaCerradaData?.playerName || currentPlayer?.name}
-              </p>
-            </div>
-            
-            <div className="bg-slate-800/50 p-4 rounded-2xl border border-white/5">
-              <p className="text-orange-400 font-black animate-pulse text-sm uppercase tracking-[0.3em]">¡CAPITÁN! NO MIRES LA PANTALLA</p>
-            </div>
-
-            <div className="relative">
-              <motion.button
-                onMouseDown={() => setGameState(prev => ({ ...prev, showBocaCerrada: true }))}
-                onMouseUp={() => setGameState(prev => ({ ...prev, showBocaCerrada: false }))}
-                onTouchStart={() => setGameState(prev => ({ ...prev, showBocaCerrada: true }))}
-                onTouchEnd={() => setGameState(prev => ({ ...prev, showBocaCerrada: false }))}
-                className="w-full h-48 rounded-[40px] bg-gradient-to-br from-orange-500/20 to-slate-900 border-2 border-dashed border-orange-500/40 flex flex-col items-center justify-center gap-4 transition-all active:scale-95 active:bg-orange-500/30 overflow-hidden shadow-2xl"
-              >
-                <AnimatePresence mode="wait">
-                  {!gameState.showBocaCerrada ? (
-                    <motion.div
-                      key="locked"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className="flex flex-col items-center gap-3"
-                    >
-                      <div className="w-16 h-16 rounded-full bg-orange-500/20 flex items-center justify-center border border-orange-500/30">
-                        <EyeOff className="w-8 h-8 text-orange-400" />
-                      </div>
-                      <p className="font-black text-orange-400 uppercase tracking-[0.2em] text-[10px]">MANTÉN PULSADO PARA VER EL RETO</p>
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="revealed"
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="flex flex-col items-center gap-4 px-6 text-center"
-                    >
-                      <p className="text-xs font-black text-orange-300 uppercase tracking-widest mb-1">Tu Reto Boca Cerrada</p>
-                      <div className="p-6 bg-white/5 rounded-2xl border border-white/10 w-full">
-                        <p className="text-2xl font-black text-white drop-shadow-lg">{gameState.currentBocaCerradaText}</p>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.button>
-            </div>
-          </div>
-          <Button
-            className="w-full h-16 text-lg font-black bg-white text-black hover:bg-white/90 rounded-[24px] shadow-xl transition-all"
-            onClick={() => {
-              setGameState(prev => ({ ...prev, showBocaCerradaWarning: false, showBocaCerrada: false }));
-              handleNext();
-            }}
-          >
-            LISTO, EMPEZAR 🙊
-          </Button>
-        </DialogContent>
-      </Dialog>
+      {/* Deleted old Mimica & Boca Cerrada overlays */}
 
       {/* Virus Cycle Notification */}
       <Dialog open={gameState.showVirusCycleAlert}>
