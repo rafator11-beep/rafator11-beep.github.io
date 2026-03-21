@@ -61,7 +61,7 @@ export const useDrinkingMicroGames = (mode: GameMode, playersCount: number) => {
             {
                 type: 'mimica',
                 weight: 1.1,
-                ok: canUse('mimica', 6),
+                ok: canUse('mimica', 12) && turn > 0 && turn % 5 === 0,
                 run: () => {
                     const mimica = getRandomMimica();
                     setGameState((prev: any) => ({ 
@@ -88,7 +88,7 @@ export const useDrinkingMicroGames = (mode: GameMode, playersCount: number) => {
             {
                 type: 'boca',
                 weight: 0.55,
-                ok: canUse('boca', 14),
+                ok: canUse('boca', 14) && turn > 0 && turn % 7 === 0,
                 run: () => {
                     const bocaCerrada = getRandomBocaCerrada();
                     setGameState((prev: any) => ({ 

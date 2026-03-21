@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Users, Trophy, AlertCircle, Video, VideoOff, Copy, Crown, Plus, Minus, Eye, EyeOff, Zap, Flame, Ghost, ShieldAlert, Dice5, UserPlus, Globe, History, Play, Trash2, UserCheck, UserX, X, Camera } from 'lucide-react';
+import { ArrowLeft, Users, Trophy, AlertCircle, Video, VideoOff, Copy, Crown, Plus, Minus, Eye, EyeOff, Zap, Flame, Ghost, ShieldAlert, Dice5, UserPlus, Globe, History, Play, Trash2, UserCheck, UserX, X, Camera, Cast, TrendingUp, Music } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import {
@@ -354,6 +354,8 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
   }, [currentIndex, currentPlayer?.id, currentQuestion]);
 
   const { updateMultiplePlayers, rankings } = useRanking();
+
+  const [showChromecastModal, setShowChromecastModal] = useState(false);
 
   // Save game to history
   const hasSavedRef = useRef(false);
@@ -809,6 +811,16 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
             }}>
             <ArrowLeft className="h-6 w-6 text-white/80" />
             </Button>
+
+            {/* Botón Chromecast */}
+            <Button 
+                variant="ghost" 
+                size="icon" 
+                className="bg-primary/10 hover:bg-primary/20 hover:text-white rounded-full transition-all border border-primary/20"
+                onClick={() => setShowChromecastModal(true)}
+            >
+              <Cast className="h-5 w-5 text-primary-200" />
+            </Button>
         </div>
 
         <div className="flex gap-2">
@@ -830,6 +842,50 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           </div>
         </div>
       </header>
+
+      {/* CHROMECAST MODAL */}
+      <Dialog open={showChromecastModal} onOpenChange={setShowChromecastModal}>
+        <DialogContent className="sm:max-w-md bg-slate-900 border-primary/20 text-white rounded-3xl z-[150]">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-black text-center flex items-center justify-center gap-2">
+              <Cast className="w-6 h-6 text-primary" />
+              Compartir en la TV
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-6 space-y-6">
+            <p className="text-center text-slate-300">
+              Para ver el juego en tu televisor, utiliza la función de transmitir (Cast/Screen Mirroring) integrada en tu dispositivo:
+            </p>
+            
+            <div className="grid gap-4">
+              <div className="bg-slate-800/50 p-4 rounded-xl border border-white/5">
+                <h3 className="font-bold flex items-center gap-2 mb-2"><TrendingUp className="w-4 h-4 text-blue-400" /> Dispositivos Android</h3>
+                <ol className="text-sm text-slate-400 list-decimal list-inside space-y-1">
+                  <li>Desliza hacia abajo desde la parte superior de la pantalla.</li>
+                  <li>Toca <strong>Emitir</strong> o <strong>Enviar pantalla</strong>.</li>
+                  <li>Selecciona tu TV o Chromecast en la lista.</li>
+                </ol>
+              </div>
+              
+              <div className="bg-slate-800/50 p-4 rounded-xl border border-white/5">
+                <h3 className="font-bold flex items-center gap-2 mb-2"><Music className="w-4 h-4 text-pink-400" /> Dispositivos Apple (iOS)</h3>
+                <ol className="text-sm text-slate-400 list-decimal list-inside space-y-1">
+                  <li>Abre el <strong>Centro de control</strong>.</li>
+                  <li>Toca el icono de <strong>Duplicar pantalla</strong>.</li>
+                  <li>Selecciona tu Apple TV o televisor compatible.</li>
+                </ol>
+              </div>
+            </div>
+            
+            <Button 
+              className="w-full bg-primary hover:bg-primary-600 text-white font-bold h-12 rounded-xl"
+              onClick={() => setShowChromecastModal(false)}
+            >
+              ¡Entendido!
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Active Norma Display for Megamix (If a rule is active, show it globally) */}
       {
@@ -1037,22 +1093,17 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
       {/* Reveal Overlay (Mimica / Boca Cerrada) with Long Press */}
       <Dialog open={gameState.showMimicaReveal || gameState.showBocaCerradaReveal}>
-        <DialogContent className="sm:max-w-md bg-slate-900/90 backdrop-blur-xl border-primary/50 text-white z-[70]" aria-describedby={undefined}>
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-black text-center text-primary flex items-center justify-center gap-2 uppercase tracking-tighter">
-              ¡TU TURNO!
-            </DialogTitle>
-          </DialogHeader>
-          <div className="text-center py-6 space-y-6">
-            <div className="space-y-2">
-              <p className="text-lg text-white/70">Toca realizar la prueba a:</p>
-              <p className="text-4xl font-black text-white bg-white/5 p-4 rounded-2xl border border-white/10 shadow-2xl">
+        <DialogContent className="sm:max-w-md bg-slate-950/95 backdrop-blur-2xl border-none p-0 text-white z-[70] overflow-hidden" aria-describedby={undefined}>
+          <div className="p-6 text-center space-y-6 bg-[linear-gradient(135deg,rgba(168,85,247,0.1),rgba(0,0,0,0.8))]">
+            <div className="space-y-1">
+              <p className="text-xl font-bold uppercase tracking-widest text-primary/80">Toca realizar la prueba a:</p>
+              <p className="text-5xl font-black text-white drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]">
                 {currentPlayer?.name}
               </p>
-              <p className="text-red-400 font-bold animate-pulse text-sm uppercase tracking-widest mt-4">¡QUE LOS DEMÁS NO MIREN LA PANTALLA!</p>
             </div>
+            <p className="text-red-400 font-bold animate-pulse text-sm uppercase tracking-widest bg-red-500/10 py-2 rounded-full border border-red-500/20">¡Que los demás no miren!</p>
 
-            <div className="relative group">
+            <div className="relative group perspective-1000">
               <motion.button
                 onMouseDown={() => {
                   if (gameState.showMimicaReveal) setGameState(prev => ({ ...prev, showMimica: true }));
@@ -1068,40 +1119,47 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                 onTouchEnd={() => {
                   setGameState(prev => ({ ...prev, showMimica: false, showBocaCerrada: false }));
                 }}
-                className="w-full h-40 rounded-3xl bg-gradient-to-br from-primary/20 to-purple-600/20 border-2 border-dashed border-primary/40 flex flex-col items-center justify-center gap-4 transition-all active:scale-95 active:bg-primary/30 overflow-hidden relative"
+                className="w-full relative preserve-3d transition-transform duration-300 shadow-2xl rounded-[2rem] overflow-hidden group-active:scale-[0.98]"
               >
-                <AnimatePresence mode="wait">
-                  {!(gameState.showMimica || gameState.showBocaCerrada) ? (
-                    <motion.div
-                      key="hidden"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className="flex flex-col items-center gap-2"
-                    >
-                      <EyeOff className="w-12 h-12 text-primary/60" />
-                      <p className="font-bold text-primary/80 uppercase tracking-widest text-xs">Mantén pulsado para ver</p>
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="visible"
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 1.1 }}
-                      className="p-6"
-                    >
-                      <p className="text-2xl font-black text-white leading-tight">
-                        {gameState.showMimicaReveal ? gameState.currentMimicaText : gameState.currentBocaCerradaText}
-                      </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                <div className={`w-full min-h-[220px] rounded-[2rem] border-4 flex flex-col items-center justify-center p-6 bg-gradient-to-br transition-all
+                  ${(gameState.showMimica || gameState.showBocaCerrada) 
+                    ? 'from-primary/30 to-purple-800/80 border-primary shadow-[0_0_30px_rgba(168,85,247,0.6)]' 
+                    : 'from-slate-800 to-slate-900 border-white/10 shadow-lg'}`}>
+                  <AnimatePresence mode="popLayout">
+                    {!(gameState.showMimica || gameState.showBocaCerrada) ? (
+                      <motion.div
+                        key="hidden"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        className="flex flex-col items-center gap-3"
+                      >
+                        <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30 mb-2">
+                          <EyeOff className="w-10 h-10 text-primary" />
+                        </div>
+                        <p className="font-bold text-white uppercase tracking-widest text-sm">Mantén pulsado para revelar</p>
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="visible"
+                        initial={{ opacity: 0, scale: 0.8, rotateX: 90 }}
+                        animate={{ opacity: 1, scale: 1, rotateX: 0 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        className="w-full flex-1 flex flex-col justify-center items-center gap-3"
+                      >
+                        <p className="text-[10px] text-primary-100 font-bold uppercase tracking-[0.2em] mb-2">{gameState.showMimicaReveal ? 'RETO DE MÍMICA' : 'RETO BOCA CERRADA'}</p>
+                        <p className="text-2xl md:text-3xl font-black text-white leading-tight drop-shadow-md pb-4">
+                          {gameState.showMimicaReveal ? gameState.currentMimicaText : gameState.currentBocaCerradaText}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </motion.button>
             </div>
 
             <Button
-              variant="outline"
-              className="w-full h-14 rounded-2xl border-white/10 bg-white/5 hover:bg-white/10 font-bold uppercase tracking-widest text-xs"
+              className="w-full h-14 rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 font-bold uppercase tracking-widest text-sm text-white backdrop-blur-md transition-all active:scale-95"
               onClick={() => {
                 setGameState(prev => ({
                   ...prev,
@@ -1113,7 +1171,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                 handleNext();
               }}
             >
-              Ya lo he visto, cerrar ⏭
+              YA LO HE VISTO, CERRAR ⏭
             </Button>
           </div>
         </DialogContent>
@@ -1454,8 +1512,8 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                   <div key={p.id} className="flex flex-col items-center gap-2 group/player">
                     {/* Avatar with status */}
                     <div className="relative">
-                      <div className={`w-14 h-14 rounded-2xl border-2 transition-all duration-300 overflow-hidden
-                        ${currentPlayer?.id === p.id ? 'border-primary ring-4 ring-primary/20 scale-105 shadow-lg shadow-primary/20' : 'border-white/10 opacity-80 group-hover/player:opacity-100 group-hover/player:border-white/30'}`}>
+                      <div className={`w-14 h-14 rounded-full border-2 transition-all duration-300 overflow-hidden
+                        ${currentPlayer?.id === p.id ? 'border-primary ring-4 ring-primary/20 scale-105 shadow-[0_0_15px_rgba(var(--primary-rgb),0.5)]' : 'border-white/10 opacity-80 group-hover/player:opacity-100 group-hover/player:border-white/30'}`}>
                         {p.avatar_url ? (
                           <img src={p.avatar_url} className="w-full h-full object-cover" alt={p.name} />
                         ) : (
@@ -1619,17 +1677,34 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           </div>
         )}
 
-        {/* Drinking Games Overlay */}
+        {/* Drinking Games Overlay ("Estatua Griega" etc) */}
         {gameState.showDrinkingGame && gameState.currentDrinkingGame && (
-          <div className="absolute inset-0 z-20 bg-gradient-to-r from-slate-900/80 to-slate-800/80 flex items-center justify-center p-6 text-center text-white">
-            <div>
-              <h2 className="text-3xl font-bold mb-4">{gameState.currentDrinkingGame.name}</h2>
-              <p className="text-xl mb-8">{gameState.currentDrinkingGame.description}</p>
-              <Button onClick={() => {
-                setGameState((prev: any) => ({ ...prev, showDrinkingGame: false }));
-                handleNext();
-              }}>Continuar</Button>
-            </div>
+          <div className="absolute inset-0 z-[60] bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0, rotateY: 90 }}
+              animate={{ scale: 1, opacity: 1, rotateY: 0 }}
+              className="max-w-sm w-full bg-gradient-to-br from-indigo-900 to-slate-900 border-2 border-indigo-500 rounded-[2.5rem] p-8 text-center text-white shadow-[0_0_40px_rgba(99,102,241,0.4)] relative overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
+              <div className="relative z-10 space-y-6">
+                <div>
+                   <p className="text-[10px] text-indigo-300 font-black uppercase tracking-[0.3em] mb-2">Evento Especial</p>
+                   <h2 className="text-3xl font-black text-white leading-tight uppercase tracking-tighter drop-shadow-lg">{gameState.currentDrinkingGame.name}</h2>
+                </div>
+                <div className="bg-black/40 p-5 rounded-2xl border border-white/10 shadow-inner">
+                   <p className="text-lg font-bold text-indigo-100 leading-snug">{gameState.currentDrinkingGame.description}</p>
+                </div>
+                <Button 
+                   className="w-full h-14 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-lg rounded-xl shadow-xl transition-all active:scale-95"
+                   onClick={() => {
+                     setGameState((prev: any) => ({ ...prev, showDrinkingGame: false }));
+                     handleNext();
+                   }}
+                >
+                   ENTENDIDO, CONTINUAR ⏭
+                </Button>
+              </div>
+            </motion.div>
           </div>
         )}
 
@@ -1840,48 +1915,48 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           </div>
         )}
 
-        {/* Virus Alert Overlay - Smaller & Fixed logic */}
+        {/* Virus Alert Overlay - Stylized physical card format */}
         {gameState.showVirusAlert && gameState.virusAlertData && (
-          <div className="fixed inset-0 z-[100] bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4 text-center text-white animate-in fade-in duration-300">
+          <div className="absolute inset-0 z-[100] bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
             <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="max-w-xs w-full bg-slate-900 border-2 border-green-500 p-5 rounded-[2.5rem] shadow-[0_0_50px_rgba(34,197,94,0.4)] relative overflow-hidden"
+              initial={{ scale: 0.8, opacity: 0, rotateY: 90 }}
+              animate={{ scale: 1, opacity: 1, rotateY: 0 }}
+              className="max-w-sm w-full bg-gradient-to-br from-green-900 to-slate-900 border-2 border-green-500 rounded-[2.5rem] p-8 text-center text-white shadow-[0_0_50px_rgba(34,197,94,0.4)] relative overflow-hidden"
             >
-              <div className="relative z-10 space-y-4">
+              <div className="absolute inset-0 bg-black opacity-20 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-green-500/20 via-transparent to-transparent mix-blend-overlay"></div>
+              <div className="relative z-10 space-y-6">
                 <div className="flex justify-center">
-                  <div className="w-14 h-14 bg-green-500/20 rounded-full flex items-center justify-center border border-green-500/30 animate-pulse">
-                    <Zap className="w-7 h-7 text-green-500" />
+                  <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center border border-green-500/30 shadow-[0_0_20px_rgba(34,197,94,0.5)]">
+                    <Zap className="w-8 h-8 text-green-400" />
                   </div>
                 </div>
 
-                <div className="space-y-1">
-                  <h2 className="text-lg font-black text-green-500 tracking-tighter uppercase">¡VIRUS DETECTADO!</h2>
-                  <div className="h-px w-8 bg-green-500/30 mx-auto" />
+                <div>
+                   <p className="text-[12px] text-green-400 font-black uppercase tracking-[0.4em] mb-1">¡VIRUS DETECTADO!</p>
+                   <div className="h-0.5 w-12 bg-green-500/50 mx-auto rounded-full" />
                 </div>
 
-                <div className="bg-black/40 p-4 rounded-2xl border border-white/5 space-y-3">
+                <div className="bg-black/40 p-5 rounded-2xl border border-white/5 space-y-3 shadow-inner">
                   <div>
-                    <p className="text-[9px] text-white/40 font-black uppercase tracking-widest mb-0.5">Infectado</p>
-                    <p className="text-xl font-black text-white leading-tight">{gameState.virusAlertData?.player?.name || 'Jugador'}</p>
+                    <p className="text-[10px] text-white/50 font-black uppercase tracking-[0.2em] mb-1">Infectado</p>
+                    <p className="text-2xl font-black text-white leading-tight drop-shadow-md">{gameState.virusAlertData?.player?.name || 'Jugador'}</p>
                   </div>
                   
-                  <div className="pt-3 border-t border-white/5">
-                    <p className="text-[9px] text-green-400 font-black uppercase tracking-widest mb-0.5">Efecto</p>
-                    <p className="text-base font-black text-white uppercase leading-tight">
+                  <div className="pt-4 border-t border-white/10">
+                    <p className="text-[10px] text-green-500 font-black uppercase tracking-[0.2em] mb-1">Efecto / Maldición</p>
+                    <p className="text-xl font-black text-green-100 uppercase leading-tight mb-2">
                       {gameState.virusAlertData?.virus?.virusName || gameState.virusAlertData?.virus?.name || 'Virus Desconocido'}
                     </p>
-                    <p className="text-[11px] text-white/60 font-medium leading-snug mt-1">
+                    <p className="text-[13px] text-white/80 font-medium leading-relaxed">
                       {gameState.virusAlertData?.virus?.virusDescription || gameState.virusAlertData?.virus?.description || 'Efecto misterioso...'}
                     </p>
                   </div>
                 </div>
 
                 <Button
-                  className="w-full bg-green-600 hover:bg-green-500 text-white font-black py-3 text-base rounded-xl shadow-lg transition-all active:scale-95"
+                  className="w-full h-14 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white font-black py-3 text-lg rounded-xl shadow-[0_5px_15px_rgba(34,197,94,0.3)] transition-all active:scale-95 border-none"
                   onClick={() => {
                     setGameState((prev: any) => ({ ...prev, showVirusAlert: false, virusAlertData: null }));
-                    // After closing, we advance to the next card using the non-recursive helper
                     performTurnAdvance();
                   }}
                 >

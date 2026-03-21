@@ -11,7 +11,7 @@ import {
 } from './gameContentExtra2';
 import {
   clasicoExtra3, yoNuncaExtra3, picanteExtra3, masProbableExtra3,
-  pacoversExtra3, enLaCamaYExtra3, categoriasLetrasExtra3, categoriasRetoExtra3
+  pacoversExtra3, espanaExtra3, enLaCamaYExtra3, categoriasLetrasExtra3, categoriasRetoExtra3
 } from './gameContentExtra3';
 export interface GameQuestion {
   text: string;
@@ -6681,7 +6681,7 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
   const clasicoItems = getRandomItems(clasicoPool, clasicoPool.length);
   const clasicoCards = clasicoItems.map(q => addDrinking(q, Math.random() < 0.5 ? 'leve' : 'grupo'));
 
-  const pacoversPool = cleanDeckPool([...pacovers, ...(pacoversExtra || []), ...(pacoversExtra2 || []), ...(pacoversExtra3 || [])]);
+  const pacoversPool = cleanDeckPool([...pacovers, ...(pacoversExtra || []), ...(pacoversExtra2 || []), ...(pacoversExtra3 || []), ...(espanaExtra3 || [])]);
   const pacoversItems = getRandomItems(pacoversPool, pacoversPool.length);
   const pacoversCards = pacoversItems.map(q => addDrinking(`🇪🇸 ${q}`, 'leve'));
 
