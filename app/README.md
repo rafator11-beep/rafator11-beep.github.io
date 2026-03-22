@@ -1,73 +1,21 @@
-# Welcome to your Lovable project
+# 🍻 BEEP - Plataforma Definitiva de Juegos y Previas
 
-## Project info
+## 🎯 Naturaleza del Proyecto
+Esta es una aplicación web progresiva diseñada para el entretenimiento en grupo (previas, fiestas y reuniones). Combina dinámicas de juegos de mesa clásicos, retos interactivos y modos de juego tanto **Offline** (un solo dispositivo pasando de mano en mano) como **Online** (multijugador en tiempo real con salas privadas).
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## 🏗️ Stack Tecnológico
+* **Frontend:** React + TypeScript + Vite.
+* **Estilos:** Tailwind CSS (Diseño oscuro, neón, festivo y muy dinámico).
+* **Backend y Base de Datos:** Supabase.
+* **Lógica Multijugador:** Supabase Realtime / WebSockets (vital para sincronización de turnos y estados de partida).
 
-## How can I edit this code?
+## 📱 Reglas Críticas de Diseño (UI/UX)
+1. **Mobile-First Estricto:** El 99% de los usuarios usarán la app en un móvil en medio de una fiesta. Los botones deben ser grandes (fat-finger friendly), los textos legibles y las animaciones fluidas pero sin sobrecargar el dispositivo.
+2. **Prevención de Errores:** En una fiesta, la gente pulsa botones sin querer. Las acciones críticas (como salir de la partida o borrar puntos) deben tener confirmación o ser difíciles de pulsar por error.
+3. **Gestión de Estado Centralizada:** Los juegos deben poder recuperar su estado si un usuario recarga la página por accidente (usar localStorage o la base de datos de Supabase).
 
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## 🤖 INSTRUCCIONES ESTRICTAS PARA LA IA (Agentes y Asistentes)
+1. **Límites de Lectura:** Tienes PROHIBIDO leer `node_modules`, `dist`, o carpetas de `assets`/imágenes para buscar contexto. Lee únicamente los archivos que te indique el usuario.
+2. **Revisión Obligatoria:** Antes de escribir una sola línea de código para modificar un juego online o la estructura de Supabase, DETENTE. Explica tu plan lógico paso a paso y espera la aprobación del usuario.
+3. **Modularidad:** Si vas a crear un minijuego nuevo, aíslalo en su propia carpeta dentro de `src/components/games/`. Un fallo en el "Juego A" nunca debe romper el "Juego B".
+4. **Reglas Maestras:** Respeta siempre las directrices del archivo `.clinerules`..

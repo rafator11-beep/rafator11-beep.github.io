@@ -3,7 +3,7 @@ import { safeLower, asString } from '@/utils/safeText';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 
-import { Plus, X, Camera, Users, Play, ArrowLeft, History, Trash2, UserPlus, UserCheck, UserX, Globe } from 'lucide-react';
+import { Plus, X, Users, Play, ArrowLeft, UserPlus, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -18,11 +18,10 @@ import {
 import { useGameContext } from '@/contexts/GameContext';
 import { GAME_MODES, TEAM_COLORS } from '@/types/game';
 import { useSavedPlayers } from '@/hooks/useSavedPlayers';
-import { compressImageToDataUrl } from '@/utils/imageCompression';
 import { useRanking } from '@/hooks/useRanking';
 import { ChatComponent } from '@/components/multiplayer/ChatComponent';
 import { supabase } from '@/integrations/supabase/client';
-// Dialog imports removed (unused)
+import AddPlayerModal from '@/components/AddPlayerModal';
 
 // Wrapper to avoid prop drilling issues or valid types
 const ChatEmbed = ({ roomId, playerName }: { roomId: string, playerName: string }) => (
@@ -39,45 +38,20 @@ interface PlayerSetupProps {
 
 export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMultiplayer, roomId }: PlayerSetupProps) {
   const { game, players, teams, addPlayer, removePlayer, createTeam, assignPlayerToTeam, startGame } = useGameContext();
-  const { savedPlayers, savePlayer, removeFromSaved } = useSavedPlayers();
+  const { savedPlayers, savePlayer } = useSavedPlayers();
   const { rankings } = useRanking();
-  const [newPlayerName, setNewPlayerName] = useState('');
   const [newTeamName, setNewTeamName] = useState('');
   const [showTeamCreator, setShowTeamCreator] = useState(false);
-  const [showSavedPlayers, setShowSavedPlayers] = useState(true);
-  const [savedSearch, setSavedSearch] = useState('');
-
-  // Merge saved players with all DB rankings for a complete pool
-  const allKnownPlayers = (() => {
-    const merged = [...savedPlayers];
-    for (const r of rankings) {
-      if (!merged.some(p => safeLower(p.name) === safeLower(r.name))) {
-        // If they have an equipped avatar, use it, otherwise fallback to avatar_url
-        const effectiveAvatar = r.equipped_items?.avatar || r.avatar_url;
-        merged.push({ name: asString(r.name), avatar_url: effectiveAvatar });
-      }
-    }
-    return merged;
-  })();
-  const [selectedColorIndex, setSelectedColorIndex] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [pendingAvatarUrl, setPendingAvatarUrl] = useState<string | null>(null);
 
   const modeInfo = GAME_MODES.find(m => m.id === game?.mode);
-  // Fix: Prioritize the prop passed from Index.tsx (User selection). Fallback to mode config only if prop is undefined.
   const isTeamMode = forceTeamMode !== undefined ? forceTeamMode : (modeInfo?.teamBased || false);
   const minPlayers = isTeamMode ? 4 : 2;
-  // New: Max players for 1vs1 modes in individual play
   const is1vs1 = !isTeamMode && (game?.mode === 'futbol' || game?.mode === 'cultura' || game?.mode === 'trivia_futbol' || game?.mode === 'tictactoe');
   const maxPlayers = is1vs1 ? 2 : 20;
 
-  const handleAddPlayer = async (name?: string, avatarUrl?: string | null) => {
-    const playerName = name || newPlayerName.trim();
-    const playerAvatar = avatarUrl !== undefined ? avatarUrl : pendingAvatarUrl;
-
-    if (!playerName) return;
-
+  const handleAddPlayer = async (name: string, avatarUrl?: string | null) => {
     if (players.length >= maxPlayers) {
       toast.error(`Máximo ${maxPlayers} jugadores en este modo`);
       return;
@@ -85,16 +59,10 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
 
     setIsLoading(true);
     try {
-      if (name?.toLowerCase().includes('bot')) {
-        await addPlayer(name, avatarUrl || undefined);
-      } else {
-        await addPlayer(playerName, playerAvatar || undefined);
-        savePlayer(playerName, playerAvatar); // Save to localStorage
+      await addPlayer(name, avatarUrl || undefined);
+      if (!name.toLowerCase().includes('bot')) {
+        savePlayer(name, avatarUrl);
       }
-      setNewPlayerName('');
-      setPendingAvatarUrl(null);
-      // keep history open for faster adding
-      setShowSavedPlayers(true);
     } catch (err) {
       console.error('Error adding player:', err);
     } finally {
@@ -102,10 +70,9 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
     }
   };
 
-  // Auto-add logged/saved player for ALL modes (local and multiplayer)
+  // Auto-add logged/saved player for ALL modes
   useEffect(() => {
     if (players.length === 0 && !isLoading) {
-      // Try localStorage profile first (set by AuthOverlay)
       const localName = localStorage.getItem('fiesta_player_name');
       const localAvatar = localStorage.getItem('fiesta_player_avatar');
 
@@ -130,13 +97,12 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
     }
   }, [players.length, savedPlayers]);
 
-  // BRIDGE: Listen for room_participants and auto-add them as Game Players
+  // BRIDGE: Listen for room_participants
   useEffect(() => {
     if (!isMultiplayer || !roomId) return;
 
     console.log("Host listening for participants in room:", roomId);
 
-    // Initial fetch to get any players who joined while we were transitioning
     const syncExistingParticipants = async () => {
       const { data: participants } = await supabase
         .from('room_participants')
@@ -163,7 +129,6 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
         filter: `room_id=eq.${roomId}`
       }, payload => {
         const newPart = payload.new;
-        // Check if player already exists in the game to avoid duplicates
         if (!players.some(gp => gp.name.toLowerCase() === newPart.name.toLowerCase())) {
           console.log("New participant detected, auto-adding to game:", newPart.name);
           addPlayer(newPart.name, newPart.avatar_url).catch(console.error);
@@ -203,35 +168,7 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
     }
   };
 
-  const handleAssignToTeam = async (playerId: string, teamId: string | null) => {
-    try {
-      await assignPlayerToTeam(playerId, teamId);
-    } catch (err) {
-      console.error('Error assigning player:', err);
-    }
-  };
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Instant preview while compressing (avoids perceived lag)
-    const quickUrl = URL.createObjectURL(file);
-    setPendingAvatarUrl(quickUrl);
-
-    // Compress off the main flow
-    setTimeout(async () => {
-      try {
-        // Increased quality for avatars
-        const compressed = await compressImageToDataUrl(file, 800, 0.90);
-        setPendingAvatarUrl(compressed);
-      } catch (err) {
-        console.error('Error compressing image:', err);
-      } finally {
-        URL.revokeObjectURL(quickUrl);
-      }
-    }, 0);
-  };
+  const [selectedColorIndex, setSelectedColorIndex] = useState(0);
 
   const handleStartGame = async () => {
     setIsLoading(true);
@@ -248,14 +185,13 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
   const canStart = players.length >= minPlayers &&
     (!isTeamMode || (teams.length >= 2 && players.every(p => p.team_id)));
 
-  // --- Lobby “zona baile” (solo modos NO equipo) ---
+  // --- Lobby "zona baile" (solo modos NO equipo) ---
   const lobbyRef = useRef<HTMLDivElement | null>(null);
   const ballElsRef = useRef<Record<string, HTMLDivElement | null>>({});
   const ballsRef = useRef<Record<string, { x: number; y: number; vx: number; vy: number }>>({});
 
   const lobbyPlayers = useMemo(() => {
     return players.map(p => {
-      // Find ranking to get equipped avatar
       const playerRanking = rankings.find(r => safeLower(r.name) === safeLower(p.name));
       const effectiveAvatar = playerRanking?.equipped_items?.avatar || p.avatar_url || null;
       return {
@@ -271,7 +207,7 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
     const el = lobbyRef.current;
     if (!el) return;
 
-    const size = 52; // avatar “bola”
+    const size = 52; // avatar "bola"
     const seedBall = (id: string) => {
       const w = Math.max(1, el.clientWidth);
       const h = Math.max(1, el.clientHeight);
@@ -363,7 +299,7 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
-          {/* Add Player Section */}
+          {/* Players Section */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -372,246 +308,104 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold flex items-center gap-2">
                 <Users className="h-5 w-5 text-[hsl(var(--primary))]" />
-                Añadir Jugador
+                Operadores ({players.length})
               </h2>
-              {allKnownPlayers.length > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowSavedPlayers(!showSavedPlayers)}
-                  className="text-xs hover:neon-box"
-                >
-                  <History className="h-4 w-4 mr-1" />
-                  Jugadores ({allKnownPlayers.length})
-                </Button>
-              )}
-            </div>
-
-            {/* Saved Players Dropdown */}
-            <AnimatePresence>
-              {showSavedPlayers && allKnownPlayers.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="mb-4 p-3 bg-secondary/30 rounded-xl border border-border/50 max-h-[200px] overflow-y-auto"
-                >
-                  <p className="text-xs text-muted-foreground mb-2">Historial (toca para añadir rápido):</p>
-                  <Input
-                    value={savedSearch}
-                    onChange={(e) => setSavedSearch(e.target.value)}
-                    placeholder="Buscar jugador..."
-                    className="mb-2 h-8"
-                  />
-                  <div className="flex flex-wrap gap-2">
-                    {allKnownPlayers
-                      .filter(sp => !players.some(p => safeLower(p.name) === safeLower(sp.name)))
-                      .filter(sp => safeLower(sp.name).includes(safeLower(savedSearch)))
-                      .slice(0, 50)
-                      .map((savedPlayer) => (
-                        <div
-                          key={savedPlayer.name}
-                          className="flex items-center gap-2 bg-background/50 rounded-full pl-1 pr-2 py-1 border border-border/50 hover:neon-border transition-all cursor-pointer group"
-                          onClick={() => handleAddPlayer(savedPlayer.name, savedPlayer.avatar_url)}
-                        >
-                          <Avatar className="h-6 w-6">
-                            {savedPlayer.avatar_url ? (
-                              <AvatarImage src={savedPlayer.avatar_url} />
-                            ) : (
-                              <AvatarFallback className="bg-primary/20 text-primary text-xs">
-                                {savedPlayer.name.slice(0, 2).toUpperCase()}
-                              </AvatarFallback>
-                            )}
-                          </Avatar>
-                          <span className="text-sm">
-                            {savedPlayer.name}
-                          </span>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              removeFromSaved(savedPlayer.name);
-                            }}
-                            className="opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive/80"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </div>
-                      ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <div className="flex gap-3 mb-4">
-              <div
-                className="relative cursor-pointer"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <Avatar className="h-14 w-14 border-2 border-dashed border-muted-foreground/30 hover:border-primary transition-colors">
-                  {pendingAvatarUrl ? (
-                    <AvatarImage src={pendingAvatarUrl} />
-                  ) : (
-                    <AvatarFallback className="bg-muted">
-                      <Camera className="h-5 w-5 text-muted-foreground" />
-                    </AvatarFallback>
-                  )}
-                </Avatar>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleFileChange}
-                />
-              </div>
-
-              <div className="flex-1 flex gap-2">
-                <Input
-                  placeholder="Nombre del jugador"
-                  value={newPlayerName}
-                  onChange={(e) => setNewPlayerName(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleAddPlayer()}
-                  className="flex-1 bg-secondary/50 border-border/50"
-                />
-
-                {/* Chat Button removed - moved to Global Layout */}
-
-                <Button onClick={() => handleAddPlayer()} disabled={!newPlayerName.trim() || isLoading} className="neon-border hover:neon-box">
-                  <Plus className="h-4 w-4" />
-                </Button>
-
-                {(game?.mode === 'poker' || game?.mode === 'parchis') && (
-                  <Button
-                    onClick={() => handleAddPlayer(`Bot ${players.filter(p => p.name.includes('Bot')).length + 1}`, 'https://api.dicebear.com/7.x/bottts/svg?seed=' + Math.random())}
-                    disabled={isLoading || players.length >= maxPlayers}
-                    variant="outline"
-                    className="border-primary/50 text-primary hover:bg-primary/10"
-                  >
-                    <Plus className="h-4 w-4 mr-1" /> Bot
-                  </Button>
-                )}
-              </div>
-            </div>
-
-              {/* Players List - Bubble Grid */}
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-primary animate-ping" />
-                  <h3 className="text-xs font-black uppercase tracking-[0.2em] text-white/60">Operadores Conectados ({players.length})</h3>
-                </div>
-                <div className="flex gap-2">
+              <Dialog>
+                <DialogTrigger asChild>
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => {
-                      const botName = `Bot_${Math.floor(Math.random() * 999)}`;
-                      handleAddPlayer(botName, `https://api.dicebear.com/7.x/bottts/svg?seed=${botName}`);
-                    }}
-                    className="text-[10px] font-black uppercase tracking-widest hover:bg-white/5 border border-white/5"
+                    className="text-[10px] font-black uppercase tracking-widest bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20"
                   >
-                    <UserPlus className="h-3 w-3 mr-1.5" />
-                    + BOT
+                    <Globe className="h-3 w-3 mr-1.5" />
+                    Comunidad
                   </Button>
-                  {/* Community Bubble Trigger */}
-                   <Dialog>
-                    <DialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-[10px] font-black uppercase tracking-widest bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20"
+                </DialogTrigger>
+                <DialogContent className="bg-slate-900/95 backdrop-blur-2xl border-white/10 text-white max-w-md">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl font-black uppercase tracking-tighter">🌐 Red de Operadores</DialogTitle>
+                    <DialogDescription className="text-white/60">Selecciona perfiles reales de la comunidad para invitarlos.</DialogDescription>
+                  </DialogHeader>
+                  <div className="grid grid-cols-2 gap-3 py-4 max-h-[400px] overflow-y-auto pr-2">
+                    {rankings.slice(0, 10).map(r => (
+                      <button
+                        key={r.name}
+                        onClick={() => {
+                          handleAddPlayer(r.name, r.avatar_url);
+                          toast.success(`Invitado: ${r.name}`);
+                        }}
+                        className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5 hover:border-primary/50 transition-all text-left group"
                       >
-                        <Globe className="h-3 w-3 mr-1.5" />
-                        Comunidad
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="bg-slate-900/95 backdrop-blur-2xl border-white/10 text-white max-w-md">
-                      <DialogHeader>
-                        <DialogTitle className="text-xl font-black uppercase tracking-tighter">🌐 Red de Operadores</DialogTitle>
-                        <DialogDescription className="text-white/60">Selecciona perfiles reales de la comunidad para invitarlos.</DialogDescription>
-                      </DialogHeader>
-                      <div className="grid grid-cols-2 gap-3 py-4 max-h-[400px] overflow-y-auto pr-2">
-                        {rankings.slice(0, 10).map(r => (
-                          <button
-                            key={r.id}
-                            onClick={() => {
-                              handleAddPlayer(asString(r.name), r.avatar_url);
-                              toast.success(`Invitado: ${r.name}`);
-                            }}
-                            className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5 hover:border-primary/50 transition-all text-left group"
-                          >
-                            <Avatar className="h-10 w-10 border border-white/10 group-hover:scale-110 transition-transform">
-                              <AvatarImage src={r.avatar_url || undefined} />
-                              <AvatarFallback className="bg-slate-800 text-[10px]">{asString(r.name).slice(0,2)}</AvatarFallback>
-                            </Avatar>
-                            <div className="min-w-0">
-                              <p className="text-xs font-black truncate">{asString(r.name)}</p>
-                              <p className="text-[9px] text-white/40 font-bold uppercase tracking-widest">{r.total_xp || 0} XP</p>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                <AnimatePresence mode="popLayout">
-                  {players.map((player) => {
-                    const playerRanking = rankings.find(r => safeLower(r.name) === safeLower(player.name));
-                    const effectiveAvatar = playerRanking?.equipped_items?.avatar || player.avatar_url;
-
-                    return (
-                      <motion.div
-                        key={player.id}
-                        initial={{ opacity: 0, scale: 0.8, y: 10 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.8, y: -10 }}
-                        className="group relative flex flex-col items-center gap-3 p-4 rounded-[32px] bg-slate-900/40 backdrop-blur-xl border border-white/10 hover:border-primary/50 transition-all cursor-pointer shadow-xl"
-                        whileHover={{ scale: 1.05 }}
-                      >
-                        <div className="relative">
-                          <Avatar className="h-16 w-16 ring-4 ring-white/5 group-hover:ring-primary/20 transition-all duration-500 shadow-2xl">
-                            {effectiveAvatar ? (
-                              <AvatarImage src={effectiveAvatar} className="object-cover" />
-                            ) : (
-                              <AvatarFallback className="bg-gradient-to-br from-slate-800 to-slate-900 text-white font-black text-xl">
-                                {player.name.slice(0, 2).toUpperCase()}
-                              </AvatarFallback>
-                            )}
-                          </Avatar>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleRemovePlayer(player.id);
-                            }}
-                            className="absolute -top-1 -right-1 bg-red-500 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-red-600 active:scale-90"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
+                        <Avatar className="h-10 w-10 border border-white/10 group-hover:scale-110 transition-transform">
+                          <AvatarImage src={r.avatar_url || undefined} />
+                          <AvatarFallback className="bg-slate-800 text-[10px]">{r.name.slice(0, 2)}</AvatarFallback>
+                        </Avatar>
+                        <div className="min-w-0">
+                          <p className="text-xs font-black truncate">{r.name}</p>
+                          <p className="text-[9px] text-white/40 font-bold uppercase tracking-widest">{r.xp || 0} XP</p>
                         </div>
-                        <div className="text-center min-w-0 w-full px-1">
-                          <span className="text-[11px] font-black uppercase tracking-widest truncate block text-white/90">
-                            {player.name}
-                          </span>
-                          <span className="text-[9px] font-bold text-primary/60 uppercase tracking-tighter">
-                            Operador Listo
-                          </span>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </AnimatePresence>
-              </div>
-
-              {players.length === 0 && (
-                <div className="text-center py-8">
-                  <div className="text-white/60 mb-2">No hay jugadores</div>
-                  <div className="text-xs text-white/40">Añade al menos {minPlayers} para empezar</div>
-                </div>
-              )}
+                      </button>
+                    ))}
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              <AnimatePresence mode="popLayout">
+                {players.map((player) => {
+                  const playerRanking = rankings.find(r => safeLower(r.name) === safeLower(player.name));
+                  const effectiveAvatar = playerRanking?.equipped_items?.avatar || player.avatar_url;
+
+                  return (
+                    <motion.div
+                      key={player.id}
+                      initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.8, y: -10 }}
+                      className="group relative flex flex-col items-center gap-3 p-4 rounded-[32px] bg-slate-900/40 backdrop-blur-xl border border-white/10 hover:border-primary/50 transition-all cursor-pointer shadow-xl"
+                      whileHover={{ scale: 1.05 }}
+                    >
+                      <div className="relative">
+                        <Avatar className="h-16 w-16 ring-4 ring-white/5 group-hover:ring-primary/20 transition-all duration-500 shadow-2xl">
+                          {effectiveAvatar ? (
+                            <AvatarImage src={effectiveAvatar} className="object-cover" />
+                          ) : (
+                            <AvatarFallback className="bg-gradient-to-br from-slate-800 to-slate-900 text-white font-black text-xl">
+                              {player.name.slice(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          )}
+                        </Avatar>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemovePlayer(player.id);
+                          }}
+                          className="absolute -top-1 -right-1 bg-red-500 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-red-600 active:scale-90"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                      <div className="text-center min-w-0 w-full px-1">
+                        <span className="text-[11px] font-black uppercase tracking-widest truncate block text-white/90">
+                          {player.name}
+                        </span>
+                        <span className="text-[9px] font-bold text-primary/60 uppercase tracking-tighter">
+                          Operador Listo
+                        </span>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+            </div>
+
+            {players.length === 0 && (
+              <div className="text-center py-8">
+                <div className="text-white/60 mb-2">No hay jugadores</div>
+                <div className="text-xs text-white/40">Añade al menos {minPlayers} para empezar</div>
+              </div>
+            )}
           </motion.div>
 
           {/* Teams Section (for team-based modes) */}
@@ -829,7 +623,26 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
             </p>
           )}
         </motion.div>
-      </motion.div >
-    </div >
+      </motion.div>
+
+      {/* Floating Action Button */}
+      <motion.button
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={() => setIsModalOpen(true)}
+        className="fixed bottom-6 right-6 w-16 h-16 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg flex items-center justify-center hover:shadow-xl transition-shadow"
+      >
+        <Plus className="h-8 w-8" />
+      </motion.button>
+
+      {/* Add Player Modal */}
+      <AddPlayerModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onAddPlayer={handleAddPlayer}
+      />
+    </div>
   );
 }
