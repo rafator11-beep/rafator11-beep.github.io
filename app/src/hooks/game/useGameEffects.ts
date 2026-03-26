@@ -5,6 +5,8 @@ import { impostorRounds } from '@/data/impostorContent';
 import { duelos } from '@/data/duelosContent';
 import { footballQuestions } from '@/data/footballQuestionsNew';
 import { cultureQuestions } from '@/data/cultureQuestions';
+import { getRandomMimica } from '@/data/mimicaContent';
+import { getRandomBocaCerrada } from '@/data/bocaCerradaContent';
 import { shuffleArray } from '@/lib/utils';
 
 export const useGameEffects = (mode: GameMode, players: Player[]) => {
@@ -99,7 +101,7 @@ export const useGameEffects = (mode: GameMode, players: Player[]) => {
 
             // Logic: Rotate Virus to next player
             setPlayerViruses([]);
-            
+
             const randomVirus = virusEffects[Math.floor(Math.random() * virusEffects.length)];
             const nextIndex = (currentRound / 7) % players.length;
             const targetPlayer = players[nextIndex];
@@ -168,22 +170,46 @@ export const useGameEffects = (mode: GameMode, players: Player[]) => {
         // Random Norma removed - now strict every 3 rounds via manageMegamixNormas
 
 
-        // Impostor round - approximately every 7 rounds (we use currentIndex % (players.length * 7))
-        const isImpostorTurn = currentIndex > 0 && currentIndex % (players.length * 7) === 0;
+        // Special Megamix events every 6 rounds, triggered exactly when the first player of that round starts
+        const isSpecialRoundTurn = currentRound > 0 && currentRound % 6 === 0 && (currentIndex % players.length === 0);
 
-        if (players.length >= 3 && isImpostorTurn) {
-            const randomImpostor = impostorRounds[Math.floor(Math.random() * impostorRounds.length)];
-            const impostorPlayer = players[Math.floor(Math.random() * players.length)];
-            setGameState((prev: any) => ({
-                ...prev,
-                showImpostorWarning: true, // NEW state for anti-spoiler
-                showImpostor: false, // Don't show the main screen yet
-                impostorData: {
-                    currentImpostorReal: randomImpostor.normalQuestion,
-                    currentImpostorFake: randomImpostor.impostorQuestion,
-                    impostorPlayerId: impostorPlayer.id,
-                }
-            }));
+        if (players.length >= 3 && isSpecialRoundTurn && mode === 'megamix') {
+            const specialCycle = Math.floor(currentRound / 6) % 3;
+
+            if (specialCycle === 0 || !players.length) {
+                // Impostor
+                const randomImpostor = impostorRounds[Math.floor(Math.random() * impostorRounds.length)];
+                const impostorPlayer = players[Math.floor(Math.random() * players.length)];
+                setGameState((prev: any) => ({
+                    ...prev,
+                    showImpostor: true,
+                    impostorData: {
+                        currentImpostorReal: randomImpostor.normalQuestion,
+                        currentImpostorFake: randomImpostor.impostorQuestion,
+                        impostorPlayerId: impostorPlayer.id,
+                    }
+                }));
+            } else if (specialCycle === 1) {
+                // Mimica
+                const randomMimica = getRandomMimica();
+                const targetPlayer = players[Math.floor(Math.random() * players.length)];
+                setGameState((prev: any) => ({
+                    ...prev,
+                    showMimicaReveal: true,
+                    currentMimicaText: randomMimica.text
+                }));
+            } else {
+                // Boca Cerrada
+                const randomBoca = getRandomBocaCerrada();
+                const targetPlayer = players[Math.floor(Math.random() * players.length)];
+                setGameState((prev: any) => ({
+                    ...prev,
+                    showBocaCerradaReveal: true,
+                    currentBocaCerradaText: randomBoca.text,
+                    bocaCerradaData: { playerId: targetPlayer.id, playerName: targetPlayer.name }
+                }));
+            }
+            
             lastMiniTurnRef.current['impostor_round'] = currentIndex;
             return true;
         }

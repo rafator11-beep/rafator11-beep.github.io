@@ -19,7 +19,7 @@ const tabs = [
 
 export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
   return (
-    <nav className="fixed inset-x-0 bottom-3 z-50 px-3 md:px-4">
+    <nav className="fixed inset-x-0 bottom-3 z-50 px-3 md:px-4" style={{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom))' }}>
       <div className="mx-auto max-w-5xl rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,hsl(var(--card)/0.96),hsl(var(--card)/0.88))] p-2 shadow-[0_30px_80px_-38px_rgba(0,0,0,0.98)] backdrop-blur-2xl">
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
           {tabs.map((tab) => {

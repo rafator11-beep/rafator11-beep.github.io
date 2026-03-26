@@ -327,25 +327,36 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
                     <DialogDescription className="text-white/60">Selecciona perfiles reales de la comunidad para invitarlos.</DialogDescription>
                   </DialogHeader>
                   <div className="grid grid-cols-2 gap-3 py-4 max-h-[400px] overflow-y-auto pr-2">
-                    {rankings.slice(0, 10).map(r => (
-                      <button
-                        key={r.name}
-                        onClick={() => {
-                          handleAddPlayer(r.name, r.avatar_url);
-                          toast.success(`Invitado: ${r.name}`);
-                        }}
-                        className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5 hover:border-primary/50 transition-all text-left group"
-                      >
-                        <Avatar className="h-10 w-10 border border-white/10 group-hover:scale-110 transition-transform">
-                          <AvatarImage src={r.avatar_url || undefined} />
-                          <AvatarFallback className="bg-slate-800 text-[10px]">{r.name.slice(0, 2)}</AvatarFallback>
-                        </Avatar>
-                        <div className="min-w-0">
-                          <p className="text-xs font-black truncate">{r.name}</p>
-                          <p className="text-[9px] text-white/40 font-bold uppercase tracking-widest">{r.xp || 0} XP</p>
-                        </div>
-                      </button>
-                    ))}
+                    {rankings.slice(0, 10).map(r => {
+                      const isAdded = players.some(p => p.name === r.name);
+                      return (
+                        <button
+                          key={r.name}
+                          onClick={() => {
+                            if (!isAdded) {
+                              handleAddPlayer(r.name, r.avatar_url);
+                              toast.success(`Invitado: ${r.name}`);
+                            }
+                          }}
+                          disabled={isAdded}
+                          className={`flex items-center gap-3 p-3 rounded-2xl border transition-all text-left group ${
+                            isAdded 
+                              ? 'bg-primary/20 border-primary/50 opacity-50 cursor-not-allowed' 
+                              : 'bg-white/5 border-white/5 hover:border-primary/50'
+                          }`}
+                        >
+                          <Avatar className="h-10 w-10 border border-white/10 group-hover:scale-110 transition-transform">
+                            <AvatarImage src={r.avatar_url || undefined} />
+                            <AvatarFallback className="bg-slate-800 text-[10px]">{r.name.slice(0, 2)}</AvatarFallback>
+                          </Avatar>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-xs font-black truncate">{r.name}</p>
+                            <p className="text-[9px] text-white/40 font-bold uppercase tracking-widest">{r.xp || 0} XP</p>
+                          </div>
+                          {isAdded && <span className="text-[10px] font-bold text-primary mr-1">✅</span>}
+                        </button>
+                      );
+                    })}
                   </div>
                 </DialogContent>
               </Dialog>

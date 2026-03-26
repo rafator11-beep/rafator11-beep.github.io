@@ -6,12 +6,13 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
 import { compressImageToDataUrl } from '@/utils/imageCompression';
-import { User, Mail, Lock, Camera, Loader2, Sparkles, ShieldCheck, Ghost, AlertCircle, ArrowLeft, Monitor } from 'lucide-react';
+import { User, Mail, Lock, Camera, Loader2, Sparkles, ShieldCheck, Ghost, AlertCircle, ArrowLeft, Search, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from '@/integrations/supabase/client';
 
 export function WelcomeScreen() {
   const { signIn, signUp, isLoading, setAuthOverlayOpen } = useAuth();
-  const [step, setStep] = useState<'initial' | 'auth' | 'recent'>('initial');
+  const [step, setStep] = useState<'initial' | 'auth' | 'recent' | 'search'>('initial');
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -20,6 +21,41 @@ export function WelcomeScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [cooldown, setCooldown] = useState(0); 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // Search logic
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+
+  React.useEffect(() => {
+    if (step !== 'search') return;
+    if (!searchQuery.trim()) {
+        setSearchResults([]);
+        return;
+    }
+
+    const timer = setTimeout(async () => {
+        setIsSearching(true);
+        try {
+            const { data, error } = await supabase
+                .from('player_rankings')
+                .select('player_name, avatar_url, total_score')
+                .ilike('player_name', `%${searchQuery}%`)
+                .order('total_score', { ascending: false })
+                .limit(10);
+            
+            if (data && !error) {
+                setSearchResults(data);
+            }
+        } catch (err) {
+            console.error('Error fetching community profiles:', err);
+        } finally {
+            setIsSearching(false);
+        }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery, step]);
 
   // Recent Users handling
   const [recentUsers, setRecentUsers] = useState<Array<{email: string, name: string, avatar: string}>>(() => {
@@ -114,22 +150,19 @@ export function WelcomeScreen() {
   const busy = submitting || isLoading;
 
   return (
-    <div className="fixed inset-0 z-[200] bg-[#020617] flex items-center justify-center p-4 overflow-y-auto font-sans">
-      {/* Premium Cyber Background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-600/20 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-600/20 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
-        <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] bg-pink-600/10 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '4s' }} />
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] mix-blend-overlay" />
+    <div className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto font-sans">
+      {/* Modern Background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
       </div>
 
       <motion.div 
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="relative w-full max-w-[440px] bg-slate-900/40 backdrop-blur-[20px] rounded-[32px] p-8 md:p-10 shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10"
+        className="relative w-full max-w-[440px] bg-slate-900/60 backdrop-blur-[24px] rounded-[32px] p-8 md:p-10 shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10"
       >
         {/* Glow effect at top */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent rounded-full blur-sm" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent rounded-full blur-sm" />
 
         {/* Header */}
         <div className="text-center mb-10">
@@ -137,14 +170,14 @@ export function WelcomeScreen() {
             initial={{ rotate: -10, scale: 0.8 }}
             animate={{ rotate: 0, scale: 1 }}
             transition={{ type: 'spring', damping: 12 }}
-            className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-600 to-blue-600 shadow-[0_0_20px_rgba(147,51,234,0.4)] mb-6"
+            className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 shadow-[0_0_20px_rgba(245,158,11,0.4)] mb-6"
           >
             <Sparkles className="w-8 h-8 text-white" />
           </motion.div>
-          <h1 className="text-4xl font-black text-white mb-3 tracking-tight">
-            CYBER<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">PARTY</span>
+          <h1 className="text-4xl font-black text-white mb-3 tracking-tight drop-shadow-lg">
+            LA<span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">FIESTA</span>
           </h1>
-          <p className="text-slate-400 text-sm font-medium">Experiencia Premium de Juego Social</p>
+          <p className="text-slate-300 text-sm font-medium">Juego Social Premium</p>
         </div>
 
         <AnimatePresence mode="wait">
@@ -170,10 +203,10 @@ export function WelcomeScreen() {
                       setStep('auth');
                     }
                   }}
-                  className="h-20 rounded-[2rem] bg-gradient-to-r from-purple-600 to-blue-600 hover:scale-[1.02] transition-all border-0 flex flex-col items-center justify-center gap-1 group"
+                  className="h-20 rounded-[2rem] bg-gradient-to-r from-amber-500 to-orange-600 hover:scale-[1.02] transition-all border-0 flex flex-col items-center justify-center gap-1 group shadow-[0_10px_30px_rgba(245,158,11,0.2)]"
                 >
                   <span className="text-lg font-black tracking-widest uppercase">SÍ, HE JUGADO</span>
-                  <span className="text-[10px] opacity-60 font-bold group-hover:opacity-100 transition-opacity">ACCEDER A MI PERFIL</span>
+                  <span className="text-[10px] opacity-80 font-bold group-hover:opacity-100 transition-opacity">ACCEDER A MI PERFIL</span>
                 </Button>
 
                 <Button
@@ -191,7 +224,7 @@ export function WelcomeScreen() {
 
               <div className="flex items-center gap-4 py-2">
                 <div className="h-px flex-1 bg-white/5" />
-                <ShieldCheck className="w-5 h-5 text-purple-500/50" />
+                <ShieldCheck className="w-5 h-5 text-amber-500/50" />
                 <div className="h-px flex-1 bg-white/5" />
               </div>
 
@@ -225,9 +258,9 @@ export function WelcomeScreen() {
                       setIsLogin(true);
                       setStep('auth');
                     }}
-                    className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-purple-500/50 hover:bg-purple-500/10 transition-all flex items-center gap-4 text-left group"
+                    className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-amber-500/50 hover:bg-amber-500/10 transition-all flex items-center gap-4 text-left group"
                   >
-                    <Avatar className="w-12 h-12 ring-2 ring-purple-500/20 group-hover:ring-purple-500/50 transition-all">
+                    <Avatar className="w-12 h-12 ring-2 ring-amber-500/20 group-hover:ring-amber-500/50 transition-all">
                       <AvatarImage src={u.avatar} />
                       <AvatarFallback className="bg-slate-800 text-white font-black">{u.name[0].toUpperCase()}</AvatarFallback>
                     </Avatar>
@@ -235,7 +268,7 @@ export function WelcomeScreen() {
                       <p className="font-black text-white uppercase leading-none mb-1">{u.name}</p>
                       <p className="text-[10px] text-slate-500 font-bold truncate">{u.email}</p>
                     </div>
-                    <Lock className="w-4 h-4 text-slate-600 group-hover:text-purple-400" />
+                    <Lock className="w-4 h-4 text-slate-600 group-hover:text-amber-400" />
                   </button>
                 ))}
 
@@ -259,6 +292,81 @@ export function WelcomeScreen() {
               >
                 ← Volver
               </Button>
+            </motion.div>
+          ) : step === 'search' ? (
+            <motion.div
+              key="search"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="space-y-6"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <button type="button" onClick={() => setStep('auth')} className="p-2 hover:bg-white/5 rounded-full text-slate-500 transition-colors">
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Reclamar Perfil Guardado</span>
+              </div>
+              
+              <div className="text-center space-y-1 mb-4">
+                <h2 className="text-xl font-black text-white uppercase tracking-tight">Busca tu alias</h2>
+                <p className="text-slate-400 text-xs">Reclama tu progreso de partidas locales</p>
+              </div>
+
+              <div className="relative">
+                <Search className="absolute left-3 top-3.5 h-4 w-4 text-white/40" />
+                <Input
+                  autoFocus
+                  placeholder="Tu nombre de invitado..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 bg-white/5 border-white/10 text-white placeholder:text-white/40 h-12"
+                />
+                {isSearching && <Loader2 className="absolute right-3 top-3.5 h-4 w-4 animate-spin text-amber-500" />}
+              </div>
+
+              <div className="space-y-2 max-h-[220px] overflow-y-auto pr-2 custom-scrollbar">
+                {searchResults.length === 0 && searchQuery.trim() && !isSearching ? (
+                  <p className="text-center text-white/40 text-sm py-4">No se encontraron perfiles</p>
+                ) : searchResults.length === 0 && !searchQuery.trim() ? (
+                  <div className="text-center text-white/40 text-xs py-4 flex flex-col items-center gap-2">
+                    <Users className="h-6 w-6 text-white/20" />
+                    <p>Busca tu nombre de invitado</p>
+                  </div>
+                ) : (
+                  searchResults.map((result, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        setUsername(result.player_name);
+                        setAvatarPreview(result.avatar_url);
+                        setIsLogin(false); // Force creating a new account linked to this name
+                        setStep('auth');
+                        toast.info(`Perfil '${result.player_name}' seleccionado. Añade email y contraseña para finalizar.`);
+                      }}
+                      className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5 hover:border-amber-500/50 hover:bg-white/10 transition-all text-left group"
+                    >
+                      <Avatar className="h-10 w-10 border border-white/10 group-hover:scale-105 transition-transform">
+                        {result.avatar_url ? (
+                          <AvatarImage src={result.avatar_url} className="object-cover" />
+                        ) : (
+                          <AvatarFallback className="bg-slate-800 text-xs">
+                            {result.player_name.substring(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        )}
+                      </Avatar>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-bold text-sm truncate text-white group-hover:text-amber-400 transition-colors">{result.player_name}</p>
+                        <p className="text-[10px] text-white/40 font-black uppercase tracking-widest">{result.total_score || 0} PTS</p>
+                      </div>
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity text-amber-500 text-xs font-bold uppercase">
+                        Reclamar
+                      </div>
+                    </button>
+                  ))
+                )}
+              </div>
             </motion.div>
           ) : (
             <motion.div
@@ -284,18 +392,18 @@ export function WelcomeScreen() {
                       className="flex flex-col items-center gap-4 mb-2"
                     >
                       <div className="relative group">
-                        <Avatar className="w-24 h-24 ring-4 ring-purple-500/20 shadow-2xl transition-transform group-hover:scale-105">
+                        <Avatar className="w-24 h-24 ring-4 ring-amber-500/20 shadow-2xl transition-transform group-hover:scale-105">
                           <AvatarImage src={avatarPreview || undefined} />
                           <AvatarFallback className="bg-slate-800 text-slate-400 text-3xl font-bold border border-white/10">
                             {username ? username[0].toUpperCase() : <User className="w-10 h-10" />}
                           </AvatarFallback>
                         </Avatar>
-                        <label className="absolute bottom-0 right-0 cursor-pointer bg-purple-600 hover:bg-purple-500 text-white p-2 rounded-full shadow-lg transition-all border-2 border-slate-900">
+                        <label className="absolute bottom-0 right-0 cursor-pointer bg-amber-600 hover:bg-amber-500 text-white p-2 rounded-full shadow-lg transition-all border-2 border-slate-900">
                           <Camera className="w-4 h-4" />
                           <input type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
                         </label>
                       </div>
-                      <span className="text-xs font-bold text-purple-400 uppercase tracking-widest">Personaliza tu Avatar</span>
+                      <span className="text-xs font-bold text-amber-400 uppercase tracking-widest">Personaliza tu Avatar</span>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -304,13 +412,13 @@ export function WelcomeScreen() {
                   <div className="space-y-1.5">
                     <Label htmlFor="email" className="text-slate-400 text-[10px] uppercase tracking-[0.2em] font-black ml-1">Identidad Digital (Email)</Label>
                     <div className="relative group">
-                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-purple-400 transition-colors w-4.5 h-4.5" />
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-amber-400 transition-colors w-4.5 h-4.5" />
                       <Input
                         id="email"
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="pl-12 bg-slate-950/50 border-white/5 text-white placeholder-slate-600 rounded-2xl h-14 focus:border-purple-500/50 focus:ring-purple-500/10 transition-all text-base"
+                        className="pl-12 bg-slate-950/50 border-white/5 text-white placeholder-slate-600 rounded-2xl h-14 focus:border-amber-500/50 focus:ring-amber-500/10 transition-all text-base"
                         placeholder="nombre@ejemplo.com"
                         required
                         disabled={busy}
@@ -321,13 +429,13 @@ export function WelcomeScreen() {
                   <div className="space-y-1.5">
                     <Label htmlFor="password" className="text-slate-400 text-[10px] uppercase tracking-[0.2em] font-black ml-1">Código de Acceso</Label>
                     <div className="relative group">
-                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-purple-400 transition-colors w-4.5 h-4.5" />
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-amber-400 transition-colors w-4.5 h-4.5" />
                       <Input
                         id="password"
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="pl-12 bg-slate-950/50 border-white/5 text-white placeholder-slate-600 rounded-2xl h-14 focus:border-purple-500/50 focus:ring-purple-500/10 transition-all text-base"
+                        className="pl-12 bg-slate-950/50 border-white/5 text-white placeholder-slate-600 rounded-2xl h-14 focus:border-amber-500/50 focus:ring-amber-500/10 transition-all text-base"
                         placeholder="••••••••"
                         required
                         minLength={6}
@@ -346,12 +454,12 @@ export function WelcomeScreen() {
                       >
                         <Label htmlFor="username" className="text-slate-400 text-[10px] uppercase tracking-[0.2em] font-black ml-1">Nombre de Operador</Label>
                         <div className="relative group">
-                          <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-purple-400 transition-colors w-4.5 h-4.5" />
+                          <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-amber-400 transition-colors w-4.5 h-4.5" />
                           <Input
                             id="username"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
-                            className="pl-12 bg-slate-950/50 border-white/5 text-white placeholder-slate-600 rounded-2xl h-14 focus:border-purple-500/50 focus:ring-purple-500/10 transition-all text-base"
+                            className="pl-12 bg-slate-950/50 border-white/5 text-white placeholder-slate-600 rounded-2xl h-14 focus:border-amber-500/50 focus:ring-amber-500/10 transition-all text-base"
                             placeholder="Tu alias"
                             required
                             disabled={busy}
@@ -379,7 +487,7 @@ export function WelcomeScreen() {
                 <div className="space-y-4">
                   <Button
                     type="submit"
-                    className="w-full h-14 text-base font-black rounded-2xl bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white shadow-[0_10px_30px_rgba(147,51,234,0.3)] transition-all hover:scale-[1.02] active:scale-[0.98] border-0 disabled:opacity-50"
+                    className="w-full h-14 text-base font-black rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white shadow-[0_10px_30px_rgba(245,158,11,0.3)] transition-all hover:scale-[1.02] active:scale-[0.98] border-0 disabled:opacity-50"
                     disabled={busy || cooldown > 0}
                   >
                     {busy ? (
@@ -401,11 +509,21 @@ export function WelcomeScreen() {
                       setIsLogin(!isLogin);
                       setErrorMsg(null);
                     }}
-                    className="w-full text-slate-500 hover:text-purple-400 transition-colors text-xs font-black uppercase tracking-widest"
+                    className="w-full text-slate-500 hover:text-amber-400 transition-colors text-xs font-black uppercase tracking-widest"
                     disabled={busy}
                   >
                     {isLogin ? '¿Nuevo aquí? Crear Perfil' : '¿Ya tienes perfil? Identifícate'}
                   </button>
+
+                  <div className="pt-4 border-t border-white/5 mt-4">
+                    <button
+                      type="button"
+                      onClick={() => setStep('search')}
+                      className="w-full text-white/50 hover:text-white transition-colors text-xs font-bold bg-white/5 hover:bg-white/10 py-3 rounded-xl border border-white/5"
+                    >
+                      ¿Has jugado como invitado? Aquí tienes tu usuario
+                    </button>
+                  </div>
                 </div>
               </form>
 

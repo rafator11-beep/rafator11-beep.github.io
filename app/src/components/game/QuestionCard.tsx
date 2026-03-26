@@ -75,12 +75,23 @@ export function QuestionCard({ question, onAnswer, timeLimit = 30, playerName }:
             const isSelected = selectedAnswer === option;
             const isCorrectAnswer = question.correct_answer === option;
 
-            let bgClass = 'bg-white/10 hover:bg-white/20 border-transparent';
+            let bgClass = 'bg-white hover:bg-slate-100 text-slate-900 border-none shadow-md';
+            let textColor = 'text-slate-900';
+            let letterColor = 'text-slate-400';
+
             if (showResult) {
-              if (isCorrectAnswer) bgClass = 'bg-green-500/30 border-green-500';
-              else if (isSelected && !isCorrectAnswer) bgClass = 'bg-red-500/30 border-red-500';
+              if (isCorrectAnswer) {
+                bgClass = 'bg-green-500 border-none shadow-lg text-white font-bold';
+                textColor = 'text-white';
+                letterColor = 'text-green-200';
+              }
+              else if (isSelected && !isCorrectAnswer) {
+                bgClass = 'bg-red-500 border-none shadow-lg text-white font-bold';
+                textColor = 'text-white';
+                letterColor = 'text-red-200';
+              }
             } else if (isSelected) {
-              bgClass = 'bg-gradient-to-r from-purple-500/30 to-pink-500/30 border-white/20';
+              bgClass = 'bg-slate-200 border-none text-slate-900 shadow-inner';
             }
 
             return (
@@ -90,10 +101,10 @@ export function QuestionCard({ question, onAnswer, timeLimit = 30, playerName }:
                 whileTap={!showResult ? { scale: 0.98 } : {}}
                 onClick={() => handleSelectAnswer(option)}
                 disabled={showResult}
-                className={`p-4 rounded-xl border-2 text-left transition-all ${bgClass} text-white`}
+                className={`p-4 rounded-xl text-center transition-all ${bgClass} ${textColor}`}
               >
-                <span className="font-bold text-purple-400 mr-2">{letter}.</span>
-                {option}
+                {!showResult && !isSelected && <span className={`font-black ${letterColor} mr-2`}>{letter}.</span>}
+                <span className="font-semibold text-[1.1rem] tracking-tight">{option}</span>
               </motion.button>
             );
           })}
@@ -108,12 +119,20 @@ export function QuestionCard({ question, onAnswer, timeLimit = 30, playerName }:
             const isSelected = selectedAnswer === option;
             const isCorrectAnswer = question.correct_answer === option;
 
-            let bgClass = 'bg-white/10 hover:bg-white/20 border-transparent';
+            let bgClass = 'bg-white hover:bg-slate-100 text-slate-900 border-none shadow-md';
+            let textColor = 'text-slate-900';
+
             if (showResult) {
-              if (isCorrectAnswer) bgClass = 'bg-green-500/30 border-green-500';
-              else if (isSelected && !isCorrectAnswer) bgClass = 'bg-red-500/30 border-red-500';
+              if (isCorrectAnswer) {
+                bgClass = 'bg-green-500 border-none text-white font-bold';
+                textColor = 'text-white';
+              }
+              else if (isSelected && !isCorrectAnswer) {
+                bgClass = 'bg-red-500 border-none text-white font-bold';
+                textColor = 'text-white';
+              }
             } else if (isSelected) {
-              bgClass = 'bg-gradient-to-r from-purple-500/30 to-pink-500/30 border-white/20';
+              bgClass = 'bg-slate-200 border-none text-slate-900 shadow-inner';
             }
 
             return (
@@ -123,7 +142,7 @@ export function QuestionCard({ question, onAnswer, timeLimit = 30, playerName }:
                 whileTap={!showResult ? { scale: 0.95 } : {}}
                 onClick={() => handleSelectAnswer(option)}
                 disabled={showResult}
-                className={`px-8 py-4 rounded-xl border-2 font-semibold text-lg transition-all ${bgClass} text-white`}
+                className={`px-8 py-4 rounded-xl font-semibold text-[1.1rem] transition-all ${bgClass} ${textColor}`}
               >
                 {option === 'Verdadero' ? '✓' : '✗'} {option}
               </motion.button>
@@ -154,102 +173,113 @@ export function QuestionCard({ question, onAnswer, timeLimit = 30, playerName }:
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
-      className="bg-gradient-to-r from-slate-800/80 to-slate-700/80 backdrop-blur-xl rounded-2xl p-6 md:p-8 shadow-xl border border-white/10 max-w-3xl mx-auto"
+      className="w-full max-w-sm mx-auto h-[75vh] min-h-[500px] flex flex-col relative rounded-[2.5rem] overflow-hidden shadow-2xl bg-gradient-to-b from-indigo-600 to-slate-900"
     >
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <span className="text-sm px-3 py-1 bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-white rounded-full font-medium border border-white/10 backdrop-blur-sm">
-            {question.category}
-          </span>
-          <span className="text-sm text-white/60">
-            Dificultad: {'⭐'.repeat(question.difficulty)}
-          </span>
+      <div className="absolute inset-0 bg-[url('/modern_bg.png')] bg-cover bg-center opacity-30 mix-blend-overlay" />
+      <div className="absolute inset-0 bg-black/20 z-0" />
+
+      <div className="relative z-10 flex flex-col h-full p-4 md:p-6 overflow-y-auto slim-scroll pb-6">
+        {/* Header / Falso Logo */}
+        <div className="flex flex-col items-center pt-2 pb-2 shrink-0">
+            <span className="text-6xl mb-1 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)]">🧠</span>
+            <h1 className="text-3xl font-black italic tracking-tighter uppercase text-white drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] text-center leading-none">
+                PREGUNTA
+            </h1>
         </div>
-        
-        {timeLimit > 0 && !showResult && (
-          <div className={`flex items-center gap-2 ${getTimerColor()}`}>
-            <Timer className="h-5 w-5" />
-            <span className="font-mono text-xl font-bold text-white">{timeLeft}s</span>
-          </div>
-        )}
-      </div>
 
-      {/* Player Turn */}
-      <div className="text-center mb-4">
-        <span className="text-sm text-white/60">Turno de</span>
-        <h3 className="text-lg font-semibold text-white">{playerName}</h3>
-      </div>
+        {/* Player Name Pill */}
+        <div className="flex justify-center shrink-0 z-20 mt-1 mb-[-12px]">
+            <span className="bg-gradient-to-r from-amber-400 to-yellow-600 text-slate-900 font-extrabold px-6 py-1.5 rounded-full uppercase tracking-widest text-sm shadow-[0_0_20px_rgba(245,158,11,0.6)] border-2 border-yellow-300">
+                {playerName}
+            </span>
+        </div>
 
-      {/* Question */}
-      <div className="mb-8">
-        <h2 className="text-xl md:text-2xl font-bold text-center leading-relaxed text-white">
-          {question.question}
-        </h2>
-      </div>
-
-      {/* Options */}
-      {renderOptions()}
-
-      {/* Submit button for non-social questions */}
-      {question.type !== 'social' && !showResult && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: selectedAnswer ? 1 : 0.5 }}
-          className="mt-6 text-center"
-        >
-          <Button
-            size="lg"
-            onClick={handleSubmit}
-            disabled={!selectedAnswer}
-            className="px-8 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 border border-white/10 backdrop-blur-sm"
-          >
-            Confirmar Respuesta
-          </Button>
-        </motion.div>
-      )}
-
-      {/* Result feedback */}
-      <AnimatePresence>
-        {showResult && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            className={`mt-6 p-4 rounded-xl text-center ${
-              isCorrect ? 'bg-gradient-to-r from-green-500/20 to-emerald-500/20' : 'bg-gradient-to-r from-red-500/20 to-rose-500/20'
-            } border border-white/10 backdrop-blur-sm`}
-          >
-            {isCorrect ? (
-              <div className="flex items-center justify-center gap-2 text-green-400">
-                <CheckCircle2 className="h-6 w-6" />
-                <span className="font-semibold text-lg text-white">¡Correcto!</span>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center gap-2 text-red-400">
-                <div className="flex items-center gap-2">
-                  <XCircle className="h-6 w-6" />
-                  <span className="font-semibold text-lg text-white">Incorrecto</span>
-                </div>
-                {question.correct_answer && (
-                  <p className="text-sm text-white/80">
-                    La respuesta correcta era: <strong>{question.correct_answer}</strong>
-                  </p>
-                )}
+        {/* Central Question Box */}
+        <div className="w-full p-6 pt-8 rounded-[2rem] flex flex-col items-center text-center shadow-2xl relative bg-black/40 backdrop-blur-md shrink-0 mb-4 mt-8">
+            <div className="absolute top-3 left-4 right-4 flex justify-between text-xs font-bold opacity-60">
+                <span className="text-white uppercase tracking-wider">{question.category}</span>
+                <span className="text-yellow-400">{'⭐'.repeat(question.difficulty)}</span>
+            </div>
+            
+            {timeLimit > 0 && !showResult && (
+              <div className={`flex items-center gap-2 font-mono text-xl font-bold mt-2 mb-2 ${getTimerColor()}`}>
+                  <Timer className="h-5 w-5" />
+                  {timeLeft}s
               </div>
             )}
-          </motion.div>
-        )}
-      </AnimatePresence>
 
-      {/* Question voting */}
-      {showResult && (
-        <QuestionVote
-          questionText={question.question}
-          questionCategory={question.category}
-          voterName={playerName}
-        />
-      )}
+            <h2 className="text-xl md:text-2xl font-bold leading-snug tracking-tight text-white drop-shadow-sm">
+                {question.question}
+            </h2>
+        </div>
+
+        {/* Options */}
+        <div className="flex-1 content-end shrink-0 mb-4">
+            {renderOptions()}
+        </div>
+
+        {/* Submit button for non-social questions */}
+        {question.type !== 'social' && !showResult && (
+            <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: selectedAnswer ? 1 : 0.5 }}
+            className="mt-2 shrink-0"
+            >
+            <Button
+                size="lg"
+                onClick={handleSubmit}
+                disabled={!selectedAnswer}
+                className="w-full py-6 text-2xl bg-white text-indigo-900 font-extrabold rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.3)] hover:scale-105 active:scale-95 transition-all text-center tracking-wide disabled:opacity-50 disabled:hover:scale-100 disabled:bg-white/50"
+            >
+                Confirmar
+            </Button>
+            </motion.div>
+        )}
+
+        {/* Result feedback */}
+        <AnimatePresence>
+            {showResult && (
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className={`mt-2 p-4 rounded-2xl text-center shrink-0 shadow-lg ${
+                isCorrect ? 'bg-green-900/60 border border-green-500/50' : 'bg-red-900/60 border border-red-500/50'
+                } backdrop-blur-md`}
+            >
+                {isCorrect ? (
+                <div className="flex items-center justify-center gap-2 text-green-400">
+                    <CheckCircle2 className="h-6 w-6" />
+                    <span className="font-bold text-lg text-white">¡Correcto!</span>
+                </div>
+                ) : (
+                <div className="flex flex-col items-center gap-1 text-red-400">
+                    <div className="flex items-center gap-2">
+                    <XCircle className="h-6 w-6" />
+                    <span className="font-bold text-lg text-white">Incorrecto</span>
+                    </div>
+                    {question.correct_answer && (
+                    <p className="text-xs text-white/80">
+                        Era: <strong>{question.correct_answer}</strong>
+                    </p>
+                    )}
+                </div>
+                )}
+            </motion.div>
+            )}
+        </AnimatePresence>
+
+        {/* Question voting */}
+        {showResult && (
+            <div className="mt-4 shrink-0">
+                <QuestionVote
+                questionText={question.question}
+                questionCategory={question.category}
+                voterName={playerName}
+                />
+            </div>
+        )}
+      </div>
     </motion.div>
   );
 }

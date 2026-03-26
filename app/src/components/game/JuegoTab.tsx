@@ -36,7 +36,7 @@ export function JuegoTab({ onSelectMode }: JuegoTabProps) {
         className="mb-6 grid gap-4 xl:grid-cols-[1.35fr_0.85fr]"
       >
         <div className="surface-panel relative overflow-hidden p-5 md:p-7">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,hsl(var(--accent)/0.14),transparent_28%),radial-gradient(circle_at_bottom_right,hsl(var(--primary)/0.16),transparent_28%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.06),transparent_40%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.04),transparent_40%)]" />
           <div className="relative space-y-5">
             <div className="space-y-3">
               <span className="section-badge">
@@ -58,7 +58,7 @@ export function JuegoTab({ onSelectMode }: JuegoTabProps) {
                 onClick={() => setPlayMode('local')}
                 className={`flex flex-1 items-center justify-center gap-2 rounded-[18px] px-4 py-3 text-sm font-semibold transition ${
                   playMode === 'local'
-                    ? 'bg-[linear-gradient(135deg,hsl(var(--primary)),hsl(var(--primary-strong)))] text-white shadow-[0_12px_28px_-16px_hsl(var(--primary)/0.95)]'
+                    ? 'bg-white/10 text-white shadow-sm ring-1 ring-white/15'
                     : 'text-muted-foreground hover:text-white'
                 }`}
               >
@@ -69,7 +69,7 @@ export function JuegoTab({ onSelectMode }: JuegoTabProps) {
                 onClick={() => setPlayMode('online')}
                 className={`flex flex-1 items-center justify-center gap-2 rounded-[18px] px-4 py-3 text-sm font-semibold transition ${
                   playMode === 'online'
-                    ? 'bg-[linear-gradient(135deg,hsl(var(--accent)),hsl(var(--primary)))] text-[hsl(var(--accent-foreground))] shadow-[0_12px_28px_-16px_hsl(var(--accent)/0.95)]'
+                    ? 'bg-white/10 text-white shadow-sm ring-1 ring-white/15'
                     : 'text-muted-foreground hover:text-white'
                 }`}
               >
@@ -107,7 +107,7 @@ export function JuegoTab({ onSelectMode }: JuegoTabProps) {
 
         <div className="surface-soft rounded-[28px] p-5 md:p-6">
           <div className="flex items-center gap-3">
-            <div className="rounded-2xl bg-[hsl(var(--accent)/0.16)] p-3 text-[hsl(var(--accent))]">
+            <div className="rounded-2xl bg-white/5 border border-white/5 p-3 text-white">
               <Sword className="h-5 w-5" />
             </div>
             <div>

@@ -562,7 +562,7 @@ function GameAppInner() {
                         <button
                           onClick={() => setMainTab('fiesta')}
                           className={`flex-1 rounded-[16px] px-4 py-2.5 text-sm font-semibold transition ${mainTab === 'fiesta'
-                            ? 'bg-[linear-gradient(135deg,hsl(var(--primary)),hsl(var(--primary-strong)))] text-white shadow-[0_14px_30px_-18px_hsl(var(--primary)/0.95)]'
+                            ? 'bg-white/10 text-white shadow-sm ring-1 ring-white/15'
                             : 'text-muted-foreground hover:text-white'}`}
                         >
                           Fiesta
@@ -570,7 +570,7 @@ function GameAppInner() {
                         <button
                           onClick={() => setMainTab('juego')}
                           className={`flex-1 rounded-[16px] px-4 py-2.5 text-sm font-semibold transition ${mainTab === 'juego'
-                            ? 'bg-[linear-gradient(135deg,hsl(var(--accent)),hsl(var(--primary)))] text-[hsl(var(--accent-foreground))] shadow-[0_14px_30px_-18px_hsl(var(--accent)/0.95)]'
+                            ? 'bg-white/10 text-white shadow-sm ring-1 ring-white/15'
                             : 'text-muted-foreground hover:text-white'}`}
                         >
                           Competitivo

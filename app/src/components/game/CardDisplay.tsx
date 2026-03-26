@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Share2, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { User } from 'lucide-react';
 import { RarityBadge } from '@/components/game/RarityBadge';
 
 interface CardDisplayProps {
@@ -16,12 +16,16 @@ interface CardDisplayProps {
 
 export function sanitizeCardText(text: string): string {
     if (!text) return '';
-    let clean = text;
+    let clean = text.trim();
     // Remove variations of "es", "norma", "norma", etc from the beginning
     clean = clean.replace(/^(es\s*:?\s*)+/i, '');
+    clean = clean.replace(/^(es\s)+/i, '');
     clean = clean.replace(/^(norma\s*,?\s*:?\s*)+/i, '');
     clean = clean.replace(/^(es\s*norma\s*,?\s*:?\s*)+/i, '');
     clean = clean.replace(/^(nueva norma\s*:?\s*)+/i, '');
+    
+    // Remove standalone 'es' or 'ES' at the very beginning
+    clean = clean.replace(/^es\s+/i, '');
 
     clean = clean.replace(/\s{2,}/g, ' ').trim();
     if (clean.length > 0) {
@@ -43,7 +47,7 @@ export function processDrinkingMultiplier(text: string, round: number = 1): Reac
         const parts = text.split(/(🍺.*?tragos?|🍻.*?doble|🥃.*?fondo|🥂.*?grupal!)/i);
         return parts.map((part, i) => {
             if (part && part.match(/(🍺|🍻|🥃|🥂)/)) {
-                return <span key={i} className="text-red-400 font-extrabold block mt-6 text-3xl sm:text-4xl animate-pulse drop-shadow-[0_0_15px_rgba(239,68,68,0.7)]">{part}</span>;
+                return <span key={i} className="text-red-400 font-extrabold block mt-3 text-xl sm:text-2xl animate-pulse drop-shadow-[0_0_15px_rgba(239,68,68,0.7)]">{part}</span>;
             }
             return part;
         });
@@ -73,100 +77,161 @@ export function processDrinkingMultiplier(text: string, round: number = 1): Reac
                 modified = modified + ' ¡TRIPLE! 🔥🔥'; // Escalate double
             }
 
-            return <span key={i} className="text-red-500 font-black block mt-6 text-3xl sm:text-4xl lg:text-5xl drop-shadow-[0_0_15px_rgba(239,68,68,0.8)] animate-bounce">{modified.trim()}</span>;
+            return <span key={i} className="text-red-500 font-black block mt-3 text-xl sm:text-2xl drop-shadow-[0_0_15px_rgba(239,68,68,0.8)] animate-bounce">{modified.trim()}</span>;
         }
         return <span key={i}>{segment}</span>;
     });
 }
 
 export function CardDisplay({ content, type = 'common', onClick, gameMode, players, round = 1 }: CardDisplayProps) {
-    const [voted, setVoted] = useState<'up' | 'down' | null>(null);
+    const getIntelligentEmoji = (text: string, type: string) => {
+        const t = text.toLowerCase();
+        if (t.includes('beso') || t.includes('liar') || t.includes('pico') || t.includes('labio')) return '💋';
+        if (t.includes('beb') || t.includes('trago')) return '🍻';
+        if (t.includes('ropa') || t.includes('desnud')) return '👕';
+        if (t.includes('canción') || t.includes('canta')) return '🎵';
+        if (t.includes('baile') || t.includes('baila')) return '💃';
+        if (t.includes('ex') || t.includes('pareja') || t.includes('novi')) return '💔';
+        if (t.includes('crush') || t.includes('amor')) return '😍';
+        if (t.includes('móvil') || t.includes('whatsapp') || t.includes('instagram')) return '📱';
+        if (t.includes('dinero') || t.includes('pagar') || t.includes('comprar')) return '💸';
+        if (t.includes('cama') || t.includes('dormir')) return '🛌';
+        if (t.includes('comida') || t.includes('comer') || t.includes('pizza') || t.includes('hambre')) return '🍕';
+        if (t.includes('foto') || t.includes('selfie') || t.includes('cámara')) return '📸';
+        if (t.includes('coche') || t.includes('conduc') || t.includes('volante')) return '🚗';
+        if (t.includes('animal') || t.includes('perro') || t.includes('gato')) return '🐶';
+        if (t.includes('fiesta') || t.includes('club') || t.includes('discoteca')) return '🎊';
+        if (type === 'yo_nunca' || type === 'yo_nunca_equipos') return '🙈';
+        if (type === 'reto' || type === 'accion') return '🎯';
+        if (type === 'bomba' || type === 'ruleta' || type === 'trivia_futbol') return '💣';
+        if (type === 'pregunta') return '🧠';
+        return '🔥';
+    };
 
     // Dynamic Color Palette Mapping
     const getModeStyles = () => {
+        const isNorma = content.toUpperCase().includes('NORMA:') || content.toUpperCase().startsWith('NORMA');
+        const intelligentEmoji = getIntelligentEmoji(content, type);
+
+        if (isNorma) {
+            return {
+                title: 'NUEVA NORMA',
+                bgClass: 'bg-gradient-to-b from-orange-400 to-red-600',
+                textColor: 'text-orange-700',
+                icon: '📜'
+            };
+        }
+
         switch (gameMode) {
             case 'megamix':
                 return {
-                    border: 'border-purple-500/50',
-                    glow: 'bg-purple-500',
-                    gradient: 'from-purple-600/20 to-pink-600/20',
-                    icon: '🔮'
+                    title: 'BEEP MEGAMIX',
+                    bgClass: 'bg-gradient-to-b from-indigo-600 to-purple-900',
+                    textColor: 'text-purple-800',
+                    icon: intelligentEmoji
                 };
             case 'clasico':
                 return {
-                    border: 'border-emerald-500/50',
-                    glow: 'bg-emerald-500',
-                    gradient: 'from-emerald-600/20 to-lime-600/20',
-                    icon: '🎲'
+                    title: 'OLIMPIADAS',
+                    bgClass: 'bg-gradient-to-b from-blue-400 to-cyan-600',
+                    textColor: 'text-blue-700',
+                    icon: intelligentEmoji
                 };
             case 'yo_nunca':
             case 'yo_nunca_equipos':
                 return {
-                    border: 'border-blue-500/50',
-                    glow: 'bg-blue-500',
-                    gradient: 'from-blue-600/20 to-indigo-600/20',
-                    icon: '🌊'
+                    title: 'YO NUNCA HE...',
+                    bgClass: 'bg-gradient-to-br from-emerald-500 to-teal-900',
+                    textColor: 'text-teal-800',
+                    icon: intelligentEmoji
                 };
             case 'picante':
                 return {
-                    border: 'border-magenta-500/50',
-                    glow: 'bg-pink-600',
-                    gradient: 'from-magenta-600/20 to-pink-600/20',
-                    icon: '🔥'
+                    title: 'LA VERDAD O...',
+                    bgClass: 'bg-gradient-to-b from-fuchsia-500 to-pink-700',
+                    textColor: 'text-pink-700',
+                    icon: intelligentEmoji
                 };
             case 'espana':
                 return {
-                    border: 'border-orange-500/50',
-                    glow: 'bg-orange-500',
-                    gradient: 'from-orange-600/20 to-red-600/20',
-                    icon: '💃'
-                };
-            case 'votacion':
-                return {
-                    border: 'border-violet-500/50',
-                    glow: 'bg-violet-500',
-                    gradient: 'from-violet-600/20 to-purple-600/20',
-                    icon: '🗳️'
+                    title: 'FIESTA ESPAÑA',
+                    bgClass: 'bg-gradient-to-b from-red-500 to-orange-600',
+                    textColor: 'text-red-700',
+                    icon: intelligentEmoji
                 };
             case 'pacovers':
             case 'veteranos':
                 return {
-                    border: 'border-amber-500/50',
-                    glow: 'bg-amber-500',
-                    gradient: 'from-amber-600/20 to-yellow-600/20',
-                    icon: '🏆'
+                    title: 'CHIMBOLEO',
+                    bgClass: 'bg-gradient-to-b from-amber-400 to-orange-600',
+                    textColor: 'text-amber-700',
+                    icon: intelligentEmoji
                 };
             case 'impostor':
             case 'mimica':
             case 'boca_cerrada':
                 return {
-                    border: 'border-purple-900/50',
-                    glow: 'bg-purple-950',
-                    gradient: 'from-black to-slate-900',
-                    icon: '🕵️'
+                    title: 'RETO ESPECIAL',
+                    bgClass: 'bg-gradient-to-b from-violet-600 to-purple-900',
+                    textColor: 'text-violet-800',
+                    icon: intelligentEmoji
+                };
+            case 'bomba':
+            case 'ruleta':
+            case 'trivia_futbol':
+                return {
+                    title: 'BOMBA',
+                    bgClass: 'bg-gradient-to-b from-red-600 to-rose-900',
+                    textColor: 'text-red-800',
+                    icon: '💣'
                 };
             default:
                 return {
-                    border: 'border-white/20',
-                    glow: 'bg-primary/20',
-                    gradient: 'from-white/5 to-transparent',
-                    icon: '🎲'
+                    title: 'PREGUNTA',
+                    bgClass: 'bg-gradient-to-b from-slate-700 to-slate-900',
+                    textColor: 'text-slate-800',
+                    icon: intelligentEmoji
                 };
         }
     };
 
     const styles = getModeStyles();
 
-    // Reset vote when content changes
-    useEffect(() => {
-        setVoted(null);
-    }, [content]);
-
-    const handleVote = (e: React.MouseEvent, vote: 'up' | 'down') => {
-        e.stopPropagation();
-        setVoted(vote);
-        console.log(`Voted ${vote} for: ${content}`);
+    // Dynamic Content Animation Engine
+    const getAnimationProps = () => {
+        const lower = content.toLowerCase();
+        if (lower.includes('trago') || lower.includes('beber') || lower.includes('fondo') || lower.includes('cerveza') || lower.includes('chupito')) {
+            // Wobble effect for drinking
+            return {
+                animate: { rotate: [0, -2, 2, -1, 1, 0] },
+                transition: { duration: 0.6, repeat: Infinity, repeatDelay: 3 }
+            };
+        }
+        if (lower.includes('beso') || lower.includes('ropa') || lower.includes('sexy') || lower.includes('caliente')) {
+            // Floating seductive pulse
+            return {
+                animate: { y: [0, -5, 0], scale: [1, 1.02, 1] },
+                transition: { duration: 2, repeat: Infinity }
+            };
+        }
+        if (lower.includes('bomba') || lower.includes('castigo') || lower.includes('muerte') || lower.includes('elimina')) {
+            // Violent shake
+            return {
+                animate: { x: [0, -3, 3, -3, 3, 0] },
+                transition: { duration: 0.3, repeat: Infinity, repeatDelay: 2 }
+            };
+        }
+        if (lower.includes('rápido') || lower.includes('tiempo') || lower.includes('segundos')) {
+            // Heartbeat
+            return {
+                animate: { scale: [1, 1.05, 1, 1.05, 1] },
+                transition: { duration: 0.8, repeat: Infinity, repeatDelay: 1.5 }
+            };
+        }
+        return {}; // Default no extra animation for the box itself, just standard UI
     };
+
+    const fx = getAnimationProps();
 
     useEffect(() => {
         if (!content) return;
@@ -176,8 +241,19 @@ export function CardDisplay({ content, type = 'common', onClick, gameMode, playe
         };
     }, [content]);
 
+    // Match if there's a specific player name in the text 
+    // to put them in the Golden Pill
+    const getTargetPlayer = () => {
+        if (!players) return null;
+        const lowerContent = content.toLowerCase();
+        return players.find(p => lowerContent.includes(p.name.toLowerCase()));
+    };
+
+    const targetPlayer = getTargetPlayer();
+    const isNormaCard = content.toUpperCase().includes('NORMA:') || content.toUpperCase().startsWith('NORMA');
+
     return (
-        <div className="perspective-1000 w-full max-w-md mx-auto aspect-[3/4] cursor-pointer" onClick={onClick}>
+        <div className="w-full max-w-sm mx-auto h-[75vh] min-h-[500px] flex flex-col justify-between perspective-1000">
             <AnimatePresence mode="wait">
                 <motion.div
                     key={content}
@@ -186,132 +262,68 @@ export function CardDisplay({ content, type = 'common', onClick, gameMode, playe
                     animate={{ rotateY: 0, opacity: 1, scale: 1 }}
                     exit={{ rotateY: -90, opacity: 0, scale: 0.8 }}
                     transition={{ type: "spring", stiffness: 100, damping: 20 }}
-                    className="w-full h-full group"
+                    className={`w-full h-full relative rounded-[2.5rem] overflow-hidden shadow-2xl ${styles.bgClass}`}
                 >
-                    <Card className={`
-            w-full h-full p-8 flex flex-col items-center justify-center text-center relative overflow-hidden rounded-[2.5rem] transition-all duration-500
-            !bg-slate-950 backdrop-blur-none !border-2 shadow-2xl
-            ${type === 'legendary' ? '!border-yellow-400 shadow-[0_0_40px_rgba(250,204,21,0.4)]' : 
-              type === 'virus' ? '!border-green-500 shadow-[0_0_40px_rgba(34,197,94,0.4)]' :
-              type === 'chaos' ? '!border-red-600 shadow-[0_0_40px_rgba(220,38,38,0.4)]' :
-              type === 'rare' ? '!border-blue-400 shadow-[0_0_30px_rgba(96,165,250,0.4)]' :
-              `!${styles.border} shadow-xl`}
-          `}>
-                        {/* Glossy Dynamic Gradient */}
-                        <div className={`absolute inset-0 bg-gradient-to-br ${styles.gradient} opacity-[0.15] group-hover:opacity-30 transition-opacity`} />
-                        
-                        {/* Dynamic Neon Glow */}
-                        <div className={`absolute -inset-4 opacity-20 group-hover:opacity-40 transition-opacity blur-[60px] pointer-events-none
-                            ${type === 'legendary' ? 'bg-yellow-400' : 
-                              type === 'virus' ? 'bg-green-500' : 
-                              type === 'chaos' ? 'bg-red-600' : 
-                              type === 'rare' ? 'bg-blue-400' : 
-                              styles.glow}
-                        `} />
+                    {/* Dark Texture Overlay (replaces the pure dark background to keep vibrant color but add texture) */}
+                    <div className="absolute inset-0 bg-[url('/modern_bg.png')] bg-cover bg-center opacity-30 mix-blend-overlay" />
 
-                        <div className="absolute top-0 right-0 p-6 opacity-20 group-hover:opacity-40 transition-opacity">
-                            <span className="text-7xl drop-shadow-2xl">{styles.icon}</span>
+                    <div className="relative z-10 flex flex-col items-center justify-between h-full px-6 pt-10 pb-6">
+                        
+                        <div className="flex flex-col items-center transform transition-all duration-300 group-hover:scale-105 shrink-0 mt-4">
+                            <span className="text-8xl md:text-9xl mb-2 drop-shadow-2xl z-10 block text-center filter contrast-125">{styles.icon}</span>
+                            <h1 className="text-3xl font-black italic tracking-tighter uppercase text-white drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] text-center leading-[0.85] w-full flex flex-wrap items-center justify-center">
+                                {styles.title}
+                            </h1>
                         </div>
 
-                        <div className="relative z-10 flex flex-col items-center gap-6 w-full">
-                            <RarityBadge rarity={type} />
+                        {/* CENTRAL TEXT BOX - Now a borderless dark pill */}
+                        <motion.div 
+                            className="w-full flex flex-col items-center justify-center relative mt-8 mb-4 max-h-[50%]"
+                            {...fx} // Dynamic text-based animation applied here
+                        >
+                            {targetPlayer && !isNormaCard && (
+                                <div className="absolute -top-4 z-20 bg-amber-400 text-amber-900 font-black px-6 py-1.5 rounded-full uppercase tracking-widest text-sm shadow-[0_4px_15px_rgba(0,0,0,0.5)]">
+                                    {targetPlayer.name}
+                                </div>
+                            )}
 
-                            <h2 className="text-2xl md:text-3xl font-bold leading-tight balance-text text-white w-full">
-                                {(() => {
-                                    const isNormaCard = content.toUpperCase().includes('NORMA:') || content.toUpperCase().startsWith('NORMA');
-                                    if (isNormaCard) {
-                                        return (
-                                            <div className="flex flex-col items-center gap-6">
-                                                <span className="text-7xl mb-2 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)]">📜</span>
-                                                <span className="text-yellow-500 text-3xl md:text-4xl font-black tracking-widest uppercase drop-shadow-[0_0_15px_rgba(234,179,8,0.6)]">¡NUEVA NORMA!</span>
-                                                <span className="text-lg text-white/70 font-black italic tracking-tight bg-white/5 px-4 py-1 rounded-full border border-white/10">(Lee arriba)</span>
-                                            </div>
-                                        );
-                                    }
-
-                                    const sanitized = sanitizeCardText(content) || 'Siguiente carta';
-                                    return (
-                                        <div className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tighter balance-text text-white w-full drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] leading-[1.1]">
-                                            {processDrinkingMultiplier(sanitized, round)}
-                                        </div>
-                                    );
-                                })()}
-                            </h2>
-
-                            <motion.div
-                                className="mt-8 flex flex-col items-center gap-4 z-10" // Modified layout
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ delay: 1 }}
-                            >
-                                {/* Player Voting Options (Who is most likely) */}
-                                {players && players.length > 0 && (gameMode === 'votacion' || content.includes('¿Quién') || content.includes('Quién')) && (
-                                    <div className="flex flex-wrap justify-center gap-2 mb-2">
-                                        {players.map(p => (
-                                            <button
-                                                key={p.id}
-                                                onClick={(e) => { e.stopPropagation(); console.log('Voted:', p.name); }}
-                                                className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 transition-all text-sm font-bold text-white shadow-lg active:scale-95"
-                                            >
-                                                {p.avatar_url && <img src={p.avatar_url} className="w-6 h-6 rounded-full object-cover border border-white/20" />}
-                                                <span>{p.name}</span>
-                                            </button>
-                                        ))}
+                            <div className="w-full p-8 rounded-[2rem] flex flex-col items-center text-center shadow-2xl relative bg-black/40 backdrop-blur-md overflow-hidden">
+                                {type !== 'common' && (
+                                    <div className="absolute top-2 left-0 w-full flex justify-center opacity-50">
+                                        <RarityBadge rarity={type} />
                                     </div>
                                 )}
-
-                                <div className="flex gap-8 mt-4">
-                                    <Button
-                                        variant="ghost"
-                                        className={`w-16 h-16 rounded-full text-white/50 hover:text-white hover:bg-white/10 border-2 border-transparent hover:border-white/20 transition-all active:scale-90 ${voted === 'up' ? 'text-green-400 bg-white/10 border-green-400/50' : ''}`}
-                                        onClick={(e) => handleVote(e, 'up')}
-                                    >
-                                        <ThumbsUp className="w-8 h-8" />
-                                    </Button>
-
-                                    <Button
-                                        variant="ghost"
-                                        className={`w-16 h-16 rounded-full text-white/50 hover:text-white hover:bg-white/10 border-2 border-transparent hover:border-white/20 transition-all active:scale-90 ${voted === 'down' ? 'text-red-400 bg-white/10 border-red-400/50' : ''}`}
-                                        onClick={(e) => handleVote(e, 'down')}
-                                    >
-                                        <ThumbsDown className="w-8 h-8" />
-                                    </Button>
-
-                                    <Button
-                                        variant="ghost"
-                                        className="w-16 h-16 rounded-full text-white/50 hover:text-white hover:bg-white/10 border-2 border-transparent hover:border-white/20 transition-all active:scale-90"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            if (navigator.share) {
-                                                navigator.share({
-                                                    title: 'Fiesta App',
-                                                    text: content,
-                                                }).catch(() => { });
-                                            }
-                                        }}
-                                    >
-                                        <Share2 className="w-8 h-8" />
-                                    </Button>
+                                
+                                <div className="mt-2 text-lg md:text-xl font-semibold tracking-tight text-white w-full drop-shadow-sm leading-[1.3] overflow-y-auto no-scrollbar max-h-full">
+                                    {isNormaCard ? (
+                                        <div className="flex flex-col items-center gap-2">
+                                            <span className="text-yellow-400 text-lg md:text-xl font-black tracking-widest uppercase">¡Novedad!</span>
+                                            <span className="leading-snug">{sanitizeCardText(content)}</span>
+                                        </div>
+                                    ) : (
+                                        processDrinkingMultiplier(sanitizeCardText(content), round)
+                                    )}
                                 </div>
-                            </motion.div>
+                            </div>
+                        </motion.div>
 
-                            {/* Emergency Skip - Discreet */}
-                            <div className="absolute top-2 right-2 opacity-0 hover:opacity-100 transition-opacity">
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-6 w-6 text-white/20 hover:text-white hover:bg-white/10"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onClick(); // Triggers next card
-                                    }}
-                                    title="Saltar carta (Emergencia)"
-                                >
-                                    <span className="text-xs">⏭️</span>
-                                </Button>
+                        {/* BOTTOM PILL BUTTON */}
+                        <div className="mt-auto w-full flex flex-col items-center shrink-0">
+                            <button 
+                                className={`w-full max-w-[280px] bg-white ${styles.textColor} font-bold text-2xl py-4 rounded-full shadow-[0_10px_20px_rgba(0,0,0,0.3)] active:scale-95 transition-all text-center tracking-wide`}
+                                onClick={onClick}
+                            >
+                                Siguiente
+                            </button>
+                            
+                            {/* App-like user icon placeholder styling */}
+                            <div className="mt-4 opacity-50 flex items-center justify-center w-10 h-10 rounded-full bg-black/20 text-white shadow-inner">
+                                <User className="w-5 h-5" />
                             </div>
                         </div>
-                    </Card>
+
+                    </div>
+                    
                 </motion.div>
             </AnimatePresence>
         </div>

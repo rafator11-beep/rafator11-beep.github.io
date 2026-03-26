@@ -64,16 +64,19 @@ export function TriviaQuestionCard({
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-gradient-to-r from-slate-800/80 to-slate-700/80 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-white/10 max-w-xl mx-auto text-center"
+        className="w-full max-w-sm mx-auto h-[75vh] min-h-[500px] flex flex-col items-center justify-center relative rounded-[2.5rem] overflow-hidden shadow-2xl bg-[url('/modern_bg.png')] bg-cover bg-center border border-white/10"
       >
-        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 flex items-center justify-center">
-          <div className="w-8 h-8 border-3 border-white/50 border-t-transparent rounded-full animate-spin" />
+        <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-md" />
+        <div className="relative z-10 flex flex-col items-center p-8 text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-800 flex items-center justify-center border-2 border-white/20">
+            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+            </div>
+            <h2 className="text-xl font-bold text-white mb-2">Cargando pregunta...</h2>
+            <p className="text-sm text-white/40 mb-3">Saltando automáticamente en 3s...</p>
+            <Button onClick={() => onAnswer(false, 0)} variant="ghost" size="sm" className="text-white bg-white/10 hover:bg-white/20 rounded-full px-6">
+            Saltar ahora
+            </Button>
         </div>
-        <h2 className="text-xl font-bold text-white mb-2">Cargando pregunta...</h2>
-        <p className="text-sm text-white/40 mb-3">Saltando automáticamente en 3s...</p>
-        <Button onClick={() => onAnswer(false, 0)} variant="ghost" size="sm" className="text-white/60 border border-white/20 hover:bg-white/10">
-          Saltar ahora
-        </Button>
       </motion.div>
     );
   }
@@ -291,37 +294,45 @@ export function TriviaQuestionCard({
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="bg-gradient-to-r from-slate-800/80 to-slate-700/80 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-white/10 max-w-xl mx-auto"
+      className={`w-full max-w-sm mx-auto h-[75vh] min-h-[500px] flex flex-col relative rounded-[2.5rem] overflow-hidden shadow-2xl ${question.category === 'Futbol' ? 'bg-gradient-to-b from-emerald-500 to-green-800' : 'bg-gradient-to-b from-violet-700 to-purple-950'}`}
     >
-      {/* Header with Timer */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <span className="text-xs px-3 py-1 bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-white rounded-full font-medium border border-white/10 backdrop-blur-sm">
-            {question.category}
-          </span>
-          <span className="text-xs text-white/60">
-            {'⭐'.repeat(typeof question.difficulty === 'number' ? question.difficulty : 1)}
-          </span>
+      <div className="absolute inset-0 bg-[url('/modern_bg.png')] bg-cover bg-center opacity-30 mix-blend-overlay" />
+      <div className="absolute inset-0 bg-black/20 z-0" />
+
+      <div className="relative z-10 flex flex-col h-full p-4 md:p-6 overflow-y-auto slim-scroll pb-6">
+        {/* Header / Falso Logo */}
+        <div className="flex flex-col items-center pt-2 pb-2 shrink-0">
+            <span className="text-6xl mb-1 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)]">
+                {question.category === 'Futbol' ? '⚽' : '💣'}
+            </span>
+            <h1 className="text-3xl font-black italic tracking-tighter uppercase text-white drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] text-center leading-none">
+                {question.category === 'Futbol' ? 'TRIVIA FÚTBOL' : 'BOMBA CULTURAL'}
+            </h1>
         </div>
 
-        <div className={`flex items-center gap-2 font-mono text-2xl font-bold ${getTimerColor()}`}>
-          <Timer className="h-6 w-6" />
-          {timeLeft}s
+        {/* Player Name Pill */}
+        <div className="flex justify-center shrink-0 z-20 mt-1 mb-[-12px]">
+            <span className="bg-gradient-to-r from-amber-400 to-yellow-600 text-slate-900 font-extrabold px-6 py-1.5 rounded-full uppercase tracking-widest text-sm shadow-[0_0_20px_rgba(245,158,11,0.6)] border-2 border-yellow-300">
+                {playerName}
+            </span>
         </div>
-      </div>
 
-      {/* Player Turn */}
-      <div className="text-center mb-3">
-        <span className="text-sm text-white/60">Turno de</span>
-        <p className="font-semibold text-white neon-text">{playerName}</p>
-      </div>
+        {/* Central Question Box - Borderless dark pill */}
+        <div className="w-full p-6 pt-8 rounded-[2rem] flex flex-col items-center text-center shadow-2xl relative bg-black/40 backdrop-blur-md shrink-0 mb-4 mt-8">
+            <div className="absolute top-3 left-4 right-4 flex justify-between text-xs font-bold opacity-60">
+                <span className="text-white uppercase tracking-wider">{question.category}</span>
+                <span className="text-yellow-400">{'⭐'.repeat(typeof question.difficulty === 'number' ? question.difficulty : 1)}</span>
+            </div>
+            
+            <div className={`flex items-center gap-2 font-mono text-xl font-bold mt-2 mb-2 ${getTimerColor()}`}>
+                <Timer className="h-5 w-5" />
+                {timeLeft}s
+            </div>
 
-      {/* Question */}
-      <div className="mb-6 text-center">
-        <h2 className="text-xl font-bold leading-relaxed text-white">
-          {question.question}
-        </h2>
-      </div>
+            <h2 className="text-xl md:text-2xl font-bold leading-snug tracking-tight text-white drop-shadow-sm">
+                {question.question}
+            </h2>
+        </div>
 
       {/* Comodines - Now with cooldown indicators */}
       {showComodines && !showResult && (
@@ -391,21 +402,33 @@ export function TriviaQuestionCard({
       )}
 
       {/* Options */}
-      <div className="grid grid-cols-1 gap-3 mb-4">
+      <div className="grid grid-cols-1 gap-2 mb-4 flex-1 content-end shrink-0">
         {options.map((option, index) => {
           const letter = String.fromCharCode(65 + index);
           const isEliminated = eliminatedOptions.includes(index);
           const isSelected = selectedAnswer === index;
           const isCorrectAnswer = index === correctIndex;
 
-          let bgClass = 'bg-white/10 hover:bg-white/20 border-transparent';
+          let bgClass = 'bg-white hover:bg-slate-100 text-slate-900 border-none shadow-md';
+          let textColor = 'text-slate-900';
+          let letterColor = 'text-slate-400';
+
           if (isEliminated) {
-            bgClass = 'bg-white/5 opacity-30 cursor-not-allowed';
+            bgClass = 'bg-white/10 opacity-30 cursor-not-allowed border-none text-white';
+            textColor = 'text-white';
           } else if (showResult) {
-            if (isCorrectAnswer) bgClass = 'bg-green-500/30 border-green-500';
-            else if (isSelected && !isCorrectAnswer) bgClass = 'bg-red-500/30 border-red-500';
+            if (isCorrectAnswer) {
+              bgClass = 'bg-green-500 border-none shadow-lg text-white font-bold';
+              textColor = 'text-white';
+              letterColor = 'text-green-200';
+            }
+            else if (isSelected && !isCorrectAnswer) {
+              bgClass = 'bg-red-500 border-none shadow-lg text-white font-bold';
+              textColor = 'text-white';
+              letterColor = 'text-red-200';
+            }
           } else if (isSelected) {
-            bgClass = 'bg-gradient-to-r from-purple-500/30 to-pink-500/30 border-white/20';
+            bgClass = 'bg-slate-200 border-none text-slate-900 shadow-inner';
           }
 
           return (
@@ -415,10 +438,10 @@ export function TriviaQuestionCard({
               whileTap={!showResult && !isEliminated ? { scale: 0.98 } : {}}
               onClick={() => handleSelectAnswer(index)}
               disabled={showResult || isEliminated}
-              className={`p-4 rounded-xl border-2 text-left transition-all ${bgClass} text-white`}
+              className={`p-4 rounded-xl text-center transition-all ${bgClass} ${textColor}`}
             >
-              <span className="font-bold text-purple-400 mr-3">{letter}.</span>
-              {option}
+              {!showResult && !isSelected && <span className={`font-black ${letterColor} mr-2`}>{letter}.</span>}
+              <span className="font-semibold text-[1.1rem] tracking-tight">{option}</span>
             </motion.button>
           );
         })}
@@ -426,14 +449,16 @@ export function TriviaQuestionCard({
 
       {/* Submit button */}
       {!showResult && (
-        <Button
-          size="lg"
-          onClick={handleSubmit}
-          disabled={selectedAnswer === null}
-          className="w-full py-6 text-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 border border-white/10 backdrop-blur-sm"
-        >
-          Confirmar Respuesta
-        </Button>
+        <div className="mt-2 shrink-0">
+            <Button
+            size="lg"
+            onClick={handleSubmit}
+            disabled={selectedAnswer === null}
+            className={`w-full py-6 text-2xl bg-white ${question.category === 'Futbol' ? 'text-emerald-800' : 'text-purple-900'} font-extrabold rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.3)] hover:scale-105 active:scale-95 transition-all text-center tracking-wide disabled:opacity-50 disabled:hover:scale-100 disabled:bg-white/50`}
+            >
+            Confirmar
+            </Button>
+        </div>
       )}
 
       {/* Result feedback */}
@@ -442,23 +467,23 @@ export function TriviaQuestionCard({
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`mt-4 p-4 rounded-xl text-center ${selectedAnswer === correctIndex ? 'bg-gradient-to-r from-green-500/20 to-emerald-500/20' : 'bg-gradient-to-r from-red-500/20 to-rose-500/20'} border border-white/10 backdrop-blur-sm`}
+            className={`mt-2 p-4 rounded-2xl text-center shrink-0 shadow-lg ${selectedAnswer === correctIndex ? 'bg-green-900/60 border border-green-500/50' : 'bg-red-900/60 border border-red-500/50'} backdrop-blur-md`}
           >
             {selectedAnswer === correctIndex ? (
               <div className="flex items-center justify-center gap-2 text-green-400">
                 <CheckCircle2 className="h-6 w-6" />
-                <span className="font-semibold text-lg text-white">¡Correcto! +{getDifficultyPoints()} puntos</span>
+                <span className="font-bold text-lg text-white">¡Correcto! +{getDifficultyPoints()} pts</span>
               </div>
             ) : (
-              <div className="flex flex-col items-center gap-2 text-red-400">
+              <div className="flex flex-col items-center gap-1 text-red-400">
                 <div className="flex items-center gap-2">
                   <XCircle className="h-6 w-6" />
-                  <span className="font-semibold text-lg text-white">
-                    {timeLeft === 0 ? '¡Tiempo agotado!' : 'Incorrecto'}
+                  <span className="font-bold text-lg text-white">
+                    {timeLeft === 0 ? '¡Tiempo!' : 'Incorrecto'}
                   </span>
                 </div>
-                <p className="text-sm text-white/80">
-                  La respuesta correcta era: <strong>{options[correctIndex]}</strong>
+                <p className="text-xs text-white/80">
+                  Era: <strong>{options[correctIndex]}</strong>
                 </p>
               </div>
             )}
@@ -468,12 +493,15 @@ export function TriviaQuestionCard({
 
       {/* Question voting */}
       {showResult && (
-        <QuestionVote
-          questionText={question.question}
-          questionCategory={question.category}
-          voterName={playerName}
-        />
+        <div className="mt-4 shrink-0">
+            <QuestionVote
+            questionText={question.question}
+            questionCategory={question.category}
+            voterName={playerName}
+            />
+        </div>
       )}
+      </div>
     </motion.div>
   );
 }

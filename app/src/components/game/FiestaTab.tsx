@@ -24,7 +24,7 @@ export function FiestaTab({ onSelectMode }: FiestaTabProps) {
         className="mb-6 grid gap-4 xl:grid-cols-[1.4fr_0.8fr]"
       >
         <div className="surface-panel relative overflow-hidden p-5 md:p-7">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.18),transparent_34%),radial-gradient(circle_at_bottom_right,hsl(var(--accent)/0.12),transparent_28%)] opacity-90" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.06),transparent_40%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.04),transparent_40%)] opacity-90" />
           <div className="relative space-y-5">
             <div className="space-y-3">
               <span className="section-badge">
@@ -36,15 +36,15 @@ export function FiestaTab({ onSelectMode }: FiestaTabProps) {
                   Modos para <span className="premium-title">romper el hielo</span>
                 </h1>
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground md:text-base">
-                  Tarjetas más limpias, mejor jerarquía visual y acceso rápido a los modos más sociales desde el móvil.
+                  Tarjetas más limpias, mejor jerarquía visual y acceso rápido a los modos más sociales desde tu dispositivo.
                 </p>
               </div>
             </div>
 
             <div className="flex flex-wrap gap-2.5">
               {highlightChips.map(({ icon: Icon, label }) => (
-                <span key={label} className="premium-chip text-white/90">
-                  <Icon className="h-3.5 w-3.5 text-[hsl(var(--accent))]" />
+                <span key={label} className="premium-chip text-white/80 border-white/5 bg-white/5">
+                  <Icon className="h-3.5 w-3.5 text-white/50" />
                   {label}
                 </span>
               ))}
@@ -77,7 +77,7 @@ export function FiestaTab({ onSelectMode }: FiestaTabProps) {
 
         <div className="surface-soft rounded-[28px] p-5 md:p-6">
           <div className="flex items-center gap-3">
-            <div className="rounded-2xl bg-[hsl(var(--primary)/0.18)] p-3 text-[hsl(var(--accent))]">
+            <div className="rounded-2xl bg-white/5 border border-white/5 p-3 text-white">
               <Flame className="h-5 w-5" />
             </div>
             <div>
