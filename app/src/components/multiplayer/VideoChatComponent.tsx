@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Video, VideoOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PeerBubbles } from './PeerBubbles';

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useGameContext } from '@/contexts/GameContext';
@@ -30,8 +30,15 @@ export function ArcadeRussianRoulette({ roomId, playerId, onClose }: ArcadeRussi
     const [isShooting, setIsShooting] = useState(false);
 
     const channelRef = useRef<any>(null);
+    const hasStartedRef = useRef(false);
+    const startTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Sync network
+    // Limpieza de timer al desmontar
+    useEffect(() => {
+        return () => {
+            if (startTimerRef.current) clearTimeout(startTimerRef.current);
+        };
+    }, []);
     useEffect(() => {
         if (!effectivePlayerId) return;
 
@@ -51,7 +58,8 @@ export function ArcadeRussianRoulette({ roomId, playerId, onClose }: ArcadeRussi
             .on('broadcast', { event: 'ready' }, ({ payload }) => {
                 setRemotePlayerReady(true);
                 // Host initializes game if first
-                if (!currentTurnId && payload.playerId !== effectivePlayerId) {
+                if (!hasStartedRef.current && payload.playerId !== effectivePlayerId) {
+                    hasStartedRef.current = true;
                     const starter = Math.random() > 0.5 ? effectivePlayerId : payload.playerId;
                     const bullet = Math.floor(Math.random() * 6);
                     channel.send({
@@ -63,7 +71,8 @@ export function ArcadeRussianRoulette({ roomId, playerId, onClose }: ArcadeRussi
                 }
             })
             .on('broadcast', { event: 'start_game' }, ({ payload }) => {
-                if (!currentTurnId) {
+                if (!hasStartedRef.current) {
+                    hasStartedRef.current = true;
                     startGame(payload.starterId, payload.bullet);
                 }
             })
@@ -83,7 +92,7 @@ export function ArcadeRussianRoulette({ roomId, playerId, onClose }: ArcadeRussi
         return () => {
             if (!isBotMatch) supabase.removeChannel(channel);
         };
-    }, [roomId, effectivePlayerId, currentTurnId, isBotMatch]);
+    }, [roomId, effectivePlayerId, isBotMatch]);
 
     const startGame = (starterId: string, bullet: number) => {
         setWinner(null);
@@ -91,8 +100,10 @@ export function ArcadeRussianRoulette({ roomId, playerId, onClose }: ArcadeRussi
         setCurrentTurnId(starterId);
         setBulletIndex(bullet);
         setChamber(0);
+        setIsShooting(false);
 
-        setTimeout(() => {
+        if (startTimerRef.current) clearTimeout(startTimerRef.current);
+        startTimerRef.current = setTimeout(() => {
             setPhase('playing');
         }, 3000);
     };
@@ -121,6 +132,14 @@ export function ArcadeRussianRoulette({ roomId, playerId, onClose }: ArcadeRussi
         const died = chamber === bulletIndex;
 
         setTimeout(() => {
+            if (!isBotMatch) {
+                channelRef.current?.send({
+                    type: 'broadcast',
+                    event: 'shoot',
+                    payload: { nextTurnId: 'remote', died }
+                });
+            }
+
             if (died) {
                 if (navigator.vibrate) navigator.vibrate([1000]);
                 setWinner('remote'); // I died, remote wins
@@ -128,17 +147,8 @@ export function ArcadeRussianRoulette({ roomId, playerId, onClose }: ArcadeRussi
             } else {
                 if (navigator.vibrate) navigator.vibrate(50);
                 setChamber(prev => prev + 1);
-                // Switch turn
-                const opponentId = 'remote'; // Not strictly needed, we use nextTurnId in broadcast
+                // Switch turn AFTER broadcast to prevent state inconsistencies
                 setCurrentTurnId('remote');
-            }
-
-            if (!isBotMatch) {
-                channelRef.current?.send({
-                    type: 'broadcast',
-                    event: 'shoot',
-                    payload: { nextTurnId: 'remote', died }
-                });
             }
 
             setIsShooting(false);

@@ -1,4 +1,4 @@
-
+﻿
 import { Zap, Skull, AlertCircle } from 'lucide-react';
 
 export function RarityBadge({ rarity }: { rarity: string }) {

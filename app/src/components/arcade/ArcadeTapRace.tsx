@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useGameContext } from '@/contexts/GameContext';
@@ -28,8 +28,10 @@ export function ArcadeTapRace({ roomId, playerId, onClose }: ArcadeTapRaceProps)
     const [winner, setWinner] = useState<string | null>(null);
 
     const channelRef = useRef<any>(null);
-    const timerRef = useRef<NodeJS.Timeout>(null);
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
+    const countdownTimerRef = useRef<NodeJS.Timeout | null>(null);
     const scoreRef = useRef(0);
+    const remoteScoreRef = useRef(0);
 
     // Sync network
     useEffect(() => {
@@ -53,6 +55,7 @@ export function ArcadeTapRace({ roomId, playerId, onClose }: ArcadeTapRaceProps)
             .on('broadcast', { event: 'score_update' }, ({ payload }) => {
                 if (payload.playerId !== effectivePlayerId) {
                     setRemoteScore(payload.score);
+                    remoteScoreRef.current = payload.score;
                 }
             })
             .on('broadcast', { event: 'start_game' }, () => {
@@ -70,6 +73,7 @@ export function ArcadeTapRace({ roomId, playerId, onClose }: ArcadeTapRaceProps)
 
         return () => {
             if (timerRef.current) clearInterval(timerRef.current);
+            if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);
             if (!isBotMatch) supabase.removeChannel(channel);
         };
     }, [roomId, effectivePlayerId, isBotMatch]);
@@ -90,12 +94,13 @@ export function ArcadeTapRace({ roomId, playerId, onClose }: ArcadeTapRaceProps)
         setPhase('countdown');
 
         let cd = 3;
-        const interval = setInterval(() => {
+        if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);
+        countdownTimerRef.current = setInterval(() => {
             cd--;
             if (cd > 0) {
                 setTimeLeft(cd);
             } else {
-                clearInterval(interval);
+                if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);
                 startGameplay();
             }
         }, 1000);
@@ -126,16 +131,13 @@ export function ArcadeTapRace({ roomId, playerId, onClose }: ArcadeTapRaceProps)
             payload: { playerId: effectivePlayerId, score: scoreRef.current }
         });
 
-        // Determine winner
+        // Determine winner safely using refs to avoid closure stale state
         setTimeout(() => {
-            setRemoteScore(prevRemote => { // ensure latest remote score is used mentally
-                const finalRemote = prevRemote;
-                const finalMy = scoreRef.current;
-                if (finalMy > finalRemote) setWinner(effectivePlayerId);
-                else if (finalRemote > finalMy) setWinner('remote');
-                else setWinner('tie');
-                return finalRemote;
-            });
+            const finalRemote = remoteScoreRef.current;
+            const finalMy = scoreRef.current;
+            if (finalMy > finalRemote) setWinner(effectivePlayerId);
+            else if (finalRemote > finalMy) setWinner('remote');
+            else setWinner('tie');
         }, 500); // give it a sec to receive last packets
     };
 
@@ -161,11 +163,20 @@ export function ArcadeTapRace({ roomId, playerId, onClose }: ArcadeTapRaceProps)
     useEffect(() => {
         if (!isBotMatch || phase !== 'playing') return;
 
-        const botTimer = setInterval(() => {
-            setRemoteScore((prev) => prev + 1);
-        }, 120 + Math.floor(Math.random() * 80));
+        let botTimer: NodeJS.Timeout;
+        const simulateBotTap = () => {
+            setRemoteScore(prev => {
+                const updated = prev + 1;
+                remoteScoreRef.current = updated;
+                return updated;
+            });
+            // Recursively schedule next tap with jitter for realism
+            botTimer = setTimeout(simulateBotTap, 100 + Math.floor(Math.random() * 120));
+        };
 
-        return () => clearInterval(botTimer);
+        botTimer = setTimeout(simulateBotTap, 120);
+
+        return () => clearTimeout(botTimer);
     }, [isBotMatch, phase]);
 
     // Derived UI values
@@ -288,7 +299,18 @@ export function ArcadeTapRace({ roomId, playerId, onClose }: ArcadeTapRaceProps)
                             </div>
                         </div>
 
-                        <Button size="lg" className="w-full h-16 text-xl rounded-2xl font-bold bg-white text-black hover:bg-gray-200" onClick={handleStartSync}>
+                        <Button size="lg" className="w-full h-16 text-xl rounded-2xl font-bold bg-white text-black hover:bg-gray-200" onClick={() => {
+                            setPhase('waiting_sync');
+                            if (!isBotMatch) setRemotePlayerReady(false);
+                            setMyScore(0);
+                            setRemoteScore(0);
+                            scoreRef.current = 0;
+                            remoteScoreRef.current = 0;
+                            if (isBotMatch) {
+                                // Reload immediately for local bot matches
+                                handleStartSync();
+                            }
+                        }}>
                             Jugar de nuevo
                         </Button>
                     </div>

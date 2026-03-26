@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+﻿import { useState, useEffect, useCallback } from 'react';
 import { safeLower } from '@/utils/safeText';
 import { supabase, isSupabaseConfigured } from '@/integrations/supabase/client';
 import { loadLocalRankings, upsertLocalRanking, PlayerRanking } from '@/utils/localRanking';

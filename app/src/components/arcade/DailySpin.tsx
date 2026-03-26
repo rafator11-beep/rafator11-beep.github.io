@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -82,7 +82,7 @@ export function DailySpin({ onAddGems, onAddCoins }: DailySpinProps) {
             const prize = ITEMS[selectedIdx];
             if (prize.type === 'coins') {
                 onAddCoins(prize.amount);
-                toast.success(`¡Ganaste ${prize.amount} Monedas! 🪙`);
+                toast.success(`¡Ganaste ${prize.amount} Monedas! 💰`);
             } else if (prize.type === 'gems') {
                 onAddGems(prize.amount);
                 toast.success(`¡Ganaste ${prize.amount} Gemas! 💎`);

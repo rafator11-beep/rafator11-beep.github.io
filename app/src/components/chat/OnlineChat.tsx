@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+﻿import { useEffect, useMemo, useRef, useState } from 'react';
 import { supabase, isSupabaseConfigured } from '@/integrations/supabase/client';
 import { Send } from 'lucide-react';
 import { Input } from '@/components/ui/input';

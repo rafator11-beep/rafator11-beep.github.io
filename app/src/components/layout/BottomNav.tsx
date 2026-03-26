@@ -1,4 +1,4 @@
-import { Home, Users, Plus, History, Settings, Trophy, Gamepad2 } from 'lucide-react';
+﻿import { Home, Users, Plus, History, Settings, Trophy, Gamepad2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 

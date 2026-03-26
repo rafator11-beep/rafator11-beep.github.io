@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useGameContext } from '@/contexts/GameContext';
@@ -56,7 +56,7 @@ export function ArcadeSimonPvP({ roomId, playerId, onClose }: ArcadeSimonPvPProp
             })
             .on('broadcast', { event: 'start_game' }, ({ payload }) => {
                 setSequence(payload.initialSequence);
-                startCountdown();
+                startCountdown(payload.initialSequence);
             })
             .on('broadcast', { event: 'died' }, () => {
                 setWinner(effectivePlayerId);
@@ -83,23 +83,24 @@ export function ArcadeSimonPvP({ roomId, playerId, onClose }: ArcadeSimonPvPProp
 
     const handleStartSync = () => {
         const initialItem = Math.floor(Math.random() * 4) as ColorCode;
+        const initialSeq = [initialItem];
         if (!isBotMatch) {
             channelRef.current?.send({
                 type: 'broadcast',
                 event: 'start_game',
-                payload: { initialSequence: [initialItem] }
+                payload: { initialSequence: initialSeq }
             });
         }
-        setSequence([initialItem]);
-        startCountdown();
+        setSequence(initialSeq);
+        startCountdown(initialSeq);
     };
 
-    const startCountdown = () => {
+    const startCountdown = (seq: ColorCode[]) => {
         setWinner(null);
         setPhase('countdown');
 
         setTimeout(() => {
-            playSequence(sequence.length ? sequence : [Math.floor(Math.random() * 4) as ColorCode]);
+            playSequence(seq);
         }, 3000);
     };
 
@@ -159,17 +160,40 @@ export function ArcadeSimonPvP({ roomId, playerId, onClose }: ArcadeSimonPvPProp
 
 
     useEffect(() => {
-        if (!isBotMatch || phase !== 'observing' || sequence.length === 0 || winner) return;
+        if (!isBotMatch || phase !== 'playing' || winner) return;
 
-        const botRound = setTimeout(() => {
-            const botFails = Math.random() < Math.min(0.18 + sequence.length * 0.06, 0.7);
-            if (botFails) {
-                setWinner(effectivePlayerId);
-                setPhase('result');
-            }
-        }, 1000 + sequence.length * 180);
+        let currentIndex = 0;
+        let isDead = false;
+        let botTimer: NodeJS.Timeout;
 
-        return () => clearTimeout(botRound);
+        const performBotTap = () => {
+             if (winner !== null || phase !== 'playing' || isDead) return;
+             
+             // Check if bot makes a mistake
+             const botFails = Math.random() < Math.min(0.05 + sequence.length * 0.02, 0.4); 
+             if (botFails) {
+                 setWinner(effectivePlayerId);
+                 setPhase('result');
+                 isDead = true;
+                 return;
+             }
+             
+             currentIndex++;
+             if (currentIndex >= sequence.length) {
+                 // Bot cleared the round before player!
+                 const nextColor = Math.floor(Math.random() * 4) as ColorCode;
+                 const newSeq = [...sequence, nextColor];
+                 setSequence(newSeq);
+                 playSequence(newSeq);
+             } else {
+                 botTimer = setTimeout(performBotTap, 400 + Math.random() * 300);
+             }
+        };
+        
+        // Bot only starts tapping after sequence ends, plus human reaction time
+        botTimer = setTimeout(performBotTap, 800 + Math.random() * 500);
+
+        return () => clearTimeout(botTimer);
     }, [isBotMatch, phase, sequence, winner, effectivePlayerId]);
 
     return (

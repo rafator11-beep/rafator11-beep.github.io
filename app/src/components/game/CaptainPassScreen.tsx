@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { AlertTriangle, ArrowRight, Eye, EyeOff, Crown, Gamepad2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';

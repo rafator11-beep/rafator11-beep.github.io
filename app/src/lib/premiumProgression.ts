@@ -1,4 +1,4 @@
-import type { PlayerRanking } from '@/utils/localRanking';
+﻿import type { PlayerRanking } from '@/utils/localRanking';
 
 const STORAGE_KEY = 'fiesta-premium-progression-v2';
 

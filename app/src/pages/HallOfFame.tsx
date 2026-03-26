@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+﻿import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { BadgeCheck, Crown, Flame, Gift, RefreshCw, Shield, Sparkles, Swords, Trophy, Users, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';

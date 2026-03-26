@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Swords, Trophy, ArrowLeft, SkipForward } from 'lucide-react';
 import { Button } from '@/components/ui/button';

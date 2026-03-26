@@ -1,4 +1,4 @@
-
+﻿
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Timer, Phone, Users2, Percent, CheckCircle2, XCircle, Lock } from 'lucide-react';

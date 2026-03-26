@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { ParchisPiece, PlayerColor, SAFE_SQUARES } from '@/lib/parchisLogic';
 import { TRACK_POSITIONS, SAFE_SQUARES_UI, COLOR_CONFIG, getGoalPath, getPieceVisualPosition } from '@/lib/parchisBoardData';
 import tapete from '@/assets/tapete.jpg';

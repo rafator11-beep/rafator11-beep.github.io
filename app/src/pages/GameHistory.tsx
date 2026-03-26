@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+﻿import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, Clock3, Play, RefreshCw, Trophy, Users, Gamepad2, History as HistoryIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';

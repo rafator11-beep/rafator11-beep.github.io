@@ -1,4 +1,4 @@
-// Utility helpers to safely normalize text values that may come from localStorage/DB/UI.
+﻿// Utility helpers to safely normalize text values that may come from localStorage/DB/UI.
 // Prevents runtime crashes like: TypeError: x.toLowerCase is not a function
 
 export function asString(value: unknown): string {

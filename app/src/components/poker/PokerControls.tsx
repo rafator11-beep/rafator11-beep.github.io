@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Coins } from 'lucide-react';
@@ -44,7 +44,7 @@ export function PokerControls({ onAction, isActive, currentBetToMatch = 0, myChi
     const handleActionOut = (action: 'fold' | 'check' | 'call' | 'raise', amount?: number) => {
         if (action === 'fold') toast('Te has retirado', { icon: '🏳️' });
         if (action === 'check') toast('Pasas turno', { icon: '✊' });
-        if (action === 'call') toast(`Igualas la apuesta (${currentBetToMatch})`, { icon: '🪙' });
+        if (action === 'call') toast(`Igualas la apuesta (${currentBetToMatch})`, { icon: '💰' });
         if (action === 'raise') toast(amount === myChips ? '¡ÓRDAGO! (ALL IN)' : `Subes a ${amount}`, { icon: amount === myChips ? '🔥' : '📈' });
 
         onAction(action, amount);

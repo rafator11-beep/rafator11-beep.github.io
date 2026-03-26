@@ -1,4 +1,4 @@
-
+﻿
 export type AchievementId =
   | "drinks_10"
   | "drinks_25"

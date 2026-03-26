@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ThumbsUp, ThumbsDown } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '@/integrations/supabase/client';

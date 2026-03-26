@@ -1,4 +1,4 @@
-export async function compressImageToDataUrl(file: File, maxSize = 800, quality = 0.90): Promise<string> {
+﻿export async function compressImageToDataUrl(file: File, maxSize = 800, quality = 0.90): Promise<string> {
   // Yield to the UI thread to avoid jank when selecting images.
   await new Promise<void>((r) => setTimeout(() => r(), 0));
 

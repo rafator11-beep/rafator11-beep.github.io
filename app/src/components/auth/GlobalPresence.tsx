@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+﻿import React, { useEffect, useState, useMemo } from 'react';
 import { supabase, isSupabaseConfigured } from '@/integrations/supabase/client';
 import { Users, Link, Shield, Swords, Coins, Gamepad2, Trophy, Crown, Copy } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';

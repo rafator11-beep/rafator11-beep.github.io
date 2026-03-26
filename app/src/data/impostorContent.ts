@@ -1,4 +1,4 @@
-// Rondas de Impostor para MEGAMIX
+﻿// Rondas de Impostor para MEGAMIX
 // Un jugador es el impostor: ve una pregunta/tema distinto y debe disimular
 // Al final el grupo vota quién creen que es el impostor
 

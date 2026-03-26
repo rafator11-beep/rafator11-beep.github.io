@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -100,7 +100,7 @@ export function SlotMachine({ currentCoins, onAddGems, onSpendCoins }: SlotMachi
     return (
         <div className="max-w-md mx-auto relative z-10 text-center flex flex-col items-center pt-8">
             <h2 className="text-3xl font-black mb-2 text-white drop-shadow-md">Tragaperras</h2>
-            <p className="text-white/80 mb-8">Tira de la palanca por 100 🪙</p>
+            <p className="text-white/80 mb-8">Tira de la palanca por 100 💰</p>
 
             <div className="bg-yellow-600 p-4 rounded-3xl border-8 border-yellow-800 shadow-2xl mb-8 relative">
                 <div className="absolute -right-8 top-12 w-6 h-24 bg-gray-400 rounded-r-lg border-2 border-l-0 border-gray-600" />
@@ -144,7 +144,7 @@ export function SlotMachine({ currentCoins, onAddGems, onSpendCoins }: SlotMachi
                 disabled={spinning || currentCoins < COST}
                 onClick={spin}
             >
-                {spinning ? 'GIRANDO...' : `JUGAR (100 🪙)`}
+                {spinning ? 'GIRANDO...' : `JUGAR (100 💰)`}
             </Button>
         </div>
     );

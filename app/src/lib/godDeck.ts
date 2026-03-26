@@ -1,4 +1,4 @@
-import { safeLower } from '@/utils/safeText';
+﻿import { safeLower } from '@/utils/safeText';
 
 type Rarity = 'common' | 'rare' | 'legendary' | 'chaos' | 'virus';
 

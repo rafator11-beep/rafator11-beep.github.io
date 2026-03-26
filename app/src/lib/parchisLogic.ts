@@ -1,4 +1,4 @@
-export type PlayerColor = 'red' | 'blue' | 'yellow' | 'green';
+﻿export type PlayerColor = 'red' | 'blue' | 'yellow' | 'green';
 export type PieceState = 'home' | 'board' | 'goal_path' | 'goal';
 
 export interface ParchisPiece {

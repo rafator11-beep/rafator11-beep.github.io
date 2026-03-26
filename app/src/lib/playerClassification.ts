@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Player Classification Engine
  * Analyzes player stats across all modes and generates fun personality titles,
  * badges, and rankings that update in real-time.
@@ -223,7 +223,7 @@ const BADGE_RULES: BadgeRule[] = [
     { id: 'classic_lover', name: 'Alma Clásica', emoji: '🍻', description: '10 partidas en Clásico', rarity: 'silver', condition: r => (r.clasico_games || 0) >= 10 },
 
     // Economy
-    { id: 'rich_100', name: 'Primer Ahorro', emoji: '🪙', description: 'Acumula 100 monedas', rarity: 'bronze', condition: r => (r.coins || 0) >= 100 },
+    { id: 'rich_100', name: 'Primer Ahorro', emoji: '💰', description: 'Acumula 100 monedas', rarity: 'bronze', condition: r => (r.coins || 0) >= 100 },
     { id: 'rich_500', name: 'Inversor', emoji: '💰', description: 'Acumula 500 monedas', rarity: 'silver', condition: r => (r.coins || 0) >= 500 },
     { id: 'rich_2000', name: 'Millonario', emoji: '🤑', description: 'Acumula 2000 monedas', rarity: 'gold', condition: r => (r.coins || 0) >= 2000 },
     { id: 'rich_10000', name: 'Magnate', emoji: '💎', description: 'Acumula 10000 monedas', rarity: 'diamond', condition: r => (r.coins || 0) >= 10000 },

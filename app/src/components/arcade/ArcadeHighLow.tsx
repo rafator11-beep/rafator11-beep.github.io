@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useGameContext } from '@/contexts/GameContext';
@@ -10,6 +10,7 @@ import reverso from '@/assets/reverso.jpg';
 interface ArcadeHighLowProps {
     roomId: string;
     onClose: () => void;
+    playerId?: string;
 }
 
 type GamePhase = 'waiting_sync' | 'countdown' | 'playing' | 'result';
@@ -26,7 +27,7 @@ const getRandomCard = () => {
 
 const WIN_STREAK_TARGET = 7;
 
-export function ArcadeHighLow({ roomId, playerId, onClose }: ArcadeHighLowProps & { playerId?: string }) {
+export function ArcadeHighLow({ roomId, playerId, onClose }: ArcadeHighLowProps) {
     const { localPlayerId: contextPlayerId, players } = useGameContext();
     const effectivePlayerId = playerId || contextPlayerId || 'guest';
     const localPlayer = players.find(p => p.id === effectivePlayerId) || players[0];
@@ -131,11 +132,8 @@ export function ArcadeHighLow({ roomId, playerId, onClose }: ArcadeHighLowProps 
         const correct = (guess === 'higher' && isHigher) || (guess === 'lower' && !isHigher);
 
         setTimeout(() => {
-            let nextScore = myScore;
-
-            if (correct) {
-                nextScore += 1;
-                setMyScore(nextScore);
+            setMyScore(prevScore => {
+                const nextScore = correct ? prevScore + 1 : 0;
 
                 if (!isBotMatch) {
                     channelRef.current?.send({
@@ -148,27 +146,17 @@ export function ArcadeHighLow({ roomId, playerId, onClose }: ArcadeHighLowProps 
                 if (nextScore >= WIN_STREAK_TARGET) {
                     setWinner(effectivePlayerId);
                     setPhase('result');
+                } else if (!correct && navigator.vibrate) {
+                    navigator.vibrate([100, 50, 100]);
                 }
-            } else {
-                nextScore = 0;
-                setMyScore(0);
-                if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
 
-                if (!isBotMatch) {
-                    channelRef.current?.send({
-                        type: 'broadcast',
-                        event: 'score_update',
-                        payload: { playerId: effectivePlayerId, score: 0 }
-                    });
-                }
-            }
+                return nextScore;
+            });
 
-            // advance card
-            if (nextScore < WIN_STREAK_TARGET) {
-                setCurrentCard(nCard);
-                setNextCard(null);
-                setWaitingForNext(false);
-            }
+            // Siempre limpiar el estado de espera y la carta para evitar bloqueos
+            setCurrentCard(nCard);
+            setNextCard(null);
+            setWaitingForNext(false);
         }, 1000);
     };
 
@@ -177,13 +165,23 @@ export function ArcadeHighLow({ roomId, playerId, onClose }: ArcadeHighLowProps 
         if (!isBotMatch || phase !== 'playing' || winner) return;
 
         const botTurn = setTimeout(() => {
-            const willScore = Math.random() > 0.35;
+            // Revalidar phase y winner dentro de functional update para evitar pisar la victoria del usuario
             setRemoteScore((prev) => {
+                const willScore = Math.random() > 0.35;
                 const next = willScore ? prev + 1 : 0;
-                if (next >= WIN_STREAK_TARGET) {
-                    setWinner('remote');
-                    setPhase('result');
-                }
+                
+                // Extra de seguridad: si el componente o phase ya cambió, abortar sin llegar a 7.
+                setPhase(currentPhase => {
+                    setWinner(currentWinner => {
+                        if (currentPhase === 'playing' && !currentWinner && next >= WIN_STREAK_TARGET) {
+                            setWinner('remote');
+                            setPhase('result');
+                        }
+                        return currentWinner;
+                    });
+                    return currentPhase;
+                });
+                
                 return next;
             });
         }, 900 + Math.random() * 900);

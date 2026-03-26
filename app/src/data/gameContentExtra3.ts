@@ -1,4 +1,4 @@
-// gameContentExtra3.ts — Contenido nuevo 2024-2025 para todos los modos de fiesta
+﻿// gameContentExtra3.ts — Contenido nuevo 2024-2025 para todos los modos de fiesta
 
 // ─── CLÁSICO (Retos, Categorías, Acciones, Si...) ─────────────────────────────
 export const clasicoExtra3: string[] = [

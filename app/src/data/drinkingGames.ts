@@ -1,4 +1,4 @@
-// Drinking mini-games for Megamix and Clasico modes
+﻿// Drinking mini-games for Megamix and Clasico modes
 
 export interface DrinkingGame {
   name: string;
@@ -45,7 +45,7 @@ export const cascadeGames: DrinkingGame[] = [
 export const coinGames: DrinkingGame[] = [
   {
     name: "MONEDA AL AIRE",
-    emoji: "🪙",
+    emoji: "💰",
     description: "{player} lanza una moneda (o elige alguien cara/cruz). Cara = el de tu derecha bebe. Cruz = el de tu izquierda bebe.",
     type: 'coin',
   },

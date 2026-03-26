@@ -1,4 +1,4 @@
-// Main game content with all modes - 500+ entries each from Word document
+﻿// Main game content with all modes - 500+ entries each from Word document
 
 import {
   clasicoExtra, yoNuncaExtra, picanteExtra, masProbableExtra,
@@ -1460,7 +1460,7 @@ export const clasico: string[] = [
   "Quitarte una prenda (no valen pulseras, zapatillas ni cosas básicas) los básicos aburren.: ",
   "NO TE VEO 🫣: {player}, el grupo decidirá con quién tendrás que irte al baño a oscuras durante 2 minutos.",
   "POR LA CARA: Bebe a quien le haya dado un gatillazo.",
-  "LA MONEDA 🪙: Una ronda del juego de la moneda.",
+  "LA MONEDA 💰: Una ronda del juego de la moneda.",
   "POR LA CARA: {player} te toca beber 2 tragos.",
   "EL CUENTACUENTOS: {player}, cuenta una historia erótica que hayas vivido o escuchado.",
   "DEMOCRACIA: Decidid en grupo: 👍 Dedo arriba: polvos cortos e intensos. 👎 Dedo abajo: polvos largos y fluidos. La minoría bebe.",

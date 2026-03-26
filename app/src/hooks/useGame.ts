@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+﻿import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase, isSupabaseConfigured } from '@/integrations/supabase/client';
 import { Game, Player, Team, Question, TicTacToeState, GameMode, QuestionType } from '@/types/game';
 import { v4 as uuidv4 } from 'uuid';

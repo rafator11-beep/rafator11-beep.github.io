@@ -1,4 +1,4 @@
-export const quienEsMasProbableExtra2: string[] = [
+﻿export const quienEsMasProbableExtra2: string[] = [
     "¿Qué dos jugadores son más probables de enamorarse de la misma persona y arruinar su amistad?",
     "¿Qué tres jugadores tienen más pinta de cometer un crimen juntos y que los pillen el primer día?",
     "¿Qué dos jugadores serían más probables de ganar un concurso de baile estando borrachísimos?",

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+﻿import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Target, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -27,7 +27,7 @@ const ONLINE_GAMES = [
   { id: 'tictactoe_speed', name: '3 en Raya (Turbo)', icon: '❌', desc: '3 segundos por turno máximo.' },
   { id: 'math_match', name: 'Duelo Matemático', icon: '🧮', desc: 'Resuelve 5 operaciones antes que tu rival.' },
   { id: 'high_low', name: 'Mayor o Menor', icon: '🃏', desc: 'Adivina la siguiente carta para ganar.' },
-  { id: 'coin_flip', name: 'Cara o Cruz', icon: '🪙', desc: 'Aguanta la racha más larga sin fallar.' },
+  { id: 'coin_flip', name: 'Cara o Cruz', icon: '💰', desc: 'Aguanta la racha más larga sin fallar.' },
   { id: 'russian_roulette', name: 'Ruleta Rusa', icon: '🔫', desc: 'Turnos tensos, 1 bala, 6 recámaras.' },
   { id: 'simon_pvp', name: 'Simón Competitivo', icon: '🚦', desc: 'Falla la secuencia y pierdes al instante.' },
   { id: 'minesweeper', name: 'Campo de Minas', icon: '💣', desc: 'Turnos alternos. Si tocas una bomba, mueres.' },

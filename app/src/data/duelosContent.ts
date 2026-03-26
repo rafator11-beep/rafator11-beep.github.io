@@ -1,4 +1,4 @@
-export const duelos = [
+﻿export const duelos = [
   { name: "Duelo de Pulgares", description: "Elige a un oponente. El que pierda bebe 3 tragos.", type: "physical" },
   { name: "Duelo de Miradas", description: "TÃº y el jugador de enfrente. El primero que parpadee o se rÃ­a, bebe.", type: "social" },
   { name: "Duelo de Nombres", description: "TÃº y un oponente debÃ©is decir marcas de coches alternadamente. El primero que repita o tarde mÃ¡s de 3 segundos, bebe.", type: "knowledge" },

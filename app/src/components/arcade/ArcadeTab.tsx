@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Coins, Diamond, Target, Gamepad2, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';

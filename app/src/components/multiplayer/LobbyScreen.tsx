@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { LogIn, Plus, Share2, Copy, Users, ArrowLeft, Sparkles, Wifi, Crown, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';

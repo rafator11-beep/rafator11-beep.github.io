@@ -1,4 +1,4 @@
-// Hook for managing lifeline cooldowns (each player can use a lifeline every 4 questions)
+﻿// Hook for managing lifeline cooldowns (each player can use a lifeline every 4 questions)
 import { useState, useCallback } from 'react';
 
 type Comodin = '50:50' | 'publico' | 'llamada';

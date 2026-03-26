@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+﻿import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Users, Trophy, AlertCircle, Video, VideoOff, Copy, Crown, Plus, Minus, Eye, EyeOff, Zap, Flame, Ghost, ShieldAlert, Dice5, UserPlus, Globe, History, Play, Trash2, UserCheck, UserX, X, Camera, Cast, TrendingUp, Music } from 'lucide-react';
 import { Button } from '@/components/ui/button';

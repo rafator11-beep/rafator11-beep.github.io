@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LogOut, Trophy, Dice1, Dice2, Dice3, Dice4, Dice5, Dice6, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';

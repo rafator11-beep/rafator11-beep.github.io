@@ -1,4 +1,4 @@
-// Auto-generated: custom retos injected for PartyGame
+﻿// Auto-generated: custom retos injected for PartyGame
 export type PartyReto = {
   id: string;
   text: string;

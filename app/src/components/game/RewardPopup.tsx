@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Coins, Star, Trophy, ArrowUpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';

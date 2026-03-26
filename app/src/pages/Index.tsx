@@ -1,4 +1,4 @@
-import { useState, useEffect, Suspense, lazy } from 'react';
+﻿import { useState, useEffect, Suspense, lazy } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Globe, Smartphone, Coins } from 'lucide-react';
 import { toast } from 'sonner';

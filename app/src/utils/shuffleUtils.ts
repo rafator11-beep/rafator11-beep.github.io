@@ -1,4 +1,4 @@
-// shuffleUtils.ts — Fisher-Yates shuffle + session-based question tracker
+﻿// shuffleUtils.ts — Fisher-Yates shuffle + session-based question tracker
 
 /**
  * Fisher-Yates (Durstenfeld) shuffle — produces a truly random permutation

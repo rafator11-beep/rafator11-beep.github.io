@@ -1,4 +1,4 @@
-// Contenido de Boca Cerrada para Megamix y Clásico
+﻿// Contenido de Boca Cerrada para Megamix y Clásico
 // El jugador debe decir la frase/palabra con los labios cerrados
 
 export interface BocaCerradaChallenge {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Coins, ShoppingBag, X, Lock, Check } from 'lucide-react';
 import { SHOP_ITEMS, ShopItem, RARITY_COLORS, RARITY_LABELS } from '@/lib/playerEconomy';

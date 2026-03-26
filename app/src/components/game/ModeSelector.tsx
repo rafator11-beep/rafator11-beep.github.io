@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+﻿import { motion } from 'framer-motion';
 import { GAME_MODES, GameMode } from '@/types/game';
 import { Sparkles } from 'lucide-react';
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X, Video, Mic, MicOff, VideoOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';

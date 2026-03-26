@@ -1,4 +1,4 @@
-// Curated list of top worldwide football clubs (ESPN IDs) to ensure 100% reliable, high-quality PNG logos
+﻿// Curated list of top worldwide football clubs (ESPN IDs) to ensure 100% reliable, high-quality PNG logos
 export const FOOTBALL_TEAM_IDS = [
     // La Liga
     86, 83, 1068, 153, 243, 142, 175, 89,

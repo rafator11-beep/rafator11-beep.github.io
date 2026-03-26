@@ -1,4 +1,4 @@
-import { OnlineChat } from '@/components/chat/OnlineChat';
+﻿import { OnlineChat } from '@/components/chat/OnlineChat';
 
 export function ChatPage() {
   return (

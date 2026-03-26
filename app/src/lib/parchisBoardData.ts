@@ -1,4 +1,4 @@
-import { PlayerColor, PieceState, ParchisPiece } from './parchisLogic';
+﻿import { PlayerColor, PieceState, ParchisPiece } from './parchisLogic';
 
 const S = 40; // Square size
 export const CENTER_OFFSET = 0; // if we need to shift the board

@@ -1,4 +1,4 @@
-// Extra content requested by user (adds more variety to every mode)
+﻿// Extra content requested by user (adds more variety to every mode)
 
 export const clasicoExtra: string[] = [
   "Reto: {player} brinda como si fueras el presentador de un concurso. Si alguien se ríe, reparte 2 tragos.",

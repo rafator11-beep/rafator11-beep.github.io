@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Player Economy System — XP, Levels, Coins, Shop
  */
 

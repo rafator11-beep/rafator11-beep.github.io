@@ -1,4 +1,4 @@
-import { useState, useRef, MutableRefObject } from 'react';
+﻿import { useState, useRef, MutableRefObject } from 'react';
 import { GameMode, PlayerVirus, Player } from '@/types/game';
 import { virusEffects, normasRonda } from '@/data/gameContent';
 import { impostorRounds } from '@/data/impostorContent';

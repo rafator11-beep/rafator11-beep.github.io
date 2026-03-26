@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+﻿import { describe, it, expect } from 'vitest';
 import { shuffleArray, getRandomWithoutRepeat, resetSessionTracker, pickRandom } from '@/utils/shuffleUtils';
 import { clasicoExtra3, yoNuncaExtra3, picanteExtra3, masProbableExtra3, pacoversExtra3 } from '@/data/gameContentExtra3';
 import { cultureQuestionsNew2025 } from '@/data/cultureQuestionsNew2025';

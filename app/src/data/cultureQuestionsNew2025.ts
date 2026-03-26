@@ -1,4 +1,4 @@
-// cultureQuestionsExtra2.ts — 200+ preguntas de cultura general actualizadas 2024-2025
+﻿// cultureQuestionsExtra2.ts — 200+ preguntas de cultura general actualizadas 2024-2025
 
 export interface CultureQuestion {
   category: string;

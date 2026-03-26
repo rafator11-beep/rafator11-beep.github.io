@@ -1,4 +1,4 @@
-// Culture General Questions - "Sabes más que un niño de primaria" style
+﻿// Culture General Questions - "Sabes más que un niño de primaria" style
 // 500+ questions with hints for lifeline system
 
 

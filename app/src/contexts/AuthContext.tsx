@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+﻿import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase, isSupabaseConfigured } from '@/integrations/supabase/client';
 import { loadLocalRankings, saveLocalRankings } from '@/utils/localRanking';
 

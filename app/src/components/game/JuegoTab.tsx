@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { GAME_MODES, GameMode, TAB_MAPPING, PlayMode } from '@/types/game';
 import { ArrowRight, Globe, Smartphone, Trophy, Wifi, Users, Sword } from 'lucide-react';

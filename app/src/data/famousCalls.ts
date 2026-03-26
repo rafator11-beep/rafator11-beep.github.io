@@ -1,4 +1,4 @@
-// Llamadas a famosos para el comodín de Cultura General
+﻿// Llamadas a famosos para el comodín de Cultura General
 // Dan pistas crípticas/complicadas como en ¿Quién quiere ser millonario?
 
 import { extraFamousCalls } from './famousCallsExtra';

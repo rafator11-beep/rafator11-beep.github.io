@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+﻿import { useRef } from 'react';
 import { GameMode } from '@/types/game';
 import { getRandomDrinkingGame, getRandomCascade, getRandomCoinGame, getRandomImpostorWord, DrinkingGame } from '@/data/drinkingGames';
 import { formatMimicaChallenge, getRandomMimica } from '@/data/mimicaContent';

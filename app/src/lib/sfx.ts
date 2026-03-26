@@ -1,4 +1,4 @@
-
+﻿
 function beep(freq = 440, ms = 90, vol = 0.08) {
   try {
     const AudioCtx = (window.AudioContext || (window as any).webkitAudioContext);

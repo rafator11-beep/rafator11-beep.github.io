@@ -1,4 +1,4 @@
-// Contenido de mímica para Megamix y Clásico
+﻿// Contenido de mímica para Megamix y Clásico
 
 export interface MimicaChallenge {
   text: string;

@@ -1,4 +1,4 @@
-import { safeLower, asString } from '@/utils/safeText';
+﻿import { safeLower, asString } from '@/utils/safeText';
 
 const LOCAL_RANKING_KEY = 'fiesta-party-local-rankings-v1';
 

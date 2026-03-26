@@ -1,4 +1,4 @@
-// Hook for managing game session persistence (10-minute save)
+﻿// Hook for managing game session persistence (10-minute save)
 import { useState, useEffect, useCallback } from 'react';
 import { GameMode } from '@/types/game';
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useGameContext } from '@/contexts/GameContext';
@@ -46,6 +46,8 @@ export function ArcadeMinesweeper({ roomId, playerId, onClose }: ArcadeMinesweep
     const [remoteScore, setRemoteScore] = useState(0);
 
     const channelRef = useRef<any>(null);
+    const hasStartedRef = useRef(false);
+    const bombIndicesRef = useRef<number[]>([]);
 
     // Sync network
     useEffect(() => {
@@ -58,7 +60,10 @@ export function ArcadeMinesweeper({ roomId, playerId, onClose }: ArcadeMinesweep
             const botReadyTimer = setTimeout(() => {
                 setRemotePlayerReady(true);
                 const starter = Math.random() > 0.5 ? effectivePlayerId : 'remote';
-                startGame(starter, generateBombs());
+                hasStartedRef.current = true;
+                const bombs = generateBombs();
+                bombIndicesRef.current = bombs;
+                startGame(starter, bombs);
             }, 700);
             return () => clearTimeout(botReadyTimer);
         }
@@ -67,9 +72,11 @@ export function ArcadeMinesweeper({ roomId, playerId, onClose }: ArcadeMinesweep
             .on('broadcast', { event: 'ready' }, ({ payload }) => {
                 setRemotePlayerReady(true);
                 // Host initializes game if first
-                if (!currentTurnId && payload.playerId !== effectivePlayerId) {
+                if (!hasStartedRef.current && payload.playerId !== effectivePlayerId) {
+                    hasStartedRef.current = true;
                     const starter = Math.random() > 0.5 ? effectivePlayerId : payload.playerId;
                     const bombs = generateBombs();
+                    bombIndicesRef.current = bombs;
                     channel.send({
                         type: 'broadcast',
                         event: 'start_game',
@@ -79,7 +86,9 @@ export function ArcadeMinesweeper({ roomId, playerId, onClose }: ArcadeMinesweep
                 }
             })
             .on('broadcast', { event: 'start_game' }, ({ payload }) => {
-                if (!currentTurnId) {
+                if (!hasStartedRef.current) {
+                    hasStartedRef.current = true;
+                    bombIndicesRef.current = payload.bombs;
                     startGame(payload.starterId, payload.bombs);
                 }
             })
@@ -99,7 +108,7 @@ export function ArcadeMinesweeper({ roomId, playerId, onClose }: ArcadeMinesweep
         return () => {
             if (!isBotMatch) supabase.removeChannel(channel);
         };
-    }, [roomId, effectivePlayerId, currentTurnId, isBotMatch]);
+    }, [roomId, effectivePlayerId, isBotMatch]);
 
     const startGame = (starterId: string, bombs: number[]) => {
         setWinner(null);
@@ -112,7 +121,7 @@ export function ArcadeMinesweeper({ roomId, playerId, onClose }: ArcadeMinesweep
     };
 
     const handleRemoteClick = (index: number, pid: string) => {
-        const isBomb = bombIndices.includes(index);
+        const isBomb = bombIndicesRef.current.includes(index);
         if (isBomb) {
             setRevealedCells(prev => ({ ...prev, [index]: 'bomb' }));
             setWinner(effectivePlayerId);

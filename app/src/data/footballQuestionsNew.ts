@@ -1,4 +1,4 @@
-// Football Trivia Questions - 500+ questions from La Liga, Premier League, Bundesliga, Serie A, Ligue 1
+﻿// Football Trivia Questions - 500+ questions from La Liga, Premier League, Bundesliga, Serie A, Ligue 1
 // Period: 1970 to present, emphasis on 2005-present
 
 export interface FootballQuestion {

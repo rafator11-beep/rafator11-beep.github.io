@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+﻿import { motion } from 'framer-motion';
 import { ArrowRight, Flame, ShieldCheck, Sparkles, TimerReset, Users } from 'lucide-react';
 import { GAME_MODES, GameMode, TAB_MAPPING } from '@/types/game';
 
