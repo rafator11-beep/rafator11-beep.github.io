@@ -1,5 +1,5 @@
-﻿import { useEffect, useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
+import { useEffect, useMemo, useState, useRef } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { BadgeCheck, Crown, Flame, Gift, RefreshCw, Shield, Sparkles, Swords, Trophy, Users, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { loadLocalRankings, type PlayerRanking } from '@/utils/localRanking';
@@ -518,42 +518,81 @@ export function HallOfFame() {
     return { seasonLeader, streakLeader, badgeLeader, clutchLeader };
   }, [allPremiumPlayers]);
 
+  const { scrollY } = useScroll();
+  const headerY = useTransform(scrollY, [0, 200], [0, -40]);
+  const headerOpacity = useTransform(scrollY, [0, 200], [1, 0.8]);
+
   return (
-    <div className="min-h-screen premium-screen pb-28 pt-6 px-4 md:px-6">
+    <div className="min-h-screen premium-screen pb-28 pt-6 px-4 md:px-6 overflow-x-hidden">
       <div className="mx-auto max-w-6xl">
-        <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
-          <div className="premium-panel rounded-[34px] p-5 md:p-7 overflow-hidden relative">
-            <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_right,rgba(168,85,247,0.18),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(34,211,238,0.12),transparent_30%)]" />
-            <div className="relative flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+        <motion.div 
+          initial={{ opacity: 0, y: -12 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          style={{ y: headerY, opacity: headerOpacity }}
+          className="mb-8 sticky top-0 z-40 pt-4"
+        >
+          <div className="premium-panel rounded-[40px] p-6 md:p-10 overflow-hidden relative border-2 border-white/5 bg-slate-900/40 backdrop-blur-3xl shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
+            <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_right,rgba(168,85,247,0.15),transparent_40%),radial-gradient(circle_at_bottom_left,rgba(34,211,238,0.1),transparent_40%)]" />
+            <div className="relative flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
               <div>
-                <div className="section-badge mb-3">Competition live · premium mode</div>
-                <div className="flex items-center gap-3">
-                  <div className="h-14 w-14 rounded-3xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-[0_0_22px_rgba(251,191,36,0.35)]">
-                    <Trophy className="w-7 h-7 text-slate-950" />
-                  </div>
+                <motion.div 
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  className="section-badge mb-4 font-arcade text-[8px] tracking-[0.4em] uppercase"
+                >
+                  LIVE COMPETITION • BEEP HALL
+                </motion.div>
+                <div className="flex items-center gap-5">
+                  <motion.div 
+                    animate={{ rotate: [0, -5, 5, 0] }}
+                    transition={{ repeat: Infinity, duration: 5 }}
+                    className="h-20 w-20 rounded-[2rem] bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-[0_0_30px_rgba(251,191,36,0.3)] border-4 border-white/20"
+                  >
+                    <Trophy className="w-10 h-10 text-slate-950" />
+                  </motion.div>
                   <div>
-                    <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight">Hall of Fame Premium</h1>
-                    <p className="text-sm md:text-base text-white/55 mt-1">Temporadas, rachas, insignias persistentes y premios especiales para jugadores registrados.</p>
+                    <h1 className="text-4xl md:text-6xl font-black text-white tracking-tighter font-arcade uppercase drop-shadow-lg">
+                      HALL OF FAME
+                    </h1>
+                    <p className="text-[10px] md:text-xs text-white/40 mt-2 font-arcade font-black uppercase tracking-[0.35em]">Temporadas • Rachas • Logros Persistentes</p>
                   </div>
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-2 md:justify-end">
-                <Button onClick={refreshData} variant="outline" className="rounded-2xl border-white/10 bg-white/5 text-white hover:bg-white/10">
-                  <RefreshCw className="w-4 h-4 mr-2" /> Actualizar
+              <div className="flex flex-wrap gap-3 md:justify-end">
+                <Button onClick={refreshData} variant="outline" className="h-12 rounded-2xl border-white/10 bg-white/5 text-white hover:bg-white/10 font-arcade text-[10px] uppercase font-black tracking-widest px-8">
+                  <RefreshCw className="w-4 h-4 mr-3" /> Actualizar
                 </Button>
               </div>
             </div>
           </div>
         </motion.div>
 
-        <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-6 mb-6">
-          <div className="premium-stat"><p className="text-[11px] uppercase tracking-[0.18em] text-white/40 font-bold mb-2">Jugadores</p><p className="text-3xl font-black text-white">{summary.totalPlayers}</p></div>
-          <div className="premium-stat"><p className="text-[11px] uppercase tracking-[0.18em] text-white/40 font-bold mb-2">Registrados</p><p className="text-3xl font-black text-white">{summary.registeredPlayers}</p></div>
-          <div className="premium-stat"><p className="text-[11px] uppercase tracking-[0.18em] text-white/40 font-bold mb-2">Partidas</p><p className="text-3xl font-black text-white">{summary.totalGames}</p></div>
-          <div className="premium-stat"><p className="text-[11px] uppercase tracking-[0.18em] text-white/40 font-bold mb-2">Victorias</p><p className="text-3xl font-black text-white">{summary.totalWins}</p></div>
-          <div className="premium-stat"><p className="text-[11px] uppercase tracking-[0.18em] text-white/40 font-bold mb-2">Insignias</p><p className="text-3xl font-black text-white">{summary.unlockedBadges}</p></div>
-          <div className="premium-stat"><p className="text-[11px] uppercase tracking-[0.18em] text-white/40 font-bold mb-2">Racha top</p><p className="text-3xl font-black text-white">{summary.hottestStreak}</p></div>
+        <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-6 mb-8">
+          <div className="premium-stat px-4 py-5 bg-slate-900/40 rounded-[2rem] border border-white/5 flex flex-col items-center">
+            <p className="text-[9px] uppercase tracking-[0.2em] text-white/40 font-black mb-3 font-arcade">Jugadores</p>
+            <p className="text-3xl font-black text-white font-arcade">{summary.totalPlayers}</p>
+          </div>
+          <div className="premium-stat px-4 py-5 bg-slate-900/40 rounded-[2rem] border border-white/5 flex flex-col items-center">
+            <p className="text-[9px] uppercase tracking-[0.2em] text-white/40 font-black mb-3 font-arcade">Registrados</p>
+            <p className="text-3xl font-black text-white font-arcade">{summary.registeredPlayers}</p>
+          </div>
+          <div className="premium-stat px-4 py-5 bg-slate-900/40 rounded-[2rem] border border-white/5 flex flex-col items-center">
+            <p className="text-[9px] uppercase tracking-[0.2em] text-white/40 font-black mb-3 font-arcade">Partidas</p>
+            <p className="text-3xl font-black text-white font-arcade">{summary.totalGames}</p>
+          </div>
+          <div className="premium-stat px-4 py-5 bg-slate-900/40 rounded-[2rem] border border-white/5 flex flex-col items-center">
+            <p className="text-[9px] uppercase tracking-[0.2em] text-white/40 font-black mb-3 font-arcade">Victorias</p>
+            <p className="text-3xl font-black text-white font-arcade">{summary.totalWins}</p>
+          </div>
+          <div className="premium-stat px-4 py-5 bg-slate-900/40 rounded-[2rem] border border-white/5 flex flex-col items-center">
+            <p className="text-[9px] uppercase tracking-[0.2em] text-white/40 font-black mb-3 font-arcade">Insignias</p>
+            <p className="text-3xl font-black text-white font-arcade">{summary.unlockedBadges}</p>
+          </div>
+          <div className="premium-stat px-4 py-5 bg-slate-900/40 rounded-[2rem] border border-white/5 flex flex-col items-center">
+            <p className="text-[9px] uppercase tracking-[0.2em] text-white/40 font-black mb-3 font-arcade">Racha top</p>
+            <p className="text-3xl font-black text-white font-arcade">{summary.hottestStreak}</p>
+          </div>
         </div>
 
         <div className="premium-panel rounded-[32px] p-4 md:p-5 mb-6">

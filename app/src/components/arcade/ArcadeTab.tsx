@@ -11,6 +11,7 @@ import { MemoryMatch } from './MemoryMatch';
 import { GemCatcher } from './GemCatcher';
 import { SimonSays } from './SimonSays';
 import { ArcadeOnlineHub } from './ArcadeOnlineHub';
+import { AnimatedCount } from '@/components/ui/AnimatedCount';
 const NOISE_DATA_URI = "data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E";
 
 type ArcadeGame = 'menu' | 'spin' | 'slots' | 'memory' | 'catcher' | 'simon' | 'online';
@@ -76,14 +77,14 @@ export function ArcadeTab() {
                     animate={{ opacity: 1, y: 0 }}
                     className="text-center mb-8 relative z-10"
                 >
-                    <div className="flex items-center justify-center gap-3 mb-2">
-                        <span className="text-4xl md:text-5xl drop-shadow-lg">🕹️</span>
-                        <h1 className="text-4xl md:text-5xl font-black tracking-tight text-white drop-shadow-lg">
-                            Arcade
+                    <div className="flex flex-col items-center justify-center gap-2 mb-2">
+                        <span className="text-5xl drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] mb-2">🕹️</span>
+                        <h1 className="text-6xl md:text-7xl font-black tracking-tighter text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.2)] font-arcade uppercase">
+                            ARCADE
                         </h1>
                     </div>
-                    <p className="text-lg md:text-xl text-muted-foreground/90">
-                        Juega minijuegos y gana <span className="text-[hsl(var(--neon-blue))] font-bold">Gemas</span>
+                    <p className="text-[10px] font-black uppercase tracking-[0.5em] text-primary/80 font-arcade">
+                        BEEP Gaming Zone • Gana Gemas
                     </p>
                 </motion.div>
 
@@ -91,15 +92,17 @@ export function ArcadeTab() {
                 <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="flex justify-center gap-4 mb-8"
+                    className="flex justify-center gap-6 mb-12"
                 >
-                    <div className="bg-black/40 backdrop-blur-md rounded-2xl px-6 py-3 flex items-center gap-3 border border-yellow-500/30 shadow-[0_0_15px_rgba(234,179,8,0.15)]">
-                        <Coins className="w-6 h-6 text-yellow-500 drop-shadow-[0_0_8px_rgba(234,179,8,0.5)]" />
-                        <span className="text-xl font-bold text-yellow-500">{currentCoins}</span>
+                    <div className="bg-black/60 backdrop-blur-md rounded-2xl px-6 py-4 flex flex-col items-center gap-1 border-2 border-yellow-500/40 shadow-[0_0_20px_rgba(234,179,8,0.2)]">
+                        <Coins className="w-5 h-5 text-yellow-500" />
+                        <AnimatedCount value={currentCoins} className="text-2xl font-black text-white font-arcade" />
+                        <span className="text-[8px] font-black text-yellow-500/60 uppercase tracking-widest font-arcade">Monedas</span>
                     </div>
-                    <div className="bg-black/40 backdrop-blur-md rounded-2xl px-6 py-3 flex items-center gap-3 border border-[hsl(var(--neon-blue))]/30 shadow-[0_0_15px_hsla(var(--neon-blue),0.15)]">
-                        <Diamond className="w-6 h-6 text-[hsl(var(--neon-blue))] drop-shadow-[0_0_8px_hsla(var(--neon-blue),0.5)]" />
-                        <span className="text-xl font-bold text-[hsl(var(--neon-blue))]">{currentGems}</span>
+                    <div className="bg-black/60 backdrop-blur-md rounded-2xl px-6 py-4 flex flex-col items-center gap-1 border-2 border-cyan-400/40 shadow-[0_0_20px_rgba(34,211,238,0.2)]">
+                        <Diamond className="w-5 h-5 text-cyan-400" />
+                        <AnimatedCount value={currentGems} className="text-2xl font-black text-white font-arcade" />
+                        <span className="text-[8px] font-black text-cyan-400/60 uppercase tracking-widest font-arcade">Gemas</span>
                     </div>
                 </motion.div>
 
@@ -107,31 +110,28 @@ export function ArcadeTab() {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mb-8"
+                    className="mb-12"
                 >
                     <div
                         onClick={() => setActiveGame('online')}
-                        className="relative group cursor-pointer overflow-hidden rounded-3xl p-8 bg-gradient-to-r from-violet-600 via-fuchsia-600 to-pink-600 shadow-[0_0_40px_rgba(236,72,153,0.3)] border border-pink-500/50 flex flex-col items-center text-center"
+                        className="relative group cursor-pointer overflow-hidden rounded-[40px] p-10 bg-gradient-to-br from-indigo-600 via-purple-700 to-pink-600 shadow-[0_20px_50px_rgba(168,85,247,0.3)] border-4 border-white/10 flex flex-col items-center text-center transition-all hover:scale-[1.02]"
                     >
                         <div className="absolute inset-0 opacity-20 mix-blend-overlay" style={{ backgroundImage: `url('${NOISE_DATA_URI}')` }}></div>
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-white/20 blur-[100px] rounded-full group-hover:bg-white/30 transition-all duration-700"></div>
-
-                        <Target className="w-16 h-16 text-white mb-4 animate-pulse drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]" />
-                        <h2 className="text-3xl md:text-4xl font-black text-white mb-2 drop-shadow-md tracking-tight uppercase">
-                            Duelos 1v1 Online
+                        
+                        <Target className="w-20 h-20 text-white mb-6 animate-bounce drop-shadow-[0_0_20px_rgba(255,255,255,0.6)]" />
+                        <h2 className="text-4xl md:text-5xl font-black text-white mb-3 drop-shadow-md tracking-tighter font-arcade uppercase">
+                            ONLINE DUELS
                         </h2>
-                        <p className="text-white/90 text-lg max-w-lg mb-6 drop-shadow-sm font-medium">
-                            Conéctate y desafía a otros jugadores a minijuegos rápidos y frenéticos en tiempo real.
-                        </p>
+                        <p className="text-white/80 text-[10px] font-black uppercase tracking-[0.3em] font-arcade mb-8">Multiplayer en tiempo real</p>
 
-                        <Button size="lg" className="rounded-full h-14 px-8 bg-white text-purple-700 hover:bg-gray-100 font-bold text-lg shadow-[0_10px_30px_rgba(0,0,0,0.3)] hover:scale-105 transition-transform">
-                            Entrar al Lobby
+                        <Button size="lg" className="rounded-2xl h-14 px-10 bg-white text-black hover:bg-white/90 font-arcade font-black text-lg shadow-xl hover:translate-y-[-2px] active:translate-y-[2px] transition-all">
+                            ENTRAR AL LOBBY
                         </Button>
                     </div>
                 </motion.div>
 
                 {/* Minigames Grid */}
-                <h3 className="text-xl font-bold text-white/80 mb-4 px-2 tracking-wide uppercase">Minijuegos en Solitario</h3>
+                <h3 className="text-[10px] font-black text-white/40 mb-6 px-2 tracking-[0.4em] uppercase font-arcade">Minijuegos en Solitario</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <GameCard
                         title="Ruleta Diaria"
@@ -180,18 +180,24 @@ function GameCard({ title, desc, emoji, color, onClick }: { title: string, desc:
             whileHover={{ scale: 1.02, y: -4 }}
             whileTap={{ scale: 0.98 }}
             onClick={onClick}
-            className={`relative group cursor-pointer overflow-hidden rounded-3xl p-6 bg-gradient-to-br ${color} shadow-lg`}
+            className={`relative group cursor-pointer overflow-hidden rounded-[32px] p-6 bg-gradient-to-br ${color} border-b-8 border-black/20`}
         >
             <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all" />
 
             <div className="relative z-10">
-                <span className="text-4xl block mb-3 drop-shadow-sm">{emoji}</span>
-                <h3 className="text-xl font-bold text-white mb-2 shadow-black/50 drop-shadow-md">{title}</h3>
-                <p className="text-white/80 text-sm leading-tight mb-4">{desc}</p>
+                <div className="flex justify-between items-start mb-4">
+                    <span className="text-4xl drop-shadow-lg">{emoji}</span>
+                    <div className="bg-black/20 backdrop-blur-sm rounded-lg px-2 py-1 border border-white/10">
+                        <span className="text-[8px] font-black text-white uppercase font-arcade tracking-widest">MINI</span>
+                    </div>
+                </div>
+                
+                <h3 className="text-xl font-black text-white mb-2 font-arcade uppercase tracking-tighter drop-shadow-md">{title}</h3>
+                <p className="text-white/70 text-[10px] uppercase font-bold tracking-wider leading-tight mb-6 h-8 line-clamp-2">{desc}</p>
 
-                <div className="flex items-center gap-1 text-white/90 text-sm font-bold bg-white/20 w-fit px-3 py-1.5 rounded-full backdrop-blur-sm">
-                    <Play fill="currentColor" className="w-4 h-4" /> Jugar
+                <div className="flex items-center gap-2 text-black text-[10px] font-black bg-white w-fit px-4 py-2 rounded-xl shadow-lg font-arcade uppercase tracking-widest group-hover:bg-primary group-hover:text-white transition-colors">
+                    <Play className="w-3 h-3 fill-current" /> Jugar
                 </div>
             </div>
         </motion.div>

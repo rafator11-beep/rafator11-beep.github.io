@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -150,19 +150,19 @@ export function WelcomeScreen() {
   const busy = submitting || isLoading;
 
   return (
-    <div className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto font-sans">
-      {/* Modern Background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+    <div className="fixed inset-0 z-[200] bg-[#050505]/95 backdrop-blur-xl flex items-center justify-center p-4 overflow-y-auto font-sans overflow-hidden">
+      {/* Scanline Effect Overlay */}
+      <div className="absolute inset-0 z-50 pointer-events-none opacity-[0.03] overflow-hidden">
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]" />
       </div>
 
       <motion.div 
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="relative w-full max-w-[440px] bg-slate-900/60 backdrop-blur-[24px] rounded-[32px] p-8 md:p-10 shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10"
+        className="relative w-full max-w-[440px] bg-slate-900/40 backdrop-blur-[24px] rounded-[32px] p-8 md:p-10 shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10 overflow-hidden"
       >
         {/* Glow effect at top */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent rounded-full blur-sm" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-1 bg-gradient-to-r from-transparent via-primary to-transparent rounded-full blur-sm" />
 
         {/* Header */}
         <div className="text-center mb-10">
@@ -170,14 +170,18 @@ export function WelcomeScreen() {
             initial={{ rotate: -10, scale: 0.8 }}
             animate={{ rotate: 0, scale: 1 }}
             transition={{ type: 'spring', damping: 12 }}
-            className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 shadow-[0_0_20px_rgba(245,158,11,0.4)] mb-6"
+            className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-slate-800 border-2 border-primary/30 shadow-[0_0_20px_rgba(var(--primary-rgb),0.2)] mb-6"
           >
-            <Sparkles className="w-8 h-8 text-white" />
+            <Sparkles className="w-10 h-10 text-primary" />
           </motion.div>
-          <h1 className="text-4xl font-black text-white mb-3 tracking-tight drop-shadow-lg">
-            LA<span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">FIESTA</span>
-          </h1>
-          <p className="text-slate-300 text-sm font-medium">Juego Social Premium</p>
+          <motion.h1 
+            initial={{ letterSpacing: '0.1em' }}
+            animate={{ letterSpacing: '0.2em' }}
+            className="text-7xl font-black text-white mb-2 tracking-tighter drop-shadow-lg font-arcade"
+          >
+            BEEP
+          </motion.h1>
+          <p className="text-primary font-arcade text-[10px] uppercase font-black tracking-[0.4em]">Next Level • Party Game</p>
         </div>
 
         <AnimatePresence mode="wait">

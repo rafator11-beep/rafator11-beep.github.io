@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { safeLower } from '@/utils/safeText';
 import { supabase, isSupabaseConfigured } from '@/integrations/supabase/client';
 import { loadLocalRankings, upsertLocalRanking, PlayerRanking } from '@/utils/localRanking';
@@ -36,6 +36,7 @@ export interface PlayerStats {
   parchis_level: number;
   unlocked_items: string[];
   equipped_items?: { avatar?: string; ficha?: string; carta?: string };
+  win_streak: number;
   updated_at: string;
 }
 
@@ -77,6 +78,7 @@ function localToPlayerStats(lr: PlayerRanking): PlayerStats {
     parchis_level: lr.parchis_level || 1,
     unlocked_items: lr.unlocked_items || [],
     equipped_items: lr.equipped_items || {},
+    win_streak: lr.win_streak || 0,
     updated_at: lr.updated_at,
   };
 }
@@ -154,6 +156,7 @@ export function useRanking() {
           parchis_level: row.parchis_level || 1,
           unlocked_items: row.unlocked_items || [],
           equipped_items: row.equipped_items || {},
+          win_streak: row.win_streak || 0,
           updated_at: row.updated_at || new Date().toISOString(),
         })) as PlayerStats[];
 

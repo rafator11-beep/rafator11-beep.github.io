@@ -405,7 +405,7 @@ function renderCardExtra(extra: string, theme: CardTheme, content: string): Reac
 
 // ── MAIN COMPONENT ───────────────────────────────────────────────────────────
 
-export function CardDisplay({ content, type = 'common', onClick, gameMode, players, round = 1 }: CardDisplayProps) {
+export const CardDisplay = React.memo(({ content, type = 'common', onClick, gameMode, players, round = 1 }: CardDisplayProps) => {
     const theme = getCardTheme(content, type, gameMode);
     const cleanText = sanitizeCardText(content);
 
@@ -508,4 +508,12 @@ export function CardDisplay({ content, type = 'common', onClick, gameMode, playe
             </AnimatePresence>
         </div>
     );
-}
+}, (prevProps, nextProps) => {
+    return (
+        prevProps.content === nextProps.content &&
+        prevProps.type === nextProps.type &&
+        prevProps.round === nextProps.round &&
+        prevProps.gameMode === nextProps.gameMode &&
+        prevProps.players?.length === nextProps.players?.length
+    );
+});

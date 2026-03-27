@@ -15,14 +15,13 @@ import { AuthOverlay } from '@/components/auth/AuthOverlay';
 import { GlobalPresence } from '@/components/auth/GlobalPresence';
 import { WelcomeScreen } from '@/components/auth/WelcomeScreen';
 import { BottomNav } from '@/components/layout/BottomNav';
-import { GameHistory } from '@/pages/GameHistory';
-import { AppSettings } from '@/pages/AppSettings';
-import { ArcadeTab } from '@/components/arcade/ArcadeTab';
 import { LobbyScreen } from '@/components/multiplayer/LobbyScreen';
 import { ChatComponent } from '@/components/multiplayer/ChatComponent';
 import { DailyVideoProvider } from '@/components/multiplayer/DailyVideoProvider';
+import { SplashScreen } from '@/components/SplashScreen';
 import { GameMode, GAME_MODES, TabId, PlayMode } from '@/types/game';
 import { supabase } from '@/integrations/supabase/client';
+import { ConnectionDot } from '@/components/multiplayer/ConnectionDot';
 
 type AppTab = 'inicio' | 'perfiles' | 'jugar' | 'historial' | 'ajustes' | 'arcade' | 'hall';
 import {
@@ -35,8 +34,9 @@ import {
 
 // Lazy load heavy/non-critical pages to avoid circular dependencies and reduce bundle size
 const Profiles = lazy(() => import('@/pages/Profiles'));
-// HallOfFame is likely a named export "export function HallOfFame...". 
-// We handle this by returning the named export as "default" for lazy().
+const GameHistory = lazy(() => import('@/pages/GameHistory').then(module => ({ default: module.GameHistory })));
+const AppSettings = lazy(() => import('@/pages/AppSettings').then(module => ({ default: module.AppSettings })));
+const ArcadeTab = lazy(() => import('@/components/arcade/ArcadeTab').then(module => ({ default: module.ArcadeTab })));
 const HallOfFame = lazy(() => import('@/pages/HallOfFame').then(module => ({ default: module.HallOfFame })));
 
 export type GameScreen = 'mode-select' | 'team-mode-select' | 'player-setup' | 'playing' | 'lobby' | 'guest-setup';
@@ -50,6 +50,7 @@ function GameAppInner() {
   const [mainTab, setMainTab] = useState<TabId>('fiesta');
   const [isTeamMode, setIsTeamMode] = useState(false);
   const [pendingMode, setPendingMode] = useState<GameMode | null>(null);
+  const [showSplash, setShowSplash] = useState(true);
 
   // Multiplayer State
   const [roomId, setRoomId] = useState<string | null>(null);
@@ -76,6 +77,27 @@ function GameAppInner() {
     if (params.get('room')) {
       setScreen('lobby');
     }
+  }, []);
+
+  // Konami Code Easter Egg
+  useEffect(() => {
+    let keys: string[] = [];
+    const konami = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+    
+    const handler = (e: KeyboardEvent) => {
+      keys.push(e.key);
+      keys = keys.slice(-10);
+      if (keys.join('') === konami.join('')) {
+        toast.info("🎮 ¡Arcade Mode ACTIVATED!", {
+          description: "Has desbloqueado un potenciador visual secreto.",
+          duration: 5000,
+        });
+        document.body.classList.add('beep-glow-active');
+      }
+    };
+
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
   }, []);
 
   // Auto-Join when Game Starts (if pending data exists)
@@ -516,9 +538,9 @@ function GameAppInner() {
                   <div className="app-shell pb-4">
                     <div className="surface-panel p-4 md:p-5">
                       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                        <div className="min-w-0">
-                          <h1 className="text-xl font-black text-white md:text-2xl">Elige modo</h1>
-                          
+                        <div className="min-w-0 flex items-center gap-4">
+                          <h1 className="text-xl font-black text-white md:text-2xl font-arcade uppercase tracking-tighter">Elige modo</h1>
+                          <ConnectionDot />
                         </div>
 
                         {roomId ? (
@@ -592,13 +614,21 @@ function GameAppInner() {
                   <Profiles />
                 </Suspense>
               )}
-              {activeTab === 'historial' && <GameHistory onRejoinGame={handleRejoinGame} />}
+              {activeTab === 'historial' && (
+                <Suspense fallback={<div className="p-8 text-center text-white font-arcade">Cargando historial...</div>}>
+                  <GameHistory onRejoinGame={handleRejoinGame} />
+                </Suspense>
+              )}
               {activeTab === 'hall' && (
                 <Suspense fallback={<div className="p-8 text-center">Cargando salón de la fama...</div>}>
                   <HallOfFame />
                 </Suspense>
               )}
-              {activeTab === 'ajustes' && <AppSettings />}
+              {activeTab === 'ajustes' && (
+                <Suspense fallback={<div className="p-8 text-center text-white font-arcade">Cargando ajustes...</div>}>
+                  <AppSettings />
+                </Suspense>
+              )}
               {activeTab === 'arcade' && (
                 <Suspense fallback={<div className="p-8 text-center">Cargando Arcade...</div>}>
                   <ArcadeTab />
@@ -615,6 +645,7 @@ function GameAppInner() {
 
   return (
     <>
+      <SplashScreen onComplete={() => setShowSplash(false)} />
       {isAuthOverlayOpen && <WelcomeScreen />}
       <AuthOverlay />
       <GlobalPresence />

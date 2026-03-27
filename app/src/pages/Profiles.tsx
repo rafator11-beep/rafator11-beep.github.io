@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
   Gamepad2,
@@ -12,6 +12,7 @@ import {
   Medal,
   Flame,
   ShieldCheck,
+  Search,
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -75,66 +76,120 @@ function SummaryStat({ icon: Icon, label, value, accent }: { icon: typeof Trophy
   );
 }
 
+function LevelRing({ level }: { level: number }) {
+  const percent = Math.min(100, (level % 10) * 10);
+  const color = level >= 30 ? 'stroke-yellow-400' : level >= 20 ? 'stroke-purple-400' : 'stroke-primary';
+  
+  return (
+    <div className="absolute -inset-1 z-0">
+      <svg className="w-full h-full -rotate-90 transform" viewBox="0 0 100 100">
+        <circle
+          cx="50" cy="50" r="46"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="4"
+          className="text-white/5"
+        />
+        <motion.circle
+          cx="50" cy="50" r="46"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="6"
+          strokeDasharray="289"
+          initial={{ strokeDashoffset: 289 }}
+          animate={{ strokeDashoffset: 289 - (289 * percent) / 100 }}
+          className={color}
+          strokeLinecap="round"
+        />
+      </svg>
+    </div>
+  );
+}
+
 function RankingList({ data, mode, onAvatarClick, localPlayerName }: { data: PlayerStats[]; mode: ModeKey; onAvatarClick: (url: string | null) => void; localPlayerName: string }) {
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {data.map((rank, i) => {
         const wins = pickWins(rank, mode);
         const games = pickGames(rank, mode);
         const isLocal = localPlayerName && rank.name.toLowerCase() === localPlayerName.toLowerCase();
+        const level = Math.floor((rank.xp || 0) / 1000) + 1;
 
         return (
           <motion.div
             key={`${rank.name}-${i}`}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.025 }}
-            className={`rounded-[24px] border p-3.5 sm:p-4 ${
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.04 }}
+            className={`group relative overflow-hidden rounded-[24px] border border-white/10 p-4 transition-all hover:scale-[1.01] hover:border-primary/40 ${
               i < 3
-                ? 'border-amber-400/20 bg-[linear-gradient(180deg,rgba(255,217,102,0.12),rgba(255,255,255,0.04))]'
+                ? 'bg-gradient-to-r from-amber-500/10 via-slate-900/40 to-slate-900/60 shadow-[0_10px_30px_rgba(245,158,11,0.1)]'
                 : isLocal
-                  ? 'border-[hsl(var(--primary)/0.34)] bg-[linear-gradient(180deg,hsl(var(--primary)/0.12),rgba(255,255,255,0.03))]'
-                  : 'border-white/8 bg-white/[0.04]'
+                  ? 'bg-gradient-to-r from-primary/10 via-slate-900/40 to-slate-900/60 border-primary/30 shadow-[0_10px_30px_rgba(var(--primary-rgb),0.1)]'
+                  : 'bg-slate-900/40'
             }`}
           >
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-sm font-black text-white">
-                {heroRankLabel(i)}
+            <div className="flex items-center gap-4 relative z-10">
+              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl font-arcade font-black text-sm ${
+                i === 0 ? 'bg-yellow-400 text-black shadow-[0_0_15px_rgba(250,204,21,0.5)]' :
+                i === 1 ? 'bg-slate-300 text-black shadow-[0_0_15px_rgba(203,213,225,0.5)]' :
+                i === 2 ? 'bg-amber-700 text-white shadow-[0_0_15px_rgba(180,83,9,0.5)]' :
+                'bg-white/5 text-white/40'
+              }`}>
+                {i + 1}
               </div>
 
-              <Avatar className="h-12 w-12 ring-1 ring-white/10 cursor-pointer" onClick={() => onAvatarClick(rank.avatar_url)}>
-                {rank.avatar_url ? <AvatarImage src={rank.avatar_url} loading="lazy" /> : null}
-                <AvatarFallback className="bg-gradient-to-br from-[hsl(var(--neon-purple))] to-[hsl(var(--neon-pink))] text-white text-sm font-bold">
-                  {rank.name.slice(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
+              <div className="relative h-14 w-14 shrink-0">
+                <LevelRing level={level} />
+                <Avatar className="h-full w-full ring-2 ring-black/50 cursor-pointer" onClick={() => onAvatarClick(rank.avatar_url)}>
+                  {rank.avatar_url ? <AvatarImage src={rank.avatar_url} loading="lazy" /> : null}
+                  <AvatarFallback className="bg-slate-800 text-white text-xs font-black font-arcade">
+                    {rank.name.slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="absolute -bottom-1 -right-1 bg-black border border-white/20 rounded-md px-1 py-0.5 text-[8px] font-black font-arcade text-white shadow-lg">
+                  L{level}
+                </div>
+              </div>
 
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <p className="truncate text-sm font-semibold text-white">{rank.name}</p>
-                  {isLocal ? (
-                    <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--accent))]">
-                      tú
+                  <p className="truncate text-base font-black text-white font-arcade uppercase tracking-tight">{rank.name}</p>
+                  {isLocal && (
+                    <span className="rounded-full bg-primary/20 border border-primary/30 px-2 py-0.5 text-[8px] font-black uppercase tracking-widest text-primary font-arcade">
+                      TÚ
                     </span>
-                  ) : null}
+                  )}
                 </div>
-                <p className="mt-1 text-xs text-muted-foreground">{games} partidas registradas</p>
+                <div className="flex items-center gap-3 mt-1 opacity-60">
+                   <p className="text-[10px] font-bold text-slate-400 font-arcade">{games} PARTIDAS</p>
+                   {rank.win_streak > 0 && (
+                     <p className="text-[10px] font-bold text-orange-400 font-arcade">🔥 {rank.win_streak}</p>
+                   )}
+                </div>
               </div>
 
               <div className="text-right">
-                <p className="text-sm font-black text-white">{wins}</p>
-                <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">{mode === 'poker' ? 'fichas' : 'victorias'}</p>
+                <p className="text-xl font-black text-white font-arcade leading-none">{wins}</p>
+                <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mt-1 font-arcade">{mode === 'poker' ? 'FICHAS' : 'WINS'}</p>
               </div>
             </div>
           </motion.div>
         );
       })}
 
-      {data.length === 0 ? (
-        <div className="rounded-[24px] border border-dashed border-white/10 bg-white/[0.03] px-4 py-10 text-center text-sm text-muted-foreground">
-          No hay datos todavía para esta categoría.
-        </div>
-      ) : null}
+      {data.length === 0 && (
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="rounded-[32px] border-2 border-dashed border-white/5 bg-white/[0.02] px-6 py-12 text-center"
+        >
+          <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5">
+            <Users className="h-6 w-6 text-white/20" />
+          </div>
+          <p className="text-sm font-bold text-white/40 font-arcade uppercase tracking-widest">No hay leyendas aún</p>
+        </motion.div>
+      )}
     </div>
   );
 }
@@ -145,6 +200,7 @@ export default function Profiles() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [localPlayerName, setLocalPlayerName] = useState<string>('');
   const [previewAvatar, setPreviewAvatar] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const { profile, syncEconomy } = useAuth();
 
   React.useEffect(() => {
@@ -161,6 +217,21 @@ export default function Profiles() {
   const megamix = sortByWins(rankings.filter(r => (r.megamix_games_played || 0) > 0), 'megamix');
   const clasico = sortByWins(rankings.filter(r => (r.clasico_games_played || 0) > 0), 'clasico');
   const picante = sortByWins(rankings.filter(r => (r.picante_games_played || 0) > 0), 'picante');
+
+  // Mejora 5.3: Debounce/Filter en búsqueda (useMemo para eficiencia)
+  const filteredRankings = useMemo(() => {
+    if (!searchTerm.trim()) return rankings;
+    const lower = searchTerm.toLowerCase();
+    return rankings.filter(r => r.name.toLowerCase().includes(lower));
+  }, [rankings, searchTerm]);
+
+  const fGlobal = sortByWins(filteredRankings.filter(r => (r.games_played || 0) > 0), 'global');
+  const fMegamix = sortByWins(filteredRankings.filter(r => (r.megamix_games_played || 0) > 0), 'megamix');
+  const fClasico = sortByWins(filteredRankings.filter(r => (r.clasico_games_played || 0) > 0), 'clasico');
+  const fPicante = sortByWins(filteredRankings.filter(r => (r.picante_games_played || 0) > 0), 'picante');
+  const fJuego = sortByWins(filteredRankings.filter(r => (r.juego_games_played || 0) > 0), 'juego');
+  const fPoker = sortByWins(filteredRankings.filter(r => (r.poker_games_played || 0) > 0 || r.poker_chips_won > 0), 'poker');
+  const fParchis = sortByWins(filteredRankings.filter(r => (r.parchis_games_played || 0) > 0), 'parchis');
 
   const topPlayer = globalRank[0];
   const myProfile = rankings.find(r => r.name.toLowerCase() === localPlayerName.toLowerCase());
@@ -270,6 +341,18 @@ export default function Profiles() {
             <SummaryStat icon={Users} label="Jugadores" value={rankings.length} accent="text-amber-300" />
             <SummaryStat icon={Crown} label="Top global" value={topPlayer?.name || 'Pendiente'} accent="text-fuchsia-300" />
             <SummaryStat icon={Flame} label="Tu puesto" value={myRankPosition || '—'} accent="text-emerald-300" />
+          </div>
+
+          {/* Barra de Búsqueda (Mejora 5.3) */}
+          <div className="mt-8 relative max-w-md">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
+            <input
+              type="text"
+              placeholder="BUSCAR JUGADOR POR NOMBRE..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full h-12 bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 text-sm font-arcade text-white placeholder:text-white/20 focus:outline-none focus:border-primary/50 transition-all uppercase tracking-widest"
+            />
           </div>
 
           <div className="mt-6 grid gap-5 xl:grid-cols-[1.05fr_0.95fr]">
@@ -404,25 +487,25 @@ export default function Profiles() {
                     </div>
 
                     <TabsContent value="global">
-                      <RankingList data={globalRank} mode="global" localPlayerName={localPlayerName} onAvatarClick={(url) => { setPreviewAvatar(url); setPreviewOpen(true); }} />
+                      <RankingList data={fGlobal} mode="global" localPlayerName={localPlayerName} onAvatarClick={(url) => { setPreviewAvatar(url); setPreviewOpen(true); }} />
                     </TabsContent>
                     <TabsContent value="megamix">
-                      <RankingList data={megamix} mode="megamix" localPlayerName={localPlayerName} onAvatarClick={(url) => { setPreviewAvatar(url); setPreviewOpen(true); }} />
+                      <RankingList data={fMegamix} mode="megamix" localPlayerName={localPlayerName} onAvatarClick={(url) => { setPreviewAvatar(url); setPreviewOpen(true); }} />
                     </TabsContent>
                     <TabsContent value="clasico">
-                      <RankingList data={clasico} mode="clasico" localPlayerName={localPlayerName} onAvatarClick={(url) => { setPreviewAvatar(url); setPreviewOpen(true); }} />
+                      <RankingList data={fClasico} mode="clasico" localPlayerName={localPlayerName} onAvatarClick={(url) => { setPreviewAvatar(url); setPreviewOpen(true); }} />
                     </TabsContent>
                     <TabsContent value="picante">
-                      <RankingList data={picante} mode="picante" localPlayerName={localPlayerName} onAvatarClick={(url) => { setPreviewAvatar(url); setPreviewOpen(true); }} />
+                      <RankingList data={fPicante} mode="picante" localPlayerName={localPlayerName} onAvatarClick={(url) => { setPreviewAvatar(url); setPreviewOpen(true); }} />
                     </TabsContent>
                     <TabsContent value="juego">
-                      <RankingList data={juego} mode="juego" localPlayerName={localPlayerName} onAvatarClick={(url) => { setPreviewAvatar(url); setPreviewOpen(true); }} />
+                      <RankingList data={fJuego} mode="juego" localPlayerName={localPlayerName} onAvatarClick={(url) => { setPreviewAvatar(url); setPreviewOpen(true); }} />
                     </TabsContent>
                     <TabsContent value="poker">
-                      <RankingList data={poker} mode="poker" localPlayerName={localPlayerName} onAvatarClick={(url) => { setPreviewAvatar(url); setPreviewOpen(true); }} />
+                      <RankingList data={fPoker} mode="poker" localPlayerName={localPlayerName} onAvatarClick={(url) => { setPreviewAvatar(url); setPreviewOpen(true); }} />
                     </TabsContent>
                     <TabsContent value="parchis">
-                      <RankingList data={parchis} mode="parchis" localPlayerName={localPlayerName} onAvatarClick={(url) => { setPreviewAvatar(url); setPreviewOpen(true); }} />
+                      <RankingList data={fParchis} mode="parchis" localPlayerName={localPlayerName} onAvatarClick={(url) => { setPreviewAvatar(url); setPreviewOpen(true); }} />
                     </TabsContent>
                   </Tabs>
                 )}

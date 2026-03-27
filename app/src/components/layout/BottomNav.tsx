@@ -1,4 +1,4 @@
-﻿import { Home, Users, Plus, History, Settings, Trophy, Gamepad2 } from 'lucide-react';
+import { Home, Users, Plus, History, Settings, Trophy, Gamepad2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -54,7 +54,7 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
                   <Icon className={cn('h-[18px] w-[18px]', isActive && !tab.isPrimary && 'text-[hsl(var(--accent))]')} />
                 </div>
                 <span className={cn(
-                  'whitespace-nowrap text-[12px]',
+                  'whitespace-nowrap text-[12px] font-arcade uppercase font-black tracking-widest',
                   isActive ? 'inline' : 'hidden sm:inline'
                 )}>
                   {tab.label}
@@ -62,7 +62,8 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
                 {isActive && !tab.isPrimary && (
                   <motion.span
                     layoutId="bottom-nav-active"
-                    className="absolute inset-0 -z-10 rounded-2xl border border-white/10"
+                    className="absolute inset-0 -z-10 rounded-2xl bg-white/5 border border-white/10 shadow-[0_0_20px_rgba(255,255,255,0.05)]"
+                    transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
                   />
                 )}
               </motion.button>

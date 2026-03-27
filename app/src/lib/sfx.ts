@@ -1,4 +1,4 @@
-﻿
+
 function beep(freq = 440, ms = 90, vol = 0.08) {
   try {
     const AudioCtx = (window.AudioContext || (window as any).webkitAudioContext);
@@ -41,5 +41,17 @@ export const sfx = {
   legendary: () => { try { beep(780, 400, 0.1); } catch { } },
   cursed: () => { try { beep(180, 600, 0.15); } catch { } },
   chaos: () => { try { beep(100, 800, 0.2); } catch { } },
-  whoosh: () => { try { beep(400, 200, 0.05); } catch { } },
+  whoosh: () => { try { beep(880, 150, 0.05); beep(440, 300, 0.03); } catch { } },
+  success: () => { 
+    try { 
+      beep(523, 100); 
+      setTimeout(() => beep(659, 100), 100); 
+      setTimeout(() => beep(783, 200), 200); 
+    } catch { } 
+  },
+  arcade: () => {
+    try {
+      [440, 554, 659, 880].forEach((f, i) => setTimeout(() => beep(f, 80), i * 80));
+    } catch { }
+  }
 };

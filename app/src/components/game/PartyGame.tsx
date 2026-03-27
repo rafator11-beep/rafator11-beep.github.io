@@ -319,6 +319,13 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     setGameOver
   } = useGameEngine(mode);
 
+  useEffect(() => {
+    document.body.classList.add('beep-game-mode');
+    return () => {
+      document.body.classList.remove('beep-game-mode');
+    };
+  }, []);
+
   // Improvements State
   const [showTurnBanner, setShowTurnBanner] = useState(false);
   const prevPlayerNameRef = useRef<string>('');
@@ -361,6 +368,26 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
   const handleAdjustXP = (playerId: string, delta: number) => {
     addScore(playerId, delta);
+    const playerName = players.find(p => p.id === playerId)?.name || 'Jugador';
+    
+    // Mejora 4.2: Toast personalizado para XP
+    toast.custom((t) => (
+      <motion.div
+        initial={{ x: 60, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        exit={{ x: 60, opacity: 0 }}
+        className="flex items-center gap-3 bg-zinc-900 border border-emerald-500/40 px-4 py-3 rounded-2xl shadow-xl"
+      >
+        <span className="text-2xl">{delta > 0 ? '⚡' : '💔'}</span>
+        <div>
+          <p className="text-white font-black text-sm">{playerName}</p>
+          <p className={`font-black text-lg ${delta > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+            {delta > 0 ? `+${delta}` : delta} XP
+          </p>
+        </div>
+      </motion.div>
+    ), { duration: 1200, position: 'top-right' });
+
     if (delta > 0) sfx.click();
     else vibe(20);
   };
@@ -1159,9 +1186,19 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           >
             Finalizar
           </Button>
-          <div className="bg-gradient-to-r from-slate-800/80 to-slate-700/80 backdrop-blur-xl px-4 py-2 rounded-full border border-white/10">
-            <span className="font-mono font-bold text-xl text-white">{gameState.round}</span>
-            <span className="text-xs text-white/60 ml-1 uppercase">Ronda</span>
+          <div className="bg-gradient-to-r from-slate-800/80 to-slate-700/80 backdrop-blur-xl px-4 py-2 rounded-full border border-white/10 flex items-center gap-2">
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={gameState.round}
+                initial={{ y: 10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: -10, opacity: 0 }}
+                className="font-arcade font-bold text-xl text-white"
+              >
+                {gameState.round}
+              </motion.span>
+            </AnimatePresence>
+            <span className="text-[10px] text-white/60 uppercase font-arcade font-black tracking-widest">Ronda</span>
           </div>
         </div>
       </header>
@@ -1778,9 +1815,15 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                               return;
                             }
                             handleAdjustXP(p.id, rewardXP);
-                            toast.success(`+${rewardXP} XP para ${p.name}! 🔥`, { 
-                              className: "bg-slate-900 border-emerald-500/50 text-emerald-400 font-bold" 
-                            });
+                            toast.custom((t) => (
+                              <div className="bg-black/90 border-2 border-emerald-500/50 p-4 rounded-2xl shadow-[0_0_20px_rgba(16,185,129,0.4)] flex items-center gap-3 font-arcade animate-in fade-in zoom-in duration-300">
+                                <div className="bg-emerald-500/20 p-2 rounded-xl text-xl">🔥</div>
+                                <div>
+                                  <p className="text-white font-black">+{rewardXP} XP</p>
+                                  <p className="text-white/50 text-[10px] uppercase tracking-wider">{p.name} ha cumplido!</p>
+                                </div>
+                              </div>
+                            ));
                           }}
                           className="w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center shadow-lg hover:bg-emerald-400 transition-colors"
                         >
@@ -2224,7 +2267,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                   handleNext();
                 }}
                 whileTap={{ y: 4, boxShadow: 'none' }}
-                className="w-full font-mono font-black text-white uppercase tracking-widest text-xl py-5 px-8 bg-black select-none rounded-none active:scale-[0.98] transition-all"
+                className="w-full font-arcade font-black text-white uppercase tracking-[0.2em] text-xl py-5 px-8 bg-black select-none rounded-none active:scale-[0.98] transition-all"
                 style={{
                   boxShadow: `
                     4px 0 0 0 ${rarity === 'legendary' ? '#fbbf24' : rarity === 'chaos' ? '#f472b6' : rarity === 'rare' ? '#60a5fa' : '#ffffff'},
