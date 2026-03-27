@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, X, Send, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -94,9 +94,9 @@ export function ChatComponent({ roomId, playerName }: { roomId: string, playerNa
 
     return (
         <>
-            {/* Floating Button */}
+            {/* Floating Button (Moved to left to avoid blocking game actions) */}
             <motion.div
-                className="fixed bottom-24 right-4 z-[99999]"
+                className="fixed bottom-24 left-4 z-40"
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
             >
@@ -117,7 +117,7 @@ export function ChatComponent({ roomId, playerName }: { roomId: string, playerNa
                         initial={{ opacity: 0, y: 50, scale: 0.9 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 50, scale: 0.9 }}
-                        className="fixed bottom-40 right-4 w-80 h-96 bg-black/95 backdrop-blur-md rounded-2xl border border-primary/20 shadow-2xl z-[99999] flex flex-col overflow-hidden"
+                        className="fixed bottom-40 left-4 w-80 h-96 bg-black/95 backdrop-blur-md rounded-2xl border border-primary/20 shadow-2xl z-40 flex flex-col overflow-hidden"
                     >
                         {/* Header */}
                         <div className={`p-3 border-b border-white/10 flex justify-between items-center ${roomId === 'global_lobby' ? 'bg-purple-500/10' : 'bg-white/5'}`}>
