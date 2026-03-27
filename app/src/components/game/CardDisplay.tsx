@@ -447,7 +447,7 @@ export const CardDisplay = React.memo(({ content, type = 'common', onClick, game
                             initial={{ opacity: 0, y: 8 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.12 }}
-                            className="text-lg md:text-xl font-black uppercase tracking-wider text-white text-center drop-shadow-md leading-tight"
+                            className="text-lg md:text-xl font-arcade font-black uppercase tracking-wider text-white text-center drop-shadow-md leading-tight"
                         >
                             {theme.modeName}
                         </motion.h2>

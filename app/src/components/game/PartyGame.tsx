@@ -41,6 +41,7 @@ import { CaptainPassScreen } from './CaptainPassScreen';
 import { SuggestionBox } from './SuggestionBox';
 import { QuestionVote } from './QuestionVote';
 import { YoNuncaEquiposFlow } from './YoNuncaEquiposFlow';
+import { PodiumScreen } from './PodiumScreen';
 import confetti from 'canvas-confetti';
 
 // Helper component for TTS
@@ -328,6 +329,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
   // Improvements State
   const [showTurnBanner, setShowTurnBanner] = useState(false);
+  const [showPodium, setShowPodium] = useState(false);
   const prevPlayerNameRef = useRef<string>('');
   const prevVirusAlertRef = useRef(false);
   const [virusFlash, setVirusFlash] = useState(false);
@@ -1169,7 +1171,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           <Button
             variant="ghost"
             size="sm"
-            className="text-[10px] font-black uppercase tracking-wider bg-white/5 text-white/40 hover:text-white hover:bg-white/10 border border-white/5"
+            className="text-[10px] font-arcade font-black uppercase tracking-wider bg-white/5 text-white/40 hover:text-white hover:bg-white/10 border border-white/5"
             onClick={handleNext}
           >
             Siguiente
@@ -1177,10 +1179,11 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           <Button
             variant="destructive"
             size="sm"
-            className="text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-red-500/10 to-red-600/10 text-red-300 border border-red-500/30"
+            className="text-[10px] font-arcade font-black uppercase tracking-wider bg-gradient-to-r from-red-500/10 to-red-600/10 text-red-300 border border-red-500/30"
             onClick={() => {
               if (window.confirm("¿Terminar partida y ver resultados?")) {
                 setGameOver(true);
+                setShowPodium(true);
               }
             }}
           >
@@ -2245,7 +2248,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
         {/* Indicador de progreso discreto */}
         {!gameState.showTrivia && !gameState.showDuel && (
-          <p className="text-white/20 text-[9px] font-mono text-center tracking-widest mb-2">
+          <p className="text-white/20 text-[9px] font-arcade text-center tracking-widest mb-2">
             CARTA {currentIndex + 1}
           </p>
         )}
@@ -2299,13 +2302,33 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               teams={teams}
               globalStats={rankings}
               onContinue={() => setShowRoundSummary(false)}
-              onEndGame={handleExit}
+              onEndGame={() => setShowPodium(true)}
               isGameOver={gameOver}
               trackingData={{ voteCounts, drinkCounts, virusReceived, skipCounts }}
             />
           </div>
         )
       }
+
+      {/* Podium Screen Overlay */}
+      {showPodium && (
+        <PodiumScreen 
+          players={players.map(p => ({
+            id: p.id,
+            name: p.name,
+            score: scores[p.id] || 0,
+            avatar_url: p.avatar_url
+          }))}
+          onRestart={() => {
+            setShowPodium(false);
+            onExit(); // Go back to lobby/mode selection
+          }}
+          onHome={() => {
+            setShowPodium(false);
+            onExit();
+          }}
+        />
+      )}
     </div >
   );
 }

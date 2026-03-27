@@ -209,7 +209,7 @@ export function WelcomeScreen() {
                   }}
                   className="h-20 rounded-[2rem] bg-gradient-to-r from-amber-500 to-orange-600 hover:scale-[1.02] transition-all border-0 flex flex-col items-center justify-center gap-1 group shadow-[0_10px_30px_rgba(245,158,11,0.2)]"
                 >
-                  <span className="text-lg font-black tracking-widest uppercase">SÍ, HE JUGADO</span>
+                  <span className="text-lg font-black font-arcade tracking-widest uppercase">SÍ, HE JUGADO</span>
                   <span className="text-[10px] opacity-80 font-bold group-hover:opacity-100 transition-opacity">ACCEDER A MI PERFIL</span>
                 </Button>
 
@@ -221,7 +221,7 @@ export function WelcomeScreen() {
                   }}
                   className="h-20 rounded-[2rem] bg-white/5 border-white/10 hover:bg-white/10 hover:border-purple-500/30 transition-all flex flex-col items-center justify-center gap-1"
                 >
-                  <span className="text-lg font-black tracking-widest uppercase text-white">SOY NUEVO</span>
+                  <span className="text-lg font-black font-arcade tracking-widest uppercase text-white">SOY NUEVO</span>
                   <span className="text-[10px] text-slate-500 font-bold">CREAR PERFIL / INVITADO</span>
                 </Button>
               </div>
