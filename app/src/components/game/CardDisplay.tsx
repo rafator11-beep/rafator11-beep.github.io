@@ -1,9 +1,5 @@
-import { useEffect, useState } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { User } from 'lucide-react';
-import { RarityBadge } from '@/components/game/RarityBadge';
 
 interface CardDisplayProps {
     content: string;
@@ -11,41 +7,58 @@ interface CardDisplayProps {
     onClick: () => void;
     gameMode: string;
     players?: any[];
-    round?: number; // Added to calculate drink multipliers
+    round?: number;
 }
+
+// ── SANITIZE ──────────────────────────────────────────────────────────────────
 
 export function sanitizeCardText(text: string): string {
     if (!text) return '';
     let clean = text.trim();
-    // Remove variations of "es", "norma", "norma", etc from the beginning
-    clean = clean.replace(/^(es\s*:?\s*)+/i, '');
-    clean = clean.replace(/^(es\s)+/i, '');
-    clean = clean.replace(/^(norma\s*,?\s*:?\s*)+/i, '');
-    clean = clean.replace(/^(es\s*norma\s*,?\s*:?\s*)+/i, '');
-    clean = clean.replace(/^(nueva norma\s*:?\s*)+/i, '');
-    
-    // Remove standalone 'es' or 'ES' at the very beginning
-    clean = clean.replace(/^es\s+/i, '');
-
+    // Quitar comillas de apertura
+    clean = clean.replace(/^["'""''«»]+/, '');
+    // Eliminar "es" como artefacto del dataset al inicio
+    clean = clean.replace(/^es\s*[:\-,]?\s+/i, '');
+    // Prefijos de modo emoji que ya están representados visualmente
+    clean = clean.replace(/^🎭\s*M[IÍ]MICA\s*:\s*/i, '');
+    clean = clean.replace(/^🤐\s*BOCA\s*CERRADA\s*:\s*/i, '');
+    clean = clean.replace(/^📜\s*NORMA\s*:\s*/i, '');
+    clean = clean.replace(/^NORMA\s*:\s*/i, '');
+    clean = clean.replace(/^NUEVA\s*NORMA\s*:\s*/i, '');
+    clean = clean.replace(/^🙈\s*(Yo\s*nunca[.…]?\s*)?/i, '');
+    clean = clean.replace(/^🎯\s*/i, '');
+    clean = clean.replace(/^🌶️\s*/i, '');
+    clean = clean.replace(/^🗳️\s*/i, '');
+    clean = clean.replace(/^🇪🇸\s*/i, '');
+    clean = clean.replace(/^🛌\s*/i, '');
+    clean = clean.replace(/^🔤\s*/i, '');
+    clean = clean.replace(/^🍺\s*/i, '');
+    clean = clean.replace(/^🍻\s*/i, '');
+    clean = clean.replace(/^🥃\s*/i, '');
+    // Prefijos textuales redundantes
+    clean = clean.replace(/^(reto\s*:?\s*)+/i, '');
+    clean = clean.replace(/^(norma\s*:?\s*)+/i, '');
+    // Normalizar espacios
     clean = clean.replace(/\s{2,}/g, ' ').trim();
+    // Eliminar comillas de cierre
+    clean = clean.replace(/["'""''«»]+$/, '');
+    // Capitalizar
     if (clean.length > 0) {
         clean = clean.charAt(0).toUpperCase() + clean.slice(1);
     }
     return clean;
 }
 
-// Function to multiply drinks based on round number
+// ── DRINK MULTIPLIER ─────────────────────────────────────────────────────────
+
 export function processDrinkingMultiplier(text: string, round: number = 1): React.ReactNode {
-    // Determine multiplier based on round
-    // Rounds 1-5: 1x, Rounds 6-12: +1 trago (min 2), Rounds 13+: +2 tragos
     let extraDrinks = 0;
     if (round >= 6 && round <= 12) extraDrinks = 1;
     if (round >= 13) extraDrinks = 2;
 
     if (extraDrinks === 0) {
-        // Just format the drinking text to stand out
         const parts = text.split(/(🍺.*?tragos?|🍻.*?doble|🥃.*?fondo|🥂.*?grupal!)/i);
-        return parts.map((part, i) => {
+        return parts.filter(Boolean).map((part, i) => {
             if (part && part.match(/(🍺|🍻|🥃|🥂)/)) {
                 return <span key={i} className="text-red-400 font-extrabold block mt-3 text-xl sm:text-2xl animate-pulse drop-shadow-[0_0_15px_rgba(239,68,68,0.7)]">{part}</span>;
             }
@@ -53,293 +66,444 @@ export function processDrinkingMultiplier(text: string, round: number = 1): Reac
         });
     }
 
-    // Multiply the numbers dynamically
     const regex = /(🍺.*?)(\d+)(\s*tragos?.*)/i;
-
-    // We split by lines starting with emojis (which usually denote the penalty)
     const segments = text.split(/(\n🍺.*|\n🍻.*|\n🥃.*|\n🥂.*)/i);
 
-    return segments.map((segment, i) => {
-        if (!segment) return null;
-        if (segment.match(/(\n🍺|\n🍻|\n🥃|\n🥂)/)) {
-            // It's a penalty line. Let's try to increase the number.
-            let modified = segment;
-            const match = modified.match(regex);
+    return segments
+        .filter((segment): segment is string => Boolean(segment))
+        .map((segment, i) => {
+            if (segment.match(/(\n🍺|\n🍻|\n🥃|\n🥂)/)) {
+                let modified = segment;
+                const match = modified.match(regex);
 
-            if (match) {
-                const originalNum = parseInt(match[2], 10);
-                // "Fondo" or huge penalties don't get multiplied linearly, just capped at 5
-                const newNum = Math.min(originalNum + extraDrinks, 5);
-                modified = `${match[1]}${newNum}${match[3]} 🔥`;
-            } else if (modified.toLowerCase().includes('bebe 1 trago')) {
-                modified = modified.replace(/bebe 1 trago/i, `bebe ${1 + extraDrinks} tragos 🔥`);
-            } else if (modified.toLowerCase().includes('doble')) {
-                modified = modified + ' ¡TRIPLE! 🔥🔥'; // Escalate double
+                if (match) {
+                    const originalNum = parseInt(match[2], 10);
+                    const newNum = Math.min(originalNum + extraDrinks, 5);
+                    modified = `${match[1]}${newNum}${match[3]} 🔥`;
+                } else if (modified.toLowerCase().includes('bebe 1 trago')) {
+                    modified = modified.replace(/bebe 1 trago/i, `bebe ${1 + extraDrinks} tragos 🔥`);
+                } else if (modified.toLowerCase().includes('doble')) {
+                    modified = modified + ' ¡TRIPLE! 🔥🔥';
+                }
+
+                return <span key={i} className="text-red-500 font-black block mt-3 text-xl sm:text-2xl drop-shadow-[0_0_15px_rgba(239,68,68,0.8)] animate-bounce">{modified.trim()}</span>;
             }
-
-            return <span key={i} className="text-red-500 font-black block mt-3 text-xl sm:text-2xl drop-shadow-[0_0_15px_rgba(239,68,68,0.8)] animate-bounce">{modified.trim()}</span>;
-        }
-        return <span key={i}>{segment}</span>;
-    });
+            return <span key={i}>{segment}</span>;
+        });
 }
 
+// ── CARD THEMES ──────────────────────────────────────────────────────────────
+
+interface CardTheme {
+    bg: string;
+    textBoxBg: string;
+    textColor: string;
+    accentColor: string;
+    modeName: string;
+    modeEmoji: string;
+    emojiCircle: string;
+    extra: string;
+}
+
+const CARD_THEMES: Record<string, CardTheme> = {
+    yoNunca: {
+        bg: 'from-emerald-500 to-teal-700',
+        textBoxBg: 'bg-white',
+        textColor: 'text-gray-900',
+        accentColor: '#10b981',
+        modeName: 'YO NUNCA HE...',
+        modeEmoji: '🙈',
+        emojiCircle: 'bg-white/20',
+        extra: 'drinkBar',
+    },
+    drink: {
+        bg: 'from-amber-400 to-orange-600',
+        textBoxBg: 'bg-black/80',
+        textColor: 'text-white',
+        accentColor: '#f59e0b',
+        modeName: '¡BEBE!',
+        modeEmoji: '🍺',
+        emojiCircle: 'bg-white/20',
+        extra: 'drinkCounter',
+    },
+    reto: {
+        bg: 'from-blue-500 to-indigo-700',
+        textBoxBg: 'bg-white',
+        textColor: 'text-gray-900',
+        accentColor: '#3b82f6',
+        modeName: 'RETO',
+        modeEmoji: '🎯',
+        emojiCircle: 'bg-white/20',
+        extra: 'stars',
+    },
+    picante: {
+        bg: 'from-rose-500 to-pink-700',
+        textBoxBg: 'bg-white',
+        textColor: 'text-gray-900',
+        accentColor: '#f43f5e',
+        modeName: 'PICANTE 🔞',
+        modeEmoji: '🌶️',
+        emojiCircle: 'bg-white/20',
+        extra: 'thermometer',
+    },
+    masProbable: {
+        bg: 'from-violet-500 to-purple-700',
+        textBoxBg: 'bg-white',
+        textColor: 'text-gray-900',
+        accentColor: '#8b5cf6',
+        modeName: '¿QUIÉN ES MÁS PROBABLE?',
+        modeEmoji: '🗳️',
+        emojiCircle: 'bg-white/20',
+        extra: 'voteBar',
+    },
+    pacovers: {
+        bg: 'from-red-600 to-yellow-500',
+        textBoxBg: 'bg-white',
+        textColor: 'text-gray-900',
+        accentColor: '#dc2626',
+        modeName: 'ESPAÑA 🇪🇸',
+        modeEmoji: '🇪🇸',
+        emojiCircle: 'bg-white/20',
+        extra: 'flag',
+    },
+    enLaCama: {
+        bg: 'from-purple-600 to-indigo-800',
+        textBoxBg: 'bg-white',
+        textColor: 'text-gray-900',
+        accentColor: '#7c3aed',
+        modeName: 'EN LA CAMA Y...',
+        modeEmoji: '🛌',
+        emojiCircle: 'bg-white/20',
+        extra: 'hearts',
+    },
+    categorias: {
+        bg: 'from-cyan-500 to-blue-600',
+        textBoxBg: 'bg-white',
+        textColor: 'text-gray-900',
+        accentColor: '#06b6d4',
+        modeName: 'CATEGORÍAS',
+        modeEmoji: '🔤',
+        emojiCircle: 'bg-white/20',
+        extra: 'timer',
+    },
+    mimica: {
+        bg: 'from-fuchsia-500 to-pink-600',
+        textBoxBg: 'bg-black/80',
+        textColor: 'text-white',
+        accentColor: '#d946ef',
+        modeName: '🎭 MÍMICA',
+        modeEmoji: '🎭',
+        emojiCircle: 'bg-white/20',
+        extra: 'clock',
+    },
+    bocaCerrada: {
+        bg: 'from-orange-500 to-red-600',
+        textBoxBg: 'bg-black/80',
+        textColor: 'text-white',
+        accentColor: '#f97316',
+        modeName: '🤐 BOCA CERRADA',
+        modeEmoji: '🤐',
+        emojiCircle: 'bg-white/20',
+        extra: 'lock',
+    },
+    norma: {
+        bg: 'from-orange-400 to-amber-600',
+        textBoxBg: 'bg-black/80',
+        textColor: 'text-white',
+        accentColor: '#f97316',
+        modeName: '📜 NUEVA NORMA',
+        modeEmoji: '📜',
+        emojiCircle: 'bg-white/20',
+        extra: 'timer',
+    },
+    trivia: {
+        bg: 'from-sky-500 to-blue-700',
+        textBoxBg: 'bg-white',
+        textColor: 'text-gray-900',
+        accentColor: '#0ea5e9',
+        modeName: '🧠 TRIVIA',
+        modeEmoji: '🧠',
+        emojiCircle: 'bg-white/20',
+        extra: 'stars',
+    },
+    legendary: {
+        bg: 'from-yellow-400 to-amber-600',
+        textBoxBg: 'bg-black/80',
+        textColor: 'text-white',
+        accentColor: '#fbbf24',
+        modeName: '👑 LEGENDARIA',
+        modeEmoji: '👑',
+        emojiCircle: 'bg-black/20',
+        extra: 'crown',
+    },
+    chaos: {
+        bg: 'from-pink-500 to-purple-700',
+        textBoxBg: 'bg-black/80',
+        textColor: 'text-white',
+        accentColor: '#ec4899',
+        modeName: '💥 MODO CAOS',
+        modeEmoji: '💥',
+        emojiCircle: 'bg-white/20',
+        extra: 'explosion',
+    },
+    virus: {
+        bg: 'from-green-600 to-emerald-900',
+        textBoxBg: 'bg-black/80',
+        textColor: 'text-white',
+        accentColor: '#22c55e',
+        modeName: '🦠 VIRUS',
+        modeEmoji: '🦠',
+        emojiCircle: 'bg-green-500/20',
+        extra: 'clock',
+    },
+    megamix: {
+        bg: 'from-indigo-600 to-purple-800',
+        textBoxBg: 'bg-white',
+        textColor: 'text-gray-900',
+        accentColor: '#6366f1',
+        modeName: 'BEEP MEGAMIX',
+        modeEmoji: '🎲',
+        emojiCircle: 'bg-white/20',
+        extra: 'stars',
+    },
+};
+
+function getCardTheme(content: string, type: string, gameMode: string): CardTheme {
+    const c = (content || '').toLowerCase();
+
+    // Rareza primero
+    if (type === 'legendary') return CARD_THEMES.legendary;
+    if (type === 'chaos') return CARD_THEMES.chaos;
+    if (type === 'virus') return CARD_THEMES.virus;
+
+    // Detección por prefijo de emoji/texto
+    if (c.startsWith('🎭') || c.includes('mímica:')) return CARD_THEMES.mimica;
+    if (c.startsWith('🤐') || c.includes('boca cerrada:')) return CARD_THEMES.bocaCerrada;
+    if (c.includes('norma:') || c.startsWith('📜')) return CARD_THEMES.norma;
+    if (c.startsWith('🙈') || c.includes('yo nunca')) return CARD_THEMES.yoNunca;
+    if (c.startsWith('🎯') || c.includes('reto:')) return CARD_THEMES.reto;
+    if (c.startsWith('🌶️') || c.includes('beso') || c.includes('lamer') || c.includes('desnud')) return CARD_THEMES.picante;
+    if (c.startsWith('🗳️') || c.includes('más probable') || c.includes('quién es') || c.includes('votación')) return CARD_THEMES.masProbable;
+    if (c.startsWith('🇪🇸') || c.includes('españa:') || c.includes('años 90') || c.includes('infancia')) return CARD_THEMES.pacovers;
+    if (c.startsWith('🛌') || c.includes('en la cama')) return CARD_THEMES.enLaCama;
+    if (c.startsWith('🔤')) return CARD_THEMES.categorias;
+    if (c.includes('trivia') || type === 'rare') return CARD_THEMES.trivia;
+
+    // Detección por contenido de tragos/bebe (cartas de bebida cortas sin contexto de "yo nunca")
+    const isDrinkCard = (c.startsWith('🍺') || c.startsWith('🍻') || c.startsWith('🥃')) && c.length < 100;
+    if (isDrinkCard) return CARD_THEMES.drink;
+
+    // Fallback por modo de juego
+    const modeMap: Record<string, CardTheme> = {
+        yo_nunca: CARD_THEMES.yoNunca,
+        yo_nunca_equipos: CARD_THEMES.yoNunca,
+        picante: CARD_THEMES.picante,
+        espana: CARD_THEMES.pacovers,
+        pacovers: CARD_THEMES.pacovers,
+        clasico: CARD_THEMES.reto,
+        votacion: CARD_THEMES.masProbable,
+    };
+    return modeMap[gameMode] || CARD_THEMES.megamix;
+}
+
+// ── CARD EXTRAS ──────────────────────────────────────────────────────────────
+
+function renderCardExtra(extra: string, theme: CardTheme, content: string): React.ReactNode {
+    switch (extra) {
+        case 'drinkBar': {
+            const drinks = parseInt(content.match(/(\d+)\s*trago/i)?.[1] ?? '1', 10);
+            const pct = Math.min(drinks * 33, 100);
+            return (
+                <div className="w-full bg-white/20 rounded-full h-2 mt-3 overflow-hidden">
+                    <motion.div
+                        className="h-2 rounded-full"
+                        style={{ background: theme.accentColor }}
+                        initial={{ width: 0 }}
+                        animate={{ width: `${pct}%` }}
+                        transition={{ duration: 0.8, ease: 'easeOut', delay: 0.3 }}
+                    />
+                </div>
+            );
+        }
+        case 'drinkCounter': {
+            const count = parseInt(content.match(/(\d+)\s*trago/i)?.[1] ?? '1', 10);
+            return (
+                <div className="flex gap-1 mt-2 justify-center">
+                    {Array.from({ length: Math.min(count, 5) }).map((_, i) => (
+                        <motion.span key={i} initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.1 * i }} className="text-xl">🍺</motion.span>
+                    ))}
+                </div>
+            );
+        }
+        case 'stars': {
+            const stars = content.length < 60 ? 1 : content.length < 130 ? 2 : 3;
+            return (
+                <div className="flex gap-0.5 mt-2 justify-center">
+                    {Array.from({ length: stars }).map((_, i) => (
+                        <motion.span key={i} initial={{ scale: 0, rotate: -30 }} animate={{ scale: 1, rotate: 0 }} transition={{ delay: 0.1 * i, type: 'spring', stiffness: 300 }} className="text-xl">⭐</motion.span>
+                    ))}
+                </div>
+            );
+        }
+        case 'voteBar':
+            return (
+                <motion.p
+                    animate={{ opacity: [1, 0.3, 1] }}
+                    transition={{ duration: 1.2, repeat: Infinity }}
+                    className="text-sm font-black mt-3 uppercase tracking-widest"
+                    style={{ color: theme.accentColor }}
+                >🗳️ VOTAD AHORA</motion.p>
+            );
+        case 'timer':
+            return (
+                <span className="text-xs font-bold px-4 py-1.5 rounded-full bg-white/20 mt-3 inline-block uppercase tracking-wider">
+                    ⏱️ 30 SEGUNDOS
+                </span>
+            );
+        case 'clock':
+            return (
+                <motion.p
+                    animate={{ opacity: [1, 0.2, 1] }}
+                    transition={{ duration: 0.7, repeat: Infinity }}
+                    className="text-sm font-black mt-3 text-white uppercase tracking-widest"
+                >🕐 ¡ACTÚA YA!</motion.p>
+            );
+        case 'hearts':
+            return (
+                <div className="flex gap-2 mt-3 justify-center">
+                    {['❤️', '💜', '🧡'].map((h, i) => (
+                        <motion.span key={i} animate={{ y: [0, -8, 0] }} transition={{ duration: 1.3, delay: i * 0.25, repeat: Infinity }} className="text-xl">{h}</motion.span>
+                    ))}
+                </div>
+            );
+        case 'thermometer': {
+            const hot = content.toLowerCase().includes('muy') || content.length > 160 ? 3 : content.length > 90 ? 2 : 1;
+            return <div className="text-xl mt-2">{'🌶️'.repeat(hot)}</div>;
+        }
+        case 'lock':
+            return <span className="text-xs font-bold px-4 py-1.5 rounded-full bg-white/20 mt-3 inline-block uppercase tracking-wider">🔒 BOCA CERRADA</span>;
+        case 'crown':
+            return (
+                <motion.span animate={{ rotate: [0, 12, -12, 0] }} transition={{ duration: 2.5, repeat: Infinity }} className="text-3xl mt-2 inline-block">👑</motion.span>
+            );
+        case 'explosion':
+            return (
+                <div className="flex gap-1 mt-2 justify-center">
+                    {['💥', '✨', '💥'].map((e, i) => (
+                        <motion.span key={i} animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 0.8, delay: i * 0.15, repeat: Infinity }} className="text-xl">{e}</motion.span>
+                    ))}
+                </div>
+            );
+        case 'flag':
+            return (
+                <motion.div animate={{ rotate: [-3, 3, -3] }} transition={{ duration: 2, repeat: Infinity }} className="text-3xl mt-2 inline-block origin-bottom-left">🇪🇸</motion.div>
+            );
+        default:
+            return null;
+    }
+}
+
+// ── MAIN COMPONENT ───────────────────────────────────────────────────────────
+
 export function CardDisplay({ content, type = 'common', onClick, gameMode, players, round = 1 }: CardDisplayProps) {
-    const getIntelligentEmoji = (text: string, type: string) => {
-        const t = text.toLowerCase();
-        if (t.includes('beso') || t.includes('liar') || t.includes('pico') || t.includes('labio')) return '💋';
-        if (t.includes('beb') || t.includes('trago')) return '🍻';
-        if (t.includes('ropa') || t.includes('desnud')) return '👕';
-        if (t.includes('canción') || t.includes('canta')) return '🎵';
-        if (t.includes('baile') || t.includes('baila')) return '💃';
-        if (t.includes('ex') || t.includes('pareja') || t.includes('novi')) return '💔';
-        if (t.includes('crush') || t.includes('amor')) return '😍';
-        if (t.includes('móvil') || t.includes('whatsapp') || t.includes('instagram')) return '📱';
-        if (t.includes('dinero') || t.includes('pagar') || t.includes('comprar')) return '💸';
-        if (t.includes('cama') || t.includes('dormir')) return '🛌';
-        if (t.includes('comida') || t.includes('comer') || t.includes('pizza') || t.includes('hambre')) return '🍕';
-        if (t.includes('foto') || t.includes('selfie') || t.includes('cámara')) return '📸';
-        if (t.includes('coche') || t.includes('conduc') || t.includes('volante')) return '🚗';
-        if (t.includes('animal') || t.includes('perro') || t.includes('gato')) return '🐶';
-        if (t.includes('fiesta') || t.includes('club') || t.includes('discoteca')) return '🎊';
-        if (type === 'yo_nunca' || type === 'yo_nunca_equipos') return '🙈';
-        if (type === 'reto' || type === 'accion') return '🎯';
-        if (type === 'bomba' || type === 'ruleta' || type === 'trivia_futbol') return '💣';
-        if (type === 'pregunta') return '🧠';
-        return '🔥';
-    };
+    const theme = getCardTheme(content, type, gameMode);
+    const cleanText = sanitizeCardText(content);
 
-    // Dynamic Color Palette Mapping
-    const getModeStyles = () => {
-        const isNorma = content.toUpperCase().includes('NORMA:') || content.toUpperCase().startsWith('NORMA');
-        const intelligentEmoji = getIntelligentEmoji(content, type);
-
-        if (isNorma) {
-            return {
-                title: 'NUEVA NORMA',
-                bgClass: 'bg-gradient-to-b from-orange-400 to-red-600',
-                textColor: 'text-orange-700',
-                icon: '📜'
-            };
-        }
-
-        switch (gameMode) {
-            case 'megamix':
-                return {
-                    title: 'BEEP MEGAMIX',
-                    bgClass: 'bg-gradient-to-b from-indigo-600 to-purple-900',
-                    textColor: 'text-purple-800',
-                    icon: intelligentEmoji
-                };
-            case 'clasico':
-                return {
-                    title: 'OLIMPIADAS',
-                    bgClass: 'bg-gradient-to-b from-blue-400 to-cyan-600',
-                    textColor: 'text-blue-700',
-                    icon: intelligentEmoji
-                };
-            case 'megamix':
-                return {
-                    title: 'FIESTA MEGAMIX',
-                    bgClass: 'bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 animate-gradient-x',
-                    textColor: 'text-indigo-900',
-                    icon: '🌀'
-                };
-            case 'yo_nunca':
-            case 'yo_nunca_equipos':
-                return {
-                    title: 'YO NUNCA HE...',
-                    bgClass: 'bg-gradient-to-br from-emerald-500 to-teal-900',
-                    textColor: 'text-teal-800',
-                    icon: intelligentEmoji
-                };
-            case 'picante':
-                return {
-                    title: 'LA VERDAD O...',
-                    bgClass: 'bg-gradient-to-b from-fuchsia-500 to-pink-700',
-                    textColor: 'text-pink-700',
-                    icon: intelligentEmoji
-                };
-            case 'espana':
-                return {
-                    title: 'FIESTA ESPAÑA',
-                    bgClass: 'bg-gradient-to-b from-red-500 to-orange-600',
-                    textColor: 'text-red-700',
-                    icon: intelligentEmoji
-                };
-            case 'pacovers':
-            case 'veteranos':
-                return {
-                    title: 'CHIMBOLEO',
-                    bgClass: 'bg-gradient-to-b from-amber-400 to-orange-600',
-                    textColor: 'text-amber-700',
-                    icon: intelligentEmoji
-                };
-            case 'impostor':
-            case 'mimica':
-            case 'boca_cerrada':
-                return {
-                    title: 'RETO ESPECIAL',
-                    bgClass: 'bg-gradient-to-b from-violet-600 to-purple-900',
-                    textColor: 'text-violet-800',
-                    icon: intelligentEmoji
-                };
-            case 'bomba':
-            case 'ruleta':
-            case 'trivia_futbol':
-                return {
-                    title: 'BOMBA',
-                    bgClass: 'bg-gradient-to-b from-red-600 to-rose-900',
-                    textColor: 'text-red-800',
-                    icon: '💣'
-                };
-            default:
-                return {
-                    title: 'PREGUNTA',
-                    bgClass: 'bg-gradient-to-b from-slate-700 to-slate-900',
-                    textColor: 'text-slate-800',
-                    icon: intelligentEmoji
-                };
-        }
-    };
-
-    const styles = getModeStyles();
-
-    // Dynamic Content Animation Engine
-    const getAnimationProps = () => {
-        const lower = content.toLowerCase();
-        if (lower.includes('trago') || lower.includes('beber') || lower.includes('fondo') || lower.includes('cerveza') || lower.includes('chupito')) {
-            // Wobble effect for drinking
-            return {
-                animate: { rotate: [0, -2, 2, -1, 1, 0] },
-                transition: { duration: 0.6, repeat: Infinity, repeatDelay: 3 }
-            };
-        }
-        if (lower.includes('beso') || lower.includes('ropa') || lower.includes('sexy') || lower.includes('caliente')) {
-            // Floating seductive pulse
-            return {
-                animate: { y: [0, -5, 0], scale: [1, 1.02, 1] },
-                transition: { duration: 2, repeat: Infinity }
-            };
-        }
-        if (lower.includes('bomba') || lower.includes('castigo') || lower.includes('muerte') || lower.includes('elimina')) {
-            // Violent shake
-            return {
-                animate: { x: [0, -3, 3, -3, 3, 0] },
-                transition: { duration: 0.3, repeat: Infinity, repeatDelay: 2 }
-            };
-        }
-        if (lower.includes('rápido') || lower.includes('tiempo') || lower.includes('segundos')) {
-            // Heartbeat
-            return {
-                animate: { scale: [1, 1.05, 1, 1.05, 1] },
-                transition: { duration: 0.8, repeat: Infinity, repeatDelay: 1.5 }
-            };
-        }
-        return {}; // Default no extra animation for the box itself, just standard UI
-    };
-
-    const fx = getAnimationProps();
-
-    useEffect(() => {
-        if (!content) return;
-        window.speechSynthesis.cancel();
-        return () => {
-            window.speechSynthesis.cancel();
-        };
-    }, [content]);
-
-    // Match if there's a specific player name in the text 
-    // to put them in the Golden Pill
-    const getTargetPlayer = () => {
-        if (!players) return null;
-        const lowerContent = content.toLowerCase();
-        return players.find(p => lowerContent.includes(p.name.toLowerCase()));
-    };
-
-    const targetPlayer = getTargetPlayer();
-    const isNormaCard = content.toUpperCase().includes('NORMA:') || content.toUpperCase().startsWith('NORMA');
+    // Detectar jugador mencionado en el texto (para pill de nombre)
+    const targetPlayer = players?.find(p =>
+        p.name && cleanText.toLowerCase().includes(p.name.toLowerCase())
+    ) || null;
 
     return (
-        <div className="w-full max-w-sm mx-auto h-[75vh] min-h-[500px] flex flex-col justify-between perspective-1000">
+        <div className="w-full max-w-sm mx-auto" style={{ minHeight: '72vh' }}>
             <AnimatePresence mode="wait">
                 <motion.div
                     key={content}
-                    layout
-                    initial={{ rotateY: 90, opacity: 0, scale: 0.8 }}
+                    initial={{ rotateY: 90, opacity: 0, scale: 0.85 }}
                     animate={{ rotateY: 0, opacity: 1, scale: 1 }}
-                    exit={{ rotateY: -90, opacity: 0, scale: 0.8 }}
-                    transition={{ type: "spring", stiffness: 100, damping: 20 }}
-                    className={`w-full h-full relative rounded-[3.5rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/20 ${styles.bgClass}`}
+                    exit={{ rotateY: -90, opacity: 0, scale: 0.85 }}
+                    transition={{ type: 'spring', stiffness: 120, damping: 22 }}
+                    className={`w-full rounded-[2.5rem] overflow-hidden shadow-2xl bg-gradient-to-b ${theme.bg} flex flex-col`}
+                    style={{ minHeight: '72vh' }}
                 >
-                    {/* Animated Grain/Noise Texture for Premium feel */}
-                    <div className="absolute inset-0 bg-black/10 mix-blend-overlay pointer-events-none opacity-20" />
-                    <div className="absolute -inset-[100%] animate-[spin_20s_linear_infinite] opacity-30 pointer-events-none" 
-                         style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)' }} />
-
-                    <div className="relative z-10 flex flex-col items-center justify-between h-full px-6 pt-10 pb-6">
-                        
-                        <div className="flex flex-col items-center transform transition-all duration-300 group-hover:scale-105 shrink-0 mt-4">
-                            <span className="text-8xl md:text-9xl mb-2 drop-shadow-2xl z-10 block text-center filter contrast-125">{styles.icon}</span>
-                            <h1 className="text-3xl font-black italic tracking-tighter uppercase text-white drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] text-center leading-[0.85] w-full flex flex-wrap items-center justify-center">
-                                {styles.title}
-                            </h1>
+                    {/* CABECERA: emoji + nombre del modo */}
+                    <div className="flex flex-col items-center pt-10 pb-4 px-6">
+                        {/* Círculo del emoji */}
+                        <div className={`rounded-full p-5 mb-3 ${theme.emojiCircle}`}>
+                            <motion.div
+                                key={`emoji-${content}`}
+                                initial={{ scale: 0, rotate: -25, y: -15 }}
+                                animate={{ scale: 1, rotate: 0, y: 0 }}
+                                transition={{ type: 'spring', stiffness: 350, damping: 12, delay: 0.05 }}
+                                className="text-7xl md:text-8xl leading-none select-none"
+                                style={{ filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.35))' }}
+                            >
+                                {theme.modeEmoji}
+                            </motion.div>
                         </div>
 
-                        {/* CENTRAL TEXT BOX - Now a borderless dark pill */}
-                        <motion.div 
-                            className="w-full flex flex-col items-center justify-center relative mt-8 mb-4 max-h-[50%]"
-                            {...fx} // Dynamic text-based animation applied here
+                        {/* Nombre del modo */}
+                        <motion.h2
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.12 }}
+                            className="text-lg md:text-xl font-black uppercase tracking-wider text-white text-center drop-shadow-md leading-tight"
                         >
-                            {targetPlayer && !isNormaCard && (
-                                <motion.div 
-                                    initial={{ y: 20, opacity: 0 }}
-                                    animate={{ y: 0, opacity: 1 }}
-                                    className="absolute -top-6 z-20 bg-amber-400 text-amber-950 font-black px-8 py-2 rounded-2xl uppercase tracking-[0.25em] text-[10px] shadow-[0_8px_20px_rgba(245,158,11,0.4)] border border-white/40"
-                                >
-                                    {targetPlayer.name}
-                                </motion.div>
+                            {theme.modeName}
+                        </motion.h2>
+                    </div>
+
+                    {/* CUERPO: pill de jugador + caja de texto */}
+                    <div className="flex-1 flex flex-col items-center justify-center px-5 pb-2">
+                        {/* Pill del jugador si lo hay */}
+                        {targetPlayer && (
+                            <motion.div
+                                initial={{ scale: 0, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                transition={{ delay: 0.18, type: 'spring', stiffness: 300 }}
+                                className="mb-3 px-5 py-1.5 rounded-full font-black text-sm uppercase tracking-widest shadow-lg"
+                                style={{ background: theme.accentColor, color: '#fff' }}
+                            >
+                                {targetPlayer.name}
+                            </motion.div>
+                        )}
+
+                        {/* Caja principal del texto */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.15 }}
+                            className={`w-full rounded-2xl p-5 shadow-xl ${theme.textBoxBg}`}
+                        >
+                            {/* Badge de rareza si no es common */}
+                            {type !== 'common' && (
+                                <div className="flex justify-center mb-2">
+                                    <span className={`text-[10px] font-black uppercase tracking-[0.3em] px-3 py-0.5 rounded-full
+                                        ${type === 'legendary' ? 'bg-yellow-500/20 text-yellow-400' :
+                                            type === 'chaos' ? 'bg-pink-500/20 text-pink-400' :
+                                                type === 'rare' ? 'bg-blue-500/20 text-blue-400' :
+                                                    'bg-green-500/20 text-green-400'}`}>
+                                        {type === 'legendary' ? '👑 LEGENDARIA' :
+                                            type === 'chaos' ? '💥 CAOS' :
+                                                type === 'rare' ? '⭐ RARA' : '🦠 VIRUS'}
+                                    </span>
+                                </div>
                             )}
 
-                            <div className="w-full p-10 rounded-[3rem] flex flex-col items-center text-center shadow-3xl relative bg-black/40 backdrop-blur-2xl border border-white/10 overflow-hidden group-hover:border-white/30 transition-all duration-500">
-                                <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none" />
-                                {type !== 'common' && (
-                                    <div className="absolute top-4 left-0 w-full flex justify-center opacity-70">
-                                        <RarityBadge rarity={type} />
-                                    </div>
-                                )}
-                                
-                                <div className="mt-4 text-xl md:text-2xl font-black tracking-tight text-white w-full drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] leading-[1.2] overflow-y-auto no-scrollbar max-h-full">
-                                    {isNormaCard ? (
-                                        <div className="flex flex-col items-center gap-2">
-                                            <span className="text-yellow-400 text-lg md:text-xl font-black tracking-widest uppercase">¡Novedad!</span>
-                                            <span className="leading-snug">{sanitizeCardText(content)}</span>
-                                        </div>
-                                    ) : (
-                                        processDrinkingMultiplier(sanitizeCardText(content), round)
-                                    )}
-                                </div>
-                            </div>
+                            <p className={`text-lg md:text-xl font-semibold text-center leading-snug no-scrollbar overflow-y-auto ${theme.textColor}`}
+                                style={{ maxHeight: '28vh' }}>
+                                {processDrinkingMultiplier(cleanText, round)}
+                            </p>
                         </motion.div>
 
-                        {/* BOTTOM PILL BUTTON */}
-                        <div className="mt-auto w-full flex flex-col items-center shrink-0">
-                            <motion.button 
-                                whileHover={{ scale: 1.02, boxShadow: "0 20px 40px rgba(0,0,0,0.4)" }}
-                                whileTap={{ scale: 0.95 }}
-                                className={`w-full max-w-[300px] bg-white ${styles.textColor} font-black text-2xl py-5 rounded-3xl shadow-[0_15px_30px_rgba(0,0,0,0.4)] transition-all text-center tracking-tighter uppercase border-b-4 border-black/10`}
-                                onClick={onClick}
-                            >
-                                Siguiente
-                            </motion.button>
-                            
-                            {/* App-like user icon placeholder styling */}
-                            <div className="mt-4 opacity-50 flex items-center justify-center w-10 h-10 rounded-full bg-black/20 text-white shadow-inner">
-                                <User className="w-5 h-5" />
-                            </div>
+                        {/* Extra decorativo */}
+                        <div className="flex justify-center mt-1">
+                            {renderCardExtra(theme.extra, theme, content)}
                         </div>
-
                     </div>
-                    
+
+                    {/* FOOTER: spacer */}
+                    <div className="h-6" />
                 </motion.div>
             </AnimatePresence>
         </div>

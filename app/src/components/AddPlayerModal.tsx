@@ -1,8 +1,8 @@
-﻿import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Camera, X, Search, Users } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -111,6 +111,9 @@ const AddPlayerModal: React.FC<AddPlayerModalProps> = ({ onAddPlayer, isOpen, on
                     <DialogTitle className="text-2xl font-black text-center bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
                         Nuevo Operador
                     </DialogTitle>
+                    <DialogDescription className="text-center text-white/40 text-xs">
+                        Añade un nuevo jugador a la partida o búscalo en la comunidad.
+                    </DialogDescription>
                 </DialogHeader>
 
                 <div className="mt-4 mb-2 flex bg-white/5 p-1 rounded-xl">

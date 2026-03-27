@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Users, Trophy, AlertCircle, Video, VideoOff, Copy, Crown, Plus, Minus, Eye, EyeOff, Zap, Flame, Ghost, ShieldAlert, Dice5, UserPlus, Globe, History, Play, Trash2, UserCheck, UserX, X, Camera, Cast, TrendingUp, Music } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Users, Trophy, AlertCircle, Video, VideoOff, Copy, Crown, Plus, Minus, Eye, EyeOff, Zap, Flame, UserPlus, Globe, History, Play, Trash2, X, Cast, TrendingUp, Music } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import {
@@ -25,6 +25,8 @@ import { detectRarity } from '@/lib/godDeck';
 import { sfx } from '@/lib/sfx';
 import { vibe } from '@/lib/vibration';
 import { GameMode } from '@/types/game';
+import { duelos } from '@/data/duelosContent';
+import { impostorRounds } from '@/data/impostorContent';
 
 import { ChatComponent } from '@/components/multiplayer/ChatComponent';
 import { PeerBubbles } from '@/components/multiplayer/PeerBubbles';
@@ -72,7 +74,7 @@ const DynamicBackground = ({ rarity }: { rarity: keyof typeof RARITY_CONFIG }) =
         transition={{ duration: 0.8, ease: 'easeInOut', delay: 0.1 }}
         style={{ backgroundColor: c.orbRight }}
       />
-      <div className="absolute inset-0 opacity-[0.03] bg-[url('/assets/noise.svg')] bg-repeat" />
+      <div className="absolute inset-0 opacity-[0.03] bg-[url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E')] bg-repeat" />
     </div>
   );
 };
@@ -87,7 +89,7 @@ const AnimatedXP = ({ value, playerId }: { value: number; playerId: string }) =>
       const diff = value - prevRef.current;
       setPopping(true);
       setFloater(diff);
-      const t = setTimeout(() => { setPopping(false); setFloater(null); }, 900);
+      const t = setTimeout(() => { setPopping(false); setFloater(null); }, 1200);
       prevRef.current = value;
       return () => clearTimeout(t);
     }
@@ -97,20 +99,25 @@ const AnimatedXP = ({ value, playerId }: { value: number; playerId: string }) =>
   return (
     <div className="relative flex items-center justify-center">
       <motion.span
-        className="text-[11px] font-bold text-white/90 tabular-nums"
-        animate={popping ? { scale:[1,1.5,1] } : { scale:1 }}
-        transition={{ duration:0.3 }}
+        className="text-[11px] font-black text-white px-2 py-0.5 rounded-full bg-white/5 border border-white/10 tabular-nums shadow-[0_0_10px_rgba(255,255,255,0.1)]"
+        animate={popping ? { 
+          scale: [1, 1.4, 1], 
+          color: ['#fff', '#10b981', '#fff'],
+          rotate: [0, -10, 10, 0]
+        } : { scale: 1 }}
+        transition={{ duration: 0.5, type: 'spring', stiffness: 400 }}
       >
-        {value} XP
+        {value} <span className="text-[8px] opacity-60 ml-0.5 font-bold uppercase tracking-widest">XP</span>
       </motion.span>
       <AnimatePresence>
         {floater !== null && (
           <motion.span
-            className="absolute -top-5 text-[10px] font-black text-emerald-400"
-            initial={{ y:0, opacity:1 }}
-            animate={{ y:-16, opacity:0 }}
-            exit={{ opacity:0 }}
-            transition={{ duration:0.8 }}
+            key={`${playerId}-${value}-${floater}`}
+            className="absolute -top-10 text-[14px] font-black text-emerald-400 drop-shadow-[0_0_12px_rgba(16,185,129,1)] z-50 pointer-events-none"
+            initial={{ y: 20, opacity: 0, scale: 0.2, rotate: Math.random() * 20 - 10 }}
+            animate={{ y: -40, opacity: 1, scale: 1.5, rotate: Math.random() * 40 - 20 }}
+            exit={{ y: -60, opacity: 0, scale: 2 }}
+            transition={{ duration: 1, type: "spring", stiffness: 200, damping: 12 }}
           >
             +{floater}
           </motion.span>
@@ -122,22 +129,19 @@ const AnimatedXP = ({ value, playerId }: { value: number; playerId: string }) =>
 
 const TurnBanner = ({ playerName }: { playerName: string }) => (
   <motion.div
-    className="fixed top-20 left-0 right-0 z-[200] flex justify-center 
-      pointer-events-none"
-    initial={{ x:'100vw', opacity:0 }}
-    animate={{ x:0,       opacity:1 }}
-    exit={{    x:'-100vw', opacity:0 }}
-    transition={{ 
-      x: { type:'spring', stiffness:200, damping:28 },
-      opacity: { duration:0.15 }
-    }}
+    className="fixed top-24 left-0 right-0 z-[200] flex justify-center pointer-events-none px-4"
+    initial={{ y: -50, opacity: 0 }}
+    animate={{ y: 0, opacity: 1 }}
+    exit={{ y: -50, opacity: 0 }}
+    transition={{ type: 'spring', stiffness: 300, damping: 25 }}
   >
-    <div className="bg-slate-900/90 backdrop-blur-xl border border-primary/40 
-      px-6 py-2.5 rounded-full shadow-[0_0_20px_rgba(168,85,247,0.3)]">
-      <span className="text-xs font-black uppercase tracking-[0.2em] text-primary/70">
-        🎯 turno de
+    <div className="bg-slate-900/90 backdrop-blur-2xl border-2 border-primary/50 
+      px-8 py-3 rounded-full shadow-[0_10px_40px_rgba(var(--primary-rgb),0.4)] flex items-center gap-3">
+      <div className="w-2 h-2 rounded-full bg-primary animate-ping" />
+      <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/80">
+        Turno de
       </span>
-      <span className="ml-2 font-black text-white uppercase tracking-wider">
+      <span className="font-black text-xl text-white uppercase tracking-tighter">
         {playerName}
       </span>
     </div>
@@ -148,12 +152,18 @@ const VirusFlash = ({ show }: { show: boolean }) => (
   <AnimatePresence>
     {show && (
       <motion.div
-        className="fixed inset-0 z-[90] pointer-events-none"
-        initial={{ opacity:0.7, backgroundColor:'#22c55e' }}
-        animate={{ opacity:0 }}
-        exit={{}}
-        transition={{ duration:0.35, ease:'easeOut' }}
-      />
+        className="fixed inset-0 z-[160] pointer-events-none"
+        initial={{ opacity:0, scale:1.1 }}
+        animate={{ 
+          opacity:[0, 0.8, 0],
+          scale:[1.1, 1, 1],
+          backgroundColor:['#22c55e', '#166534', '#22c55e']
+        }}
+        exit={{ opacity:0 }}
+        transition={{ duration:0.5, ease:'easeOut' }}
+      >
+        <div className="absolute inset-0 opacity-20 invert mix-blend-overlay" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }} />
+      </motion.div>
     )}
   </AnimatePresence>
 );
@@ -258,7 +268,18 @@ const PlayerProfilesBottom = ({ players, currentPlayer, scores, playerViruses = 
                   <span className={isTurn ? 'text-primary' : (isCaptain ? 'text-amber-400' : 'text-white/80')}>{p.name[0].toUpperCase()}</span>
                 )}
                 {showVirus && (
-                  <div className="absolute inset-0 bg-green-500/20 animate-pulse pointer-events-none" />
+                  <motion.div 
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="absolute inset-0 bg-green-500/20 animate-pulse pointer-events-none flex items-center justify-center"
+                  >
+                    <div className="w-full h-full border-2 border-green-500/50 rounded-[22px]" />
+                    <motion.div 
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                      className="absolute inset-0 border-t-2 border-green-400/80 rounded-full opacity-40"
+                    />
+                  </motion.div>
                 )}
               </motion.div>
               <div className="flex flex-col items-center">
@@ -436,27 +457,34 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
   });
 
   // Effect: Parse NORMA from content for Clasico/Megamix — auto-skip the card
+  const normaAutoAdvanceRef = useRef(false);
   useEffect(() => {
     const txt = getCurrentContent();
     const isOverlayActive = gameState.showVirusAlert || gameState.showTrivia || gameState.showDuel || 
-                            gameState.showImpostor || gameState.showMimica || gameState.showBocaCerrada;
+                            gameState.showImpostor || gameState.showMimica;
 
     if (!isOverlayActive && typeof txt === 'string' && (txt.toUpperCase().startsWith('NORMA:') || txt.toUpperCase().startsWith('NUEVA NORMA:'))) {
       const rule = txt.split(':')[1]?.trim() || txt;
       setGameState(prev => ({ 
         ...prev, 
         currentNorma: rule,
-        showNormaGlobal: true 
+        showNormaGlobal: true,
+        currentNormaTurnsRemaining: (players.length > 0 ? players.length * 2 : 10)
       }));
       toast.success("¡Nueva Norma Activa!", { description: rule, duration: 4000 });
-      const timer = setTimeout(() => {
-        performTurnAdvance();
-      }, 500);
-      return () => clearTimeout(timer);
+      // BUG 5: Guard against double advance
+      if (!normaAutoAdvanceRef.current) {
+        normaAutoAdvanceRef.current = true;
+        const timer = setTimeout(() => {
+          normaAutoAdvanceRef.current = false;
+          performTurnAdvance();
+        }, 500);
+        return () => { clearTimeout(timer); normaAutoAdvanceRef.current = false; };
+      }
     }
   }, [currentIndex, isHost, mode, getCurrentContent, setGameState, performTurnAdvance, 
       gameState.showVirusAlert, gameState.showTrivia, gameState.showDuel, 
-      gameState.showImpostor, gameState.showMimica, gameState.showBocaCerrada]);
+      gameState.showImpostor, gameState.showMimica]);
 
   const hasInitializedRound1 = useRef(false);
   // Trigger: Ronda 1 Norma Global + Virus Assignment (Robust Unified Sync)
@@ -649,6 +677,22 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     sfx.click();
     vibe(10);
 
+    // Global Reset of all potential "active overlay" flags to prevent ghost states
+    setGameState(prev => ({
+      ...prev,
+      showTrivia: false,
+      showDrinkingGame: false,
+      showImpostor: false,
+      showDuel: false,
+      showMimica: false,
+      showImpostorWord: false,
+      showVoting: false,
+      showCaptainPass: false,
+      showVirusAlert: false,
+      showImpostorWarning: false,
+      votingSelections: []
+    }));
+
     // Check specific game modes first
     if ((mode === 'trivia_futbol' || mode === 'cultura') && loadNextQuestion) {
       loadNextQuestion();
@@ -665,37 +709,39 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     if (mode === 'megamix' || mode === 'clasico') {
       updateViruses();
 
-      // Manage 2-round periodic virus cycle (Megamix)
+      // Manage Megamix periodic events
       if (mode === 'megamix') {
-        const virusEvent = manageMegamixViruses(gameState.round);
-        if (virusEvent) {
-          setGameState(prev => ({ ...prev, showVirusCycleAlert: true, virusCycleData: virusEvent }));
-        }
-
-        // Auto-XP for current player (Megamix scaling)
+        // 1. Auto-XP for current player (Megamix scaling) - Always runs
         if (currentPlayer) {
           const autoXp = Math.min(20, 3 + Math.floor(gameState.round / 2));
           addScore(currentPlayer.id, autoXp);
         }
 
-        // Manage 3-round periodic Norma (MegaMix)
-        const normaEvent = manageMegamixNormas(gameState.round);
-        if (normaEvent) {
+        // 2. Periodic events (Normas/Viruses) - Priority 1
+        const virusCycleEvent = manageMegamixViruses(gameState.round);
+        if (virusCycleEvent) {
+          setGameState(prev => ({ ...prev, showVirusCycleAlert: true, virusCycleData: virusCycleEvent }));
+          return; // STOP: wait for user to accept cycle event
+        }
+
+        const normaCycleEvent = manageMegamixNormas(gameState.round);
+        if (normaCycleEvent) {
           setGameState(prev => ({ 
             ...prev, 
             showVirusCycleAlert: true, 
-            virusCycleData: normaEvent,
-            currentNorma: normaEvent.message,
-            currentNormaTurnsRemaining: normaEvent.duration
+            virusCycleData: normaCycleEvent,
+            currentNorma: normaCycleEvent.message,
+            currentNormaTurnsRemaining: normaCycleEvent.duration
           }));
+          return; // STOP: wait for user to accept cycle event
         }
       }
 
-      // Apply Random Virus & Capture Result
+      // 3. Apply Random Virus from current card - Priority 2
       const virusResult = applyRandomVirus();
       if (virusResult) {
         setGameState(prev => ({ ...prev, showVirusAlert: true, virusAlertData: virusResult }));
-        return; // STOP HERE, wait for user to accept virus
+        return; // STOP: wait for user to accept virus
       }
 
       // Check Megamix special events
@@ -725,7 +771,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     // Bug 8: Guard against overlays - Do not skip if an interaction is pending
     if (gameState.showVirusAlert || gameState.showTrivia || gameState.showVoting || 
         gameState.showDuel || gameState.showImpostor || gameState.showMimica || 
-        gameState.showBocaCerrada || gameState.showImpostorWord) return;
+        gameState.showImpostorWord) return;
 
     if (gameState.currentNorma.includes('AVANCE AUTOMÁTICO') || gameState.currentNorma.includes('AUTO-SKIP')) {
       const timer = setTimeout(() => {
@@ -737,11 +783,14 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       return () => clearTimeout(timer);
     }
   }, [gameState.currentNorma, gameState.showVirusAlert, gameState.showTrivia, gameState.showVoting, 
-      gameState.showDuel, gameState.showImpostor, gameState.showMimica, gameState.showBocaCerrada, 
+      gameState.showDuel, gameState.showImpostor, gameState.showMimica, 
       gameState.showImpostorWord, mode, handleNext]);
 
   // Rarity calculation for CardDisplay
   const currentText = getCurrentContent();
+  const safeCurrentText = (currentText && currentText !== 'Siguiente carta' && currentText !== 'Cargando pregunta...')
+    ? currentText
+    : '';
   const rarity = detectRarity(currentText);
 
   // Trigger / Content Detection System
@@ -762,6 +811,11 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         loadSpecificQuestion?.('cultura');
         setGameState(prev => ({ ...prev, showTrivia: true }));
       } else if (triggerType === 'VIRUS') {
+        // BUG 4: Don't fire virus alerts before round 3
+        if (gameState.round < 3) {
+          const timer = setTimeout(() => advanceTurn(), 100);
+          return () => clearTimeout(timer);
+        }
         const virusResult = applyRandomVirus(true);
         if (virusResult) {
           setGameState(prev => ({ ...prev, showVirusAlert: true, virusAlertData: virusResult }));
@@ -774,9 +828,42 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           showBocaCerradaWarning: true,
           bocaCerradaData: { playerId: targetPlayer.id, playerName: targetPlayer.name }
         }));
+      } else if (triggerType === 'DUELO') {
+        // BUG 3: Handle DUELO triggers from deck cards
+        if (players.length >= 2) {
+          const randomDuelo = duelos[Math.floor(Math.random() * duelos.length)];
+          const opponents = players.filter(p => p.id !== (currentPlayer?.id || ''));
+          const opponent = opponents[Math.floor(Math.random() * opponents.length)];
+          setGameState(prev => ({
+            ...prev,
+            showDuel: true,
+            currentDuelo: `${randomDuelo.name}: ${randomDuelo.description}`,
+            duelPlayers: [currentPlayer || players[0], opponent],
+          }));
+        } else {
+          const timer = setTimeout(() => advanceTurn(), 100);
+          return () => clearTimeout(timer);
+        }
+      } else if (triggerType === 'IMPOSTOR') {
+        // BUG 3: Handle IMPOSTOR triggers from deck cards
+        if (players.length >= 3) {
+          const round = impostorRounds[Math.floor(Math.random() * impostorRounds.length)];
+          const impostorPlayer = players[Math.floor(Math.random() * players.length)];
+          setGameState(prev => ({
+            ...prev,
+            showImpostorWarning: true,
+            impostorData: {
+              impostorPlayerId: impostorPlayer.id,
+              currentImpostorReal: round.normalQuestion || round.category,
+              currentImpostorFake: round.impostorQuestion || round.hint,
+            },
+          }));
+        } else {
+          const timer = setTimeout(() => advanceTurn(), 100);
+          return () => clearTimeout(timer);
+        }
       } else {
-        // MIMICA and any unknown triggers - auto-skip
-        // These don't have overlay UI, so we advance to prevent getting stuck
+        // Unknown triggers - auto-skip to prevent getting stuck
         console.log("Auto-skipping trigger:", triggerType);
         const timer = setTimeout(() => advanceTurn(), 100);
         return () => clearTimeout(timer);
@@ -786,7 +873,11 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
     // 2. Check for "Normas" (Rules) to persist them
     if (currentText.includes('NORMA:') || currentText.includes('📜')) {
-      const cleanNorma = currentText.replace(/📜|NORMA:|\\./g, '').trim();
+      const cleanNorma = currentText
+        .replace(/📜\s*/g, '')
+        .replace(/NORMA:\s*/gi, '')
+        .replace(/NUEVA\s*NORMA:\s*/gi, '')
+        .trim();
       if (cleanNorma.length > 5) {
         setGameState(prev => ({
           ...prev,
@@ -915,7 +1006,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       {/* Voting Overlay for "Who is most likely" and similar prompts */}
       {(() => {
         const isVoting = !!currentText && (
-          currentText.toLowerCase().includes('¿quién') ||
+          (currentText.toLowerCase().includes('¿quién') && !currentText.toLowerCase().includes('yo nunca')) ||
           currentText.toLowerCase().includes('¿qué dos jugadores') ||
           currentText.toLowerCase().includes('¿qué tres jugadores') ||
           currentText.toLowerCase().includes('votación:')
@@ -926,12 +1017,12 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
         return (
           <Dialog open={isVoting} onOpenChange={() => { }}>
-            <DialogContent className="sm:max-w-md bg-gradient-to-r from-slate-900/95 to-slate-800/95 border-primary/50 text-white z-[60] max-h-[85vh] flex flex-col" aria-describedby={undefined}>
+            <DialogContent className="sm:max-w-md bg-gradient-to-r from-slate-900/95 to-slate-800/95 border-primary/50 text-white z-[60] max-h-[85vh] flex flex-col">
               <DialogHeader className="shrink-0">
                 <DialogTitle className="text-xl font-bold text-center neon-text text-primary">
                   🗳️ Votación {maxVotes > 1 ? `(Elige a ${maxVotes})` : ''}
                 </DialogTitle>
-                <DialogDescription id="voting-desc" className="text-center text-sm text-white/90 font-medium pt-2 px-2">
+                <DialogDescription className="text-center text-sm text-white/90 font-medium pt-2 px-2">
                   {currentText}
                 </DialogDescription>
               </DialogHeader>
@@ -1037,7 +1128,25 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
             </Button>
         </div>
 
+        {/* Captain Indicator — integrated in header */}
+        {gameState.captainId && (
+          <div className="flex items-center gap-1.5 bg-amber-500/20 border border-amber-500/40 px-3 py-1.5 rounded-full">
+            <Crown className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+            <span className="text-amber-200 text-xs font-black uppercase tracking-wider">
+              {players.find(p => p.id === gameState.captainId)?.name}
+            </span>
+          </div>
+        )}
+
         <div className="flex gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-[10px] font-black uppercase tracking-wider bg-white/5 text-white/40 hover:text-white hover:bg-white/10 border border-white/5"
+            onClick={handleNext}
+          >
+            Siguiente
+          </Button>
           <Button
             variant="destructive"
             size="sm"
@@ -1128,16 +1237,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         )
       }
 
-      {/* Captain Indicator */}
-      {
-        gameState.captainId && (
-          <div className="absolute top-4 left-4 bg-gradient-to-r from-yellow-500/30 to-yellow-600/30 border-2 border-yellow-400 px-5 py-2.5 rounded-full text-sm font-black text-yellow-100 flex items-center gap-2 z-50 shadow-[0_0_20px_rgba(234,179,8,0.4)] backdrop-blur-md animate-pulse">
-            <Crown className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-            <span className="uppercase tracking-widest">Capitán:</span>
-            <span className="capitalize text-lg">{players.find(p => p.id === gameState.captainId)?.name}</span>
-          </div>
-        )
-      }
+      {/* Captain Indicator — moved to header above */}
 
       {
         isMultiplayer && (
@@ -1187,11 +1287,11 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               Estado
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto bg-gradient-to-r from-slate-900/80 to-slate-800/80 border border-white/10" aria-describedby={undefined}>
+          <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto bg-gradient-to-r from-slate-900/80 to-slate-800/80 border border-white/10">
             <DialogHeader>
               <DialogTitle>Estado de la Partida</DialogTitle>
-              <DialogDescription id="status-desc">
-                Revisa los virus activos y las normas vigentes.
+              <DialogDescription>
+                Revisa los virus activos y las normas vigentes en este turno.
               </DialogDescription>
             </DialogHeader>
 
@@ -1237,11 +1337,11 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               Ranking
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto bg-gradient-to-r from-slate-900/80 to-slate-800/80 border border-white/10" aria-describedby={undefined}>
+          <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto bg-gradient-to-r from-slate-900/80 to-slate-800/80 border border-white/10">
             <DialogHeader>
               <DialogTitle>Clasificación General</DialogTitle>
-              <DialogDescription id="ranking-desc">
-                Puntuaciones y clasificación de jugadores.
+              <DialogDescription>
+                Puntuaciones actuales y estadísticas históricas de los jugadores.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-3 py-4">
@@ -1320,9 +1420,30 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         </Dialog>
       </div>
 
-      {/* Reveal Overlay (Mimica / Boca Cerrada) with Long Press */}
-      <Dialog open={gameState.showMimica || gameState.showBocaCerrada}>
-        <DialogContent className="sm:max-w-md bg-[url('/modern_bg.png')] bg-cover bg-center border-none p-0 text-white z-[70] overflow-hidden shadow-2xl" aria-describedby={undefined}>
+      {/* Reveal Overlay (Mimica) with Long Press */}
+      <Dialog 
+        open={gameState.showMimica}
+        onOpenChange={(open) => {
+          if (!open) {
+            setGameState(prev => ({ 
+              ...prev, 
+              showMimica: false, 
+              showMimicaReveal: false
+            }));
+          }
+        }}
+      >
+        <DialogContent 
+          className="sm:max-w-md bg-[url('/modern_bg.png')] bg-cover bg-center border-none p-0 text-white z-[70] overflow-hidden shadow-2xl"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          onCloseAutoFocus={(e) => e.preventDefault()}
+        >
+          <DialogHeader className="sr-only">
+            <DialogTitle>Reto de Mímica</DialogTitle>
+            <DialogDescription>
+              Muestra el secreto al jugador actual sin que el resto del grupo pueda verlo.
+            </DialogDescription>
+          </DialogHeader>
           <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-2xl z-0" />
           <div className="p-6 text-center space-y-6 relative z-10 glass-panel border-b border-white/10">
             <div className="space-y-1">
@@ -1337,18 +1458,17 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               <motion.button
                 onClick={(e) => {
                   e.preventDefault();
-                  if (gameState.showMimica) setGameState(prev => ({ ...prev, showMimicaReveal: !prev.showMimicaReveal }));
-                  if (gameState.showBocaCerrada) setGameState(prev => ({ ...prev, showBocaCerradaReveal: !prev.showBocaCerradaReveal }));
+                  setGameState(prev => ({ ...prev, showMimicaReveal: !prev.showMimicaReveal }));
                 }}
                 onContextMenu={(e) => { e.preventDefault(); return false; }}
                 className="w-full relative preserve-3d transition-transform duration-300 shadow-2xl rounded-[2rem] overflow-hidden group-active:scale-[0.98] select-none touch-none"
               >
                 <div className={`w-full min-h-[220px] rounded-[2rem] border-4 flex flex-col items-center justify-center p-6 transition-all backdrop-blur-md
-                  ${(gameState.showMimicaReveal || gameState.showBocaCerradaReveal) 
+                  ${gameState.showMimicaReveal 
                     ? 'bg-slate-900/80 border-primary shadow-[0_0_30px_rgba(168,85,247,0.6)]' 
                     : 'bg-slate-800/50 border-white/10 shadow-lg hover:border-primary/50'}`}>
                   <AnimatePresence mode="popLayout">
-                    {!(gameState.showMimicaReveal || gameState.showBocaCerradaReveal) ? (
+                    {!gameState.showMimicaReveal ? (
                       <motion.div
                         key="hidden"
                         initial={{ opacity: 0, scale: 0.8 }}
@@ -1369,9 +1489,9 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                         exit={{ opacity: 0, scale: 0.8 }}
                         className="w-full flex-1 flex flex-col justify-center items-center gap-3"
                       >
-                        <p className="text-[10px] text-primary-100 font-bold uppercase tracking-[0.2em] mb-2">{gameState.showMimica ? 'RETO DE MÍMICA' : 'RETO BOCA CERRADA'}</p>
+                        <p className="text-[10px] text-primary-100 font-bold uppercase tracking-[0.2em] mb-2">RETO DE MÍMICA</p>
                         <p className="text-2xl md:text-3xl font-black text-white leading-tight drop-shadow-md pb-4">
-                          {gameState.showMimica ? gameState.currentMimicaText : gameState.currentBocaCerradaText}
+                          {gameState.currentMimicaText}
                         </p>
                       </motion.div>
                     )}
@@ -1386,9 +1506,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                 setGameState(prev => ({
                   ...prev,
                   showMimicaReveal: false,
-                  showBocaCerradaReveal: false,
-                  showMimica: false,
-                  showBocaCerrada: false
+                  showMimica: false
                 }));
                 handleNext();
               }}
@@ -1399,29 +1517,38 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         </DialogContent>
       </Dialog>
       <Dialog open={gameState.showCaptainSelection} onOpenChange={() => { }}>
-        <DialogContent className="sm:max-w-md bg-gradient-to-r from-slate-900/80 to-slate-800/80 border-yellow-500/50 text-white z-[60]" aria-describedby={undefined}>
+        <DialogContent className="sm:max-w-md bg-slate-950/95 backdrop-blur-3xl border-yellow-500/40 text-white z-[60] rounded-[3rem] p-8">
           <DialogHeader>
-            <DialogTitle className="text-3xl font-black text-center text-yellow-500 flex items-center justify-center gap-3">
-              👑 ELIGE AL CAPITÁN
+            <DialogTitle className="text-4xl font-black text-center text-yellow-500 flex flex-col items-center gap-4">
+              <div className="p-4 bg-yellow-500/10 rounded-3xl border border-yellow-500/20">
+                <Crown className="w-12 h-12 text-yellow-500 fill-yellow-500" />
+              </div>
+              <span>ELÍGE AL CAPITÁN</span>
             </DialogTitle>
+            <DialogDescription className="text-center text-slate-400 font-medium">
+                El Capitán tendrá el control total del móvil y las puntuaciones.
+            </DialogDescription>
           </DialogHeader>
-          <div className="text-center py-4 space-y-4">
-            <p className="text-lg text-white/80">
-              El <strong>Capitán</strong> es el dueño del móvil durante <span className="text-white font-bold">TODA</span> la partida. Su trabajo es leer las cartas al resto y <strong>repartir la Experiencia (+XP)</strong>.
-            </p>
-            <p className="text-sm text-yellow-200 font-bold tracking-widest uppercase">¿Quién tiene el móvil ahora mismo?</p>
 
-            <div className="grid grid-cols-2 gap-3 mt-6 max-h-[40vh] overflow-y-auto no-scrollbar pb-2">
+          <div className="mt-8 space-y-6">
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-3">
+              <h4 className="text-[10px] font-black text-yellow-500 tracking-[0.3em] uppercase">Misiones del Capitán</h4>
+              <ul className="text-xs space-y-2 text-slate-300 font-medium">
+                <li className="flex items-center gap-2">✅ Leer las cartas en voz alta</li>
+                <li className="flex items-center gap-2">✅ Repartir XP por buen desempeño</li>
+                <li className="flex items-center gap-2">✅ Asegurar que todos beben cuando toca</li>
+              </ul>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 max-h-[40vh] overflow-y-auto no-scrollbar pb-2">
               {players.map(p => (
                 <Button
                   key={`pick-captain-${p.id}`}
-                  className="h-24 flex flex-col items-center justify-center gap-2 bg-gradient-to-r from-slate-800/80 to-slate-700/80 hover:bg-gradient-to-r hover:from-yellow-600/30 hover:to-yellow-700/30 border border-white/10 hover:border-yellow-500/50 transition-all rounded-xl relative overflow-hidden group"
+                  className="h-28 flex flex-col items-center justify-center gap-2 bg-white/5 hover:bg-yellow-500/20 border border-white/10 hover:border-yellow-500/50 transition-all rounded-2xl relative overflow-hidden group shadow-xl"
                   onClick={() => {
                     try {
                         if (typeof sfx !== 'undefined' && sfx.click) sfx.click();
-                    } catch (e) {
-                        // ignore audio error gracefully
-                    }
+                    } catch (e) {}
                     setGameState(prev => ({
                       ...prev,
                       captainId: p.id,
@@ -1429,24 +1556,31 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                     }));
                   }}
                 >
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-slate-800/80 to-slate-700/80 flex items-center justify-center text-sm font-bold overflow-hidden border-2 border-transparent group-hover:border-yellow-400">
+                  <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-lg font-black overflow-hidden border-2 border-white/10 group-hover:border-yellow-400 group-hover:scale-110 transition-transform">
                     {p.avatar_url ? <img src={p.avatar_url} className="w-full h-full object-cover" /> : p.name.substring(0, 2).toUpperCase()}
                   </div>
-                  <span className="font-bold truncate w-full px-2 text-white">{p.name}</span>
+                  <span className="font-bold truncate w-full px-2 text-white/90">{p.name}</span>
                 </Button>
               ))}
             </div>
+            
+            <p className="text-[9px] text-center text-slate-500 font-bold uppercase tracking-widest italic animate-pulse">
+              ¿Quién tiene el dispositivo ahora mismo?
+            </p>
           </div>
         </DialogContent>
       </Dialog>
 
       {/* NEW: Impostor Anti-Spoiler Warning */}
       <Dialog open={gameState.showImpostorWarning}>
-        <DialogContent className="sm:max-w-md bg-slate-900/95 backdrop-blur-2xl border-red-500/50 text-white z-[80]" aria-describedby={undefined}>
+        <DialogContent className="sm:max-w-md bg-slate-900/95 backdrop-blur-2xl border-red-500/50 text-white z-[80]">
           <DialogHeader>
             <DialogTitle className="text-3xl font-black text-center text-red-500 flex items-center justify-center gap-3 uppercase tracking-tighter">
               ⚠️ ACCESO RESTRINGIDO
             </DialogTitle>
+            <DialogDescription className="text-center text-red-400 font-bold text-xs uppercase tracking-widest mt-2">
+              Esta pantalla contiene información secreta que solo el jugador asignado debe ver.
+            </DialogDescription>
           </DialogHeader>
           <div className="text-center py-6 space-y-6">
             <div className="space-y-2">
@@ -1533,11 +1667,14 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
       {/* Virus Cycle Notification */}
       <Dialog open={gameState.showVirusCycleAlert}>
-        <DialogContent className="sm:max-w-md bg-slate-900/95 backdrop-blur-2xl border-purple-500/50 text-white z-[70]" aria-describedby={undefined}>
+        <DialogContent className="sm:max-w-md bg-slate-900/95 backdrop-blur-2xl border-purple-500/50 text-white z-[70]">
           <DialogHeader>
             <DialogTitle className="text-3xl font-black text-center text-purple-400 uppercase tracking-tighter">
-              {gameState.virusCycleData?.title}
+              {gameState.virusCycleData?.title || 'Evento Megamix'}
             </DialogTitle>
+            <DialogDescription className="text-center text-white/60 text-sm">
+              Informativo sobre cambios periódicos en virus o normas durante el ciclo Megamix.
+            </DialogDescription>
           </DialogHeader>
           <div className="text-center py-8">
             <p className="text-xl font-bold text-white/90">{gameState.virusCycleData?.message}</p>
@@ -1575,40 +1712,27 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           )}
         </AnimatePresence>
 
-        {/* Global Norma Panel — Prominent Slide-down */}
-        <AnimatePresence>
-          {gameState.currentNorma && (
-            <motion.div
-              className="mb-4 mx-auto max-w-sm z-10 relative w-full"
-              initial={{ y:-40, opacity:0 }}
-              animate={{ y:0,   opacity:1 }}
-              exit={{    y:-40, opacity:0 }}
-              transition={{ type:'spring', stiffness:300, damping:28 }}
-            >
-              <div className="bg-gradient-to-r from-orange-600/40 to-orange-900/40 
-                border-l-4 border-l-orange-500 border border-orange-500/30
-                backdrop-blur-md rounded-2xl p-4 text-center 
-                shadow-[0_0_20px_rgba(249,115,22,0.25)]">
-                <div className="flex items-center justify-center gap-2 mb-1">
-                  <motion.span
-                    animate={{ rotate:[-5,5,-5] }}
-                    transition={{ repeat:Infinity, duration:2, ease:'easeInOut' }}
-                    className="text-lg"
-                  >📜</motion.span>
-                  <p className="text-[10px] uppercase tracking-[0.3em] 
-                    text-orange-400 font-black">NORMA GLOBAL ACTIVA</p>
-                </div>
-                <p className="text-sm text-white font-black leading-tight uppercase 
-                  tracking-tight">
-                  {gameState.currentNorma}
-                </p>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Banner de norma activa */}
+        {gameState.currentNorma && (
+          <motion.div
+            initial={{ opacity: 0, scaleX: 0.9 }}
+            animate={{ opacity: 1, scaleX: 1 }}
+            className="w-full max-w-md mx-auto mb-3 flex items-center gap-3 bg-amber-500/15 border-l-4 border-amber-500 px-3 py-2 rounded-r-xl z-10"
+          >
+            <span className="text-xl shrink-0">📜</span>
+            <p className="text-amber-200 text-sm font-bold flex-1 leading-tight line-clamp-2">
+              {gameState.currentNorma.replace(/NORMA:\s*/i, '').replace(/📜\s*/g, '')}
+            </p>
+            {gameState.currentNormaTurnsRemaining > 0 && (
+              <span className="text-amber-400 text-[10px] font-black shrink-0 bg-amber-500/20 px-2 py-0.5 rounded-full">
+                {gameState.currentNormaTurnsRemaining}T
+              </span>
+            )}
+          </motion.div>
+        )}
 
         {/* CAPTAIN ACTION PANEL - Give/Take XP in real-time */}
-        {(!gameState.showTrivia && !gameState.showVoting && !gameState.showDuel && !gameState.showImpostor && !gameState.showMimica && !gameState.showBocaCerrada && !gameState.showImpostorWord && mode !== 'cultura' && mode !== 'trivia_futbol') && (
+        {(!gameState.showTrivia && !gameState.showVoting && !gameState.showDuel && !gameState.showImpostor && !gameState.showMimica && !gameState.showImpostorWord && mode !== 'cultura' && mode !== 'trivia_futbol') && (
           <div className="w-full max-w-md mt-4 mb-2 z-10 flex flex-col items-center bg-slate-950/40 backdrop-blur-3xl border border-white/10 rounded-[40px] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
@@ -1743,47 +1867,26 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           </div>
         )}
 
-        {/* Virus Cycle Alert (Periodic Infection/Mutation) */}
-        {gameState.showVirusCycleAlert && gameState.virusCycleData && (
-          <div className="absolute inset-0 z-[120] bg-slate-950/95 backdrop-blur-xl flex items-center justify-center p-6">
-            <motion.div
-              initial={{ scale:0.7, opacity:0, y:30 }}
-              animate={{ scale:1,   opacity:1, y:0  }}
-              className="max-w-sm w-full bg-gradient-to-br from-purple-900/60 to-slate-900 border-2 border-primary/40 rounded-[2.5rem] p-8 text-center shadow-[0_0_60px_rgba(168,85,247,0.3)]"
-            >
-              <div className="flex justify-center mb-6">
-                <div className="w-20 h-20 bg-primary/20 rounded-2xl flex items-center justify-center border border-primary/30 rotate-12">
-                  <motion.div animate={{ rotate:[-15,15,-15] }} transition={{ repeat:Infinity, duration:3 }}>
-                    <Zap className="w-10 h-10 text-primary" />
-                  </motion.div>
-                </div>
-              </div>
-              <h2 className="text-2xl font-black text-white uppercase tracking-tighter mb-2">
-                {gameState.virusCycleData.title}
-              </h2>
-              <div className="bg-black/40 p-5 rounded-2xl border border-white/5 mb-8 shadow-inner">
-                <p className="text-lg font-bold text-white/90 leading-snug">
-                  {gameState.virusCycleData.message}
-                </p>
-              </div>
-              <Button
-                className="w-full h-14 bg-primary hover:bg-primary/80 text-white font-black text-lg rounded-xl transition-all active:scale-95"
-                onClick={() => setGameState(prev => ({ ...prev, showVirusCycleAlert: false }))}
-              >
-                ENTENDIDO ⏭️
-              </Button>
-            </motion.div>
-          </div>
-        )}
-
+        {/* Virus Cycle Alert (Periodic Infection/Mutation) - Manual overlay removed to use Dialog instead */}
+        
         <AnimatePresence mode="wait">
-          {!gameState.showTrivia && !gameState.showDrinkingGame && !gameState.showImpostor && !gameState.showDuel &&
-            !gameState.showMimica && !gameState.showBocaCerrada && !gameState.showImpostorWord &&
-            !gameState.showVoting && !gameState.showCaptainPass && !gameState.showVirusAlert &&
-            gameState.yoNuncaEquiposPhase === 'idle' &&
-            mode !== 'cultura' && mode !== 'trivia_futbol' && (
+          {/* CONTENT-AWARE VISIBILITY: Only hide the main card if an overlay is ACTIVE AND HAS DATA */}
+          {!(gameState.showTrivia && currentQuestion) && 
+           !(gameState.showDuel && gameState.currentDuelo) && 
+           !gameState.showVoting && 
+           !gameState.showImpostor && 
+           !gameState.showCaptainPass && 
+           gameState.yoNuncaEquiposPhase === 'idle' && (
               <motion.div
                 key={currentIndex}
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                onDragEnd={(e, { offset, velocity }) => {
+                  const swipe = offset.x;
+                  if (swipe < -100 || velocity.x < -500) {
+                    handleNext();
+                  }
+                }}
                 initial={{ rotateY: 90,  opacity: 0, scale: 0.9 }}
                 animate={{ rotateY: 0,   opacity: 1, scale: 1   }}
                 exit={{    rotateY: -90, opacity: 0, scale: 0.9 }}
@@ -1795,15 +1898,24 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                 style={{ 
                   perspective:'1000px', 
                   transformStyle:'preserve-3d',
-                  willChange:'transform'
+                  willChange:'transform',
+                  cursor: 'grab'
                 }}
-                className="w-full flex justify-center relative"
+                whileTap={{ cursor: 'grabbing' }}
+                className="w-full flex flex-col items-center justify-center relative"
               >
+                <div className="absolute -top-8 left-0 right-0 flex justify-center opacity-30 pointer-events-none sm:hidden">
+                  <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.4em] text-white">
+                    <span>Desliza para saltar</span>
+                    <ArrowRight className="w-3 h-3 animate-bounce-x" />
+                  </div>
+                </div>
+
                 <CardDisplay
-                  content={currentText}
+                  content={safeCurrentText}
                   type={rarity}
                   onClick={() => {
-                    if (isMultiplayer && !isHost) return; // Viewers can't click info
+                    if (isMultiplayer && !isHost) return;
                     handleNext();
                   }}
                   gameMode={mode}
@@ -1986,59 +2098,59 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         {/* Virus Flash */}
         <VirusFlash show={virusFlash} />
 
-        {/* Virus Alert Overlay - Stylized physical card format */}
-        {gameState.showVirusAlert && gameState.virusAlertData && (
-          <div className="absolute inset-0 z-[100] bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
+        {/* COMPACT VIRUS BANNER (Fixed Top) */}
+        <AnimatePresence>
+          {gameState.showVirusAlert && gameState.virusAlertData && (
             <motion.div
-              initial={{ scale: 0.8, opacity: 0, rotateY: 90 }}
-              animate={{ scale: 1, opacity: 1, rotateY: 0 }}
-              className="max-w-sm w-full bg-gradient-to-br from-green-900 to-slate-900 border-2 border-green-500 rounded-[2.5rem] p-8 text-center text-white shadow-[0_0_50px_rgba(34,197,94,0.4)] relative overflow-hidden"
+              key="virus-banner"
+              initial={{ y: -120, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -120, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+              className="fixed top-0 left-0 right-0 z-[200] bg-black/97 border-b-2 border-green-400 px-4 py-3 backdrop-blur-sm"
             >
-              <div className="absolute inset-0 bg-black opacity-20 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-green-500/20 via-transparent to-transparent mix-blend-overlay"></div>
-              <div className="relative z-10 space-y-6">
-                <div className="flex justify-center">
-                  <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center border border-green-500/30 shadow-[0_0_20px_rgba(34,197,94,0.5)]">
-                    <Zap className="w-8 h-8 text-green-400" />
-                  </div>
+              <div className="flex items-center gap-3 max-w-md mx-auto">
+                {/* Emoji animado */}
+                <motion.span
+                  animate={{ scale: [1, 1.3, 1] }}
+                  transition={{ repeat: Infinity, duration: 1.5 }}
+                  className="text-4xl shrink-0"
+                  style={{ filter: 'drop-shadow(0 0 12px rgba(34,197,94,0.9))' }}
+                >🦠</motion.span>
+
+                {/* Info del virus */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-[9px] text-green-400 font-black uppercase tracking-[0.35em] mb-0.5">
+                    ⚠ VIRUS DETECTADO
+                  </p>
+                  <p className="text-white font-black text-base leading-tight truncate">
+                    {gameState.virusAlertData.player?.name}
+                  </p>
+                  <p className="text-[11px] font-bold leading-tight">
+                    <span className="text-green-300">
+                      {gameState.virusAlertData.virus?.virusName || gameState.virusAlertData.virus?.name}
+                    </span>
+                    <span className="text-white/40 mx-1">—</span>
+                    <span className="text-white/55 truncate inline-block max-w-[180px]">
+                      {gameState.virusAlertData.virus?.virusDescription || gameState.virusAlertData.virus?.description}
+                    </span>
+                  </p>
                 </div>
 
-                <div>
-                   <p className="text-[12px] text-green-400 font-black uppercase tracking-[0.4em] mb-1">¡VIRUS DETECTADO!</p>
-                   <div className="h-0.5 w-12 bg-green-500/50 mx-auto rounded-full" />
-                </div>
-
-                <div className="bg-black/40 p-5 rounded-2xl border border-white/5 space-y-3 shadow-inner">
-                  <div>
-                    <p className="text-[10px] text-white/50 font-black uppercase tracking-[0.2em] mb-1">Infectado</p>
-                    <p className="text-2xl font-black text-white leading-tight drop-shadow-md">
-                      {scrambledName}
-                    </p>
-                  </div>
-                  
-                  <div className="pt-4 border-t border-white/10">
-                    <p className="text-[10px] text-green-500 font-black uppercase tracking-[0.2em] mb-1">Efecto / Maldición</p>
-                    <h3 className="text-2xl font-black text-emerald-400 mb-2 drop-shadow-lg">
-                      ¡{scrambledName} tiene el virus {gameState.virusAlertData.virus.virusName}!
-                    </h3>
-                    <p className="text-white/80 font-medium italic mb-6 bg-slate-800/50 p-4 rounded-2xl border border-white/5 text-sm leading-relaxed">
-                      "{gameState.virusAlertData.virus.virusDescription}"
-                    </p>
-                  </div>
-                </div>
-
-                <Button
-                  className="w-full h-14 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white font-black py-3 text-lg rounded-xl shadow-[0_5px_15px_rgba(34,197,94,0.3)] transition-all active:scale-95 border-none"
+                {/* Botón OK */}
+                <button
                   onClick={() => {
-                    setGameState((prev: any) => ({ ...prev, showVirusAlert: false, virusAlertData: null }));
+                    setGameState(prev => ({ ...prev, showVirusAlert: false, virusAlertData: null }));
                     performTurnAdvance();
                   }}
+                  className="shrink-0 h-10 px-4 rounded-xl bg-green-500 hover:bg-green-400 text-black font-black text-xs uppercase tracking-wider active:scale-95 transition-all shadow-lg"
                 >
-                  ACEPTAR DESTINO
-                </Button>
+                  OK ✓
+                </button>
               </div>
             </motion.div>
-          </div>
-        )}
+          )}
+        </AnimatePresence>
 
         {/* Video Chat is now handled globally at Index.tsx level */}
 
@@ -2078,64 +2190,56 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
         {/* Final Emergency Fallback: If any of the flags are true but we failed to render the subcomponent, provide a way out */}
         {(gameState.showTrivia || gameState.showDrinkingGame || gameState.showImpostor || gameState.showDuel ||
-          gameState.showMimica || gameState.showBocaCerrada || gameState.showImpostorWord ||
-          gameState.showVoting || gameState.showCaptainPass || gameState.showVirusAlert ||
+          gameState.showMimica || gameState.showImpostorWord ||
+          gameState.showVoting || gameState.showCaptainPass ||
           mode === 'cultura' || mode === 'trivia_futbol') && (
             <div className="absolute bottom-4 left-0 right-0 p-4 flex flex-col items-center justify-center pointer-events-none gap-2">
-              {/* Safety message if screen is likely empty */}
-              {((gameState.showDrinkingGame && !gameState.currentDrinkingGame) ||
-                (gameState.showMimica && !gameState.currentMimicaText) ||
-                (gameState.showBocaCerrada && !gameState.currentBocaCerradaText)) && (
-                  <div className="bg-red-500/80 text-white px-4 py-2 rounded-lg text-sm font-bold animate-pulse pointer-events-auto">
-                    ⚠️ Error de contenido - Pulsa Saltar
-                  </div>
-                )}
-
-              {/* Special Loading State for Trivia if question is fetching */}
-              {((mode === 'cultura' || mode === 'trivia_futbol' || gameState.showTrivia) && !currentQuestion) && (
-                <div className="bg-blue-500/80 text-white px-4 py-2 rounded-lg text-sm font-bold animate-pulse pointer-events-auto">
-                  🔄 Cargando pregunta...
-                </div>
-              )}
-
-              {/* Bug 16: Only show Emergency button if something is legitimately missing or stuck */}
-              {(((gameState.showDrinkingGame && !gameState.currentDrinkingGame) ||
-                (gameState.showMimica && !gameState.currentMimicaText) ||
-                (gameState.showBocaCerrada && !gameState.currentBocaCerradaText) ||
-                ((mode === 'cultura' || mode === 'trivia_futbol' || gameState.showTrivia) && !currentQuestion))) && (
-                <Button variant="outline" className="opacity-60 hover:opacity-100 pointer-events-auto bg-background/50 backdrop-blur text-xs" onClick={handleNext}>
-                  Saltar (Emergencia)
-                </Button>
-              )}
+              <Button variant="outline" className="opacity-40 hover:opacity-100 pointer-events-auto bg-background/50 backdrop-blur text-[9px] uppercase font-black tracking-widest border-white/10" onClick={handleNext}>
+                Forzar Salto (Si está pillado)
+              </Button>
             </div>
           )}
 
-        {/* Global Next Button for MegaMix Cards */}
+        {/* Indicador de progreso discreto */}
+        {!gameState.showTrivia && !gameState.showDuel && (
+          <p className="text-white/20 text-[9px] font-mono text-center tracking-widest mb-2">
+            CARTA {currentIndex + 1}
+          </p>
+        )}
+
+        {/* Botón SIGUIENTE — estilo arcade 8-bit */}
         {!gameState.showTrivia && !gameState.showDrinkingGame && !gameState.showImpostor &&
-          !gameState.showDuel && !gameState.showMimica && !gameState.showBocaCerrada &&
+          !gameState.showDuel && !gameState.showMimica &&
           !gameState.showImpostorWord && !gameState.showVoting && !gameState.showCaptainPass &&
           !gameState.showVirusAlert && (
             <motion.div
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
-              className="w-full max-w-md px-6 mb-4 mt-8 flex justify-center"
+              className="w-full max-w-md px-6 mb-6 mt-6 flex flex-col items-center"
             >
+              {/* Botón principal arcade */}
               <motion.button
-                onClick={handleNext}
-                whileTap={{ scale:0.93, y:6 }}
-                style={{ boxShadow:'0 8px 0 rgba(255,255,255,0.07), 0 0 30px rgba(168,85,247,0.2)' }}
-                className="w-full max-w-md h-20 rounded-[2rem] bg-gradient-to-b from-white/15 
-                  to-white/5 backdrop-blur-xl border border-white/20 font-black text-2xl 
-                  uppercase tracking-widest text-white transition-shadow"
+                onClick={() => {
+                  if (isMultiplayer && !isHost) return;
+                  handleNext();
+                }}
+                whileTap={{ y: 4, boxShadow: 'none' }}
+                className="w-full font-mono font-black text-white uppercase tracking-widest text-xl py-5 px-8 bg-black select-none rounded-none active:scale-[0.98] transition-all"
+                style={{
+                  boxShadow: `
+                    4px 0 0 0 ${rarity === 'legendary' ? '#fbbf24' : rarity === 'chaos' ? '#f472b6' : rarity === 'rare' ? '#60a5fa' : '#ffffff'},
+                    -4px 0 0 0 ${rarity === 'legendary' ? '#fbbf24' : rarity === 'chaos' ? '#f472b6' : rarity === 'rare' ? '#60a5fa' : '#ffffff'},
+                    0 4px 0 0 ${rarity === 'legendary' ? '#fbbf24' : rarity === 'chaos' ? '#f472b6' : rarity === 'rare' ? '#60a5fa' : '#ffffff'},
+                    0 -4px 0 0 ${rarity === 'legendary' ? '#fbbf24' : rarity === 'chaos' ? '#f472b6' : rarity === 'rare' ? '#60a5fa' : '#ffffff'},
+                    0 8px 0 0 rgba(0,0,0,0.7)
+                  `
+                }}
               >
-                <span className="flex items-center justify-center gap-3">
-                  SIGUIENTE CARTA
-                  <motion.span
-                    animate={{ x:[0,5,0] }}
-                    transition={{ repeat:Infinity, duration:1.4, ease:'easeInOut' }}
-                  >⏭️</motion.span>
-                </span>
+                ► SIGUIENTE
               </motion.button>
+              <p className="text-center text-white/25 text-[9px] mt-3 font-mono uppercase tracking-[0.35em]">
+                [ TOCA PARA AVANZAR ]
+              </p>
             </motion.div>
           )}
 

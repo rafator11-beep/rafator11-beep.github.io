@@ -6,7 +6,6 @@ import { duelos } from '@/data/duelosContent';
 import { footballQuestions } from '@/data/footballQuestionsNew';
 import { cultureQuestions } from '@/data/cultureQuestions';
 import { getRandomMimica } from '@/data/mimicaContent';
-import { getRandomBocaCerrada } from '@/data/bocaCerradaContent';
 import { shuffleArray } from '@/lib/utils';
 
 export const useGameEffects = (mode: GameMode, players: Player[]) => {
@@ -179,7 +178,7 @@ export const useGameEffects = (mode: GameMode, players: Player[]) => {
         const isSpecialRoundTurn = currentRound > 0 && currentRound % 6 === 0 && (currentIndex % players.length === 0);
 
         if (players.length >= 3 && isSpecialRoundTurn && mode === 'megamix') {
-            const specialCycle = Math.floor(currentRound / 6) % 3;
+            const specialCycle = Math.floor(currentRound / 6) % 2; // Only 2 types now
 
             if (specialCycle === 0 || !players.length) {
                 // Impostor
@@ -194,27 +193,14 @@ export const useGameEffects = (mode: GameMode, players: Player[]) => {
                         impostorPlayerId: impostorPlayer.id,
                     }
                 }));
-            } else if (specialCycle === 1) {
+            } else {
                 // Mimica
                 const randomMimica = getRandomMimica();
-                const targetPlayer = players[Math.floor(Math.random() * players.length)];
-                // Bug 9 & 10: Fix activation flags - showMimica/showBocaCerrada instead of Reveal
                 setGameState(prev => ({
                     ...prev,
                     showMimica: true,
-                    showMimicaReveal: true, // Also show skip button first
+                    showMimicaReveal: true,
                     currentMimicaText: randomMimica.text
-                }));
-            } else {
-                // Boca Cerrada
-                const randomBoca = getRandomBocaCerrada();
-                const targetPlayer = players[Math.floor(Math.random() * players.length)];
-                setGameState(prev => ({
-                    ...prev,
-                    showBocaCerrada: true,
-                    showBocaCerradaReveal: true,
-                    currentBocaCerradaText: randomBoca.text,
-                    bocaCerradaData: { playerId: targetPlayer.id, playerName: targetPlayer.name }
                 }));
             }
             

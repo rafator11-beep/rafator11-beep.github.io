@@ -158,7 +158,8 @@ export const useGameContent = (mode: GameMode, currentIndex: number, currentPlay
 
         const cleanedContent = normalizeDeckEntries(modeContent as any[]);
         const weighted = normalizeDeckEntries(applyVoteWeights(cleanedContent, mode));
-        setContent(weighted);
+        // Force an extra shuffle on the final weighted content for total randomness
+        setContent(shuffleArray(weighted));
 
         // Reset used questions for fresh game
         setUsedQuestionIds(new Set());

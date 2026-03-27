@@ -19,10 +19,7 @@ export interface GameState {
   showTrivia: boolean;
   showDrinkingGame: boolean;
   showMimica: boolean;
-  showBocaCerrada: boolean;
-  showBocaCerradaWarning?: boolean;
   showMimicaReveal: boolean;
-  showBocaCerradaReveal: boolean;
   showImpostorWord: boolean;
   showCaptainPass: boolean;
   showVirusAlert: boolean;
@@ -35,8 +32,6 @@ export interface GameState {
   // Data for specific screens
   currentDrinkingGame: any | null;
   currentMimicaText: string | null;
-  currentBocaCerradaText: string | null;
-  bocaCerradaData?: { playerId: string; playerName: string }; // Added
   currentImpostorWord: string | null;
   votingQuestion: string | null;
   duelPlayers: Player[];
@@ -90,10 +85,7 @@ export const useGameEngine = (mode: GameMode) => {
     showTrivia: false,
     showDrinkingGame: false,
     showMimica: false,
-    showBocaCerrada: false,
-    showBocaCerradaWarning: false,
     showMimicaReveal: false,
-    showBocaCerradaReveal: false,
     showImpostorWord: false,
     showCaptainPass: false,
     showVirusAlert: false,
@@ -104,8 +96,6 @@ export const useGameEngine = (mode: GameMode) => {
     virusPlayerId: null,
     currentDrinkingGame: null,
     currentMimicaText: null,
-    currentBocaCerradaText: null,
-    bocaCerradaData: undefined,
     currentImpostorWord: null,
     votingQuestion: null,
     duelPlayers: [],

@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Gamepad2,
@@ -533,7 +533,13 @@ export default function Profiles() {
       />
 
       <Dialog open={achOpen} onOpenChange={setAchOpen}>
-        <DialogContent className="max-w-2xl border-white/10 bg-[hsl(var(--card))]" aria-describedby={undefined}>
+        <DialogContent className="max-w-2xl border-white/10 bg-[hsl(var(--card))]">
+          <DialogHeader>
+            <DialogTitle>Detalle del Logro</DialogTitle>
+            <DialogDescription>
+              Información detallada sobre este logro y cómo conseguirlo.
+            </DialogDescription>
+          </DialogHeader>
           <DialogHeader>
             <DialogTitle>Logros premium</DialogTitle>
             <DialogDescription>Insignias persistentes, rachas guardadas y premios especiales conectados al Hall of Fame.</DialogDescription>

@@ -1,4 +1,4 @@
-﻿
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 interface Props {
@@ -12,7 +12,7 @@ export function ImagePreviewDialog({ open, onOpenChange, imageUrl, playerName }:
   if (!imageUrl) return null;
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md p-4 bg-black/90 border border-white/10" aria-describedby={undefined}>
+      <DialogContent className="max-w-md p-4 bg-black/90 border border-white/10">
         <DialogHeader className="sr-only">
           <DialogTitle>Vista previa de imagen</DialogTitle>
           <DialogDescription id="image-preview-description">Vista ampliada del avatar del jugador</DialogDescription>

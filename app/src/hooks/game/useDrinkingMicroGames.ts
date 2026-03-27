@@ -1,8 +1,7 @@
-﻿import { useRef } from 'react';
+import { useRef } from 'react';
 import { GameMode } from '@/types/game';
 import { getRandomDrinkingGame, getRandomCascade, getRandomCoinGame, getRandomImpostorWord, DrinkingGame } from '@/data/drinkingGames';
 import { formatMimicaChallenge, getRandomMimica } from '@/data/mimicaContent';
-import { formatBocaCerradaChallenge, getRandomBocaCerrada } from '@/data/bocaCerradaContent';
 import { pickWeighted } from '@/lib/godDeck';
 
 export const useDrinkingMicroGames = (mode: GameMode, playersCount: number) => {
@@ -27,7 +26,7 @@ export const useDrinkingMicroGames = (mode: GameMode, playersCount: number) => {
             const lastTurn = lastMiniTurnRef.current[type];
             if (typeof lastTurn === 'number' && turn - lastTurn < cooldownTurns) return false;
             if (type === last) return false;
-            if ((type === 'boca' || type === 'impostor_word') && recently.has(type)) return false;
+            if (type === 'impostor_word' && recently.has(type)) return false;
             return true;
         };
 
@@ -83,20 +82,6 @@ export const useDrinkingMicroGames = (mode: GameMode, playersCount: number) => {
                         description: drinkingGame.description.replace(/{player}/g, currentPlayerName)
                     };
                     setGameState((prev: any) => ({ ...prev, showDrinkingGame: true, currentDrinkingGame: processed }));
-                },
-            },
-            {
-                type: 'boca',
-                weight: 0.55,
-                ok: canUse('boca', 14) && turn > 0 && turn % 7 === 0,
-                run: () => {
-                    const bocaCerrada = getRandomBocaCerrada();
-                    setGameState((prev: any) => ({
-                        ...prev,
-                        showBocaCerrada: true,
-                        showBocaCerradaReveal: true, // Show handover first
-                        currentBocaCerradaText: formatBocaCerradaChallenge(bocaCerrada, currentPlayerName)
-                    }));
                 },
             },
             {

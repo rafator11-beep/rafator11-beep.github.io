@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Coins, Diamond, Target, Gamepad2, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,7 @@ import { MemoryMatch } from './MemoryMatch';
 import { GemCatcher } from './GemCatcher';
 import { SimonSays } from './SimonSays';
 import { ArcadeOnlineHub } from './ArcadeOnlineHub';
-import noise from '@/assets/noise.svg';
+const NOISE_DATA_URI = "data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E";
 
 type ArcadeGame = 'menu' | 'spin' | 'slots' | 'memory' | 'catcher' | 'simon' | 'online';
 
@@ -113,7 +113,7 @@ export function ArcadeTab() {
                         onClick={() => setActiveGame('online')}
                         className="relative group cursor-pointer overflow-hidden rounded-3xl p-8 bg-gradient-to-r from-violet-600 via-fuchsia-600 to-pink-600 shadow-[0_0_40px_rgba(236,72,153,0.3)] border border-pink-500/50 flex flex-col items-center text-center"
                     >
-                        <div className="absolute inset-0 opacity-20 mix-blend-overlay" style={{ backgroundImage: `url('${noise}')` }}></div>
+                        <div className="absolute inset-0 opacity-20 mix-blend-overlay" style={{ backgroundImage: `url('${NOISE_DATA_URI}')` }}></div>
                         <div className="absolute top-0 right-0 w-64 h-64 bg-white/20 blur-[100px] rounded-full group-hover:bg-white/30 transition-all duration-700"></div>
 
                         <Target className="w-16 h-16 text-white mb-4 animate-pulse drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]" />

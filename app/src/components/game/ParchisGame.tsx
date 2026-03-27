@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, LogOut, Loader2, Trophy, ArrowRight, Dice1, Dice2, Dice3, Dice4, Dice5, Dice6 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -90,39 +90,44 @@ export function ParchisGame({ roomId, isHost, onExit, localPlayerName, localPlay
 
     // Bot AI and Auto-pass logic
     useEffect(() => {
-        if (gameState.status !== 'playing' || gameState.winner) return;
+        if (gameState.status !== 'playing' || gameState.winner || rolling) return;
 
         const currentPlayer = gameState.players[gameState.currentTurn];
         const isBot = currentPlayer?.isBot;
 
         if (isBot) {
-            if (gameState.dice.length === 0 && !rolling) {
-                // Bot rolls dice
-                setRolling(true);
-                setTimeout(() => {
-                    setRolling(false);
-                    const d1 = Math.floor(Math.random() * 6) + 1;
-                    const d2 = Math.floor(Math.random() * 6) + 1;
-                    setGameState(prev => ({ ...prev, dice: [d1, d2] }));
+            // Bot needs to roll
+            if (gameState.dice.length === 0) {
+                const rollTimer = setTimeout(() => {
+                    setRolling(true);
+                    setTimeout(() => {
+                        setRolling(false);
+                        const d1 = Math.floor(Math.random() * 6) + 1;
+                        const d2 = Math.floor(Math.random() * 6) + 1;
+                        setGameState(prev => ({ ...prev, dice: [d1, d2] }));
+                    }, 1000);
                 }, 1000);
-            } else if (gameState.dice.length > 0) {
-                // Bot needs to move
-                const timer = setTimeout(() => {
-                    const myPieces = gameState.pieces.filter(p => p.color === gameState.currentTurn);
+                return () => clearTimeout(rollTimer);
+            } 
+            
+            // Bot needs to move
+            if (gameState.dice.length > 0) {
+                const moveTimer = setTimeout(() => {
+                    const myTotalPieces = gameState.pieces.filter(p => p.color === gameState.currentTurn);
                     const steps = gameState.dice[0];
                     let moved = false;
 
                     // Try to find a valid move
-                    for (const piece of myPieces) {
-                        const newPos = calculateNextPosition(piece, steps);
-                        if (newPos) {
+                    for (const piece of myTotalPieces) {
+                        const nextPos = calculateNextPosition(piece, steps);
+                        if (nextPos) {
                             handlePieceClick(piece); // reuse the existing logic
                             moved = true;
                             break;
                         }
                     }
 
-                    // If no piece could move, pass turn or consume die
+                    // If no piece could move, consume die and eventually pass turn
                     if (!moved) {
                         setGameState(prev => {
                             const newDice = prev.dice.slice(1);
@@ -132,8 +137,8 @@ export function ParchisGame({ roomId, isHost, onExit, localPlayerName, localPlay
                             return { ...prev, dice: newDice };
                         });
                     }
-                }, 1000);
-                return () => clearTimeout(timer);
+                }, 1500); // Slightly slower for better readability
+                return () => clearTimeout(moveTimer);
             }
         } else {
             // Human player: Auto pass if no valid moves
@@ -142,19 +147,19 @@ export function ParchisGame({ roomId, isHost, onExit, localPlayerName, localPlay
                 const myPieces = gameState.pieces.filter(p => p.color === gameState.currentTurn);
                 const hasValidMove = myPieces.some(p => calculateNextPosition(p, steps) !== null);
                 if (!hasValidMove) {
-                    const timer = setTimeout(() => {
-                        toast.info("No tienes movimientos válidos.");
+                    const passTimer = setTimeout(() => {
+                        toast.info("No tienes movimientos válidos. Paso de turno automático.");
                         setGameState(prev => {
                             const newDice = prev.dice.slice(1);
                             if (newDice.length === 0) setTimeout(nextTurn, 500);
                             return { ...prev, dice: newDice };
                         });
-                    }, 1000);
-                    return () => clearTimeout(timer);
+                    }, 1500);
+                    return () => clearTimeout(passTimer);
                 }
             }
         }
-    }, [gameState.currentTurn, gameState.status, gameState.dice, rolling, gameState.winner]);
+    }, [gameState.currentTurn, gameState.status, gameState.dice.length, rolling, gameState.winner]);
 
     const handleGameEnd = async (winnerColor: PlayerColor) => {
         setGameState(prev => ({ ...prev, status: 'finished', winner: winnerColor }));
@@ -244,9 +249,19 @@ export function ParchisGame({ roomId, isHost, onExit, localPlayerName, localPlay
 
                 return { ...prev, pieces: newPieces, dice: remainingDice };
             });
-            // If no dice left, check for doubles (not implemented yet, just next turn)
+
+            // Turn transition logic
+            // Handle turn advance synchronously or via scheduled timeout
+            const currentPlayer = gameState.players[gameState.currentTurn];
+            const isBot = currentPlayer?.isBot;
+
+            // If no dice left, check for turn advance
             if (gameState.dice.length === 1 && !gameState.winner) {
-                setTimeout(nextTurn, 500);
+                // If it's a human, we auto-advance if no more dice.
+                // If it's a bot, the Bot AI loop will handle the check and nextTurn call itself.
+                if (!isBot) {
+                    setTimeout(nextTurn, 800);
+                }
             }
         } else {
             toast.error("Movimiento inválido");

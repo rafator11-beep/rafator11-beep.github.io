@@ -1,4 +1,4 @@
-﻿// Main game content with all modes - 500+ entries each from Word document
+// Main game content with all modes - 500+ entries each from Word document
 
 import {
   clasicoExtra, yoNuncaExtra, picanteExtra, masProbableExtra,
@@ -13,6 +13,10 @@ import {
   clasicoExtra3, yoNuncaExtra3, picanteExtra3, masProbableExtra3,
   pacoversExtra3, espanaExtra3, enLaCamaYExtra3, categoriasLetrasExtra3, categoriasRetoExtra3
 } from './gameContentExtra3';
+import { mimicaChallenges } from './mimicaContent';
+import { bocaCerradaChallenges } from './bocaCerradaContent';
+import { impostorRounds } from './impostorContent';
+import { duelos } from './duelosContent';
 export interface GameQuestion {
   text: string;
   type: 'reto' | 'yo_nunca' | 'pregunta' | 'votacion' | 'accion';
@@ -6681,9 +6685,14 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
   const clasicoItems = getRandomItems(clasicoPool, clasicoPool.length);
   const clasicoCards = clasicoItems.map(q => addDrinking(q, Math.random() < 0.5 ? 'leve' : 'grupo'));
 
-  const pacoversPool = cleanDeckPool([...pacovers, ...(pacoversExtra || []), ...(pacoversExtra2 || []), ...(pacoversExtra3 || []), ...(espanaExtra3 || [])]);
+  const pacoversPool = cleanDeckPool([...pacovers, ...(pacoversExtra || []), ...(pacoversExtra2 || []), ...(pacoversExtra3 || [])]);
   const pacoversItems = getRandomItems(pacoversPool, pacoversPool.length);
   const pacoversCards = pacoversItems.map(q => addDrinking(`🇪🇸 ${q}`, 'leve'));
+
+  // Pool de España Nostálgica como pool separado
+  const espanaPool = cleanDeckPool([...(espanaExtra3 || [])]);
+  const espanaItems = getRandomItems(espanaPool, espanaPool.length);
+  const espanaCards = espanaItems.map(q => addDrinking(`🇪🇸 ${q}`, 'leve'));
 
   const picantePool = cleanDeckPool([...picante, ...(picanteExtra || []), ...(picanteExtra2 || []), ...(picanteExtra3 || [])]);
   const picanteItems = getRandomItems(picantePool, picantePool.length);
@@ -6697,27 +6706,61 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
   const categoriasItems = getRandomItems(categoriasPool, categoriasPool.length);
   const categoriasCards = categoriasItems.map(q => addDrinking(`🔤 ${q}`, 'reparte'));
 
-  // Combine with weights: repeat arrays to achieve frequency
+  // Specialized Pool Integration
+  const mimicaPool = cleanDeckPool(mimicaChallenges.map(m => m.text));
+  const mimicaItems = getRandomItems(mimicaPool, mimicaPool.length);
+  const mimicaCards = mimicaItems.map(q => `🎭 MÍMICA: ${q} o reparte 3 tragos`);
+
+  // Pool de boca cerrada: combina bocaCerradaChallenges + bocaCerradaExtra2
+  const bocaPool = cleanDeckPool([
+    ...bocaCerradaChallenges.map((b: any) => b.text || b),
+    ...(bocaCerradaExtra2 || []),
+  ]);
+  const bocaItems = getRandomItems(bocaPool, bocaPool.length);
+  const bocaCards = bocaItems.map(q => `🤐 BOCA CERRADA: ${q}`);
+
+  const impostorPool = cleanDeckPool(impostorRounds.map(r => `ESPECIAL IMPOSTOR: El tema es "${r.category}". Pista: ${r.hint}`));
+  const impostorCards = getRandomItems(impostorPool, impostorPool.length);
+
+  const duelosPool = cleanDeckPool(duelos.map(d => `${d.name}: ${d.description}`));
+  const duelosItems = getRandomItems(duelosPool, duelosPool.length);
+  const duelosCards = duelosItems.map(q => `⚔️ ${q}`);
+
+  // Helper: repite un array N veces sin mutarlo
+  function spread<T>(arr: T[], times: number): T[] {
+    const result: T[] = [];
+    for (let i = 0; i < times; i++) result.push(...arr);
+    return result;
+  }
+
+  // Combine with weights using spread helper
   const weightedContent = shuffleArray([
-    // 5x weight — most frequent
-    ...yoNuncaCards, ...yoNuncaCards, ...yoNuncaCards, ...yoNuncaCards, ...yoNuncaCards,
-    ...masProbableCards, ...masProbableCards, ...masProbableCards, ...masProbableCards, ...masProbableCards,
-    ...clasicoCards, ...clasicoCards, ...clasicoCards, ...clasicoCards, ...clasicoCards, // Increased from 3x
-    // 4x weight
-    ...retosCards, ...retosCards, ...retosCards, ...retosCards,
-    // 3x weight
-    ...pacoversCards, ...pacoversCards, ...pacoversCards,
-    // 2x weight
-    ...picanteCards, ...picanteCards,
-    ...enLaCamaCards, ...enLaCamaCards,
-    ...categoriasCards, ...categoriasCards,
+    // 5x — más frecuentes
+    ...spread(yoNuncaCards, 5),
+    ...spread(masProbableCards, 5),
+    ...spread(clasicoCards, 5),
+    // 4x
+    ...spread(retosCards, 4),
+    // 3x
+    ...spread(pacoversCards, 3),
+    ...spread(enLaCamaCards, 3),
+    ...spread(espanaCards, 3),
+    // 2x
+    ...spread(picanteCards, 2),
+    ...spread(categoriasCards, 2),
+    ...spread(mimicaCards, 2),
+    ...spread(duelosCards, 2),
+    // 1x — eventos especiales
+    ...bocaCards,
+    ...impostorCards,
   ]);
 
-  // Triggers — MINIMAL for boca cerrada and impostor (handled by useGameEffects instead)
-  // Only trivia triggers are included as cards, the rest use the event system
+  // Triggers — trivia, duelos, and impostor fire interactive overlays
   const triggers = [
     ...Array(12).fill("TRIGGER:TRIVIA_FUTBOL"),
     ...Array(12).fill("TRIGGER:TRIVIA_CULTURA"),
+    ...Array(8).fill("TRIGGER:DUELO"),
+    ...Array(5).fill("TRIGGER:IMPOSTOR"),
   ];
 
   // Mix content + triggers
