@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Volume2,
@@ -15,7 +15,12 @@ import {
   Smartphone,
   SlidersHorizontal,
   ShieldCheck,
+  Globe,
+  Loader2,
+  RefreshCw,
 } from 'lucide-react';
+import { supabase, isSupabaseConfigured } from '@/integrations/supabase/client';
+import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
@@ -111,6 +116,29 @@ export function AppSettings() {
 
   const intensityLabel = settings.intensity === 'low' ? 'Tranquila' : settings.intensity === 'medium' ? 'Normal' : 'Locura';
   const enabledCount = [settings.confettiEnabled, settings.soundEnabled, settings.vibrationEnabled, settings.showHints].filter(Boolean).length;
+
+  const [supabaseUrl, setSupabaseUrl] = useState(() => localStorage.getItem('fiesta_supabase_url') || '');
+  const [supabaseKey, setSupabaseKey] = useState(() => localStorage.getItem('fiesta_supabase_key') || '');
+
+  const saveSupabaseConfig = () => {
+    if (supabaseUrl) localStorage.setItem('fiesta_supabase_url', supabaseUrl.trim());
+    else localStorage.removeItem('fiesta_supabase_url');
+
+    if (supabaseKey) localStorage.setItem('fiesta_supabase_key', supabaseKey.trim());
+    else localStorage.removeItem('fiesta_supabase_key');
+
+    toast.success('Configuración guardada. Recargando para aplicar...');
+    setTimeout(() => window.location.reload(), 1500);
+  };
+
+  const clearSupabaseConfig = () => {
+    localStorage.removeItem('fiesta_supabase_url');
+    localStorage.removeItem('fiesta_supabase_key');
+    setSupabaseUrl('');
+    setSupabaseKey('');
+    toast.success('Configuración reseteada a valores por defecto.');
+    setTimeout(() => window.location.reload(), 1500);
+  };
 
   return (
     <div className="premium-screen min-h-screen px-4 pb-28 pt-5 md:px-6 md:pb-32 md:pt-6">
@@ -355,6 +383,72 @@ export function AppSettings() {
                       <ChevronRight className="h-4 w-4 text-muted-foreground" />
                     </div>
                   ))}
+                </div>
+              </motion.section>
+
+              <motion.section
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.20 }}
+                className="premium-panel-soft rounded-[30px] p-5 sm:p-6 border border-emerald-500/20 shadow-lg shadow-emerald-500/5"
+              >
+                <div className="mb-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${isSupabaseConfigured ? 'bg-emerald-400/10' : 'bg-amber-400/10'}`}>
+                      {isSupabaseConfigured ? <Globe className="h-5 w-5 text-emerald-300" /> : <ShieldCheck className="h-5 w-5 text-amber-300" />}
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Sistema central</p>
+                      <h2 className="text-xl font-bold text-white">Conexión Online</h2>
+                    </div>
+                  </div>
+                  <div className={`flex h-2.5 w-2.5 rounded-full ${isSupabaseConfigured ? 'bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]' : 'bg-amber-500'}`} />
+                </div>
+
+                <div className="space-y-4">
+                  <div className="rounded-[24px] border border-white/8 bg-white/[0.04] p-4 text-sm text-white/80 leading-relaxed">
+                    {isSupabaseConfigured 
+                      ? "Conectado al servidor de BEEP. El modo Arcade y el progreso online están activos."
+                      : "No hay una conexión personalizada configurada. Se están usando los valores por defecto del sistema."}
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Supabase URL</Label>
+                      <Input 
+                        placeholder="https://su-proyecto.supabase.co"
+                        value={supabaseUrl}
+                        onChange={(e) => setSupabaseUrl(e.target.value)}
+                        className="bg-black/40 border-white/10 text-white text-xs h-11"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Anon Key / Publishable Key</Label>
+                      <Input 
+                        placeholder="sb_publishable_..."
+                        type="password"
+                        value={supabaseKey}
+                        onChange={(e) => setSupabaseKey(e.target.value)}
+                        className="bg-black/40 border-white/10 text-white text-xs h-11"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 pt-2">
+                    <Button 
+                      onClick={saveSupabaseConfig}
+                      className="flex-1 h-11 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold"
+                    >
+                      Actualizar Conexión
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      onClick={clearSupabaseConfig}
+                      className="aspect-square h-11 w-11 p-0 rounded-xl border border-white/10 text-white hover:bg-red-500/20 hover:text-red-400"
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </motion.section>
             </div>
