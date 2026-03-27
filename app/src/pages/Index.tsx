@@ -100,6 +100,14 @@ function GameAppInner() {
     return () => window.removeEventListener('keydown', handler);
   }, []);
 
+  // Sync localPlayerId with authenticated user
+  useEffect(() => {
+    if (profile?.id && setLocalPlayerId && localPlayerId !== profile.id) {
+      console.log("Syncing localPlayerId with authenticated profile:", profile.id);
+      setLocalPlayerId(profile.id);
+    }
+  }, [profile?.id, setLocalPlayerId, localPlayerId]);
+
   // Auto-Join when Game Starts (if pending data exists)
   useEffect(() => {
     const checkPendingJoin = async () => {

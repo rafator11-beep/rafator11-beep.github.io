@@ -642,14 +642,15 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
         </motion.div>
       </motion.div>
 
-      {/* Floating Action Button */}
+      {/* Floating Action Button (Elevated z-index to stay above overlays) */}
       <motion.button
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsModalOpen(true)}
-        className="fixed bottom-6 right-6 w-16 h-16 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg flex items-center justify-center hover:shadow-xl transition-shadow"
+        className="fixed bottom-24 right-6 w-16 h-16 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-[0_10px_40px_-10px_rgba(168,85,247,0.5)] flex items-center justify-center hover:shadow-xl transition-shadow z-50 cursor-pointer"
+        style={{ marginBottom: 'env(safe-area-inset-bottom)' }}
       >
         <Plus className="h-8 w-8" />
       </motion.button>

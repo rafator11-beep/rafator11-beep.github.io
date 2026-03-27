@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import * as THREE from 'three';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LogOut, Trophy, Dice1, Dice2, Dice3, Dice4, Dice5, Dice6, ArrowRight } from 'lucide-react';
+import { LogOut, Trophy, Dice1, Dice2, Dice3, Dice4, Dice5, Dice6, ArrowRight, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { RewardPopup } from './RewardPopup';
@@ -1105,9 +1105,10 @@ export function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }: Me
             <Button
               variant="ghost"
               onClick={() => setSetupNames(prev => [...prev, ''])}
-              className="w-full mb-4 border border-dashed border-white/20 text-white/60 hover:text-white hover:border-white/40"
+              className="w-full mb-4 border-2 border-dashed border-white/20 text-white/60 hover:text-white hover:border-white/40 h-12 rounded-xl bg-white/5 active:scale-[0.98] transition-all cursor-pointer z-50"
             >
-              + Añadir jugador
+              <Plus className="w-4 h-4 mr-2" />
+              Añadir otro jugador
             </Button>
           )}
 
