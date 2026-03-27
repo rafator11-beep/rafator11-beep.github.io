@@ -1,5 +1,6 @@
-﻿import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase, isSupabaseConfigured } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import { Game, Player, Team, Question, TicTacToeState, GameMode, QuestionType } from '@/types/game';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -172,6 +173,12 @@ export function useGame(gameId: string | null) {
     if (!isSupabaseConfigured) {
       if (!game) throw new Error('No active game found locally');
 
+      // Mejora 4: Guard against duplicate names in offline mode (consistent with online)
+      if (players.some(p => p.name.toLowerCase() === name.toLowerCase())) {
+        console.warn('Player already exists (offline):', name);
+        return players.find(p => p.name.toLowerCase() === name.toLowerCase());
+      }
+
       const newPlayer: Player = {
         id: uuidv4(),
         game_id: game.id,
@@ -192,9 +199,9 @@ export function useGame(gameId: string | null) {
 
     if (!gameId) throw new Error('No game ID');
 
-    // Fix: Guard against duplicate names
+    // Bug 5: Guard against duplicate names
     if (players.some(p => p.name.toLowerCase() === name.toLowerCase())) {
-      console.warn("Player already exists:", name);
+      toast.error(`El nombre "${name}" ya está en uso.`);
       return players.find(p => p.name.toLowerCase() === name.toLowerCase());
     }
 
@@ -456,10 +463,17 @@ export function useGame(gameId: string | null) {
 
     if (!gameId || !game) return;
 
-    const playersWhoHaventPlayed = players.filter(p => !p.has_played_this_round);
+    // Bug 4: Robust check for round end by counting based on current DB state 
+    // instead of relying on local stale state
+    const { data: remainingPlayers } = await supabase
+      .from('players')
+      .select('id')
+      .eq('game_id', gameId)
+      .eq('has_played_this_round', false);
 
-    if (playersWhoHaventPlayed.length === 0) {
-      // End of round
+    if (remainingPlayers && remainingPlayers.length <= 1) { 
+      // If 1 or 0 remaining (this player's update might not be reflected yet)
+      // Actually, safest is to count exactly who has played.
       await supabase.from('games')
         .update({ status: 'round_end' })
         .eq('id', gameId);

@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Users, Trophy, AlertCircle, Video, VideoOff, Copy, Crown, Plus, Minus, Eye, EyeOff, Zap, Flame, Ghost, ShieldAlert, Dice5, UserPlus, Globe, History, Play, Trash2, UserCheck, UserX, X, Camera, Cast, TrendingUp, Music } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -54,8 +54,20 @@ interface PartyGameProps {
 
 // New Bottom Profiles Component with Virus Support and Captain XP Controls
 const PlayerProfilesBottom = ({ players, currentPlayer, scores, playerViruses = [], mode, remoteStreams = [], captainId, onAdjustXP }: { players: any[], currentPlayer: any, scores: any, playerViruses?: any[], mode: GameMode, remoteStreams?: any[], captainId?: string | null, onAdjustXP?: (pid: string, delta: number) => void }) => {
+  const [editMode, setEditMode] = useState(false); // Mejora 10: Edit mode for mobile
+
   return (
-    <div className="fixed bottom-0 left-0 right-0 h-28 md:h-32 bg-slate-900/40 backdrop-blur-[16px] border-t border-white/10 flex items-center justify-center px-6 gap-6 z-[100] overflow-x-auto no-scrollbar">
+    <div className="fixed bottom-0 left-0 right-0 h-28 md:h-32 bg-slate-950/60 backdrop-blur-[24px] border-t border-white/10 flex items-center justify-center px-6 gap-6 z-[100] overflow-x-auto no-scrollbar shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+      {/* Edit Mode Toggle Button */}
+      {captainId && (
+        <button
+          onClick={() => setEditMode(e => !e)}
+          className={`absolute top-2 right-3 w-8 h-8 rounded-lg flex items-center justify-center text-xs transition-all z-[120] ${editMode ? 'bg-amber-500 text-black shadow-[0_0_10px_rgba(245,158,11,0.5)]' : 'bg-white/10 text-white/50'}`}
+        >
+          {editMode ? '✅' : '✏️'}
+        </button>
+      )}
+
       <div className="flex items-center gap-4 md:gap-8">
         {players.map((p) => {
           const isTurn = currentPlayer?.id === p.id;
@@ -66,17 +78,17 @@ const PlayerProfilesBottom = ({ players, currentPlayer, scores, playerViruses = 
 
           return (
             <div key={p.id} className="flex flex-col items-center gap-1 relative group shrink-0">
-              {/* Captain Controls Overlay */}
-              <div className="absolute -top-12 left-1/2 -translate-x-1/2 flex gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 scale-90 group-hover:scale-100 z-[110]">
+              {/* Captain Controls Overlay: visible on hover (desktop) OR editMode (mobile) */}
+              <div className={`absolute -top-12 left-1/2 -translate-x-1/2 flex gap-3 transition-all duration-300 z-[110] ${editMode ? 'opacity-100 scale-100' : 'opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100'}`}>
                 <button
                   onClick={() => onAdjustXP?.(p.id, -5)}
-                  className="w-10 h-10 rounded-xl bg-red-500/90 text-white flex items-center justify-center shadow-[0_0_15px_rgba(239,68,68,0.4)] border border-white/20 hover:bg-red-600 active:scale-90 transition-all"
+                  className="w-10 h-10 rounded-xl bg-red-500/90 text-white flex items-center justify-center shadow-[0_0_15px_rgba(239,68,68,0.4)] border border-white/20 hover:bg-red-600 active:scale-90 transition-all font-bold"
                 >
                   <Minus className="w-5 h-5" />
                 </button>
                 <button
                   onClick={() => onAdjustXP?.(p.id, 5)}
-                  className="w-10 h-10 rounded-xl bg-green-500/90 text-white flex items-center justify-center shadow-[0_0_15px_rgba(34,197,94,0.4)] border border-white/20 hover:bg-green-600 active:scale-90 transition-all"
+                  className="w-10 h-10 rounded-xl bg-green-500/90 text-white flex items-center justify-center shadow-[0_0_15px_rgba(34,197,94,0.4)] border border-white/20 hover:bg-green-600 active:scale-90 transition-all font-bold"
                 >
                   <Plus className="w-5 h-5" />
                 </button>
@@ -88,7 +100,7 @@ const PlayerProfilesBottom = ({ players, currentPlayer, scores, playerViruses = 
                   borderColor: isCaptain ? '#fbbf24' : (hasVirus ? '#22c55e' : (isTurn ? 'var(--primary)' : 'transparent')),
                   boxShadow: isCaptain ? '0 0 20px #fbbf24' : (hasVirus ? '0 0 15px #22c55e' : (isTurn ? '0 0 15px var(--primary)' : 'none'))
                 }}
-                className={`w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-slate-800/60 backdrop-blur-xl border-2 flex items-center justify-center text-lg font-bold relative overflow-hidden transition-all duration-500 ${isTurn ? 'border-primary shadow-lg shadow-primary/20' : 'border-white/10 opacity-70 hover:opacity-100'}`}
+                className={`w-14 h-14 md:w-16 md:h-16 rounded-[22px] bg-slate-800/40 backdrop-blur-2xl border flex items-center justify-center text-lg font-bold relative overflow-hidden transition-all duration-500 ${isTurn ? 'border-primary/60' : 'border-white/5 opacity-60 hover:opacity-100 hover:scale-105'}`}
               >
                 {isCaptain && (
                   <div className="absolute top-0 right-0 p-1 bg-amber-500 rounded-bl-lg z-10">
@@ -99,13 +111,14 @@ const PlayerProfilesBottom = ({ players, currentPlayer, scores, playerViruses = 
                   <video
                     autoPlay
                     playsInline
-                    ref={el => { if (el) el.srcObject = remotePeer.stream; }}
+                    muted={p.id === currentPlayer?.id}
+                    ref={el => { if (el && remotePeer.stream) el.srcObject = remotePeer.stream; }}
                     className="w-full h-full object-cover"
                   />
                 ) : p.avatar_url ? (
                   <img src={p.avatar_url} alt={p.name} className="w-full h-full object-cover" />
                 ) : (
-                  <span className="text-white/40">{p.name[0].toUpperCase()}</span>
+                  <span className={isTurn ? 'text-primary' : (isCaptain ? 'text-amber-400' : 'text-white/80')}>{p.name[0].toUpperCase()}</span>
                 )}
                 {showVirus && (
                   <div className="absolute inset-0 bg-green-500/20 animate-pulse pointer-events-none" />
@@ -198,6 +211,11 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     manageMegamixViruses, // Every 5 rounds virus cycle
     manageMegamixNormas   // Every 3 rounds norma
   } = useGameEffects(mode, players);
+  
+  const performTurnAdvance = useCallback(() => {
+    sfx.whoosh();
+    advanceTurn();
+  }, [advanceTurn]);
 
   // --- TRACKING DATA for Classifications ---
   const [voteCounts, setVoteCounts] = useState<Record<string, number>>({});
@@ -218,24 +236,24 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     vibe(5);
   };
 
-  // Multiplayer Hook
-  const { broadcastState, sendActionToHost } = useMultiplayer(roomId, isHost, currentPlayer?.name || 'Observer', (remoteState) => {
-    // Viewer Logic: Receive State
-    if (!isHost && remoteState) {
-      if (remoteState.currentIndex !== undefined && remoteState.currentIndex !== currentIndex) {
-        setCurrentIndex(remoteState.currentIndex);
-
-        if (remoteState.gameState) setGameState(remoteState.gameState);
-
-        if (remoteState.currentQuestion) {
-          setCurrentQuestion(remoteState.currentQuestion);
+  // Mejora 8: Passing currentPlayer ID as presence key
+  const { broadcastState, sendActionToHost } = useMultiplayer(
+    roomId, 
+    isHost, 
+    currentPlayer?.name || 'Observer',
+    currentPlayer?.id || 'observer', // Passed ID
+    (remoteState) => {
+      // Mejora 2: Viewer Logic: Receive State (Unified sync)
+      if (!isHost && remoteState) {
+        if (remoteState.currentIndex !== undefined && remoteState.currentIndex !== currentIndex) {
+          setCurrentIndex(remoteState.currentIndex);
         }
-      } else {
-        // Even if index doesn't change, we should sync gamestate (like timer, voting, teams)
+        
+        // Siempre sincronizar gameState y pregunta, independientemente del índice
         if (remoteState.gameState) setGameState(remoteState.gameState);
+        if (remoteState.currentQuestion) setCurrentQuestion(remoteState.currentQuestion);
       }
-    }
-  }, (action) => {
+    }, (action) => {
     // Host Logic: Receive Action from Guest
     if (isHost && action) {
       if (action.type === 'YO_NUNCA_VOTE') {
@@ -254,24 +272,31 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
   // Effect: Parse NORMA from content for Clasico/Megamix — auto-skip the card
   useEffect(() => {
     const txt = getCurrentContent();
-    if (typeof txt === 'string' && (txt.toUpperCase().startsWith('NORMA:') || txt.toUpperCase().startsWith('NUEVA NORMA:'))) {
+    const isOverlayActive = gameState.showVirusAlert || gameState.showTrivia || gameState.showDuel || 
+                            gameState.showImpostor || gameState.showMimica || gameState.showBocaCerrada;
+
+    if (!isOverlayActive && typeof txt === 'string' && (txt.toUpperCase().startsWith('NORMA:') || txt.toUpperCase().startsWith('NUEVA NORMA:'))) {
       const rule = txt.split(':')[1]?.trim() || txt;
       setGameState(prev => ({ 
         ...prev, 
         currentNorma: rule,
-        showNormaGlobal: true // Force show if it was hidden
+        showNormaGlobal: true 
       }));
       toast.success("¡Nueva Norma Activa!", { description: rule, duration: 4000 });
-      // Auto-skip to next card so the norma card never shows on screen
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         performTurnAdvance();
       }, 500);
+      return () => clearTimeout(timer);
     }
-  }, [currentIndex, isHost, mode]); // Re-run when turn changes
+  }, [currentIndex, isHost, mode, getCurrentContent, setGameState, performTurnAdvance, 
+      gameState.showVirusAlert, gameState.showTrivia, gameState.showDuel, 
+      gameState.showImpostor, gameState.showMimica, gameState.showBocaCerrada]);
 
+  const hasInitializedRound1 = useRef(false);
   // Trigger: Ronda 1 Norma Global + Virus Assignment
   useEffect(() => {
-    if (mode === 'megamix' && gameState.round === 1 && currentIndex === 0) {
+    if (mode === 'megamix' && gameState.round === 1 && currentIndex === 0 && !hasInitializedRound1.current) {
+      hasInitializedRound1.current = true;
       // 1. Show Norma Global Overlay
       setGameState(prev => ({ 
         ...prev, 
@@ -293,7 +318,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       }
       toast.info("¡RONDA 1: Norma Global + Virus activados!");
     }
-  }, [gameState.round, currentIndex, mode, players]);
+  }, [gameState.round, currentIndex, mode]); // removed players as dep to avoid double trigger
 
   // Effect to broadcast state when Host changes things
   useEffect(() => {
@@ -457,11 +482,6 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     if (onExit) onExit();
   };
 
-  // Overlay State (Managed locally as it's UI specific)
-  const performTurnAdvance = () => {
-    sfx.whoosh();
-    advanceTurn();
-  };
 
   const handleNext = () => {
     sfx.click();
@@ -535,6 +555,29 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     performTurnAdvance();
   };
 
+  // Bug 6/8: NORMA - Auto turn advance logic (Megamix)
+  // Moved here to avoid 'handleNext' hoisting issues
+  useEffect(() => {
+    if (mode !== 'megamix' || !gameState.currentNorma) return;
+    
+    // Bug 8: Guard against overlays - Do not skip if an interaction is pending
+    if (gameState.showVirusAlert || gameState.showTrivia || gameState.showVoting || 
+        gameState.showDuel || gameState.showImpostor || gameState.showMimica || 
+        gameState.showBocaCerrada || gameState.showImpostorWord) return;
+
+    if (gameState.currentNorma.includes('AVANCE AUTOMÁTICO') || gameState.currentNorma.includes('AUTO-SKIP')) {
+      const timer = setTimeout(() => {
+        // Bug 6: Ensure we are still on the same card before skipping
+        if (!gameState.showVirusAlert && !gameState.showTrivia) {
+          handleNext();
+        }
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [gameState.currentNorma, gameState.showVirusAlert, gameState.showTrivia, gameState.showVoting, 
+      gameState.showDuel, gameState.showImpostor, gameState.showMimica, gameState.showBocaCerrada, 
+      gameState.showImpostorWord, mode, handleNext]);
+
   // Rarity calculation for CardDisplay
   const currentText = getCurrentContent();
   const rarity = detectRarity(currentText);
@@ -573,7 +616,8 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         // MIMICA and any unknown triggers - auto-skip
         // These don't have overlay UI, so we advance to prevent getting stuck
         console.log("Auto-skipping trigger:", triggerType);
-        setTimeout(() => advanceTurn(), 100);
+        const timer = setTimeout(() => advanceTurn(), 100);
+        return () => clearTimeout(timer);
       }
       return;
     }
@@ -590,7 +634,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       }
     }
 
-  }, [currentText]);
+  }, [currentText, advanceTurn, applyRandomVirus, currentPlayer, players, setGameState, loadSpecificQuestion]); // Mejora 1: Correct dependencies
 
   // YoNunca Equipos Logic Interception
   useEffect(() => {
@@ -651,14 +695,25 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       const syncAllPlayers = async () => {
         try {
           const updates = players.map(p => {
-            const currentScore = scores[p.id] || 0;
-            // Get local ranking or supabase profile
-            // This is where the mass UPSERT logic lives
+            // Mejora 3: Recuperar XP histórico del ranking local antes de sumar
+            const existingRanking = (() => {
+              try {
+                const raw = localStorage.getItem('fiesta-party-local-rankings-v1');
+                const all = raw ? JSON.parse(raw) : [];
+                return all.find((r: any) => 
+                  r.player_name?.toLowerCase() === p.name?.toLowerCase()
+                );
+              } catch { return null; }
+            })();
+
+            const historicalXP = existingRanking?.total_xp || 
+                                 existingRanking?.xp || 0;
+            const sessionXP    = scores[p.id] || 0;
+
             return {
               id: p.id,
-              total_xp: currentScore, // This should be cumulative in real logic
-              games_played: 1,
-              // badges: calculateBadges(p.id)
+              total_xp: historicalXP + sessionXP, // ← acumulativo
+              games_played: 1, // As requested in Mejora 3
             };
           });
           
@@ -1284,8 +1339,8 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                             players.forEach(p => {
                               if (p.id !== gameState.impostorData?.impostorPlayerId) addScore(p.id, 20);
                             });
-                          } else {
-                            addScore(gameState.impostorData?.impostorPlayerId || '', 50);
+                          } else if (gameState.impostorData?.impostorPlayerId) {
+                            addScore(gameState.impostorData.impostorPlayerId, 50);
                           }
                           setGameState(prev => ({ ...prev, showImpostorWarning: false, showImpostorWord: false }));
                           handleNext();
@@ -1355,28 +1410,42 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           </div>
         )}
 
-        {/* Active Rule Display */}
+        {/* Active Rule Display - Premium Glassmorphism */}
         {(gameState.currentNorma || gameState.showNormaGlobal) && (
-          <div className="mb-6 mx-auto max-w-sm z-10 relative">
-            <div className="bg-gradient-to-r from-orange-600/40 to-orange-900/40 border-2 border-orange-500 backdrop-blur-md rounded-2xl p-4 text-center shadow-[0_0_20px_rgba(249,115,22,0.3)]">
-              <p className="text-[10px] uppercase tracking-[0.3em] text-orange-400 font-black mb-1">📜 NORMA GLOBAL ACTIVA</p>
-              <p className="text-base text-white font-black leading-tight uppercase tracking-tight">
-                NORMA: {gameState.currentNorma || "¡Preparando nueva norma!"}
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.8, y: -20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="mb-8 mx-auto max-w-sm z-50 relative"
+          >
+            <div className="bg-gradient-to-br from-amber-500/20 via-orange-500/10 to-red-600/20 border border-white/20 backdrop-blur-3xl rounded-[2.5rem] p-6 text-center shadow-[0_0_50px_rgba(245,158,11,0.2)] group transition-all duration-700 hover:shadow-[0_0_60px_rgba(245,158,11,0.35)] relative overflow-hidden">
+               <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none" />
+               <motion.div 
+                 animate={{ opacity: [0.3, 0.6, 0.3] }}
+                 transition={{ duration: 3, repeat: Infinity }}
+                 className="absolute inset-0 border-2 border-amber-500/30 rounded-[2.5rem]" 
+               />
+               
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-500 to-orange-600 text-white text-[10px] px-6 py-1.5 rounded-full font-black tracking-[0.3em] shadow-[0_4px_15px_rgba(245,158,11,0.4)] border border-white/20 uppercase">
+                📜 Norma Activa
+              </div>
+              <p className="text-xl text-white font-black leading-tight uppercase tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] mt-2">
+                {gameState.currentNorma || "¡Mantén el ritmo!"}
               </p>
             </div>
-          </div>
+          </motion.div>
         )}
 
         {/* CAPTAIN ACTION PANEL - Give/Take XP in real-time */}
         {(!gameState.showTrivia && !gameState.showVoting && !gameState.showDuel && !gameState.showImpostor && !gameState.showMimica && !gameState.showBocaCerrada && !gameState.showImpostorWord && mode !== 'cultura' && mode !== 'trivia_futbol') && (
-          <div className="w-full max-w-md mt-4 mb-2 z-10 flex flex-col items-center bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-[32px] p-4 shadow-2xl">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-              <p className="text-[10px] text-amber-400/80 uppercase font-black tracking-[0.2em]">Panel de Control del Capitán</p>
+          <div className="w-full max-w-md mt-4 mb-2 z-10 flex flex-col items-center bg-slate-950/40 backdrop-blur-3xl border border-white/10 rounded-[40px] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+              <p className="text-[11px] text-amber-400 font-black uppercase tracking-[0.3em]">Mesa del Capitán</p>
             </div>
             <div className="flex flex-wrap justify-center gap-4">
               {players.map(p => {
                 const isCaptain = gameState.captainId === p.id;
+                // Bug 16: Ensure consistent XP calculation
                 const baseXP = 10 + Math.floor(gameState.round / 2) * 5;
                 const rewardXP = Math.min(50, baseXP);
                 const penaltyXP = Math.max(5, Math.floor(rewardXP / 2));
@@ -1407,6 +1476,11 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                           whileTap={{ scale: 0.8 }}
                           onClick={() => {
                             if (isMultiplayer && !isHost) return;
+                            // Bug 18: Captain shouldn't adjust their own XP
+                            if (isCaptain) {
+                              toast.error("El Capitán no puede auto-asignarse XP 👑");
+                              return;
+                            }
                             handleAdjustXP(p.id, rewardXP);
                             toast.success(`+${rewardXP} XP para ${p.name}! 🔥`, { 
                               className: "bg-slate-900 border-emerald-500/50 text-emerald-400 font-bold" 
@@ -1420,6 +1494,11 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                           whileTap={{ scale: 0.8 }}
                           onClick={() => {
                             if (isMultiplayer && !isHost) return;
+                            // Bug 18: Captain shouldn't adjust their own XP
+                            if (isCaptain) {
+                              toast.error("El Capitán no puede auto-penalizarse 👑");
+                              return;
+                            }
                             handleAdjustXP(p.id, -penaltyXP);
                             toast.error(`-${penaltyXP} XP para ${p.name} ❌`, { 
                               className: "bg-slate-900 border-red-500/50 text-red-400 font-bold" 
@@ -1676,11 +1755,11 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                   
                   <div className="pt-4 border-t border-white/10">
                     <p className="text-[10px] text-green-500 font-black uppercase tracking-[0.2em] mb-1">Efecto / Maldición</p>
-                    <p className="text-xl font-black text-green-100 uppercase leading-tight mb-2">
-                      {gameState.virusAlertData?.virus?.virusName || gameState.virusAlertData?.virus?.name || 'Virus Desconocido'}
-                    </p>
-                    <p className="text-[13px] text-white/80 font-medium leading-relaxed">
-                      {gameState.virusAlertData?.virus?.virusDescription || gameState.virusAlertData?.virus?.description || 'Efecto misterioso...'}
+                    <h3 className="text-2xl font-black text-emerald-400 mb-2 drop-shadow-lg">
+                      ¡{gameState.virusAlertData.player.name} tiene el virus {gameState.virusAlertData.virus.virusName}!
+                    </h3>
+                    <p className="text-white/80 font-medium italic mb-6 bg-slate-800/50 p-4 rounded-2xl border border-white/5 text-sm leading-relaxed">
+                      "{gameState.virusAlertData.virus.virusDescription}"
                     </p>
                   </div>
                 </div>
@@ -1757,9 +1836,15 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                 </div>
               )}
 
-              <Button variant="outline" className="opacity-60 hover:opacity-100 pointer-events-auto bg-background/50 backdrop-blur text-xs" onClick={handleNext}>
-                Saltar (Emergencia)
-              </Button>
+              {/* Bug 16: Only show Emergency button if something is legitimately missing or stuck */}
+              {(((gameState.showDrinkingGame && !gameState.currentDrinkingGame) ||
+                (gameState.showMimica && !gameState.currentMimicaText) ||
+                (gameState.showBocaCerrada && !gameState.currentBocaCerradaText) ||
+                ((mode === 'cultura' || mode === 'trivia_futbol' || gameState.showTrivia) && !currentQuestion))) && (
+                <Button variant="outline" className="opacity-60 hover:opacity-100 pointer-events-auto bg-background/50 backdrop-blur text-xs" onClick={handleNext}>
+                  Saltar (Emergencia)
+                </Button>
+              )}
             </div>
           )}
 

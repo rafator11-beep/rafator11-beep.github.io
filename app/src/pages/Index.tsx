@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, Suspense, lazy } from 'react';
+import { useState, useEffect, Suspense, lazy } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Globe, Smartphone, Coins } from 'lucide-react';
 import { toast } from 'sonner';
@@ -15,7 +15,6 @@ import { AuthOverlay } from '@/components/auth/AuthOverlay';
 import { GlobalPresence } from '@/components/auth/GlobalPresence';
 import { WelcomeScreen } from '@/components/auth/WelcomeScreen';
 import { BottomNav } from '@/components/layout/BottomNav';
-type AppTab = 'inicio' | 'perfiles' | 'jugar' | 'historial' | 'ajustes' | 'arcade' | 'hall';
 import { GameHistory } from '@/pages/GameHistory';
 import { AppSettings } from '@/pages/AppSettings';
 import { ArcadeTab } from '@/components/arcade/ArcadeTab';
@@ -24,6 +23,8 @@ import { ChatComponent } from '@/components/multiplayer/ChatComponent';
 import { DailyVideoProvider } from '@/components/multiplayer/DailyVideoProvider';
 import { GameMode, GAME_MODES, TabId, PlayMode } from '@/types/game';
 import { supabase } from '@/integrations/supabase/client';
+
+type AppTab = 'inicio' | 'perfiles' | 'jugar' | 'historial' | 'ajustes' | 'arcade' | 'hall';
 import {
   Dialog,
   DialogContent,

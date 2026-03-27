@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { LogIn, Plus, Share2, Copy, Users, ArrowLeft, Sparkles, Wifi, Crown, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -40,27 +40,7 @@ export function LobbyScreen({ onJoin, onBack, initialMode, initialWaiting = fals
   const [onlinePlayers, setOnlinePlayers] = useState<{ name: string; avatar: string; id: string }[]>([]);
   const [joinTimeout, setJoinTimeout] = useState<NodeJS.Timeout | null>(null);
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const roomParam = params.get('room');
-
-    if (initialMode && !isWaiting) {
-      window.history.replaceState({}, '', window.location.pathname);
-      createRoom();
-      return;
-    }
-
-    if (roomParam && roomParam.length === 4 && !isWaiting && !loading) {
-      setRoomCode(roomParam.toUpperCase());
-      window.history.replaceState({}, '', window.location.pathname);
-
-      if (!currentPlayer) {
-        onJoin(roomParam.toUpperCase(), false);
-      } else {
-        handleJoinSubmit(roomParam.toUpperCase());
-      }
-    }
-  }, [initialMode, currentPlayer, isWaiting, loading]);
+  // useEffect for initial mode and room params moved below handleJoinSubmit (Bug 31)
 
   useEffect(() => {
     if (!isWaiting || !roomCode) return;
@@ -114,7 +94,7 @@ export function LobbyScreen({ onJoin, onBack, initialMode, initialWaiting = fals
       supabase.removeChannel(channel);
       if (joinTimeout) clearTimeout(joinTimeout);
     };
-  }, [isWaiting, roomCode, currentPlayer]);
+  }, [isWaiting, roomCode, currentPlayer, joinTimeout]);
 
   const createRoom = async () => {
     setLoading(true);
@@ -122,13 +102,7 @@ export function LobbyScreen({ onJoin, onBack, initialMode, initialWaiting = fals
     const code = Math.random().toString(36).substring(2, 6).toUpperCase();
     onJoin(code, true, initialMode);
   };
-
-  const copyInviteLink = () => {
-    const url = `${window.location.origin}?room=${roomCode}`;
-    navigator.clipboard.writeText(url);
-    toast.success('Enlace copiado al portapapeles');
-  };
-
+  // Moved handleJoinSubmit above useEffect to avoid hoisting issues (Bug 31)
   const handleJoinSubmit = async (codeOverride?: string) => {
     const codeToJoin = codeOverride || roomCode;
     if (codeToJoin.length < 4) {
@@ -151,7 +125,35 @@ export function LobbyScreen({ onJoin, onBack, initialMode, initialWaiting = fals
     setIsWaiting(true);
   };
 
+  const copyInviteLink = () => {
+    const url = `${window.location.origin}?room=${roomCode}`;
+    navigator.clipboard.writeText(url);
+    toast.success('Enlace copiado al portapapeles');
+  };
+
   const connectedCount = Math.max(onlinePlayers.length, currentPlayer ? 1 : 0);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const roomParam = params.get('room');
+
+    if (initialMode && !isWaiting) {
+      window.history.replaceState({}, '', window.location.pathname);
+      createRoom();
+      return;
+    }
+
+    if (roomParam && roomParam.length === 4 && !isWaiting && !loading) {
+      setRoomCode(roomParam.toUpperCase());
+      window.history.replaceState({}, '', window.location.pathname);
+
+      if (!currentPlayer) {
+        onJoin(roomParam.toUpperCase(), false);
+      } else {
+        handleJoinSubmit(roomParam.toUpperCase());
+      }
+    }
+  }, [initialMode, currentPlayer, isWaiting, loading, handleJoinSubmit, onJoin]);
 
   return (
     <div className="premium-screen min-h-screen px-4 py-5 md:px-6 md:py-8">

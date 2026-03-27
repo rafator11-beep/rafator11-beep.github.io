@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LogOut, Trophy, Dice1, Dice2, Dice3, Dice4, Dice5, Dice6, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -378,14 +378,14 @@ export function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }: Me
       case 'carcel': {
         setEventEmoji('⛓️');
         setEventText('¡Vas directo a la Cárcel!\nPierdes 1 turno y bebes 3 tragos.');
-        applyTrap('próximo turno');
+        applyTrap({ type: 'skip' });
         setGamePhase('event');
         break;
       }
       case 'calavera': {
         setEventEmoji('☠️');
         setEventText('¡LA CALAVERA!\nHas muerto. Vuelves a la casilla 1.');
-        applyTrap('Vuelves a la casilla 1');
+        applyTrap({ type: 'reset' });
         setGamePhase('event');
         break;
       }
@@ -394,37 +394,53 @@ export function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }: Me
     }
   };
 
-  const applyBonus = (text: string) => {
-    if (text.includes('Avanza 3')) {
-      const newPos = Math.min(currentPlayer.position + 3, 99);
-      setPlayers(prev => prev.map((p, i) => i === currentPlayerIdx ? { ...p, position: newPos } : p));
-    } else if (text.includes('Doble XP') || text.includes('+20')) {
-      setPlayers(prev => prev.map((p, i) => i === currentPlayerIdx ? { ...p, score: p.score + 20 } : p));
-    } else if (text.includes('Escudo')) {
-      setPlayers(prev => prev.map((p, i) => i === currentPlayerIdx ? { ...p, shielded: true } : p));
-    } else if (text.includes('Roba 5')) {
-      // Steal 5 XP from a random other player
-      const others = players.filter((_, i) => i !== currentPlayerIdx);
-      if (others.length > 0) {
-        const victim = others[Math.floor(Math.random() * others.length)];
-        setPlayers(prev => prev.map(p => {
-          if (p.id === victim.id) return { ...p, score: Math.max(0, p.score - 5) };
-          if (p.id === currentPlayer.id) return { ...p, score: p.score + 5 };
-          return p;
-        }));
+  const applyBonus = (event: any) => {
+    switch (event.type) {
+      case 'move': {
+        const newPos = Math.min(currentPlayer.position + event.value, 99);
+        setPlayers(prev => prev.map((p, i) => i === currentPlayerIdx ? { ...p, position: newPos } : p));
+        break;
+      }
+      case 'xp': {
+        setPlayers(prev => prev.map((p, i) => i === currentPlayerIdx ? { ...p, score: p.score + event.value } : p));
+        break;
+      }
+      case 'shield': {
+        setPlayers(prev => prev.map((p, i) => i === currentPlayerIdx ? { ...p, shielded: true } : p));
+        break;
+      }
+      case 'steal': {
+        const others = players.filter((_, i) => i !== currentPlayerIdx);
+        if (others.length > 0) {
+          const victim = others[Math.floor(Math.random() * others.length)];
+          setPlayers(prev => prev.map(p => {
+            if (p.id === victim.id) return { ...p, score: Math.max(0, p.score - event.value) };
+            if (p.id === currentPlayer.id) return { ...p, score: p.score + event.value };
+            return p;
+          }));
+        }
+        break;
       }
     }
   };
 
-  const applyTrap = (text: string) => {
-    if (text.includes('Retrocede 3')) {
-      setPlayers(prev => prev.map((p, i) => i === currentPlayerIdx ? { ...p, position: Math.max(0, p.position - 3) } : p));
-    } else if (text.includes('próximo turno')) {
-      setPlayers(prev => prev.map((p, i) => i === currentPlayerIdx ? { ...p, skipNextTurn: true } : p));
-    } else if (text.includes('Vuelves a la casilla 1')) {
-      setPlayers(prev => prev.map((p, i) => i === currentPlayerIdx ? { ...p, position: p.position < 20 ? Math.max(0, p.position - 5) : 0 } : p));
-    } else if (text.includes('retrocede 1')) {
-      setPlayers(prev => prev.map((p, i) => i === currentPlayerIdx ? { ...p, position: Math.max(0, p.position - 1) } : p));
+  const applyTrap = (event: any) => {
+    // Bug 30: Consistent reset logic
+    switch (event.type) {
+      case 'move': {
+        const newPos = Math.max(0, currentPlayer.position + event.value);
+        setPlayers(prev => prev.map((p, i) => i === currentPlayerIdx ? { ...p, position: newPos } : p));
+        break;
+      }
+      case 'skip': {
+        setPlayers(prev => prev.map((p, i) => i === currentPlayerIdx ? { ...p, skipNextTurn: true } : p));
+        break;
+      }
+      case 'reset': {
+        // Bug 30: "volver al inicio" is always position 0
+        setPlayers(prev => prev.map((p, i) => i === currentPlayerIdx ? { ...p, position: 0 } : p));
+        break;
+      }
     }
   };
 
@@ -696,24 +712,46 @@ export function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }: Me
             <h3 className="text-xs font-black uppercase tracking-widest text-white/50 mb-2 flex items-center gap-1">
               <Trophy className="w-3 h-3" /> Clasificación
             </h3>
-            <div className="space-y-2 max-h-[46vh] overflow-y-auto pr-1">
+            <div className="space-y-2 max-h-[46vh] overflow-y-auto pr-1 custom-scrollbar">
               {sortedPlayers.map((p, i) => (
-                <div key={p.id} className={`flex items-center gap-2 p-2 rounded-xl transition-colors ${p.id === currentPlayer?.id ? 'bg-amber-500/20 border border-amber-500/30' : 'bg-white/5'}`}>
-                  <span className="text-sm font-black w-5 text-center">{i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}`}</span>
-                  <div className="w-7 h-7 rounded-full overflow-hidden border border-white/20 shrink-0">
-                    {p.avatarUrl ? (
-                      <img src={p.avatarUrl} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full bg-slate-700 flex items-center justify-center text-[10px] font-bold">{p.name[0]}</div>
+                <motion.div 
+                  key={p.id} 
+                  layout
+                  className={`flex items-center gap-2 p-2.5 rounded-2xl transition-all duration-300 ${
+                    p.id === currentPlayer?.id 
+                      ? 'bg-amber-500/15 border border-amber-500/40 shadow-[0_0_15px_rgba(245,158,11,0.1)]' 
+                      : 'bg-white/5 border border-white/5 hover:bg-white/10'
+                  }`}
+                >
+                  <span className={`text-[10px] font-black w-5 text-center ${i < 3 ? 'text-amber-400' : 'text-white/40'}`}>
+                    {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}`}
+                  </span>
+                  <div className="relative">
+                    <div className="w-8 h-8 rounded-full overflow-hidden border border-white/20 shrink-0 bg-slate-800">
+                      {p.avatarUrl ? (
+                        <img src={p.avatarUrl} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-[10px] font-bold">{p.name[0]}</div>
+                      )}
+                    </div>
+                    {p.id === currentPlayer?.id && (
+                      <motion.div 
+                        layoutId="active-indicator"
+                        className="absolute -inset-1 rounded-full border border-amber-500/50 animate-pulse"
+                      />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-xs font-bold truncate">{p.name}</div>
-                    <div className="text-[10px] text-white/40">Casilla {p.position} · {p.score} XP</div>
+                    <div className="text-[11px] font-black tracking-tight truncate">{p.name}</div>
+                    <div className="text-[9px] font-bold text-white/30 truncate">
+                      CASILLA {p.position} <span className="mx-1">·</span> {p.score} XP
+                    </div>
                   </div>
-                  {p.shielded && <span className="text-xs">🛡️</span>}
-                  {p.skipNextTurn && <span className="text-xs">⏭️</span>}
-                </div>
+                  <div className="flex gap-1">
+                    {p.shielded && <span className="text-[10px] filter drop-shadow-[0_0_2px_rgba(59,130,246,0.5)]">🛡️</span>}
+                    {p.skipNextTurn && <span className="text-[10px] filter drop-shadow-[0_0_2px_rgba(239,68,68,0.5)]">⏭️</span>}
+                  </div>
+                </motion.div>
               ))}
             </div>
           </div>
@@ -724,13 +762,33 @@ export function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }: Me
             <p className="text-lg font-black text-amber-400 mb-3">{currentPlayer?.name || '...'}</p>
 
             {/* Dice Display */}
-            <div className="flex justify-center mb-3">
+            <div className="flex justify-center mb-4">
               <motion.div
-                animate={rolling ? { rotateX: [0, 360, 720], rotateY: [0, 180, 360] } : {}}
-                transition={{ duration: 0.8 }}
-                className="w-20 h-20 rounded-[24px] bg-white text-slate-900 flex items-center justify-center text-4xl font-black shadow-lg border-2 border-white/50 mx-auto"
+                animate={rolling ? { 
+                  rotateX: [0, 360, 720, 1080], 
+                  rotateY: [0, 180, 540, 900],
+                  scale: [1, 1.2, 0.9, 1.1, 1],
+                  y: [0, -20, 10, -5, 0]
+                } : { 
+                  scale: [1, 1.05, 1],
+                  transition: { repeat: Infinity, duration: 2 }
+                }}
+                transition={{ duration: 0.8, ease: "easeInOut" }}
+                className="w-24 h-24 rounded-[28px] bg-white text-slate-900 flex flex-col items-center justify-center shadow-[0_10px_30px_rgba(255,255,255,0.2)] border-4 border-white/50 relative overflow-hidden group"
               >
-                {rolling ? '🎲' : diceValue || '?'}
+                <div className="absolute inset-0 bg-gradient-to-br from-white via-transparent to-black/5 pointer-events-none" />
+                <span className="text-5xl font-black relative z-10">
+                  {rolling ? '🎲' : diceValue || '?'}
+                </span>
+                {!rolling && diceValue && (
+                  <motion.span 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-[10px] font-black uppercase tracking-tighter text-slate-400 mt-1"
+                  >
+                    Pasos
+                  </motion.span>
+                )}
               </motion.div>
             </div>
 

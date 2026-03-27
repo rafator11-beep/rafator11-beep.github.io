@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserX, Vote, Clock, ThumbsUp, ThumbsDown, ArrowLeft, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -28,9 +28,12 @@ export function ImpostorRound({
   const [mostVotedId, setMostVotedId] = useState<string>('');
   const [isRevealing, setIsRevealing] = useState<string | null>(null);
 
+  const discussionTimeRef = useRef(discussionTime);
+  discussionTimeRef.current = discussionTime;
+
   // Discussion timer
   useEffect(() => {
-    if (phase !== 'discussion' || discussionTime <= 0) return;
+    if (phase !== 'discussion') return;
     
     const timer = setInterval(() => {
       setDiscussionTime(prev => {
@@ -44,7 +47,7 @@ export function ImpostorRound({
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [phase, discussionTime]);
+  }, [phase]);
 
   const handleReveal = (playerId: string) => {
     setRevealedPlayers(prev => new Set([...prev, playerId]));
@@ -68,16 +71,21 @@ export function ImpostorRound({
       voteCounts[suspectId] = (voteCounts[suspectId] || 0) + 1;
     });
     
-    // Find most voted
+    // Find most voted (Bug 11: Handle ties)
     let maxVotes = 0;
-    let voted = '';
+    let candidates: string[] = [];
+    
     Object.entries(voteCounts).forEach(([id, count]) => {
       if (count > maxVotes) {
         maxVotes = count;
-        voted = id;
+        candidates = [id];
+      } else if (count === maxVotes) {
+        candidates.push(id);
       }
     });
     
+    // If there's a tie or no votes, no one is the "most voted" result
+    const voted = candidates.length === 1 ? candidates[0] : '';
     setMostVotedId(voted);
     setPhase('result');
     

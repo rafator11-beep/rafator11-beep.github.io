@@ -1,5 +1,5 @@
-﻿
-import { useState, useEffect, useCallback } from 'react';
+
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Timer, Phone, Users2, Percent, CheckCircle2, XCircle, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -45,8 +45,10 @@ export function TriviaQuestionCard({
   const [famousHint, setFamousHint] = useState<{ name: string; avatar: string; hint: string } | null>(null);
   const [isPaused, setIsPaused] = useState(false);
 
-  const correctIndex = question?.correctIndex;
-  const options = question?.options;
+  const options = question?.options || [];
+  const correctIndex = typeof question?.correctIndex === 'number' 
+    ? Math.max(0, Math.min(question.correctIndex, options.length - 1)) 
+    : 0;
 
   // CRITICAL GUARD: Prevent .map of undefined crashes
   // Auto-skip after 3 seconds to avoid permanent loading screen
@@ -92,8 +94,10 @@ export function TriviaQuestionCard({
     setFamousHint(null);
     setIsPaused(false);
 
-    // TTS Removed
-    window.speechSynthesis.cancel();
+    // Bug 15: TTS Safely check existence of window.speechSynthesis
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
   }, [question?.question, timeLimit]);
 
   // Timer countdown
@@ -114,20 +118,28 @@ export function TriviaQuestionCard({
     return () => clearInterval(timer);
   }, [showResult, isPaused, timeLeft]);
 
+  const hasHandledResult = useRef(false);
+
+  useEffect(() => {
+    hasHandledResult.current = false;
+  }, [question?.question]);
+
   const handleTimeUp = () => {
-    if (!showResult) {
+    if (!showResult && !hasHandledResult.current) {
+      hasHandledResult.current = true;
       setShowResult(true);
       setTimeout(() => onAnswer(false, 0), 2000);
     }
   };
 
   const handleSelectAnswer = (index: number) => {
-    if (showResult || eliminatedOptions.includes(index)) return;
+    if (showResult || eliminatedOptions.includes(index) || hasHandledResult.current) return;
     setSelectedAnswer(index);
   };
 
   const handleSubmit = () => {
-    if (selectedAnswer === null) return;
+    if (selectedAnswer === null || hasHandledResult.current) return;
+    hasHandledResult.current = true;
 
     const isCorrect = selectedAnswer === correctIndex;
     const points = isCorrect ? getDifficultyPoints() : 0;

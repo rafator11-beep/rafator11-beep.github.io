@@ -1,4 +1,4 @@
-﻿import { useState, useRef, MutableRefObject } from 'react';
+import { useState, useRef, MutableRefObject, useCallback } from 'react';
 import { GameMode, PlayerVirus, Player } from '@/types/game';
 import { virusEffects, normasRonda } from '@/data/gameContent';
 import { impostorRounds } from '@/data/impostorContent';
@@ -22,7 +22,7 @@ export const useGameEffects = (mode: GameMode, players: Player[]) => {
     const lastVirusRoundRef = useRef<number>(-1);
     const lastNormaRoundRef = useRef<number>(-1);
 
-    const applyRandomVirus = (force: boolean = false, specificPlayerId?: string) => {
+    const applyRandomVirus = useCallback((force: boolean = false, specificPlayerId?: string) => {
         // If not forced, apply random chance
         if (!force && ((mode !== 'megamix' && mode !== 'clasico') || Math.random() > 0.20)) return null;
 
@@ -60,13 +60,18 @@ export const useGameEffects = (mode: GameMode, players: Player[]) => {
                     playerId: targetPlayer.id,
                     virusName: randomVirus.name,
                     virusDescription: randomVirus.description,
-                    turnsRemaining: Math.max(players.length * 2, 4), // Lasts 2 rounds roughly
+                    turnsRemaining: randomVirus.duration
                 },
             ];
         });
-
-        return { player: targetPlayer, virus: randomVirus };
-    };
+        const fullVirus = {
+            playerId: targetPlayer.id,
+            virusName: randomVirus.name,
+            virusDescription: randomVirus.description,
+            turnsRemaining: randomVirus.duration
+        };
+        return { player: targetPlayer, virus: fullVirus };
+    }, [mode, players]);
 
     const updateViruses = () => {
         setPlayerViruses(prev =>
@@ -193,17 +198,20 @@ export const useGameEffects = (mode: GameMode, players: Player[]) => {
                 // Mimica
                 const randomMimica = getRandomMimica();
                 const targetPlayer = players[Math.floor(Math.random() * players.length)];
-                setGameState((prev: any) => ({
+                // Bug 9 & 10: Fix activation flags - showMimica/showBocaCerrada instead of Reveal
+                setGameState(prev => ({
                     ...prev,
-                    showMimicaReveal: true,
+                    showMimica: true,
+                    showMimicaReveal: true, // Also show skip button first
                     currentMimicaText: randomMimica.text
                 }));
             } else {
                 // Boca Cerrada
                 const randomBoca = getRandomBocaCerrada();
                 const targetPlayer = players[Math.floor(Math.random() * players.length)];
-                setGameState((prev: any) => ({
+                setGameState(prev => ({
                     ...prev,
+                    showBocaCerrada: true,
                     showBocaCerradaReveal: true,
                     currentBocaCerradaText: randomBoca.text,
                     bocaCerradaData: { playerId: targetPlayer.id, playerName: targetPlayer.name }

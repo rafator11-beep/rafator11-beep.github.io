@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Video, VideoOff, Mic, MicOff, Eye, EyeOff } from 'lucide-react';
@@ -30,9 +30,18 @@ const ICE_SERVERS = {
 function useWindowSize() {
     const [size, setSize] = useState([window.innerWidth, window.innerHeight]);
     useEffect(() => {
-        const handleResize = () => setSize([window.innerWidth, window.innerHeight]);
+        let timeoutId: NodeJS.Timeout;
+        const handleResize = () => {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                setSize([window.innerWidth, window.innerHeight]);
+            }, 150);
+        };
         window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            clearTimeout(timeoutId);
+        };
     }, []);
     return size;
 }
@@ -339,6 +348,8 @@ export function PeerBubbles({ roomId, playerId, onClose, onStreamsChange, onLoca
         channelRef.current = channel;
 
         return () => {
+            // Mejora 13: Cleanup signals to avoid "trash" in next session
+            supabase.from('webrtc_signals').delete().eq('room_id', roomId).eq('sender_id', playerId).then();
             sendSignal('*', 'leave', {});
             supabase.removeChannel(channel);
             Object.values(peersRef.current).forEach(peer => {

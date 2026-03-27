@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -137,6 +137,13 @@ export function CardDisplay({ content, type = 'common', onClick, gameMode, playe
                     textColor: 'text-blue-700',
                     icon: intelligentEmoji
                 };
+            case 'megamix':
+                return {
+                    title: 'FIESTA MEGAMIX',
+                    bgClass: 'bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 animate-gradient-x',
+                    textColor: 'text-indigo-900',
+                    icon: '🌀'
+                };
             case 'yo_nunca':
             case 'yo_nunca_equipos':
                 return {
@@ -262,10 +269,12 @@ export function CardDisplay({ content, type = 'common', onClick, gameMode, playe
                     animate={{ rotateY: 0, opacity: 1, scale: 1 }}
                     exit={{ rotateY: -90, opacity: 0, scale: 0.8 }}
                     transition={{ type: "spring", stiffness: 100, damping: 20 }}
-                    className={`w-full h-full relative rounded-[2.5rem] overflow-hidden shadow-2xl ${styles.bgClass}`}
+                    className={`w-full h-full relative rounded-[3.5rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/20 ${styles.bgClass}`}
                 >
-                    {/* Dark Texture Overlay (replaces the pure dark background to keep vibrant color but add texture) */}
-                    <div className="absolute inset-0 bg-[url('/modern_bg.png')] bg-cover bg-center opacity-30 mix-blend-overlay" />
+                    {/* Animated Grain/Noise Texture for Premium feel */}
+                    <div className="absolute inset-0 bg-black/10 mix-blend-overlay pointer-events-none opacity-20" />
+                    <div className="absolute -inset-[100%] animate-[spin_20s_linear_infinite] opacity-30 pointer-events-none" 
+                         style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)' }} />
 
                     <div className="relative z-10 flex flex-col items-center justify-between h-full px-6 pt-10 pb-6">
                         
@@ -282,19 +291,24 @@ export function CardDisplay({ content, type = 'common', onClick, gameMode, playe
                             {...fx} // Dynamic text-based animation applied here
                         >
                             {targetPlayer && !isNormaCard && (
-                                <div className="absolute -top-4 z-20 bg-amber-400 text-amber-900 font-black px-6 py-1.5 rounded-full uppercase tracking-widest text-sm shadow-[0_4px_15px_rgba(0,0,0,0.5)]">
+                                <motion.div 
+                                    initial={{ y: 20, opacity: 0 }}
+                                    animate={{ y: 0, opacity: 1 }}
+                                    className="absolute -top-6 z-20 bg-amber-400 text-amber-950 font-black px-8 py-2 rounded-2xl uppercase tracking-[0.25em] text-[10px] shadow-[0_8px_20px_rgba(245,158,11,0.4)] border border-white/40"
+                                >
                                     {targetPlayer.name}
-                                </div>
+                                </motion.div>
                             )}
 
-                            <div className="w-full p-8 rounded-[2rem] flex flex-col items-center text-center shadow-2xl relative bg-black/40 backdrop-blur-md overflow-hidden">
+                            <div className="w-full p-10 rounded-[3rem] flex flex-col items-center text-center shadow-3xl relative bg-black/40 backdrop-blur-2xl border border-white/10 overflow-hidden group-hover:border-white/30 transition-all duration-500">
+                                <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none" />
                                 {type !== 'common' && (
-                                    <div className="absolute top-2 left-0 w-full flex justify-center opacity-50">
+                                    <div className="absolute top-4 left-0 w-full flex justify-center opacity-70">
                                         <RarityBadge rarity={type} />
                                     </div>
                                 )}
                                 
-                                <div className="mt-2 text-lg md:text-xl font-semibold tracking-tight text-white w-full drop-shadow-sm leading-[1.3] overflow-y-auto no-scrollbar max-h-full">
+                                <div className="mt-4 text-xl md:text-2xl font-black tracking-tight text-white w-full drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] leading-[1.2] overflow-y-auto no-scrollbar max-h-full">
                                     {isNormaCard ? (
                                         <div className="flex flex-col items-center gap-2">
                                             <span className="text-yellow-400 text-lg md:text-xl font-black tracking-widest uppercase">¡Novedad!</span>
@@ -309,12 +323,14 @@ export function CardDisplay({ content, type = 'common', onClick, gameMode, playe
 
                         {/* BOTTOM PILL BUTTON */}
                         <div className="mt-auto w-full flex flex-col items-center shrink-0">
-                            <button 
-                                className={`w-full max-w-[280px] bg-white ${styles.textColor} font-bold text-2xl py-4 rounded-full shadow-[0_10px_20px_rgba(0,0,0,0.3)] active:scale-95 transition-all text-center tracking-wide`}
+                            <motion.button 
+                                whileHover={{ scale: 1.02, boxShadow: "0 20px 40px rgba(0,0,0,0.4)" }}
+                                whileTap={{ scale: 0.95 }}
+                                className={`w-full max-w-[300px] bg-white ${styles.textColor} font-black text-2xl py-5 rounded-3xl shadow-[0_15px_30px_rgba(0,0,0,0.4)] transition-all text-center tracking-tighter uppercase border-b-4 border-black/10`}
                                 onClick={onClick}
                             >
                                 Siguiente
-                            </button>
+                            </motion.button>
                             
                             {/* App-like user icon placeholder styling */}
                             <div className="mt-4 opacity-50 flex items-center justify-center w-10 h-10 rounded-full bg-black/20 text-white shadow-inner">

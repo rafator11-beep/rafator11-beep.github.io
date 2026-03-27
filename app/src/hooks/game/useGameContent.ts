@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { GameMode } from '@/types/game';
 import {
     normasRonda,
@@ -44,19 +44,16 @@ import { footballQuestions } from '@/data/footballQuestionsNew';
 import { cultureQuestions } from '@/data/cultureQuestions';
 import { cultureQuestionsNew2025 } from '@/data/cultureQuestionsNew2025';
 import { buildGodDeck } from '@/lib/godDeck';
+import { sanitizeCardText } from '../../components/game/CardDisplay';
 
-// Deep Shuffle: Multi-pass Fisher-Yates with random sort final pass
+// Clean Fisher-Yates shuffle
 function shuffleArray<T>(array: T[]): T[] {
-    let shuffled = [...array];
-    // Three passes of Fisher-Yates for maximum entropy
-    for (let pass = 0; pass < 3; pass++) {
-        for (let i = shuffled.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-        }
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
-    // Final random sort to break any remaining patterns
-    return shuffled.sort(() => Math.random() - 0.5);
+    return shuffled;
 }
 
 function normalizeDeckEntries(items: any[]): string[] {
@@ -237,32 +234,36 @@ export const useGameContent = (mode: GameMode, currentIndex: number, currentPlay
         }
     }, [usedQuestionIds]);
 
-    const getCurrentContent = () => {
-        if (mode === 'trivia_futbol' || mode === 'cultura') {
-            return currentQuestion?.question || 'Cargando pregunta...';
-        }
-        const validContent = content.length > 0
-            ? content.find((item, idx) => idx >= (currentIndex % content.length) && typeof item === 'string' && item.trim().length > 0)
-              || content.find((item) => typeof item === 'string' && item.trim().length > 0)
-            : undefined;
-        return validContent?.replace(/{player}/g, currentPlayerName) || 'Siguiente carta';
-    };
+    const getCurrentContent = useMemo(() => {
+        return () => {
+            if (mode === 'trivia_futbol' || mode === 'cultura') {
+                return currentQuestion?.question || 'Cargando pregunta...';
+            }
+            const validContent = content.length > 0
+                ? content.find((item, idx) => 
+                    idx >= (currentIndex % content.length) && 
+                    typeof item === 'string' && 
+                    item.trim().length > 0)
+                  || content.find(item => typeof item === 'string' && item.trim().length > 0)
+                : undefined;
+            return validContent?.replace(/{player}/g, currentPlayerName) || 'Siguiente carta';
+        };
+    }, [content, currentIndex, currentPlayerName, mode, currentQuestion]);
 
-    const getNextPreview = (showTrivia: boolean) => {
-        if (mode !== 'megamix' || showTrivia) return null;
-        const nextBase = content[(currentIndex + 1) % Math.max(content.length, 1)];
-        if (!nextBase) return null;
-        return nextBase.replace(/{player}/g, currentPlayerName);
+    const getNextPreview = () => {
+        if (!content || content.length === 0) return "Cargando...";
+        const nextBase = content[(currentIndex + 1) % content.length];
+        return sanitizeCardText(nextBase).replace(/\{.*?\}/g, '___');
     };
 
     return {
         content,
         currentQuestion,
-        setCurrentQuestion, // Expose setter for useGameEffects
+        setCurrentQuestion,
         usedQuestionIds,
         setUsedQuestionIds,
         loadNextQuestion,
-        loadSpecificQuestion,
+        loadSpecificQuestion: loadSpecificQuestion as (category: 'futbol' | 'cultura') => void,
         getCurrentContent,
         getNextPreview,
         questionNumber

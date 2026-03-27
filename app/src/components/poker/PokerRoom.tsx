@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useGameContext } from '@/contexts/GameContext';
 import { PokerTable } from './PokerTable';
 import { PokerControls } from './PokerControls';
@@ -10,6 +10,7 @@ import { motion } from 'framer-motion';
 
 import { loadLocalRankings } from '@/utils/localRanking';
 import { Player } from '@/types/game';
+import { getHandResult, HandRank } from '@/utils/pokerUtils';
 
 // --- MVP Authoritative Poker Engine Utilities ---
 const SUITS = ['H', 'D', 'C', 'S'];
@@ -32,35 +33,12 @@ const createDeck = () => {
 
 const getHandRank = (cards: string[]) => {
     if (!cards || cards.length < 2) return "Repartiendo...";
-
-    const values = cards.map(c => c.slice(0, -1));
-    const suits = cards.map(c => c.slice(-1));
-
-    const valueCounts: Record<string, number> = {};
-    values.forEach(v => valueCounts[v] = (valueCounts[v] || 0) + 1);
-    const counts = Object.values(valueCounts).sort((a, b) => b - a);
-
-    const suitCounts: Record<string, number> = {};
-    suits.forEach(s => suitCounts[s] = (suitCounts[s] || 0) + 1);
-    const maxSuitCount = Math.max(...Object.values(suitCounts));
-
-    // Simple ranking for UI display
-    if (counts[0] === 4) return "Póker";
-    if (counts[0] === 3 && counts[1] === 2) return "Full House";
-    if (maxSuitCount >= 5) return "Color";
-    // Straight detection simplified:
-    const uniqueValues = Array.from(new Set(values.map(v => VALUES.indexOf(v)))).sort((a, b) => a - b);
-    let isStraight = false;
-    for (let i = 0; i <= uniqueValues.length - 5; i++) {
-        if (uniqueValues[i + 4] - uniqueValues[i] === 4) isStraight = true;
+    try {
+        const result = getHandResult(cards);
+        return result.description;
+    } catch (e) {
+        return "Calculando...";
     }
-    if (isStraight) return "Escalera";
-
-    if (counts[0] === 3) return "Trío";
-    if (counts[0] === 2 && counts[1] === 2) return "Doble Pareja";
-    if (counts[0] === 2) return "Pareja";
-
-    return "Carta Alta";
 };
 
 interface PokerRoomProps {
@@ -405,51 +383,58 @@ export function PokerRoom({ onExit, roomId, isHost: isHostParam }: PokerRoomProp
     const resolveShowdown = (state: any, forcedWinnerId?: string) => {
         if (!isHost) return;
 
-        // MVP: Random winner logic if complex evaluation is too long, 
-        // or just the first player who didn't fold for now.
-        // In a real app, we'd use getHandRank compare.
         const activePlayers = players.filter(p => !state.folded_players?.includes(p.id));
-        const winner = forcedWinnerId
-            ? players.find(p => p.id === forcedWinnerId)
-            : (activePlayers.length > 0 ? activePlayers[Math.floor(Math.random() * activePlayers.length)] : players[0]);
+        if (activePlayers.length === 0) return;
 
-        const winAmount = state.pot;
+        let winner: any = null;
+        let bestResult: any = null;
+
+        if (forcedWinnerId) {
+            winner = players.find(p => p.id === forcedWinnerId);
+        } else {
+            // Real evaluation (Bug 18, 19)
+            const playerHands = activePlayers.map(p => {
+                const holeCards = state.all_hands?.[p.id] || [];
+                const fullHand = [...holeCards, ...state.community_cards];
+                return { player: p, result: getHandResult(fullHand) };
+            });
+
+            playerHands.sort((a, b) => b.result.value - a.result.value);
+            winner = playerHands[0].player;
+            bestResult = playerHands[0].result;
+        }
 
         if (!winner) return;
+        const winAmount = state.pot;
 
-        // Update local state scores first for immediate feedback
-        setPokerState(prev => ({
-            ...prev,
-            status: 'finished',
-            winner: winner.id,
-            community_cards: prev.deck.length >= 5 ? prev.deck.slice(-5) : prev.community_cards // Show all cards
-        }));
-
-        // Give pot to the winner
-        let finalScoresObj = { ...localScores };
+        // Update persistence and local scores (Bug 22 fix: use latest prev)
         setLocalScores(prev => {
-            const currentScore = prev[winner.id] !== undefined ? prev[winner.id] : (winner.score || 1000);
+            const nextScores = { ...prev };
+            const currentScore = nextScores[winner.id] !== undefined ? nextScores[winner.id] : (winner.score || 1000);
             const newScore = currentScore + winAmount;
-            if (roomId) supabase.from('players').update({ score: newScore }).eq('id', winner.id).then();
-            finalScoresObj = { ...prev, [winner.id]: newScore };
-            return finalScoresObj;
-        });
+            nextScores[winner.id] = newScore;
 
-        // Broadcast the final scores immediately so clients see winner chips
-        if (roomId) {
-            broadcastState({
+            if (roomId) {
+                supabase.from('players').update({ score: newScore }).eq('id', winner.id).then();
+            }
+
+            // Sync immediately to prevent stale states
+            const finalState = {
                 ...state,
                 status: 'finished',
                 winner: winner.id,
-                community_cards: state.deck.length >= 5 ? state.deck.slice(-5) : state.community_cards,
-                player_chips: finalScoresObj
-            });
-        }
+                winnerDescription: bestResult?.description || "Ganador",
+                community_cards: state.community_cards,
+                player_chips: nextScores
+            };
+            
+            setPokerState(finalState);
+            if (roomId) broadcastState(finalState);
 
-        // Auto-restart next hand directly (Sped up from 6s to 3.5s)
-        setTimeout(() => {
-            startGame();
-        }, 3500);
+            return nextScores;
+        });
+
+        setTimeout(() => startGame(), 4000);
     };
 
     const startGame = async () => {
@@ -484,7 +469,8 @@ export function PokerRoom({ onExit, roomId, isHost: isHostParam }: PokerRoomProp
             player_bets: {},
             last_aggressive_player: null,
             winner: null,
-            folded_players: []
+            folded_players: [],
+            all_hands: hands
         };
 
         setPokerState(newState);

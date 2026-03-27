@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Swords, Trophy, ArrowLeft, SkipForward } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -39,7 +39,7 @@ export function DueloComponent({ dueloText, player1, player2, onWinner, onSkip }
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
-      className="w-full max-w-sm mx-auto h-[75vh] min-h-[500px] flex flex-col relative rounded-[2.5rem] overflow-hidden shadow-2xl bg-gradient-to-b from-orange-600 to-red-900"
+      className="w-full max-w-sm mx-auto h-auto max-h-[85vh] min-h-[400px] flex flex-col relative rounded-[2.5rem] overflow-hidden shadow-2xl bg-gradient-to-b from-orange-600 to-red-900"
     >
       <div className="absolute inset-0 bg-[url('/modern_bg.png')] bg-cover bg-center opacity-30 mix-blend-overlay" />
       <div className="absolute inset-0 bg-black/20 z-0" />
@@ -47,9 +47,9 @@ export function DueloComponent({ dueloText, player1, player2, onWinner, onSkip }
       <div className="relative z-10 flex flex-col h-full p-4 md:p-6 pb-6 overflow-y-auto slim-scroll">
         
         {/* Header / Falso Logo */}
-        <div className="flex flex-col items-center transform transition-all duration-300 group-hover:scale-105 shrink-0 mb-2">
-            <span className="text-7xl mb-[-5px] drop-shadow-2xl z-10">⚔️</span>
-            <h1 className="text-5xl font-black italic tracking-tighter uppercase text-white drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] text-center leading-[0.85] w-full flex items-center justify-center">
+        <div className="flex flex-col items-center transform transition-all duration-300 group-hover:scale-105 shrink-0 mb-4 pt-2">
+            <span className="text-6xl mb-[-5px] drop-shadow-2xl z-10">⚔️</span>
+            <h1 className="text-4xl font-black italic tracking-tighter uppercase text-white drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] text-center leading-[0.85] w-full flex items-center justify-center">
                 ¡DUELO!
             </h1>
         </div>
@@ -129,11 +129,11 @@ export function DueloComponent({ dueloText, player1, player2, onWinner, onSkip }
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="flex-1 flex flex-col items-center justify-center text-center pb-12"
+            className="flex-1 flex flex-col items-center justify-center text-center py-10"
           >
-            <div className="text-9xl mb-6 drop-shadow-[0_0_30px_rgba(255,255,255,0.4)]">🏆</div>
-            <h3 className="text-4xl font-black italic mb-2 text-white drop-shadow-lg">¡{winner.name} gana!</h3>
-            <p className="text-2xl text-yellow-300 font-extrabold">+50 puntos</p>
+            <div className="text-7xl mb-4 drop-shadow-[0_0_30px_rgba(255,255,255,0.4)]">🏆</div>
+            <h3 className="text-3xl font-black italic mb-2 text-white drop-shadow-lg text-balance">¡{winner.name} gana!</h3>
+            <p className="text-xl text-yellow-300 font-extrabold">+50 puntos</p>
           </motion.div>
         )}
       </div>

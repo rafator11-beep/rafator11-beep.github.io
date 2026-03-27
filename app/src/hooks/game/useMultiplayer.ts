@@ -1,8 +1,15 @@
-﻿import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
-export function useMultiplayer(roomId: string | null, isHost: boolean, playerName: string, onGameStateUpdate: (state: any) => void, onGuestAction?: (action: any) => void) {
+export function useMultiplayer(
+    roomId: string | null, 
+    isHost: boolean, 
+    playerName: string, 
+    playerId: string, // Mejora 8: New parameter for unique presence
+    onGameStateUpdate: (state: any) => void, 
+    onGuestAction?: (action: any) => void
+) {
     const [players, setPlayers] = useState<any[]>([]);
     const channelRef = useRef<RealtimeChannel | null>(null);
 
@@ -12,7 +19,7 @@ export function useMultiplayer(roomId: string | null, isHost: boolean, playerNam
         const channel = supabase.channel(`room:${roomId}`, {
             config: {
                 presence: {
-                    key: playerName, // Use name as key for simplicity, ideally ID
+                    key: playerId || playerName, // Mejora 8: Use playerId
                 },
             },
         });
@@ -49,14 +56,20 @@ export function useMultiplayer(roomId: string | null, isHost: boolean, playerNam
         };
     }, [roomId, playerName, isHost]);
 
+    const lastBroadcastRef = useRef<number>(0);
     const broadcastState = (newState: any) => {
-        if (isHost && channelRef.current) {
-            channelRef.current.send({
-                type: 'broadcast',
-                event: 'game_state',
-                payload: newState,
-            });
-        }
+        if (!isHost || !channelRef.current) return;
+
+        const now = Date.now();
+        // Throttle to 200ms
+        if (now - lastBroadcastRef.current < 200) return;
+        
+        lastBroadcastRef.current = now;
+        channelRef.current.send({
+            type: 'broadcast',
+            event: 'game_state',
+            payload: newState,
+        });
     };
 
     const sendActionToHost = (action: any) => {

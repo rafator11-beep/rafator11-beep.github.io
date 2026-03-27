@@ -1,4 +1,4 @@
-﻿import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { safeLower, asString } from '@/utils/safeText';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -171,6 +171,12 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
   const [selectedColorIndex, setSelectedColorIndex] = useState(0);
 
   const handleStartGame = async () => {
+    // Mejora 9: Validación mínimo de jugadores antes de empezar
+    if (players.length < 2) {
+      toast.error('Necesitas al menos 2 jugadores para empezar');
+      return;
+    }
+
     setIsLoading(true);
     try {
       await startGame();

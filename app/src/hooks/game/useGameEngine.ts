@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Player, Team, GameMode } from '@/types/game';
 import { useGameContext } from '@/contexts/GameContext';
 
@@ -166,17 +166,25 @@ export const useGameEngine = (mode: GameMode) => {
     return (teamsWithScore?.length || 0) > 0 && playersWithScore.some(p => !!p.team_id);
   }, [teamsWithScore, playersWithScore]);
 
-  const advanceTurn = () => {
+  const advanceTurn = useCallback(() => {
     setCurrentIndex(prev => prev + 1);
 
-    // Check if we completed a full circle of players
-    if ((currentPlayerIndex + 1) % players.length === 0) {
-      setGameState(prev => {
+    setGameState(prev => {
+      // 1. Check if we completed a full circle of players
+      // We use current round to check for game over
+      const isEndOfRound = (currentPlayerIndex + 1) % players.length === 0;
+      let nextState = { ...prev };
+
+      if (isEndOfRound) {
         const nextRound = prev.round + 1;
+        
+        // Check Game Over Condition with fresh value
+        if (nextRound > 20) {
+          setGameOver(true);
+        }
         
         // Global Events: Change Norma Global every 5 rounds
         let showNormaGlobal = prev.showNormaGlobal;
-
         if (nextRound % 5 === 0) {
            showNormaGlobal = true;
         }
@@ -189,33 +197,29 @@ export const useGameEngine = (mode: GameMode) => {
           nextVirusId = players[nextIndex].id;
         }
 
-        return { 
-          ...prev, 
+        nextState = { 
+          ...nextState, 
           round: nextRound,
           showNormaGlobal,
           virusPlayerId: nextVirusId
         };
-      });
-
-      // Game Over Condition (Example: 20 Rounds)
-      if (gameState.round >= 20) {
-        setGameOver(true);
       }
-    }
 
-    setGameState(prev => {
-      if (prev.currentNorma && prev.currentNormaTurnsRemaining && prev.currentNormaTurnsRemaining > 0) {
-        const nextTurns = prev.currentNormaTurnsRemaining - 1;
+      // 2. Handle Norma Turn Expiration
+      if (nextState.currentNorma && nextState.currentNormaTurnsRemaining && nextState.currentNormaTurnsRemaining > 0) {
+        const nextTurns = nextState.currentNormaTurnsRemaining - 1;
         if (nextTurns === 0) {
-          return { ...prev, currentNorma: null, currentNormaTurnsRemaining: 0 };
+          nextState = { ...nextState, currentNorma: null, currentNormaTurnsRemaining: 0 };
+        } else {
+          nextState = { ...nextState, currentNormaTurnsRemaining: nextTurns };
         }
-        return { ...prev, currentNormaTurnsRemaining: nextTurns };
       }
-      return prev;
+
+      return nextState;
     });
 
     setCurrentPlayerIndex(prev => (prev + 1) % players.length);
-  };
+  }, [players.length, currentPlayerIndex]);
 
   const addScore = (playerId: string, points: number) => {
     setScores(prev => ({
