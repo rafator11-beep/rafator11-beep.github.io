@@ -266,7 +266,7 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
   }, [isTeamMode, lobbyPlayers]);
 
   return (
-    <div className="min-h-screen bg-background bg-grid-pattern p-4 md:p-8 relative overflow-hidden">
+    <div className="min-h-screen bg-background bg-grid-pattern p-3 md:p-8 relative overflow-hidden pb-32">
       {/* Neon background effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-[hsl(var(--neon-purple))] opacity-10 rounded-full blur-[100px] animate-pulse" />
@@ -279,16 +279,16 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
         className="max-w-4xl mx-auto relative z-10"
       >
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Button variant="ghost" size="icon" onClick={onBack} className="hover:neon-box">
+        <div className="flex items-center gap-3 mb-6 md:mb-8">
+          <Button variant="ghost" size="icon" onClick={onBack} className="hover:neon-box h-9 w-9">
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2 neon-text text-[hsl(var(--primary))]">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl md:text-3xl font-bold flex items-center gap-2 neon-text text-[hsl(var(--primary))] truncate">
               {modeInfo?.icon} {modeInfo?.name}
             </h1>
             <div className="flex flex-col items-start">
-              <p className="text-muted-foreground">Configura los jugadores</p>
+              <p className="text-xs md:text-sm text-muted-foreground truncate w-full text-left">Configura los jugadores</p>
               {isMultiplayer && roomId && (
                 <div
                   className="mt-1 flex items-center gap-2 bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20 cursor-pointer hover:bg-primary/20 transition-colors"
@@ -298,23 +298,23 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
                     toast.success('Enlace de invitación copiado');
                   }}
                 >
-                  <span className="text-xs font-mono font-bold text-primary">SALA: {roomId}</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-70"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>
+                  <span className="text-[10px] md:text-xs font-mono font-bold text-primary text-left">SALA: {roomId}</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-70"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>
                 </div>
               )}
             </div>
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           {/* Players Section */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="bg-card/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg neon-border"
+            className="bg-card/80 backdrop-blur-sm rounded-2xl p-4 md:p-6 shadow-lg neon-border"
           >
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold flex items-center gap-2">
+              <h2 className="text-lg md:text-xl font-semibold flex items-center gap-2">
                 <Users className="h-5 w-5 text-[hsl(var(--primary))]" />
                 Operadores ({players.length})
               </h2>
@@ -323,18 +323,18 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-[10px] font-black uppercase tracking-widest bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20"
+                    className="text-[10px] font-black uppercase tracking-widest bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 px-2 h-7"
                   >
-                    <Globe className="h-3 w-3 mr-1.5" />
+                    <Globe className="h-3 w-3 mr-1" />
                     Comunidad
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="bg-slate-900/95 backdrop-blur-2xl border-white/10 text-white max-w-md">
+                <DialogContent className="bg-slate-900/95 backdrop-blur-2xl border-white/10 text-white max-w-md w-[95vw] rounded-3xl p-4 md:p-6">
                   <DialogHeader>
-                    <DialogTitle className="text-xl font-black uppercase tracking-tighter">🌐 Red de Operadores</DialogTitle>
-                    <DialogDescription className="text-white/60">Selecciona perfiles reales de la comunidad para invitarlos.</DialogDescription>
+                    <DialogTitle className="text-xl font-black uppercase tracking-tighter text-left">🌐 Red de Operadores</DialogTitle>
+                    <DialogDescription className="text-white/60 text-left">Selecciona perfiles reales de la comunidad para invitarlos.</DialogDescription>
                   </DialogHeader>
-                  <div className="grid grid-cols-2 gap-3 py-4 max-h-[400px] overflow-y-auto pr-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 py-4 max-h-[50vh] overflow-y-auto pr-1">
                     {rankings.slice(0, 10).map(r => {
                       const isAdded = players.some(p => p.name === r.name);
                       return (
@@ -347,12 +347,12 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
                             }
                           }}
                           disabled={isAdded}
-                          className={`flex items-center gap-3 p-3 rounded-2xl border transition-all text-left group ${isAdded
+                          className={`flex items-center gap-3 p-2.5 rounded-2xl border transition-all text-left group ${isAdded
                             ? 'bg-primary/20 border-primary/50 opacity-50 cursor-not-allowed'
                             : 'bg-white/5 border-white/5 hover:border-primary/50'
                             }`}
                         >
-                          <Avatar className="h-10 w-10 border border-white/10 group-hover:scale-110 transition-transform">
+                          <Avatar className="h-10 w-10 border border-white/10 group-hover:scale-110 transition-transform flex-shrink-0">
                             <AvatarImage src={r.avatar_url || undefined} />
                             <AvatarFallback className="bg-slate-800 text-[10px]">{r.name.slice(0, 2)}</AvatarFallback>
                           </Avatar>
@@ -360,7 +360,7 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
                             <p className="text-xs font-black truncate">{r.name}</p>
                             <p className="text-[9px] text-white/40 font-bold uppercase tracking-widest">{r.xp || 0} XP</p>
                           </div>
-                          {isAdded && <span className="text-[10px] font-bold text-primary mr-1">✅</span>}
+                          {isAdded && <span className="text-[10px] font-bold text-primary flex-shrink-0">✅</span>}
                         </button>
                       );
                     })}
@@ -369,7 +369,7 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
               </Dialog>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 xs:grid-cols-3 md:grid-cols-4 gap-3">
               <AnimatePresence mode="popLayout">
                 {players.map((player) => {
                   const playerRanking = rankings.find(r => safeLower(r.name) === safeLower(player.name));
@@ -381,15 +381,15 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
                       initial={{ opacity: 0, scale: 0.8, y: 10 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.8, y: -10 }}
-                      className="group relative flex flex-col items-center gap-3 p-4 rounded-[32px] bg-slate-900/40 backdrop-blur-xl border border-white/10 hover:border-primary/50 transition-all cursor-pointer shadow-xl"
+                      className="group relative flex flex-col items-center gap-2 p-3 rounded-[24px] bg-slate-900/40 backdrop-blur-xl border border-white/10 hover:border-primary/50 transition-all cursor-pointer shadow-xl overflow-hidden"
                       whileHover={{ scale: 1.05 }}
                     >
                       <div className="relative">
-                        <Avatar className="h-16 w-16 ring-4 ring-white/5 group-hover:ring-primary/20 transition-all duration-500 shadow-2xl">
+                        <Avatar className="h-12 w-12 md:h-16 md:w-16 ring-2 ring-white/5 group-hover:ring-primary/20 transition-all duration-500 shadow-2xl">
                           {effectiveAvatar ? (
                             <AvatarImage src={effectiveAvatar} className="object-cover" />
                           ) : (
-                            <AvatarFallback className="bg-gradient-to-br from-slate-800 to-slate-900 text-white font-black text-xl">
+                            <AvatarFallback className="bg-gradient-to-br from-slate-800 to-slate-900 text-white font-black text-sm md:text-xl">
                               {player.name.slice(0, 2).toUpperCase()}
                             </AvatarFallback>
                           )}
@@ -399,29 +399,42 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
                             e.stopPropagation();
                             handleRemovePlayer(player.id);
                           }}
-                          className="absolute -top-1 -right-1 bg-red-500 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-red-600 active:scale-90"
+                          className="absolute -top-1 -right-1 bg-red-500 text-white p-1 rounded-full opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity shadow-lg hover:bg-red-600 active:scale-90 z-20"
                         >
                           <X className="h-3 w-3" />
                         </button>
                       </div>
-                      <div className="text-center min-w-0 w-full px-1">
-                        <span className="text-[11px] font-black uppercase tracking-widest truncate block text-white/90">
+                      <div className="text-center min-w-0 w-full">
+                        <span className="text-[10px] font-black uppercase tracking-wider truncate block text-white/90">
                           {player.name}
-                        </span>
-                        <span className="text-[9px] font-bold text-primary/60 uppercase tracking-tighter">
-                          Operador Listo
                         </span>
                       </div>
                     </motion.div>
                   );
                 })}
+
+                {/* Mobile direct add button in grid */}
+                <motion.button
+                  key="add-player-btn"
+                  onClick={() => setIsModalOpen(true)}
+                  className="flex flex-col items-center justify-center gap-2 p-3 rounded-[24px] bg-white/5 border border-dashed border-white/20 hover:border-primary/50 hover:bg-white/10 transition-all group min-h-[90px]"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-primary/20 group-hover:text-primary transition-colors">
+                    <Plus className="h-6 w-6" />
+                  </div>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-white/40 group-hover:text-primary">
+                    Añadir
+                  </span>
+                </motion.button>
               </AnimatePresence>
             </div>
 
             {players.length === 0 && (
               <div className="text-center py-8">
-                <div className="text-white/60 mb-2">No hay jugadores</div>
-                <div className="text-xs text-white/40">Añade al menos {minPlayers} para empezar</div>
+                <div className="text-white/60 mb-1 text-sm">No hay operadores</div>
+                <div className="text-[10px] text-white/40 uppercase tracking-widest font-bold">Añade al menos {minPlayers}</div>
               </div>
             )}
           </motion.div>
@@ -431,9 +444,9 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="bg-card rounded-2xl p-6 shadow-lg border"
+              className="bg-card rounded-2xl p-4 md:p-6 shadow-lg border"
             >
-              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <h2 className="text-lg md:text-xl font-semibold mb-4 flex items-center gap-2 text-left">
                 👥 Equipos
               </h2>
 
@@ -443,32 +456,32 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
                     placeholder="Nombre del equipo"
                     value={newTeamName}
                     onChange={(e) => setNewTeamName(e.target.value)}
-                    className="mb-3"
+                    className="mb-3 h-10"
                   />
-                  <div className="flex gap-2 mb-3">
+                  <div className="flex flex-wrap gap-2 mb-3 justify-center">
                     {TEAM_COLORS.map((color, idx) => (
                       <button
                         key={color}
                         onClick={() => setSelectedColorIndex(idx)}
-                        className={`w-8 h-8 rounded-full transition-transform ${selectedColorIndex === idx ? 'scale-125 ring-2 ring-offset-2 ring-primary' : ''
+                        className={`w-7 h-7 rounded-full transition-transform ${selectedColorIndex === idx ? 'scale-125 ring-2 ring-offset-2 ring-primary' : ''
                           }`}
                         style={{ backgroundColor: color }}
                       />
                     ))}
                   </div>
                   <div className="flex gap-2">
-                    <Button onClick={handleCreateTeam} disabled={!newTeamName.trim() || isLoading} className="flex-1">
-                      Crear Equipo
+                    <Button onClick={handleCreateTeam} disabled={!newTeamName.trim() || isLoading} className="flex-1 h-10">
+                      Crear
                     </Button>
-                    <Button variant="outline" onClick={() => setShowTeamCreator(false)}>
-                      Cancelar
+                    <Button variant="outline" onClick={() => setShowTeamCreator(false)} className="h-10">
+                      Cerrar
                     </Button>
                   </div>
                 </div>
               ) : (
                 <Button
                   variant="outline"
-                  className="w-full mb-4"
+                  className="w-full mb-4 h-10 border-dashed"
                   onClick={() => setShowTeamCreator(true)}
                 >
                   <Plus className="h-4 w-4 mr-2" />
@@ -482,24 +495,24 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
                   return (
                     <div
                       key={team.id}
-                      className="p-4 rounded-xl border-2"
+                      className="p-3 md:p-4 rounded-xl border-2"
                       style={{ borderColor: team.color }}
                     >
                       <div className="flex items-center gap-2 mb-2">
                         <div
-                          className="w-4 h-4 rounded-full"
+                          className="w-3 h-3 md:w-4 md:h-4 rounded-full"
                           style={{ backgroundColor: team.color }}
                         />
-                        <span className="font-semibold">{team.name}</span>
-                        <span className="text-sm text-muted-foreground ml-auto">
-                          {teamPlayers.length} jugadores
+                        <span className="font-bold text-sm md:text-base">{team.name}</span>
+                        <span className="text-[10px] md:text-xs text-muted-foreground ml-auto uppercase font-black">
+                          {teamPlayers.length} OP
                         </span>
                       </div>
                       <div className="flex flex-wrap gap-1">
                         {teamPlayers.map(p => (
                           <span
                             key={p.id}
-                            className="text-xs bg-muted px-2 py-1 rounded-full"
+                            className="text-[10px] bg-muted px-2 py-1 rounded-full font-bold uppercase"
                           >
                             {p.name}
                           </span>
@@ -511,8 +524,8 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
               </div>
 
               {teams.length < 2 && (
-                <p className="text-center text-muted-foreground py-4 text-sm">
-                  Crea al menos 2 equipos para este modo
+                <p className="text-center text-muted-foreground py-4 text-xs font-bold uppercase tracking-widest opacity-60">
+                  Mínimo 2 equipos requeridos
                 </p>
               )}
             </motion.div>
@@ -525,17 +538,17 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
               animate={{ opacity: 1, x: 0 }}
               className="bg-card rounded-2xl p-4 shadow-lg border"
             >
-              <div className="flex items-center justify-between gap-3 px-2 pt-1 pb-3">
+              <div className="flex items-center justify-between gap-3 px-2 pt-1 pb-3 border-b border-white/5 mb-3">
                 <div className="flex items-center gap-3">
-                  <div className="text-3xl">{modeInfo?.icon}</div>
-                  <div>
-                    <h3 className="text-lg font-semibold leading-tight">Sala de espera</h3>
-                    <p className="text-xs text-muted-foreground">
-                      {players.length} jugador{players.length === 1 ? '' : 'es'} listo{players.length === 1 ? '' : 's'}
+                  <div className="text-2xl">{modeInfo?.icon}</div>
+                  <div className="text-left">
+                    <h3 className="text-base font-semibold leading-tight">Lobby Virtual</h3>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
+                      {players.length} listos
                     </p>
                   </div>
                 </div>
-                <div className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+                <div className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 font-black uppercase tracking-tighter">
                   {modeInfo?.name}
                 </div>
               </div>
@@ -543,7 +556,7 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
               {/* Zona baile */}
               <div
                 ref={lobbyRef}
-                className="relative w-full h-[320px] rounded-2xl overflow-hidden border bg-black/80"
+                className="relative w-full h-[200px] md:h-[320px] rounded-2xl overflow-hidden border bg-black/80"
               >
                 {/* glow */}
                 <div className="absolute inset-0 opacity-60 pointer-events-none"
@@ -560,7 +573,7 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
                     ref={(node) => {
                       ballElsRef.current[p.id] = node;
                     }}
-                    className="absolute top-0 left-0 w-[52px] h-[52px] rounded-full overflow-hidden border-2 shadow-[0_0_12px_rgba(168,85,247,0.45)]"
+                    className="absolute top-0 left-0 w-[42px] h-[42px] md:w-[52px] md:h-[52px] rounded-full overflow-hidden border-2 shadow-[0_0_12px_rgba(168,85,247,0.45)]"
                     style={{ borderColor: 'rgba(168,85,247,0.9)' }}
                     title={p.name}
                   >
@@ -573,7 +586,7 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
                       />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-primary to-pink-500 flex items-center justify-center">
-                        <span className="font-black text-white">
+                        <span className="font-black text-white text-xs md:text-sm">
                           {p.name?.trim()?.charAt(0)?.toUpperCase() || '?'}
                         </span>
                       </div>
@@ -587,12 +600,12 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
                     type="button"
                     onClick={handleStartGame}
                     disabled={!canStart || isLoading}
-                    className="px-6 py-3 rounded-full font-extrabold text-white border border-white/10 bg-gradient-to-r from-purple-500 to-pink-500 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-5 py-2.5 md:px-6 md:py-3 rounded-full font-black text-white text-sm md:text-base border border-white/10 bg-gradient-to-r from-purple-500 to-pink-500 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-tighter"
                     style={{
                       animation: 'pulse-neon 1.9s ease-in-out infinite',
                     }}
                   >
-                    ▶ Empezar partida
+                    🚀 ¡Despegar!
                   </button>
                 </div>
 
@@ -604,58 +617,57 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
                   }
                 `}</style>
               </div>
-
-              <p className="mt-3 text-xs text-muted-foreground text-center px-2">
-                Tip: si una foto se ve mal, usa una URL directa o súbela a Supabase Storage en <b>public</b>.
-              </p>
             </motion.div>
           )}
         </div>
 
-        {/* Start Button */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="mt-8 text-center"
-        >
-          <Button
-            size="lg"
-            onClick={handleStartGame}
-            disabled={!canStart || isLoading}
-            className="text-lg px-8 py-6 h-auto"
+        {/* Floating Start Button for mobile (sticky-like behavior) */}
+        <div className="fixed bottom-0 left-0 right-0 p-4 md:relative md:bg-transparent bg-background/80 backdrop-blur-md md:backdrop-blur-none border-t border-white/10 md:border-none z-40">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="text-center"
           >
-            <Play className="h-5 w-5 mr-2" />
-            {isLoading ? 'Iniciando...' : 'Empezar Partida'}
-          </Button>
+            <Button
+              size="lg"
+              onClick={handleStartGame}
+              disabled={!canStart || isLoading}
+              className="w-full md:w-auto text-base md:text-lg px-8 py-5 md:py-6 h-auto font-black uppercase tracking-widest rounded-2xl shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)]"
+            >
+              <Play className="h-5 w-5 mr-2" />
+              {isLoading ? 'Iniciando...' : 'Empezar Misión'}
+            </Button>
 
-          {!canStart && (
-            <p className="text-sm text-muted-foreground mt-2">
-              {players.length < minPlayers
-                ? `Añade al menos ${minPlayers - players.length} jugador(es) más`
-                : isTeamMode && teams.length < 2
-                  ? 'Crea al menos 2 equipos'
-                  : isTeamMode && players.some(p => !p.team_id)
-                    ? 'Asigna todos los jugadores a un equipo'
-                    : ''}
-            </p>
-          )}
-        </motion.div>
+            {!canStart && (
+              <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold uppercase tracking-widest">
+                {players.length < minPlayers
+                  ? `Faltan ${minPlayers - players.length} operadores`
+                  : isTeamMode && teams.length < 2
+                    ? 'Crea 2 equipos'
+                    : isTeamMode && players.some(p => !p.team_id)
+                      ? 'Asigna equipos'
+                      : ''}
+              </p>
+            )}
+          </motion.div>
+        </div>
       </motion.div>
 
       {/* Floating Action Button (Elevated z-index to stay above overlays) */}
-      <motion.button
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        onClick={() => setIsModalOpen(true)}
-        className="fixed right-6 w-16 h-16 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-[0_10px_40px_-10px_rgba(168,85,247,0.5)] flex items-center justify-center hover:shadow-xl transition-shadow z-[999] cursor-pointer pointer-events-auto"
-        style={{ marginBottom: 'env(safe-area-inset-bottom)', bottom: isMobile ? '2rem' : '12rem' }}
-
-      >
-        <Plus className="h-8 w-8" />
-      </motion.button>
+      {!isMobile && (
+        <motion.button
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => setIsModalOpen(true)}
+          className="fixed bottom-6 right-6 w-16 h-16 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-[0_10px_40px_-10px_rgba(168,85,247,0.5)] flex items-center justify-center hover:shadow-xl transition-shadow z-[999] cursor-pointer pointer-events-auto"
+          style={{ marginBottom: 'env(safe-area-inset-bottom)' }}
+        >
+          <Plus className="h-8 w-8" />
+        </motion.button>
+      )}
 
       {/* Add Player Modal */}
       <AddPlayerModal
