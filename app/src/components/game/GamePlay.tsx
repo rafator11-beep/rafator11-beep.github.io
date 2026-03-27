@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Trophy, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -183,7 +183,7 @@ export function GamePlay({ onExit, isTeamMode = false, roomId = null, isHost = f
     setIsAnswering(true);
 
     try {
-      await answerQuestion(currentQuestion.id, currentPlayer.id, isCorrect);
+      await answerQuestion(currentQuestion.id, currentPlayer?.id || '', isCorrect);
 
       if (game?.mode === 'futbol' && selectedCell && isCorrect) {
         await updateTicTacToeBoard(selectedCell[0], selectedCell[1], currentPlayer.id);

@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Users, Trophy, AlertCircle, Video, VideoOff, Copy, Crown, Plus, Minus, Eye, EyeOff, Zap, Flame, Ghost, ShieldAlert, Dice5, UserPlus, Globe, History, Play, Trash2, UserCheck, UserX, X, Camera, Cast, TrendingUp, Music } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,7 @@ import { useDrinkingMicroGames } from '@/hooks/game/useDrinkingMicroGames';
 import { useGameEffects } from '@/hooks/game/useGameEffects';
 import { useMultiplayer } from '@/hooks/game/useMultiplayer';
 import { useRanking } from '@/hooks/useRanking';
+import { useGameContext } from '@/contexts/GameContext';
 import { CardDisplay } from '@/components/game/CardDisplay';
 import { detectRarity } from '@/lib/godDeck';
 import { sfx } from '@/lib/sfx';
@@ -149,12 +150,14 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     setGameOver
   } = useGameEngine(mode);
 
+  const { localPlayerId } = useGameContext();
+
   // Show Captain Selection dialog at the start (manual pick, not random)
   useEffect(() => {
-    if (players.length > 0 && !gameState.captainId && !gameState.showCaptainSelection) {
+    if (players.length > 0 && !gameState.captainId && !gameState.showCaptainSelection && (mode === 'megamix' || mode === 'clasico')) {
       setGameState(prev => ({ ...prev, showCaptainSelection: true }));
     }
-  }, [players, gameState.captainId]);
+  }, [players, gameState.captainId, mode]);
 
   const handleAdjustXP = (playerId: string, delta: number) => {
     addScore(playerId, delta);
@@ -220,9 +223,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     // Viewer Logic: Receive State
     if (!isHost && remoteState) {
       if (remoteState.currentIndex !== undefined && remoteState.currentIndex !== currentIndex) {
-        if (remoteState.currentIndex !== undefined && remoteState.currentIndex !== currentIndex) {
-          setCurrentIndex(remoteState.currentIndex);
-        }
+        setCurrentIndex(remoteState.currentIndex);
 
         if (remoteState.gameState) setGameState(remoteState.gameState);
 
@@ -1342,7 +1343,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       </Dialog>
 
       {/* Main Content Area */}
-      <main className={`flex-1 flex flex-col items-center justify-center p-4 relative transition-opacity duration-300 ${isMultiplayer && !isHost && currentPlayer?.id !== currentPlayer?.id ? 'opacity-80 pointer-events-none' : ''}`}>
+      <main className={`flex-1 flex flex-col items-center justify-center p-4 relative transition-opacity duration-300 ${isMultiplayer && !isHost && (currentPlayer?.id !== localPlayerId) ? 'opacity-80 pointer-events-none' : ''}`}>
 
         {/* Turn Blocker Overlay */}
         {isMultiplayer && !isHost && false && (
@@ -1592,9 +1593,9 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                 // Simple score logic for now
                 if (caught) {
                   players.forEach(p => {
-                    if (p.id !== gameState.impostorPlayerId) addScore(p.id, 20);
+                    if (p.id && p.id !== gameState.impostorPlayerId) addScore(p.id, 20);
                   });
-                } else {
+                } else if (gameState.impostorPlayerId) {
                   addScore(gameState.impostorPlayerId, 50);
                 }
                 setGameState((prev: any) => ({ ...prev, showImpostor: false }));
