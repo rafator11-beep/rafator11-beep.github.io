@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { compressImageToDataUrl } from '@/utils/imageCompression';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface AddPlayerModalProps {
     onAddPlayer: (name: string, avatarUrl?: string | null) => Promise<void>;
@@ -43,7 +44,7 @@ const AddPlayerModal: React.FC<AddPlayerModalProps> = ({ onAddPlayer, isOpen, on
                     .ilike('player_name', `%${searchQuery}%`)
                     .order('total_score', { ascending: false })
                     .limit(10);
-                
+
                 if (data && !error) {
                     setSearchResults(data);
                 }
