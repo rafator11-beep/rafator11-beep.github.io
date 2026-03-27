@@ -584,7 +584,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
   // Trigger / Content Detection System
   useEffect(() => {
-    if (!currentText) return;
+    if (!currentText || currentText === 'Siguiente carta' || currentText === 'Cargando pregunta...') return;
 
     // 1. Check for explicit TRIGGERS (Megamix)
     if (currentText.startsWith('TRIGGER:')) {

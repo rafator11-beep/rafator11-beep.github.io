@@ -407,32 +407,28 @@ export function PokerRoom({ onExit, roomId, isHost: isHostParam }: PokerRoomProp
         if (!winner) return;
         const winAmount = state.pot;
 
-        // Update persistence and local scores (Bug 22 fix: use latest prev)
-        setLocalScores(prev => {
-            const nextScores = { ...prev };
-            const currentScore = nextScores[winner.id] !== undefined ? nextScores[winner.id] : (winner.score || 1000);
-            const newScore = currentScore + winAmount;
-            nextScores[winner.id] = newScore;
+        // Bug 22 fix: Calculate next scores first, then update both state and persistence
+        const currentWinnerScore = localScores[winner.id] !== undefined ? localScores[winner.id] : (winner.score || 1000);
+        const newScore = currentWinnerScore + winAmount;
+        const nextScores = { ...localScores, [winner.id]: newScore };
 
-            if (roomId) {
-                supabase.from('players').update({ score: newScore }).eq('id', winner.id).then();
-            }
+        setLocalScores(nextScores);
+        
+        if (roomId) {
+            supabase.from('players').update({ score: newScore }).eq('id', winner.id).then();
+        }
 
-            // Sync immediately to prevent stale states
-            const finalState = {
-                ...state,
-                status: 'finished',
-                winner: winner.id,
-                winnerDescription: bestResult?.description || "Ganador",
-                community_cards: state.community_cards,
-                player_chips: nextScores
-            };
-            
-            setPokerState(finalState);
-            if (roomId) broadcastState(finalState);
-
-            return nextScores;
-        });
+        const finalState = {
+            ...state,
+            status: 'finished',
+            winner: winner.id,
+            winnerDescription: bestResult?.description || "Ganador",
+            community_cards: state.community_cards,
+            player_chips: nextScores
+        };
+        
+        setPokerState(finalState);
+        if (roomId) broadcastState(finalState);
 
         setTimeout(() => startGame(), 4000);
     };

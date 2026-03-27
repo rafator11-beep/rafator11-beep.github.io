@@ -234,21 +234,21 @@ export const useGameContent = (mode: GameMode, currentIndex: number, currentPlay
         }
     }, [usedQuestionIds]);
 
-    const getCurrentContent = useMemo(() => {
-        return () => {
-            if (mode === 'trivia_futbol' || mode === 'cultura') {
-                return currentQuestion?.question || 'Cargando pregunta...';
-            }
-            const validContent = content.length > 0
-                ? content.find((item, idx) => 
-                    idx >= (currentIndex % content.length) && 
-                    typeof item === 'string' && 
-                    item.trim().length > 0)
-                  || content.find(item => typeof item === 'string' && item.trim().length > 0)
-                : undefined;
-            return validContent?.replace(/{player}/g, currentPlayerName) || 'Siguiente carta';
-        };
+    const currentText = useMemo(() => {
+        if (mode === 'trivia_futbol' || mode === 'cultura') {
+            return currentQuestion?.question || 'Cargando pregunta...';
+        }
+        const validContent = content.length > 0
+            ? content.find((item, idx) => 
+                idx >= (currentIndex % content.length) && 
+                typeof item === 'string' && 
+                item.trim().length > 0)
+              || content.find(item => typeof item === 'string' && item.trim().length > 0)
+            : undefined;
+        return validContent?.replace(/{player}/g, currentPlayerName) || 'Siguiente carta';
     }, [content, currentIndex, currentPlayerName, mode, currentQuestion]);
+
+    const getCurrentContent = useCallback(() => currentText, [currentText]);
 
     const getNextPreview = () => {
         if (!content || content.length === 0) return "Cargando...";

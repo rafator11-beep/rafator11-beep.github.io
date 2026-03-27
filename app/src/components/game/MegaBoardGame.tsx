@@ -112,33 +112,32 @@ const DRINK_EVENTS = [
 ];
 
 const BONUS_EVENTS = [
-  "⭐ ¡Avanza 3 casillas extra!",
-  "⭐ ¡Tira otra vez!",
-  "⭐ Eres inmune al próximo trap. ¡Escudo activado!",
-  "⭐ ¡Doble XP en esta ronda! (+20 puntos extra)",
-  "⭐ Elige a un jugador y retrocédelo 2 casillas.",
-  "⭐ ¡Comodín! Puedes saltarte la próxima casilla negativa.",
-  "⭐ ¡Roba 5 puntos de XP a otro jugador!",
+  { label: "⭐ ¡Avanza 3 casillas extra!", type: 'move', value: 3 },
+  { label: "⭐ ¡Tira otra vez!", type: 'roll_again' },
+  { label: "⭐ Eres inmune al próximo trap. ¡Escudo activado!", type: 'shield' },
+  { label: "⭐ ¡Doble XP en esta ronda! (+20 puntos extra)", type: 'xp', value: 20 },
+  { label: "⭐ Elige a un jugador y retrocédelo 2 casillas.", type: 'move_other', value: -2 },
+  { label: "⭐ ¡Comodín! Puedes saltarte la próxima casilla negativa.", type: 'shield' },
+  { label: "⭐ ¡Roba 5 puntos de XP a otro jugador!", type: 'steal', value: 5 },
 ];
 
 const TRAP_EVENTS = [
-  "💀 ¡Retrocede 3 casillas!",
-  "💀 Pierdes tu próximo turno.",
-  "💀 Bebe 3 tragos y retrocede 1 casilla.",
-  "💀 Todos te señalan y bebes 2 tragos.",
-  "💀 Vuelves a la casilla 1! (si estás antes de la 20, solo retrocedes 5)",
-  "💀 Haz 10 sentadillas o bebe 5 tragos.",
-  "💀 El grupo te pone un mote. Te llaman así hasta que acabe la partida.",
+  { label: "💀 ¡Retrocede 3 casillas!", type: 'move', value: -3 },
+  { label: "💀 Pierdes tu próximo turno.", type: 'skip' },
+  { label: "💀 Bebe 3 tragos y retrocede 1 casilla.", type: 'move', value: -1 },
+  { label: "💀 Todos te señalan y bebes 2 tragos.", type: 'info' },
+  { label: "💀 ¡Vuelves a la casilla 0!", type: 'reset' },
+  { label: "💀 Haz 10 sentadillas o bebe 5 tragos.", type: 'info' },
+  { label: "💀 El grupo te pone un mote.", type: 'info' },
 ];
 
 const RANDOM_EVENTS = [
-  "🎲 ¡Cambio de posiciones! Los dos jugadores más adelantados intercambian lugar.",
-  "🎲 Todos tiran un dado imaginario (di un número del 1-6). El más alto avanza 2 extra.",
-  "🎲 El jugador decide: ¿doble o nada? Tira otro dado. Si es par, avanza el doble. Si es impar, retrocede.",
-  "🎲 ¡Tormenta! Todos retroceden 1 casilla excepto el jugador actual.",
-  "🎲 Reto relámpago: di 5 países en 10 segundos o pierdes tu turno.",
-  "🎲 ¡Intercambio! Cambia posición con el jugador de tu izquierda.",
-  "🎲 Lotería: si el dado salió par, ganas 15 XP. Si salió impar, pierdes 10.",
+  { label: "🎲 ¡Cambio de posiciones! Los dos jugadores más adelantados intercambian lugar.", type: 'swap_top' },
+  { label: "🎲 Todos tiran un dado imaginario. El más alto avanza 2 extra.", type: 'info' },
+  { label: "🎲 ¡Tormenta! Todos retroceden 1 casilla excepto tú.", type: 'move_all_others', value: -1 },
+  { label: "🎲 Reto relámpago: di 5 países en 10 segundos o pierdes tu turno.", type: 'info' },
+  { label: "🎲 ¡Intercambio! Cambia posición con el jugador de tu izquierda.", type: 'swap_left' },
+  { label: "🎲 Lotería: ganas 15 XP.", type: 'xp', value: 15 },
 ];
 
 // ─── Player Interface ─────────────────────────────────────────────────────────
@@ -283,9 +282,9 @@ export function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }: Me
       case 'bonus': {
         const bonus = BONUS_EVENTS[Math.floor(Math.random() * BONUS_EVENTS.length)];
         setEventEmoji('⭐');
-        setEventText(bonus);
+        setEventText(bonus.label);
         applyBonus(bonus);
-        setEventType('info');
+        setEventType(bonus.type === 'roll_again' ? 'roll_again' : 'info');
         setGamePhase('event');
         break;
       }
@@ -297,7 +296,7 @@ export function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }: Me
         } else {
           const trap = TRAP_EVENTS[Math.floor(Math.random() * TRAP_EVENTS.length)];
           setEventEmoji('💀');
-          setEventText(trap);
+          setEventText(trap.label);
           applyTrap(trap);
         }
         setEventType('info');
@@ -315,7 +314,8 @@ export function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }: Me
       case 'random': {
         const random = RANDOM_EVENTS[Math.floor(Math.random() * RANDOM_EVENTS.length)];
         setEventEmoji('🎲');
-        setEventText(random);
+        setEventText(random.label);
+        applyRandom(random);
         setEventType('info');
         setGamePhase('event');
         break;
@@ -397,12 +397,21 @@ export function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }: Me
   const applyBonus = (event: any) => {
     switch (event.type) {
       case 'move': {
-        const newPos = Math.min(currentPlayer.position + event.value, 99);
+        const newPos = Math.min(currentPlayer.position + (event.value || 0), 99);
         setPlayers(prev => prev.map((p, i) => i === currentPlayerIdx ? { ...p, position: newPos } : p));
         break;
       }
+      case 'move_other': {
+        const others = players.filter((_, i) => i !== currentPlayerIdx);
+        if (others.length > 0) {
+            const victim = others[Math.floor(Math.random() * others.length)];
+            const newPos = Math.max(0, victim.position + (event.value || 0));
+            setPlayers(prev => prev.map(p => p.id === victim.id ? { ...p, position: newPos } : p));
+        }
+        break;
+      }
       case 'xp': {
-        setPlayers(prev => prev.map((p, i) => i === currentPlayerIdx ? { ...p, score: p.score + event.value } : p));
+        setPlayers(prev => prev.map((p, i) => i === currentPlayerIdx ? { ...p, score: p.score + (event.value || 0) } : p));
         break;
       }
       case 'shield': {
@@ -413,9 +422,10 @@ export function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }: Me
         const others = players.filter((_, i) => i !== currentPlayerIdx);
         if (others.length > 0) {
           const victim = others[Math.floor(Math.random() * others.length)];
+          const val = event.value || 5;
           setPlayers(prev => prev.map(p => {
-            if (p.id === victim.id) return { ...p, score: Math.max(0, p.score - event.value) };
-            if (p.id === currentPlayer.id) return { ...p, score: p.score + event.value };
+            if (p.id === victim.id) return { ...p, score: Math.max(0, p.score - val) };
+            if (p.id === currentPlayer.id) return { ...p, score: p.score + val };
             return p;
           }));
         }
@@ -425,10 +435,9 @@ export function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }: Me
   };
 
   const applyTrap = (event: any) => {
-    // Bug 30: Consistent reset logic
     switch (event.type) {
       case 'move': {
-        const newPos = Math.max(0, currentPlayer.position + event.value);
+        const newPos = Math.max(0, currentPlayer.position + (event.value || 0));
         setPlayers(prev => prev.map((p, i) => i === currentPlayerIdx ? { ...p, position: newPos } : p));
         break;
       }
@@ -437,8 +446,45 @@ export function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }: Me
         break;
       }
       case 'reset': {
-        // Bug 30: "volver al inicio" is always position 0
+        // Bug 30: consistent reset to 0
         setPlayers(prev => prev.map((p, i) => i === currentPlayerIdx ? { ...p, position: 0 } : p));
+        break;
+      }
+    }
+  };
+
+  const applyRandom = (event: any) => {
+    switch (event.type) {
+      case 'swap_top': {
+        const sorted = [...players].sort((a,b) => b.position - a.position);
+        if (sorted.length >= 2) {
+            const p1 = sorted[0];
+            const p2 = sorted[1];
+            setPlayers(prev => prev.map(p => {
+                if (p.id === p1.id) return { ...p, position: p2.position };
+                if (p.id === p2.id) return { ...p, position: p1.position };
+                return p;
+            }));
+        }
+        break;
+      }
+      case 'move_all_others': {
+        setPlayers(prev => prev.map((p, i) => i !== currentPlayerIdx ? { ...p, position: Math.max(0, p.position + (event.value || 0)) } : p));
+        break;
+      }
+      case 'swap_left': {
+        const prevIdx = (currentPlayerIdx - 1 + players.length) % players.length;
+        const other = players[prevIdx];
+        const myPos = currentPlayer.position;
+        setPlayers(prev => prev.map(p => {
+            if (p.id === currentPlayer.id) return { ...p, position: other.position };
+            if (p.id === other.id) return { ...p, position: myPos };
+            return p;
+        }));
+        break;
+      }
+      case 'xp': {
+        setPlayers(prev => prev.map((p, i) => i === currentPlayerIdx ? { ...p, score: p.score + (event.value || 0) } : p));
         break;
       }
     }

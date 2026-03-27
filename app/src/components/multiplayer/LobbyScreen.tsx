@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { LogIn, Plus, Share2, Copy, Users, ArrowLeft, Sparkles, Wifi, Crown, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -38,7 +38,7 @@ export function LobbyScreen({ onJoin, onBack, initialMode, initialWaiting = fals
   const [error, setError] = useState('');
   const [isWaiting, setIsWaiting] = useState(initialWaiting);
   const [onlinePlayers, setOnlinePlayers] = useState<{ name: string; avatar: string; id: string }[]>([]);
-  const [joinTimeout, setJoinTimeout] = useState<NodeJS.Timeout | null>(null);
+  const joinTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // useEffect for initial mode and room params moved below handleJoinSubmit (Bug 31)
 
@@ -73,9 +73,9 @@ export function LobbyScreen({ onJoin, onBack, initialMode, initialWaiting = fals
       })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
-          if (joinTimeout) {
-            clearTimeout(joinTimeout);
-            setJoinTimeout(null);
+          if (joinTimeoutRef.current) {
+            clearTimeout(joinTimeoutRef.current);
+            joinTimeoutRef.current = null;
           }
           if (currentPlayer) {
             await channel.track({
@@ -92,9 +92,12 @@ export function LobbyScreen({ onJoin, onBack, initialMode, initialWaiting = fals
 
     return () => {
       supabase.removeChannel(channel);
-      if (joinTimeout) clearTimeout(joinTimeout);
+      if (joinTimeoutRef.current) {
+        clearTimeout(joinTimeoutRef.current);
+        joinTimeoutRef.current = null;
+      }
     };
-  }, [isWaiting, roomCode, currentPlayer, joinTimeout]);
+  }, [isWaiting, roomCode, currentPlayer]);
 
   const createRoom = async () => {
     setLoading(true);
@@ -112,14 +115,14 @@ export function LobbyScreen({ onJoin, onBack, initialMode, initialWaiting = fals
     setLoading(true);
     setError('');
 
-    const timeout = setTimeout(() => {
+    if (joinTimeoutRef.current) clearTimeout(joinTimeoutRef.current);
+    joinTimeoutRef.current = setTimeout(() => {
       if (onlinePlayers.length === 0) {
         setError('No se pudo conectar a la sala o está vacía.');
         setIsWaiting(false);
         setLoading(false);
       }
     }, 10000);
-    setJoinTimeout(timeout);
 
     onJoin(codeToJoin.toUpperCase(), false);
     setIsWaiting(true);
