@@ -44,6 +44,143 @@ import confetti from 'canvas-confetti';
 // Helper component for TTS
 // TTSTrigger removed
 
+// ─── Visual Improvements Sub-components ──────────────────────────────────────
+
+const RARITY_CONFIG = {
+  common:    { orbLeft:'rgba(99,102,241,0.08)',  orbRight:'rgba(139,92,246,0.08)',  via:'slate-900/50'  },
+  rare:      { orbLeft:'rgba(59,130,246,0.18)',  orbRight:'rgba(99,102,241,0.15)', via:'blue-950/40'   },
+  legendary: { orbLeft:'rgba(251,191,36,0.20)',  orbRight:'rgba(245,158,11,0.15)', via:'amber-950/40'  },
+  chaos:     { orbLeft:'rgba(239,68,68,0.22)',   orbRight:'rgba(220,38,38,0.15)',  via:'red-950/50'    },
+  virus:     { orbLeft:'rgba(34,197,94,0.18)',   orbRight:'rgba(16,185,129,0.14)', via:'green-950/40'  },
+} as const;
+
+const DynamicBackground = ({ rarity }: { rarity: keyof typeof RARITY_CONFIG }) => {
+  const c = RARITY_CONFIG[rarity] ?? RARITY_CONFIG.common;
+  return (
+    <div className="fixed inset-0 z-0 pointer-events-none">
+      <div className={`absolute inset-0 bg-gradient-to-br from-slate-950 
+        via-${c.via} to-slate-950 transition-all duration-[800ms] ease-in-out`} />
+      <motion.div
+        className="absolute top-[-10%] left-[-10%] w-[45%] h-[45%] rounded-full blur-[120px]"
+        animate={{ backgroundColor: c.orbLeft }}
+        transition={{ duration: 0.8, ease: 'easeInOut' }}
+        style={{ backgroundColor: c.orbLeft }}
+      />
+      <motion.div
+        className="absolute bottom-[-10%] right-[-10%] w-[45%] h-[45%] rounded-full blur-[120px]"
+        animate={{ backgroundColor: c.orbRight }}
+        transition={{ duration: 0.8, ease: 'easeInOut', delay: 0.1 }}
+        style={{ backgroundColor: c.orbRight }}
+      />
+      <div className="absolute inset-0 opacity-[0.03] bg-[url('/assets/noise.svg')] bg-repeat" />
+    </div>
+  );
+};
+
+const AnimatedXP = ({ value, playerId }: { value: number; playerId: string }) => {
+  const prevRef = useRef(value);
+  const [popping, setPopping] = useState(false);
+  const [floater, setFloater] = useState<number|null>(null);
+
+  useEffect(() => {
+    if (value > prevRef.current) {
+      const diff = value - prevRef.current;
+      setPopping(true);
+      setFloater(diff);
+      const t = setTimeout(() => { setPopping(false); setFloater(null); }, 900);
+      prevRef.current = value;
+      return () => clearTimeout(t);
+    }
+    prevRef.current = value;
+  }, [value]);
+
+  return (
+    <div className="relative flex items-center justify-center">
+      <motion.span
+        className="text-[11px] font-bold text-white/90 tabular-nums"
+        animate={popping ? { scale:[1,1.5,1] } : { scale:1 }}
+        transition={{ duration:0.3 }}
+      >
+        {value} XP
+      </motion.span>
+      <AnimatePresence>
+        {floater !== null && (
+          <motion.span
+            className="absolute -top-5 text-[10px] font-black text-emerald-400"
+            initial={{ y:0, opacity:1 }}
+            animate={{ y:-16, opacity:0 }}
+            exit={{ opacity:0 }}
+            transition={{ duration:0.8 }}
+          >
+            +{floater}
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+const TurnBanner = ({ playerName }: { playerName: string }) => (
+  <motion.div
+    className="fixed top-20 left-0 right-0 z-[200] flex justify-center 
+      pointer-events-none"
+    initial={{ x:'100vw', opacity:0 }}
+    animate={{ x:0,       opacity:1 }}
+    exit={{    x:'-100vw', opacity:0 }}
+    transition={{ 
+      x: { type:'spring', stiffness:200, damping:28 },
+      opacity: { duration:0.15 }
+    }}
+  >
+    <div className="bg-slate-900/90 backdrop-blur-xl border border-primary/40 
+      px-6 py-2.5 rounded-full shadow-[0_0_20px_rgba(168,85,247,0.3)]">
+      <span className="text-xs font-black uppercase tracking-[0.2em] text-primary/70">
+        🎯 turno de
+      </span>
+      <span className="ml-2 font-black text-white uppercase tracking-wider">
+        {playerName}
+      </span>
+    </div>
+  </motion.div>
+);
+
+const VirusFlash = ({ show }: { show: boolean }) => (
+  <AnimatePresence>
+    {show && (
+      <motion.div
+        className="fixed inset-0 z-[90] pointer-events-none"
+        initial={{ opacity:0.7, backgroundColor:'#22c55e' }}
+        animate={{ opacity:0 }}
+        exit={{}}
+        transition={{ duration:0.35, ease:'easeOut' }}
+      />
+    )}
+  </AnimatePresence>
+);
+
+function useScrambleText(target: string, active: boolean) {
+  const [display, setDisplay] = useState(target);
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#!';
+  
+  useEffect(() => {
+    if (!active) { setDisplay(target); return; }
+    let iterations = 0;
+    const max = target.length * 3;
+    const t = setInterval(() => {
+      setDisplay(
+        target.split('').map((char, i) => {
+          if (i < Math.floor(iterations / 3)) return char;
+          return chars[Math.floor(Math.random() * chars.length)];
+        }).join('')
+      );
+      if (++iterations >= max) clearInterval(t);
+    }, 40);
+    return () => clearInterval(t);
+  }, [target, active]);
+
+  return display;
+}
+
 interface PartyGameProps {
   mode: GameMode;
   onExit: () => void;
@@ -128,9 +265,7 @@ const PlayerProfilesBottom = ({ players, currentPlayer, scores, playerViruses = 
                 <span className={`text-[10px] font-black uppercase tracking-widest ${isTurn ? 'text-primary' : (isCaptain ? 'text-amber-400' : 'text-white/40')}`}>
                   {p.name}
                 </span>
-                <span className="text-[11px] font-bold text-white/90 tabular-nums">
-                  {scores[p.id] || 0} XP
-                </span>
+                <AnimatedXP value={scores[p.id] || 0} playerId={p.id} />
               </div>
             </div>
           );
@@ -162,6 +297,33 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     gameOver,
     setGameOver
   } = useGameEngine(mode);
+
+  // Improvements State
+  const [showTurnBanner, setShowTurnBanner] = useState(false);
+  const prevPlayerNameRef = useRef<string>('');
+  const prevVirusAlertRef = useRef(false);
+  const [virusFlash, setVirusFlash] = useState(false);
+
+  useEffect(() => {
+    if (!currentPlayer?.name) return;
+    if (prevPlayerNameRef.current && 
+        prevPlayerNameRef.current !== currentPlayer.name &&
+        players.length > 1) {
+      setShowTurnBanner(true);
+      const t = setTimeout(() => setShowTurnBanner(false), 2500);
+      return () => clearTimeout(t);
+    }
+    prevPlayerNameRef.current = currentPlayer.name;
+  }, [currentPlayer?.name, players.length]);
+
+  useEffect(() => {
+    if (gameState.showVirusAlert && !prevVirusAlertRef.current) {
+      setVirusFlash(true);
+      const t = setTimeout(() => setVirusFlash(false), 400);
+      return () => clearTimeout(t);
+    }
+    prevVirusAlertRef.current = gameState.showVirusAlert;
+  }, [gameState.showVirusAlert]);
 
   const { localPlayerId } = useGameContext();
 
@@ -736,12 +898,8 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col relative overflow-hidden pb-24 md:pb-32">
-      {/* Deep Background Blur Layer */}
-      <div className="fixed inset-0 z-0">
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950" />
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/10 rounded-full blur-[120px] animate-pulse delay-700" />
-      </div>
+      {/* Dynamic Background */}
+      <DynamicBackground rarity={rarity} />
 
       <PlayerProfilesBottom
         players={players}
@@ -1410,30 +1568,44 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           </div>
         )}
 
-        {/* Active Rule Display - Premium Glassmorphism */}
-        {(gameState.currentNorma || gameState.showNormaGlobal) && (
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.8, y: -20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="mb-8 mx-auto max-w-sm z-50 relative"
-          >
-            <div className="bg-gradient-to-br from-amber-500/20 via-orange-500/10 to-red-600/20 border border-white/20 backdrop-blur-3xl rounded-[2.5rem] p-6 text-center shadow-[0_0_50px_rgba(245,158,11,0.2)] group transition-all duration-700 hover:shadow-[0_0_60px_rgba(245,158,11,0.35)] relative overflow-hidden">
-               <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none" />
-               <motion.div 
-                 animate={{ opacity: [0.3, 0.6, 0.3] }}
-                 transition={{ duration: 3, repeat: Infinity }}
-                 className="absolute inset-0 border-2 border-amber-500/30 rounded-[2.5rem]" 
-               />
-               
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-500 to-orange-600 text-white text-[10px] px-6 py-1.5 rounded-full font-black tracking-[0.3em] shadow-[0_4px_15px_rgba(245,158,11,0.4)] border border-white/20 uppercase">
-                📜 Norma Activa
+        {/* Turn Banner Overlay */}
+        <AnimatePresence>
+          {showTurnBanner && currentPlayer && (
+            <TurnBanner playerName={currentPlayer.name} />
+          )}
+        </AnimatePresence>
+
+        {/* Global Norma Panel — Prominent Slide-down */}
+        <AnimatePresence>
+          {(gameState.currentNorma || gameState.showNormaGlobal) && (
+            <motion.div
+              className="mb-4 mx-auto max-w-sm z-10 relative w-full"
+              initial={{ y:-40, opacity:0 }}
+              animate={{ y:0,   opacity:1 }}
+              exit={{    y:-40, opacity:0 }}
+              transition={{ type:'spring', stiffness:300, damping:28 }}
+            >
+              <div className="bg-gradient-to-r from-orange-600/40 to-orange-900/40 
+                border-l-4 border-l-orange-500 border border-orange-500/30
+                backdrop-blur-md rounded-2xl p-4 text-center 
+                shadow-[0_0_20px_rgba(249,115,22,0.25)]">
+                <div className="flex items-center justify-center gap-2 mb-1">
+                  <motion.span
+                    animate={{ rotate:[-5,5,-5] }}
+                    transition={{ repeat:Infinity, duration:2, ease:'easeInOut' }}
+                    className="text-lg"
+                  >📜</motion.span>
+                  <p className="text-[10px] uppercase tracking-[0.3em] 
+                    text-orange-400 font-black">NORMA GLOBAL ACTIVA</p>
+                </div>
+                <p className="text-sm text-white font-black leading-tight uppercase 
+                  tracking-tight">
+                  {gameState.currentNorma || '¡Preparando nueva norma!'}
+                </p>
               </div>
-              <p className="text-xl text-white font-black leading-tight uppercase tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] mt-2">
-                {gameState.currentNorma || "¡Mantén el ritmo!"}
-              </p>
-            </div>
-          </motion.div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* CAPTAIN ACTION PANEL - Give/Take XP in real-time */}
         {(!gameState.showTrivia && !gameState.showVoting && !gameState.showDuel && !gameState.showImpostor && !gameState.showMimica && !gameState.showBocaCerrada && !gameState.showImpostorWord && mode !== 'cultura' && mode !== 'trivia_futbol') && (
@@ -1572,24 +1744,28 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         )}
 
         <AnimatePresence mode="wait">
-          {/* Ensure Norma is visible even if other things are showing? */}
           {!gameState.showTrivia && !gameState.showDrinkingGame && !gameState.showImpostor && !gameState.showDuel &&
             !gameState.showMimica && !gameState.showBocaCerrada && !gameState.showImpostorWord &&
             !gameState.showVoting && !gameState.showCaptainPass && !gameState.showVirusAlert &&
             gameState.yoNuncaEquiposPhase === 'idle' &&
             mode !== 'cultura' && mode !== 'trivia_futbol' && (
               <motion.div
-                key="card-display"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="w-full flex justify-center"
+                key={currentIndex}
+                initial={{ rotateY: 90,  opacity: 0, scale: 0.9 }}
+                animate={{ rotateY: 0,   opacity: 1, scale: 1   }}
+                exit={{    rotateY: -90, opacity: 0, scale: 0.9 }}
+                transition={{
+                  rotateY: { type:'spring', stiffness:280, damping:24 },
+                  opacity: { duration: 0.12 },
+                  scale:   { type:'spring', stiffness:300, damping:26 },
+                }}
+                style={{ 
+                  perspective:'1000px', 
+                  transformStyle:'preserve-3d',
+                  willChange:'transform'
+                }}
+                className="w-full flex justify-center relative"
               >
-                {/* 
-                   If content is a NORMA, do NOT show the card text. 
-                   Instead show a generic "New Rule" card or just the rule overlay?
-                   User said: "que las cartas de norma no salgan en el mazo normal, ya sale arriba en una ventana"
-                */}
                 <CardDisplay
                   content={currentText}
                   type={rarity}
@@ -1601,6 +1777,54 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                   players={players}
                   round={gameState.round}
                 />
+
+                {/* Partículas doradas — legendary */}
+                {rarity === 'legendary' && (
+                  <div className="absolute inset-0 pointer-events-none overflow-hidden 
+                    flex items-center justify-center" style={{zIndex:5}}>
+                    {[...Array(6)].map((_,i) => (
+                      <motion.div key={i}
+                        className="absolute w-1.5 h-1.5 rounded-full bg-amber-400"
+                        style={{ left:`${18+i*13}%`, bottom:'38%', filter:'blur(0.5px)' }}
+                        animate={{ y:[0,-(55+i*15),-(110+i*20)], opacity:[0,1,0], scale:[0.5,1,0.3] }}
+                        transition={{ duration:1.8+i*0.2, repeat:Infinity, 
+                          repeatDelay:i*0.3, ease:'easeOut' }}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {/* Borde glitch — chaos */}
+                {rarity === 'chaos' && (
+                  <>
+                    <style>{`
+                      @keyframes glitch {
+                        0%,100%{ box-shadow: 0 0 0 2px rgba(239,68,68,0.6); }
+                        20%    { box-shadow: 2px 0 0 2px rgba(239,68,68,0.9),
+                                            -2px 0 0 2px rgba(239,68,68,0.4); }
+                        40%    { box-shadow: -2px 0 0 2px rgba(239,68,68,0.8); }
+                        60%    { box-shadow: 2px 2px 0 2px rgba(239,68,68,0.5); }
+                        80%    { box-shadow: -2px -2px 0 2px rgba(239,68,68,0.7); }
+                      }
+                    `}</style>
+                    <div className="absolute inset-0 rounded-[2.5rem] pointer-events-none"
+                      style={{ animation:'glitch 0.4s infinite', zIndex:4 }} />
+                  </>
+                )}
+
+                {/* Anillo de respiración — virus */}
+                {rarity === 'virus' && (
+                  <motion.div
+                    className="absolute inset-0 rounded-[2.5rem] pointer-events-none"
+                    style={{ zIndex:4 }}
+                    animate={{ boxShadow:[
+                      '0 0 0 0px rgba(34,197,94,0)',
+                      '0 0 0 7px rgba(34,197,94,0.28)',
+                      '0 0 0 0px rgba(34,197,94,0)',
+                    ]}}
+                    transition={{ duration:1.8, repeat:Infinity, ease:'easeInOut' }}
+                  />
+                )}
               </motion.div>
             )}
         </AnimatePresence>
@@ -1726,6 +1950,9 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           </div>
         )}
 
+        {/* Virus Flash */}
+        <VirusFlash show={virusFlash} />
+
         {/* Virus Alert Overlay - Stylized physical card format */}
         {gameState.showVirusAlert && gameState.virusAlertData && (
           <div className="absolute inset-0 z-[100] bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
@@ -1750,13 +1977,15 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                 <div className="bg-black/40 p-5 rounded-2xl border border-white/5 space-y-3 shadow-inner">
                   <div>
                     <p className="text-[10px] text-white/50 font-black uppercase tracking-[0.2em] mb-1">Infectado</p>
-                    <p className="text-2xl font-black text-white leading-tight drop-shadow-md">{gameState.virusAlertData?.player?.name || 'Jugador'}</p>
+                    <p className="text-2xl font-black text-white leading-tight drop-shadow-md">
+                      {useScrambleText(gameState.virusAlertData?.player?.name || '', gameState.showVirusAlert)}
+                    </p>
                   </div>
                   
                   <div className="pt-4 border-t border-white/10">
                     <p className="text-[10px] text-green-500 font-black uppercase tracking-[0.2em] mb-1">Efecto / Maldición</p>
                     <h3 className="text-2xl font-black text-emerald-400 mb-2 drop-shadow-lg">
-                      ¡{gameState.virusAlertData.player.name} tiene el virus {gameState.virusAlertData.virus.virusName}!
+                      ¡{useScrambleText(gameState.virusAlertData?.player?.name || '', gameState.showVirusAlert)} tiene el virus {gameState.virusAlertData.virus.virusName}!
                     </h3>
                     <p className="text-white/80 font-medium italic mb-6 bg-slate-800/50 p-4 rounded-2xl border border-white/5 text-sm leading-relaxed">
                       "{gameState.virusAlertData.virus.virusDescription}"
@@ -1856,15 +2085,24 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
             <motion.div
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
-              className="w-full max-w-md px-6 mb-4 mt-8"
+              className="w-full max-w-md px-6 mb-4 mt-8 flex justify-center"
             >
-              <Button
+              <motion.button
                 onClick={handleNext}
-                className="w-full h-20 text-2xl font-black uppercase tracking-widest rounded-[2rem] shadow-[0_15px_40px_rgba(var(--primary-rgb),0.35)] border-b-8 border-white/20 active:border-b-0 active:translate-y-2 transition-all bg-gradient-to-r from-white/10 via-white/20 to-white/10 backdrop-blur-sm"
+                whileTap={{ scale:0.93, y:6 }}
+                style={{ boxShadow:'0 8px 0 rgba(255,255,255,0.07), 0 0 30px rgba(168,85,247,0.2)' }}
+                className="w-full max-w-md h-20 rounded-[2rem] bg-gradient-to-b from-white/15 
+                  to-white/5 backdrop-blur-xl border border-white/20 font-black text-2xl 
+                  uppercase tracking-widest text-white transition-shadow"
               >
-                SIGUIENTE CARTA ⏭️
-              </Button>
-              <p className="text-center text-white/60 text-[10px] mt-4 uppercase tracking-[0.2em] font-bold opacity-40">Toca el botón o la carta para avanzar</p>
+                <span className="flex items-center justify-center gap-3">
+                  SIGUIENTE CARTA
+                  <motion.span
+                    animate={{ x:[0,5,0] }}
+                    transition={{ repeat:Infinity, duration:1.4, ease:'easeInOut' }}
+                  >⏭️</motion.span>
+                </span>
+              </motion.button>
             </motion.div>
           )}
 
