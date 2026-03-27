@@ -459,32 +459,28 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       gameState.showImpostor, gameState.showMimica, gameState.showBocaCerrada]);
 
   const hasInitializedRound1 = useRef(false);
-  // Trigger: Ronda 1 Norma Global + Virus Assignment
+  // Trigger: Ronda 1 Norma Global + Virus Assignment (Robust Unified Sync)
   useEffect(() => {
-    if (mode === 'megamix' && gameState.round === 1 && currentIndex === 0 && !hasInitializedRound1.current) {
+    if (mode === 'megamix' && gameState.round === 1 && currentIndex === 0 && !hasInitializedRound1.current && players.length > 0) {
       hasInitializedRound1.current = true;
-      // 1. Show Norma Global Overlay
+      
+      // Get the virus first to include it in the single state update
+      const randomVirus = applyRandomVirus(true);
+      
       setGameState(prev => ({ 
         ...prev, 
         showNormaGlobal: true,
-        // Also trigger a virus and norma for the first round as requested
         currentNorma: "Prohibido decir nombres de jugadores",
-        currentNormaTurnsRemaining: players.length * 2
+        currentNormaTurnsRemaining: players.length * 2,
+        // Integrate virus if assigned
+        showVirusAlert: !!randomVirus,
+        virusAlertData: randomVirus,
+        virusPlayerId: randomVirus?.player?.id
       }));
-      // 2. Assign first Virus
-      const randomVirus = applyRandomVirus(true);
-      if (randomVirus) {
-          // Manual inject for round 1
-          setGameState(prev => ({ 
-              ...prev, 
-              showVirusAlert: true, 
-              virusAlertData: randomVirus,
-              virusPlayerId: randomVirus.player.id
-          }));
-      }
+
       toast.info("¡RONDA 1: Norma Global + Virus activados!");
     }
-  }, [gameState.round, currentIndex, mode]); // removed players as dep to avoid double trigger
+  }, [gameState.round, currentIndex, mode, applyRandomVirus, players.length]);
 
   // Effect to broadcast state when Host changes things
   useEffect(() => {
@@ -1581,7 +1577,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
         {/* Global Norma Panel — Prominent Slide-down */}
         <AnimatePresence>
-          {(gameState.currentNorma || gameState.showNormaGlobal) && (
+          {gameState.currentNorma && (
             <motion.div
               className="mb-4 mx-auto max-w-sm z-10 relative w-full"
               initial={{ y:-40, opacity:0 }}
@@ -1604,7 +1600,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                 </div>
                 <p className="text-sm text-white font-black leading-tight uppercase 
                   tracking-tight">
-                  {gameState.currentNorma || '¡Preparando nueva norma!'}
+                  {gameState.currentNorma}
                 </p>
               </div>
             </motion.div>
@@ -1744,6 +1740,39 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               </div>
               <p className="text-[9px] text-amber-500/60 text-center mt-2">Cada trago otorga +5 XP al jugador</p>
             </div>
+          </div>
+        )}
+
+        {/* Virus Cycle Alert (Periodic Infection/Mutation) */}
+        {gameState.showVirusCycleAlert && gameState.virusCycleData && (
+          <div className="absolute inset-0 z-[120] bg-slate-950/95 backdrop-blur-xl flex items-center justify-center p-6">
+            <motion.div
+              initial={{ scale:0.7, opacity:0, y:30 }}
+              animate={{ scale:1,   opacity:1, y:0  }}
+              className="max-w-sm w-full bg-gradient-to-br from-purple-900/60 to-slate-900 border-2 border-primary/40 rounded-[2.5rem] p-8 text-center shadow-[0_0_60px_rgba(168,85,247,0.3)]"
+            >
+              <div className="flex justify-center mb-6">
+                <div className="w-20 h-20 bg-primary/20 rounded-2xl flex items-center justify-center border border-primary/30 rotate-12">
+                  <motion.div animate={{ rotate:[-15,15,-15] }} transition={{ repeat:Infinity, duration:3 }}>
+                    <Zap className="w-10 h-10 text-primary" />
+                  </motion.div>
+                </div>
+              </div>
+              <h2 className="text-2xl font-black text-white uppercase tracking-tighter mb-2">
+                {gameState.virusCycleData.title}
+              </h2>
+              <div className="bg-black/40 p-5 rounded-2xl border border-white/5 mb-8 shadow-inner">
+                <p className="text-lg font-bold text-white/90 leading-snug">
+                  {gameState.virusCycleData.message}
+                </p>
+              </div>
+              <Button
+                className="w-full h-14 bg-primary hover:bg-primary/80 text-white font-black text-lg rounded-xl transition-all active:scale-95"
+                onClick={() => setGameState(prev => ({ ...prev, showVirusCycleAlert: false }))}
+              >
+                ENTENDIDO ⏭️
+              </Button>
+            </motion.div>
           </div>
         )}
 
