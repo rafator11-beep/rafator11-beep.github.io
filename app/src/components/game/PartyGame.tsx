@@ -322,8 +322,12 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       const t = setTimeout(() => setVirusFlash(false), 400);
       return () => clearTimeout(t);
     }
-    prevVirusAlertRef.current = gameState.showVirusAlert;
+  prevVirusAlertRef.current = gameState.showVirusAlert;
   }, [gameState.showVirusAlert]);
+
+  // Scramble text for Virus Alert (Top-level hook call)
+  const infectedName = gameState.virusAlertData?.player?.name || '';
+  const scrambledName = useScrambleText(infectedName, gameState.showVirusAlert || false);
 
   const { localPlayerId } = useGameContext();
 
@@ -1978,14 +1982,14 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                   <div>
                     <p className="text-[10px] text-white/50 font-black uppercase tracking-[0.2em] mb-1">Infectado</p>
                     <p className="text-2xl font-black text-white leading-tight drop-shadow-md">
-                      {useScrambleText(gameState.virusAlertData?.player?.name || '', gameState.showVirusAlert)}
+                      {scrambledName}
                     </p>
                   </div>
                   
                   <div className="pt-4 border-t border-white/10">
                     <p className="text-[10px] text-green-500 font-black uppercase tracking-[0.2em] mb-1">Efecto / Maldición</p>
                     <h3 className="text-2xl font-black text-emerald-400 mb-2 drop-shadow-lg">
-                      ¡{useScrambleText(gameState.virusAlertData?.player?.name || '', gameState.showVirusAlert)} tiene el virus {gameState.virusAlertData.virus.virusName}!
+                      ¡{scrambledName} tiene el virus {gameState.virusAlertData.virus.virusName}!
                     </h3>
                     <p className="text-white/80 font-medium italic mb-6 bg-slate-800/50 p-4 rounded-2xl border border-white/5 text-sm leading-relaxed">
                       "{gameState.virusAlertData.virus.virusDescription}"
