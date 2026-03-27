@@ -661,7 +661,7 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsModalOpen(true)}
-        className="fixed bottom-6 left-6 w-16 h-16 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-[0_10px_40px_-10px_rgba(168,85,247,0.5)] flex items-center justify-center hover:shadow-xl transition-shadow z-[999] cursor-pointer pointer-events-auto"
+        className="fixed bottom-48 right-6 w-16 h-16 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-[0_10px_40px_-10px_rgba(168,85,247,0.5)] flex items-center justify-center hover:shadow-xl transition-shadow z-[999] cursor-pointer pointer-events-auto"
         style={{ marginBottom: 'env(safe-area-inset-bottom)' }}
       >
         <Plus className="h-8 w-8" />
