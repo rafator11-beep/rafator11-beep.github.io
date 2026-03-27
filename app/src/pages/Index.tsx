@@ -65,7 +65,7 @@ function GameAppInner() {
   // New state for Mode Options (Local vs Online)
   const [selectedModeForOptions, setSelectedModeForOptions] = useState<GameMode | null>(null);
   const [pendingHostMode, setPendingHostMode] = useState<GameMode | null>(null);
-  const [pendingBetMode, setPendingBetMode] = useState<{mode: GameMode, isOnline: boolean} | null>(null);
+  const [pendingBetMode, setPendingBetMode] = useState<{ mode: GameMode, isOnline: boolean } | null>(null);
 
   // Game Context
   const { createGame, setGameId, players, localPlayerId, gameId, addPlayer, game, createTeam, assignPlayerToTeam, setLocalPlayerId } = useGameContext();
@@ -83,7 +83,7 @@ function GameAppInner() {
   useEffect(() => {
     let keys: string[] = [];
     const konami = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
-    
+
     const handler = (e: KeyboardEvent) => {
       keys.push(e.key);
       keys = keys.slice(-10);
@@ -164,16 +164,16 @@ function GameAppInner() {
 
   const handleModeClick = (mode: GameMode) => {
     if (mode === 'poker' || mode === 'parchis') {
-       setPendingBetMode({ mode, isOnline: true });
-       return;
+      setPendingBetMode({ mode, isOnline: true });
+      return;
     }
     setSelectedModeForOptions(mode);
   };
 
   const handleJuegoTabSelect = (mode: GameMode, playMode: PlayMode) => {
     if (mode === 'poker' || mode === 'parchis') {
-       setPendingBetMode({ mode, isOnline: playMode === 'online' });
-       return;
+      setPendingBetMode({ mode, isOnline: playMode === 'online' });
+      return;
     }
     if (playMode === 'online') {
       setPendingHostMode(mode);
@@ -218,6 +218,7 @@ function GameAppInner() {
       setScreen('player-setup');
     } catch (err) {
       console.error('Error creating game:', err);
+      toast.error("Error al crear la partida. Inténtalo de nuevo.");
     }
   };
 
@@ -234,6 +235,7 @@ function GameAppInner() {
       setScreen('player-setup');
     } catch (err) {
       console.error('Error creating game:', err);
+      toast.error("Error al crear la partida. Inténtalo de nuevo.");
     }
   };
 
@@ -682,20 +684,20 @@ function GameAppInner() {
                 variant="outline"
                 className="group h-auto min-h-[120px] flex-col items-center justify-center gap-2 rounded-[24px] border-white/10 bg-white/[0.03] p-4 text-center hover:border-yellow-500/40 hover:bg-white/[0.06] transition-all"
                 onClick={() => {
-                   if (amount > 0 && (profile?.coins || 0) < amount) {
-                     toast.error(`Necesitas al menos ${amount} monedas para entrar aquí.`);
-                     return;
-                   }
-                   sessionStorage.setItem('current_bet_amount', amount.toString());
-                   const mode = pendingBetMode!.mode;
-                   const isOnline = pendingBetMode!.isOnline;
-                   setPendingBetMode(null);
-                   if (isOnline) {
-                     setPendingHostMode(mode);
-                     setScreen('lobby');
-                   } else {
-                     handleSelectMode(mode);
-                   }
+                  if (amount > 0 && (profile?.coins || 0) < amount) {
+                    toast.error(`Necesitas al menos ${amount} monedas para entrar aquí.`);
+                    return;
+                  }
+                  sessionStorage.setItem('current_bet_amount', amount.toString());
+                  const mode = pendingBetMode!.mode;
+                  const isOnline = pendingBetMode!.isOnline;
+                  setPendingBetMode(null);
+                  if (isOnline) {
+                    setPendingHostMode(mode);
+                    setScreen('lobby');
+                  } else {
+                    handleSelectMode(mode);
+                  }
                 }}
               >
                 <div className="flex items-center gap-2 text-xl font-black text-white">
