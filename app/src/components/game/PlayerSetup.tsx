@@ -345,11 +345,10 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
                             }
                           }}
                           disabled={isAdded}
-                          className={`flex items-center gap-3 p-3 rounded-2xl border transition-all text-left group ${
-                            isAdded 
-                              ? 'bg-primary/20 border-primary/50 opacity-50 cursor-not-allowed' 
+                          className={`flex items-center gap-3 p-3 rounded-2xl border transition-all text-left group ${isAdded
+                              ? 'bg-primary/20 border-primary/50 opacity-50 cursor-not-allowed'
                               : 'bg-white/5 border-white/5 hover:border-primary/50'
-                          }`}
+                            }`}
                         >
                           <Avatar className="h-10 w-10 border border-white/10 group-hover:scale-110 transition-transform">
                             <AvatarImage src={r.avatar_url || undefined} />
@@ -649,7 +648,7 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsModalOpen(true)}
-        className="fixed bottom-24 right-6 w-16 h-16 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-[0_10px_40px_-10px_rgba(168,85,247,0.5)] flex items-center justify-center hover:shadow-xl transition-shadow z-50 cursor-pointer"
+        className="fixed bottom-24 right-6 w-16 h-16 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-[0_10px_40px_-10px_rgba(168,85,247,0.5)] flex items-center justify-center hover:shadow-xl transition-shadow z-[999] cursor-pointer pointer-events-auto"
         style={{ marginBottom: 'env(safe-area-inset-bottom)' }}
       >
         <Plus className="h-8 w-8" />
