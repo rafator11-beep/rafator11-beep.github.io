@@ -6,20 +6,24 @@ export function useMultiplayer(
     roomId: string | null, 
     isHost: boolean, 
     playerName: string, 
-    playerId: string, // Mejora 8: New parameter for unique presence
+    playerId: string, 
     onGameStateUpdate: (state: any) => void, 
     onGuestAction?: (action: any) => void
 ) {
     const [players, setPlayers] = useState<any[]>([]);
+    const [connectionStatus, setConnectionStatus] = useState<'SUBSCRIBED' | 'TIMED_OUT' | 'CLOSED' | 'CHANNEL_ERROR' | 'JOINING'>('JOINING');
     const channelRef = useRef<RealtimeChannel | null>(null);
 
     useEffect(() => {
         if (!roomId || !playerName) return;
 
+        console.log(`[useMultiplayer] Joining room: ${roomId} as ${playerName} (${playerId})`);
+        setConnectionStatus('JOINING');
+
         const channel = supabase.channel(`room:${roomId}`, {
             config: {
                 presence: {
-                    key: playerId || playerName, // Mejora 8: Use playerId
+                    key: playerId || playerName, 
                 },
             },
         });
@@ -38,27 +42,38 @@ export function useMultiplayer(
             .on('presence', { event: 'sync' }, () => {
                 const state = channel.presenceState();
                 const users = Object.keys(state).map(key => ({
-                    name: key, // simplistic
-                    ...state[key][0] // grab first instance metadata
+                    presence_key: key,
+                    id: key,
+                    ...state[key][0] 
                 }));
                 setPlayers(users);
             })
             .subscribe(async (status) => {
+                setConnectionStatus(status as any);
                 if (status === 'SUBSCRIBED') {
-                    await channel.track({ online_at: new Date().toISOString(), isHost });
+                    console.log(`[useMultiplayer] Successfully joined room: ${roomId}`);
+                    await channel.track({ 
+                        online_at: new Date().toISOString(), 
+                        isHost,
+                        playerName,
+                        playerId
+                    });
+                } else if (status === 'CHANNEL_ERROR') {
+                    console.error(`[useMultiplayer] Channel error in room: ${roomId}`);
                 }
             });
 
         channelRef.current = channel;
 
         return () => {
+            console.log(`[useMultiplayer] Leaving room: ${roomId}`);
             supabase.removeChannel(channel);
         };
-    }, [roomId, playerName, isHost]);
+    }, [roomId, playerName, playerId, isHost]);
 
     const lastBroadcastRef = useRef<number>(0);
     const broadcastState = (newState: any) => {
-        if (!isHost || !channelRef.current) return;
+        if (!isHost || !channelRef.current || connectionStatus !== 'SUBSCRIBED') return;
 
         const now = Date.now();
         // Throttle to 200ms
@@ -69,18 +84,18 @@ export function useMultiplayer(
             type: 'broadcast',
             event: 'game_state',
             payload: newState,
-        });
+        }).catch(err => console.error("[useMultiplayer] Broadcast error:", err));
     };
 
     const sendActionToHost = (action: any) => {
-        if (!isHost && channelRef.current) {
+        if (!isHost && channelRef.current && connectionStatus === 'SUBSCRIBED') {
             channelRef.current.send({
                 type: 'broadcast',
                 event: 'guest_action',
                 payload: action,
-            });
+            }).catch(err => console.error("[useMultiplayer] Send action error:", err));
         }
     };
 
-    return { players, broadcastState, sendActionToHost };
+    return { players, broadcastState, sendActionToHost, connectionStatus };
 }

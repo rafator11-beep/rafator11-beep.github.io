@@ -2,7 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import { fileURLToPath } from "url";
-import { viteSingleFile } from "vite-plugin-singlefile";
+// Removed viteSingleFile to allow correct code splitting
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,22 +17,23 @@ export default defineConfig({
       overlay: false,
     },
   },
-  plugins: [react(), viteSingleFile()],
+  plugins: [react()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
   },
   build: {
-    // This removes the potential Node stream error when Rollup attempts
-    // to include missing/broken polyfill modules that are not needed
-    // now that simple-peer is fully removed.
-    chunkSizeWarningLimit: 10000,
-    assetsInlineLimit: 100000000, // Inline all assets
+    chunkSizeWarningLimit: 2000,
+    assetsInlineLimit: 4096, // Keep small assets inline, externalize large ones
     rollupOptions: {
       external: ['stream', 'buffer', 'process', 'node:stream', 'node:buffer', 'node:process'],
       output: {
-        manualChunks: undefined,
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'three-vendor': ['three'],
+          'ui-vendor': ['framer-motion', 'lucide-react', 'sonner'],
+        },
       },
     },
     minify: true,

@@ -1,11 +1,12 @@
-﻿import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Check, X, ShieldQuestion, Users, Trophy } from 'lucide-react';
+import { Check, X, ShieldQuestion, Users, Trophy, AlertTriangle, RefreshCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Player, Team } from '@/types/game';
 import { GameState } from '@/hooks/game/useGameEngine';
 import confetti from 'canvas-confetti';
 import { sfx } from '@/lib/sfx';
+import { toast } from 'sonner';
 
 interface YoNuncaEquiposFlowProps {
     questionText: string;
@@ -41,6 +42,16 @@ export function YoNuncaEquiposFlow({
     const targetTeamId = gameState.yoNuncaTargetTeamId;
 
     const targetTeam = teams.find(t => t.id === targetTeamId);
+
+    // [STABILITY FIX] Auto-recovery for dead states
+    useEffect(() => {
+        if (phase !== 'idle' && (!targetTeamId || !targetTeam)) {
+            console.warn("YoNuncaEquiposFlow: Missing target team for active phase. Recovering to idle.");
+            toast.error("Error en flujo de equipos. Reiniciando...");
+            finishFlow();
+        }
+    }, [phase, targetTeamId, targetTeam]);
+
     const targetPlayers = players.filter(p => p.team_id === targetTeamId);
 
     // The guessing team is ideally any team that is NOT the target team.
@@ -178,7 +189,17 @@ export function YoNuncaEquiposFlow({
 
                 {/* CAPTAIN ACTION PANEL (MINI) */}
                 <div className="w-full flex flex-col items-center mb-6 pt-2">
-                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest mb-2 opacity-70">Panel del Capitán (+XP)</p>
+                    <div className="flex items-center justify-between w-full mb-2">
+                        <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest opacity-70">Panel del Capitán (+XP)</p>
+                        <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={finishFlow}
+                            className="h-6 text-[9px] text-red-400 hover:text-red-300 hover:bg-red-400/10 flex gap-1 items-center"
+                        >
+                            <RefreshCcw className="w-3 h-3" /> Reiniciar flujo
+                        </Button>
+                    </div>
                     <div className="flex flex-wrap justify-center gap-2">
                         {players.map(p => (
                             <motion.button
@@ -231,7 +252,8 @@ export function YoNuncaEquiposFlow({
                             // Interactive flow for the Target Team
                             currentTruthPlayerIndex < targetPlayers.length ? (
                                 // Sequential Voting
-                                showPassScreen ? (
+                                // [STABILITY] Skip pass device screen in multiplayer
+                                (showPassScreen && !isMultiplayer) ? (
                                     <div className="flex flex-col items-center justify-center p-8 bg-blue-500/10 border border-blue-500/30 rounded-3xl mt-4">
                                         <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-blue-400 mb-6 shadow-[0_0_20px_rgba(59,130,246,0.5)]">
                                             {targetPlayers[currentTruthPlayerIndex].avatar_url ? (
@@ -255,36 +277,50 @@ export function YoNuncaEquiposFlow({
                                 ) : (
                                     <div className="flex flex-col items-center justify-center p-6 bg-slate-900 border border-white/10 rounded-3xl mt-4 relative overflow-hidden">
                                         <div className="absolute top-0 inset-x-0 h-1 bg-blue-500"></div>
-                                        <div className="mb-8 text-center">
-                                            <p className="text-sm font-bold text-blue-400 uppercase tracking-widest mb-2">Tu Turno</p>
-                                            <p className="text-3xl font-black text-white capitalize">{targetPlayers[currentTruthPlayerIndex].name}</p>
-                                        </div>
-
-                                        <h2 className="text-2xl md:text-3xl font-bold text-white text-center mb-8 leading-tight">
-                                            ¿Has hecho esto alguna vez?
-                                        </h2>
-
-                                        <div className="grid grid-cols-2 gap-4 w-full">
-                                            <Button
-                                                className="h-24 md:h-32 rounded-2xl bg-green-500/20 hover:bg-green-500/30 border border-green-500/50 flex flex-col items-center justify-center gap-2 group"
-                                                onClick={() => handleTruthPlayerVote(targetPlayers[currentTruthPlayerIndex].id, true)}
-                                            >
-                                                <div className="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center group-hover:scale-110 transition-transform">
-                                                    <Check className="w-6 h-6" />
+                                        
+                                        {/* [MULTIPLAYER FIX] If it's not actually the turn of this player in remote, show wait UI */}
+                                        {isMultiplayer && localPlayerId !== targetPlayers[currentTruthPlayerIndex].id && !isHost ? (
+                                            <div className="py-12 text-center">
+                                                <p className="text-blue-400 font-bold mb-2">ES EL TURNO DE</p>
+                                                <p className="text-3xl font-black text-white uppercase">{targetPlayers[currentTruthPlayerIndex].name}</p>
+                                                <p className="mt-4 text-xs text-muted-foreground">Espera a que responda...</p>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <div className="mb-8 text-center">
+                                                    <p className="text-sm font-bold text-blue-400 uppercase tracking-widest mb-2">
+                                                        {isMultiplayer ? 'Tu Verdade' : 'Tu Turno'}
+                                                    </p>
+                                                    <p className="text-3xl font-black text-white capitalize">{targetPlayers[currentTruthPlayerIndex].name}</p>
                                                 </div>
-                                                <span className="font-bold text-green-100 text-lg">SÍ, lo he hecho</span>
-                                            </Button>
-
-                                            <Button
-                                                className="h-24 md:h-32 rounded-2xl bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 flex flex-col items-center justify-center gap-2 group"
-                                                onClick={() => handleTruthPlayerVote(targetPlayers[currentTruthPlayerIndex].id, false)}
-                                            >
-                                                <div className="w-10 h-10 rounded-full bg-red-500 text-white flex items-center justify-center group-hover:scale-110 transition-transform">
-                                                    <X className="w-6 h-6" />
+        
+                                                <h2 className="text-2xl md:text-3xl font-bold text-white text-center mb-8 leading-tight">
+                                                    ¿Has hecho esto alguna vez?
+                                                </h2>
+        
+                                                <div className="grid grid-cols-2 gap-4 w-full">
+                                                    <Button
+                                                        className="h-24 md:h-32 rounded-2xl bg-green-500/20 hover:bg-green-500/30 border border-green-500/50 flex flex-col items-center justify-center gap-2 group"
+                                                        onClick={() => handleTruthPlayerVote(targetPlayers[currentTruthPlayerIndex].id, true)}
+                                                    >
+                                                        <div className="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                            <Check className="w-6 h-6" />
+                                                        </div>
+                                                        <span className="font-bold text-green-100 text-lg">SÍ</span>
+                                                    </Button>
+        
+                                                    <Button
+                                                        className="h-24 md:h-32 rounded-2xl bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 flex flex-col items-center justify-center gap-2 group"
+                                                        onClick={() => handleTruthPlayerVote(targetPlayers[currentTruthPlayerIndex].id, false)}
+                                                    >
+                                                        <div className="w-10 h-10 rounded-full bg-red-500 text-white flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                            <X className="w-6 h-6" />
+                                                        </div>
+                                                        <span className="font-bold text-red-100 text-lg">NO</span>
+                                                    </Button>
                                                 </div>
-                                                <span className="font-bold text-red-100 text-lg">NO lo he hecho</span>
-                                            </Button>
-                                        </div>
+                                            </>
+                                        )}
                                     </div>
                                 )
                             ) : (

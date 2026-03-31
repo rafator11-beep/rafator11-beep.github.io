@@ -453,11 +453,11 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
   };
 
   // Mejora 8: Passing currentPlayer ID as presence key
-  const { broadcastState, sendActionToHost } = useMultiplayer(
+  const { broadcastState, sendActionToHost, connectionStatus } = useMultiplayer(
     roomId, 
     isHost, 
-    currentPlayer?.name || 'Observer',
-    currentPlayer?.id || 'observer', // Passed ID
+    localPlayerId || 'Observer', // Use localPlayerId as name if available or obs
+    localPlayerId || 'observer', // Passed ID
     (remoteState) => {
       // Mejora 2: Viewer Logic: Receive State (Unified sync)
       if (!isHost && remoteState) {
@@ -921,6 +921,13 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
   // YoNunca Equipos Logic Interception
   useEffect(() => {
     if (mode === 'yo_nunca_equipos' && currentText && gameState.yoNuncaEquiposPhase === 'idle') {
+      // [P0 VALIDATION] Ensure we have teams and participants
+      if (teams.length < 2) {
+        if (isHost) toast.error("Se necesitan al menos 2 equipos para este modo.");
+        handleNext();
+        return;
+      }
+
       // Find team of current player to be the target team
       const targetTeamId = currentPlayer?.team_id;
       if (targetTeamId) {
@@ -931,9 +938,13 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           yoNuncaTruthVotes: {},
           yoNuncaGuessVotes: {}
         }));
+      } else {
+        // [STABILITY] If current player has no team, move on to avoid block
+        console.warn("YoNuncaEquipos: Current player has no team. Skipping.");
+        handleNext();
       }
     }
-  }, [mode, currentText, gameState.yoNuncaEquiposPhase, currentPlayer]);
+  }, [mode, currentText, gameState.yoNuncaEquiposPhase, currentPlayer, teams.length]);
 
   // Handle Virus Expiration Notifications
   const prevVirusesRef = useRef(playerViruses);

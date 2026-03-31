@@ -6609,10 +6609,24 @@ export function getMegamixContent(count: number): string[] {
 // 8. Boca cerrada / Impostor (MINIMAL — rare events)
 export function getStructuredMegamix(count: number, playersCount: number = 4): string[] {
   function cleanDeckPool(items: any[]): string[] {
-    return items
-      .map(item => typeof item === 'string' ? item : String(item ?? ''))
-      .map(item => item.replace(/\s+/g, ' ').trim())
-      .filter(item => item.length > 0 && item !== 'undefined' && item !== 'null');
+    const seen = new Set<string>();
+    const cleaned: string[] = [];
+    
+    for (const item of items) {
+      if (typeof item !== 'string' && item == null) continue;
+      
+      const str = String(item).replace(/\s+/g, ' ').trim();
+      if (!str || str === 'undefined' || str === 'null') continue;
+
+      // Semantic normalization for dedupe: lowercase, replace non-alphanumeric
+      const normalized = str.toLowerCase().replace(/[^a-z0-9áéíóúüñ]/g, '');
+      
+      if (!seen.has(normalized)) {
+        seen.add(normalized);
+        cleaned.push(str);
+      }
+    }
+    return cleaned;
   }
 
 
@@ -6755,34 +6769,113 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     ...impostorCards,
   ]);
 
-  // Triggers — trivia, duelos, and impostor fire interactive overlays
-  const triggers = [
-    ...Array(12).fill("TRIGGER:TRIVIA_FUTBOL"),
-    ...Array(12).fill("TRIGGER:TRIVIA_CULTURA"),
-    ...Array(8).fill("TRIGGER:DUELO"),
-    ...Array(5).fill("TRIGGER:IMPOSTOR"),
-  ];
+  // --- NEW FAIR-PLAY SCHEDULER (Phase 2) ---
+  const safePlayersCount = Math.max(2, playersCount || 4);
+  const totalRounds = Math.ceil(count / safePlayersCount);
 
-  // Mix content + triggers
-  const allCards = shuffleArray(cleanDeckPool([...weightedContent, ...triggers]));
+  // 1. Group pools by specific interaction type for Quota Map
+  const pools = {
+    yo_nunca: shuffleArray(cleanDeckPool([
+      ...yoNuncaCards,
+      ...picanteCards,
+      ...enLaCamaCards
+    ])),
+    retos: shuffleArray(cleanDeckPool([
+      ...retosCards,
+      ...clasicoCards,
+      ...pacoversCards,
+      ...espanaCards
+    ])),
+    group: shuffleArray(cleanDeckPool([
+      ...masProbableCards,
+      ...categoriasCards,
+      ...mimicaCards,
+      ...bocaCards,
+      ...duelosCards,
+      ...impostorCards
+    ]))
+  };
 
-  // Build deck: take 'count' cards
-  const deck: string[] = [];
-  for (let i = 0; i < count && allCards.length > 0; i++) {
-    deck.push(allCards.pop()!);
-  }
+  const ptrs = { yo_nunca: 0, retos: 0, group: 0 };
 
-  // If deck is smaller than count, recycle
-  while (deck.length < count) {
-    deck.push(weightedContent[Math.floor(Math.random() * weightedContent.length)]);
-  }
+  const specialTriggers = shuffleArray([
+    "TRIGGER:TRIVIA_FUTBOL",
+    "TRIGGER:TRIVIA_CULTURA",
+    "TRIGGER:DUELO",
+    "TRIGGER:IMPOSTOR",
+    "TRIGGER:VIRUS"
+  ]);
 
-  // Add ~12 normas spread throughout
-  const selectedNormas = getRandomItems(normasRonda, 12).map(n =>
+  const globalNormas = shuffleArray(normasRonda.map(n => 
     `📜 NORMA: ${n.replace(/NORMA:|NORMA: |📜 |\\\./g, '').trim()}`
-  );
+  ));
 
-  return shuffleArray(cleanDeckPool([...deck, ...selectedNormas]));
+  let triggerPtr = 0;
+  let normaPtr = 0;
+  
+  let lastType = '';
+  let streakCount = 0;
+
+  const deck: string[] = [];
+
+  // Generate in rounds to ensure EVERY player gets a turn to act
+  for (let r = 0; r < totalRounds; r++) {
+    // Generate Quotas
+    const blockQuotas: string[] = [];
+    for (let i = 0; i < safePlayersCount; i++) {
+      if (i % 4 === 3) blockQuotas.push('group');
+      else if (i % 2 === 1) blockQuotas.push('retos');
+      else blockQuotas.push('yo_nunca');
+    }
+    
+    // Shuffle the block types for this round
+    const shuffledBlock = shuffleArray(blockQuotas);
+
+    for (let t = 0; t < safePlayersCount; t++) {
+      if (deck.length >= count) break;
+
+      let type = shuffledBlock[t];
+
+      // Anti-streak logic: Max 2 of the same type in a row
+      if (type === lastType && streakCount >= 2) {
+         const nextDiffIdx = shuffledBlock.findIndex((cand, idx) => idx > t && cand !== lastType);
+         if (nextDiffIdx !== -1) {
+            const temp = shuffledBlock[t];
+            shuffledBlock[t] = shuffledBlock[nextDiffIdx];
+            shuffledBlock[nextDiffIdx] = temp;
+            type = shuffledBlock[t];
+         }
+      }
+
+      if (type === lastType) {
+         streakCount++;
+      } else {
+         lastType = type;
+         streakCount = 1;
+      }
+
+      const pool = pools[type as keyof typeof pools];
+      const card = pool[ptrs[type as keyof typeof ptrs] % pool.length];
+      ptrs[type as keyof typeof ptrs]++;
+
+      deck.push(card);
+
+      // 2. Periodic Injections (High Priority Overlays)
+      // Every 10 cards, inject a Trigger
+      if (deck.length > 0 && deck.length % 10 === 0 && deck.length < count) {
+        deck.push(specialTriggers[triggerPtr % specialTriggers.length]);
+        triggerPtr++;
+      }
+      
+      // Every 15 cards, inject a Norma
+      else if (deck.length > 0 && deck.length % 15 === 0 && deck.length < count) {
+        deck.push(globalNormas[normaPtr % globalNormas.length]);
+        normaPtr++;
+      }
+    }
+  }
+
+  return cleanDeckPool(deck.slice(0, count));
 }
 
 function shuffleArray<T>(array: T[]): T[] {

@@ -35,7 +35,7 @@ export function useGame(gameId: string | null) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Local state for offline mode
+  // Local state for offline mode (persisted to avoid reload data loss)
   const localGameState = useRef<{
     game: Game | null;
     players: Player[];
@@ -45,6 +45,37 @@ export function useGame(gameId: string | null) {
     players: [],
     teams: []
   });
+
+  // Hydrate local state on mount
+  useEffect(() => {
+    if (!isSupabaseConfigured) {
+      const stored = localStorage.getItem('beep_local_session');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (parsed.game) {
+            setGame(parsed.game);
+            setPlayers(parsed.players || []);
+            setTeams(parsed.teams || []);
+            localGameState.current = parsed;
+          }
+        } catch (e) {
+          console.error("Error parsing local game session", e);
+        }
+      }
+    }
+  }, []);
+
+  // Persist local state on changes
+  useEffect(() => {
+    if (!isSupabaseConfigured && game) {
+      localStorage.setItem('beep_local_session', JSON.stringify({
+        game,
+        players,
+        teams
+      }));
+    }
+  }, [game, players, teams]);
 
   const fetchGameData = useCallback(async () => {
     if (!gameId) {

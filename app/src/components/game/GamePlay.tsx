@@ -1,18 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Trophy, Users } from 'lucide-react';
+import { ArrowLeft, Trophy, Users, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useGameContext } from '@/contexts/GameContext';
 import { QuestionCard } from './QuestionCard';
 import { TicTacToeBoard } from './TicTacToeBoard';
-import { TicTacToeGame } from './TicTacToeGame';
 import { Scoreboard } from './Scoreboard';
 import { RoundSummary } from './RoundSummary';
-import { PartyGame } from './PartyGame';
-import { PokerRoom } from '../poker/PokerRoom';
-import { ParchisGame } from './ParchisGame';
-import { MegaBoardGame } from './MegaBoardGame';
 import { GAME_MODES } from '@/types/game';
+
+const TicTacToeGame = lazy(() => import('./TicTacToeGame').then(m => ({ default: m.TicTacToeGame })));
+const PartyGame = lazy(() => import('./PartyGame').then(m => ({ default: m.PartyGame })));
+const PokerRoom = lazy(() => import('../poker/PokerRoom').then(m => ({ default: m.PokerRoom })));
+const ParchisGame = lazy(() => import('./ParchisGame').then(m => ({ default: m.ParchisGame })));
+const MegaBoardGame = lazy(() => import('./MegaBoardGame').then(m => ({ default: m.MegaBoardGame })));
 
 interface GamePlayProps {
   onExit: () => void;
@@ -72,12 +73,12 @@ export function GamePlay({ onExit, isTeamMode = false, roomId = null, isHost = f
 
   // Check if this is the new TicTacToe Fútbol mode - use dedicated component
   if (game?.mode === 'futbol') {
-    return <TicTacToeGame onExit={onExit} />;
+    return <Suspense fallback={<div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white"><Loader2 className="w-8 h-8 animate-spin text-primary" /> Cargando estadio...</div>}><TicTacToeGame onExit={onExit} /></Suspense>;
   }
 
   // Check if this is Poker mode
   if (game?.mode === 'poker') {
-    return <PokerRoom onExit={onExit} roomId={roomId} isHost={isHost} />;
+    return <Suspense fallback={<div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white"><Loader2 className="w-8 h-8 animate-spin text-primary" /> Configurando mesa...</div>}><PokerRoom onExit={onExit} roomId={roomId} isHost={isHost} /></Suspense>;
   }
 
   // Check if this is Parchis mode
@@ -89,13 +90,15 @@ export function GamePlay({ onExit, isTeamMode = false, roomId = null, isHost = f
     const localAvatar = localP?.avatar_url || undefined;
 
     return (
-      <ParchisGame
-        onExit={onExit}
-        roomId={roomId || undefined}
-        isHost={isHost}
-        localPlayerName={localName}
-        localPlayerAvatar={localAvatar}
-      />
+      <Suspense fallback={<div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white"><Loader2 className="w-8 h-8 animate-spin text-primary" /> Desplegando tablero...</div>}>
+        <ParchisGame
+          onExit={onExit}
+          roomId={roomId || undefined}
+          isHost={isHost}
+          localPlayerName={localName}
+          localPlayerAvatar={localAvatar}
+        />
+      </Suspense>
     );
   }
 
@@ -107,11 +110,13 @@ export function GamePlay({ onExit, isTeamMode = false, roomId = null, isHost = f
     const localAvatar = localP?.avatar_url || undefined;
 
     return (
-      <MegaBoardGame
-        onExit={onExit}
-        localPlayerName={localName}
-        localPlayerAvatar={localAvatar}
-      />
+      <Suspense fallback={<div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white font-arcade animate-pulse"><Loader2 className="w-8 h-8 animate-spin mb-4 text-primary" /> Cargando Entorno 3D...<br/><span className="text-xs opacity-50 mt-2">Esto puede tardar unos segundos</span></div>}>
+        <MegaBoardGame
+          onExit={onExit}
+          localPlayerName={localName}
+          localPlayerAvatar={localAvatar}
+        />
+      </Suspense>
     );
   }
 
@@ -151,13 +156,15 @@ export function GamePlay({ onExit, isTeamMode = false, roomId = null, isHost = f
   // For party modes, render the PartyGame component
   if (isPartyMode && game) {
     return (
-      <PartyGame
-        mode={game.mode as any}
-        onExit={onExit}
-        isMultiplayer={!!roomId}
-        isHost={isHost}
-        roomId={roomId}
-      />
+      <Suspense fallback={<div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white"><Loader2 className="w-8 h-8 animate-spin text-primary" /> Preparando cartas...</div>}>
+        <PartyGame
+          mode={game.mode as any}
+          onExit={onExit}
+          isMultiplayer={!!roomId}
+          isHost={isHost}
+          roomId={roomId}
+        />
+      </Suspense>
     );
   }
 

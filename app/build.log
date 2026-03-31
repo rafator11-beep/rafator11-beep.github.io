@@ -1,0 +1,45 @@
+
+> vite_react_shadcn_ts@0.0.0 build
+> vite build
+
+[36mvite v4.5.14 [32mbuilding for production...[36m[39m
+transforming...
+
+[1m[33mwarn[39m[22m - The class `duration-[800ms]` is ambiguous and matches multiple utilities.
+[1m[33mwarn[39m[22m - If this is content and not a class, replace it with `duration-&lsqb;800ms&rsqb;` to silence this warning.
+[32m✓[39m 2310 modules transformed.
+rendering chunks...
+computing gzip size...
+[2mdist/[22m[32mindex.html                                  [39m[1m[2m  1.87 kB[22m[1m[22m[2m │ gzip:   0.75 kB[22m
+[2mdist/[22m[32massets/favicon-dd821076.ico                 [39m[1m[2m 20.37 kB[22m[1m[22m
+[2mdist/[22m[32massets/reverso-2d48e65c.jpg                 [39m[1m[2m 26.99 kB[22m[1m[22m
+[2mdist/[22m[32massets/tapete-c80893b4.jpg                  [39m[1m[2m 55.62 kB[22m[1m[22m
+[2mdist/[22m[35massets/index-f278640d.css                   [39m[1m[2m229.74 kB[22m[1m[22m[2m │ gzip:  30.50 kB[22m
+[2mdist/[22m[36massets/tapete-16df2058.js                   [39m[1m[2m  0.07 kB[22m[1m[22m[2m │ gzip:   0.09 kB[22m
+[2mdist/[22m[36massets/reverso-580c020d.js                  [39m[1m[2m  0.08 kB[22m[1m[22m[2m │ gzip:   0.10 kB[22m
+[2mdist/[22m[36massets/NotFound-b53fb92f.js                 [39m[1m[2m  0.67 kB[22m[1m[22m[2m │ gzip:   0.40 kB[22m
+[2mdist/[22m[36massets/useSavedPlayers-00217abc.js          [39m[1m[2m  1.63 kB[22m[1m[22m[2m │ gzip:   0.67 kB[22m
+[2mdist/[22m[36massets/ResetApp-20881c2a.js                 [39m[1m[2m  2.16 kB[22m[1m[22m[2m │ gzip:   1.12 kB[22m
+[2mdist/[22m[36massets/RewardPopup-dc4a7aec.js              [39m[1m[2m  4.48 kB[22m[1m[22m[2m │ gzip:   1.59 kB[22m
+[2mdist/[22m[36massets/TicTacToeGame-d8cde30e.js            [39m[1m[2m  6.87 kB[22m[1m[22m[2m │ gzip:   2.63 kB[22m
+[2mdist/[22m[36massets/GameHistory-589fdbde.js              [39m[1m[2m  7.31 kB[22m[1m[22m[2m │ gzip:   2.46 kB[22m
+[2mdist/[22m[36massets/slider-0f16ab97.js                   [39m[1m[2m  8.54 kB[22m[1m[22m[2m │ gzip:   3.46 kB[22m
+[2mdist/[22m[36massets/GuestSetup-9eb9384a.js               [39m[1m[2m  8.79 kB[22m[1m[22m[2m │ gzip:   3.39 kB[22m
+[2mdist/[22m[36massets/LobbyScreen-513e45a4.js              [39m[1m[2m 14.59 kB[22m[1m[22m[2m │ gzip:   3.89 kB[22m
+[2mdist/[22m[36massets/AppSettings-b9067255.js              [39m[1m[2m 17.26 kB[22m[1m[22m[2m │ gzip:   4.88 kB[22m
+[2mdist/[22m[36massets/ParchisGame-803b5dd4.js              [39m[1m[2m 21.58 kB[22m[1m[22m[2m │ gzip:   6.93 kB[22m
+[2mdist/[22m[36massets/HallOfFame-53e78431.js               [39m[1m[2m 24.01 kB[22m[1m[22m[2m │ gzip:   6.89 kB[22m
+[2mdist/[22m[36massets/PokerRoom-8e42add1.js                [39m[1m[2m 24.32 kB[22m[1m[22m[2m │ gzip:   8.27 kB[22m
+[2mdist/[22m[36massets/PlayerSetup-8c769c2c.js              [39m[1m[2m 24.74 kB[22m[1m[22m[2m │ gzip:   7.53 kB[22m
+[2mdist/[22m[36massets/Profiles-d6a38edd.js                 [39m[1m[2m 32.68 kB[22m[1m[22m[2m │ gzip:   8.29 kB[22m
+[2mdist/[22m[36massets/MegaBoardGame-a88cfcd6.js            [39m[1m[2m 37.36 kB[22m[1m[22m[2m │ gzip:  11.92 kB[22m
+[2mdist/[22m[36massets/GamePlay-7836e162.js                 [39m[1m[2m 47.73 kB[22m[1m[22m[2m │ gzip:  14.38 kB[22m
+[2mdist/[22m[36massets/ArcadeTab-e6127525.js                [39m[1m[2m 92.14 kB[22m[1m[22m[2m │ gzip:  22.38 kB[22m
+[2mdist/[22m[36massets/react-vendor-310d0b36.js             [39m[1m[2m160.10 kB[22m[1m[22m[2m │ gzip:  52.31 kB[22m
+[2mdist/[22m[36massets/footballQuestionsNew-3fa6ce55.js     [39m[1m[2m175.85 kB[22m[1m[22m[2m │ gzip:  37.52 kB[22m
+[2mdist/[22m[36massets/ui-vendor-0e636bb0.js                [39m[1m[2m211.59 kB[22m[1m[22m[2m │ gzip:  64.21 kB[22m
+[2mdist/[22m[36massets/PartyGame-73dfc0e0.js                [39m[1m[2m232.13 kB[22m[1m[22m[2m │ gzip:  63.82 kB[22m
+[2mdist/[22m[36massets/three-vendor-bcfff0a5.js             [39m[1m[2m502.29 kB[22m[1m[22m[2m │ gzip: 126.60 kB[22m
+[2mdist/[22m[36massets/cultureQuestionsNew2025-7c95c2e0.js  [39m[1m[2m654.83 kB[22m[1m[22m[2m │ gzip: 188.48 kB[22m
+[2mdist/[22m[36massets/index-91b8b45e.js                    [39m[1m[2m729.80 kB[22m[1m[22m[2m │ gzip: 208.50 kB[22m
+[32m✓ built in 5.30s[39m

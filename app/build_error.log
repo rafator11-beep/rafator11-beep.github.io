@@ -1,0 +1,18 @@
+
+> vite_react_shadcn_ts@0.0.0 build
+> vite build
+
+[36mvite v4.5.14 [32mbuilding for production...[36m[39m
+transforming...
+
+[1m[33mwarn[39m[22m - The class `duration-[800ms]` is ambiguous and matches multiple utilities.
+[1m[33mwarn[39m[22m - If this is content and not a class, replace it with `duration-&lsqb;800ms&rsqb;` to silence this warning.
+[32m✓[39m 2310 modules transformed.
+[31mCould not resolve entry module "@react-three/fiber".[39m
+[32m✓ built in 4.90s[39m
+[31merror during build:
+RollupError: Could not resolve entry module "@react-three/fiber".
+    at error (file:///C:/Users/Rafa/Desktop/App%20Final/app/node_modules/rollup/dist/es/shared/node-entry.js:2287:30)
+    at ModuleLoader.loadEntryModule (file:///C:/Users/Rafa/Desktop/App%20Final/app/node_modules/rollup/dist/es/shared/node-entry.js:24881:20)
+    at async Promise.all (index 1)
+    at async Promise.all (index 0)[39m

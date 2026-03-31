@@ -7,21 +7,24 @@ import { GameProvider, useGameContext } from '@/contexts/GameContext';
 import { FiestaTab } from '@/components/game/FiestaTab';
 import { JuegoTab } from '@/components/game/JuegoTab';
 import { TeamModeSelector } from '@/components/game/TeamModeSelector';
-import { PlayerSetup } from '@/components/game/PlayerSetup';
-import { GuestSetup } from '@/components/game/GuestSetup';
-import { GamePlay } from '@/components/game/GamePlay';
+import { SplashScreen } from '@/components/SplashScreen';
+import { GameMode, GAME_MODES, TabId, PlayMode } from '@/types/game';
+import { supabase } from '@/integrations/supabase/client';
+import { ConnectionDot } from '@/components/multiplayer/ConnectionDot';
+import { FeedbackDialog } from '@/components/game/FeedbackDialog';
+import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { AuthOverlay } from '@/components/auth/AuthOverlay';
 import { GlobalPresence } from '@/components/auth/GlobalPresence';
 import { WelcomeScreen } from '@/components/auth/WelcomeScreen';
 import { BottomNav } from '@/components/layout/BottomNav';
-import { LobbyScreen } from '@/components/multiplayer/LobbyScreen';
 import { ChatComponent } from '@/components/multiplayer/ChatComponent';
 import { DailyVideoProvider } from '@/components/multiplayer/DailyVideoProvider';
-import { SplashScreen } from '@/components/SplashScreen';
-import { GameMode, GAME_MODES, TabId, PlayMode } from '@/types/game';
-import { supabase } from '@/integrations/supabase/client';
-import { ConnectionDot } from '@/components/multiplayer/ConnectionDot';
+
+const GamePlay = lazy(() => import('@/components/game/GamePlay').then(m => ({ default: m.GamePlay })));
+const LobbyScreen = lazy(() => import('@/components/multiplayer/LobbyScreen').then(m => ({ default: m.LobbyScreen })));
+const PlayerSetup = lazy(() => import('@/components/game/PlayerSetup').then(m => ({ default: m.PlayerSetup })));
+const GuestSetup = lazy(() => import('@/components/game/GuestSetup').then(m => ({ default: m.GuestSetup })));
 
 type AppTab = 'inicio' | 'perfiles' | 'jugar' | 'historial' | 'ajustes' | 'arcade' | 'hall';
 import {
@@ -418,79 +421,85 @@ function GameAppInner() {
   const getScreenContent = () => {
     switch (screen) {
       case 'playing':
-        return <GamePlay onExit={handleExit} isTeamMode={isTeamMode} roomId={roomId} isHost={isHost} />;
+        return (
+          <Suspense fallback={<div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white font-arcade animate-pulse"><Loader2 className="w-12 h-12 animate-spin mb-4 text-primary" /> INICIANDO PARTIDA...</div>}>
+            <GamePlay onExit={handleExit} isTeamMode={isTeamMode} roomId={roomId} isHost={isHost} />
+          </Suspense>
+        );
 
       case 'lobby':
         return (
-          <LobbyScreen
-            initialMode={pendingHostMode || undefined}
-            initialWaiting={!!roomId && !isHost}
-            roomId={roomId}
-            currentPlayer={pendingPlayer || undefined}
-            onJoin={async (code, host, mode) => {
-              setRoomId(code);
-              setIsHost(host);
-              setPendingHostMode(null);
-              // Store roomId in sessionStorage so GuestSetup can detect game mode
-              sessionStorage.setItem('current_room_id', code);
+          <Suspense fallback={<div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white"><Loader2 className="w-8 h-8 animate-spin text-primary" /> Entrando al Lobby...</div>}>
+            <LobbyScreen
+              initialMode={pendingHostMode || undefined}
+              initialWaiting={!!roomId && !isHost}
+              roomId={roomId}
+              currentPlayer={pendingPlayer || undefined}
+              onJoin={async (code, host, mode) => {
+                setRoomId(code);
+                setIsHost(host);
+                setPendingHostMode(null);
+                // Store roomId in sessionStorage so GuestSetup can detect game mode
+                sessionStorage.setItem('current_room_id', code);
 
-              if (host && mode) {
-                try {
-                  const validMode = GAME_MODES.find(m => m.id === mode)?.id;
-                  if (validMode) {
-                    const hostId = localPlayerId || Math.random().toString(36).substring(2, 9);
+                if (host && mode) {
+                  try {
+                    const validMode = GAME_MODES.find(m => m.id === mode)?.id;
+                    if (validMode) {
+                      const hostId = localPlayerId || Math.random().toString(36).substring(2, 9);
 
-                    // 1. Create robust Room in DB
-                    await supabase.from('rooms').upsert({
-                      id: code,
-                      host_id: hostId,
-                      game_mode: validMode,
-                      status: 'setup'
-                    });
+                      // 1. Create robust Room in DB
+                      await supabase.from('rooms').upsert({
+                        id: code,
+                        host_id: hostId,
+                        game_mode: validMode,
+                        status: 'setup'
+                      });
 
-                    // 2. Insert host into participants
-                    const hPlayer = players.find(p => p.id === localPlayerId);
-                    if (hPlayer || localPlayerId) {
-                      await supabase.from('room_participants').upsert({
-                        room_id: code,
-                        player_id: hPlayer?.id || hostId,
-                        name: hPlayer?.name || 'Host',
-                        avatar_url: hPlayer?.avatar_url || '',
-                        is_host: true
-                      }).catch(console.error);
+                      // 2. Insert host into participants
+                      const hPlayer = players.find(p => p.id === localPlayerId);
+                      if (hPlayer || localPlayerId) {
+                        await supabase.from('room_participants').upsert({
+                          room_id: code,
+                          player_id: hPlayer?.id || hostId,
+                          name: hPlayer?.name || 'Host',
+                          avatar_url: hPlayer?.avatar_url || '',
+                          is_host: true
+                        }).catch(console.error);
+                      }
+
+                      const newGame = await createGame(validMode);
+                      setGameId(newGame.id);
+                      setIsTeamMode(validMode === 'yo_nunca_equipos');
+
+                      // Save current_game_id to rooms table so guests can fetch it
+                      await supabase.from('rooms').update({ current_game_id: newGame.id }).eq('id', code);
+
+                      setScreen('player-setup');
                     }
-
-                    const newGame = await createGame(validMode);
-                    setGameId(newGame.id);
-                    setIsTeamMode(validMode === 'yo_nunca_equipos');
-
-                    // Save current_game_id to rooms table so guests can fetch it
-                    await supabase.from('rooms').update({ current_game_id: newGame.id }).eq('id', code);
-
-                    setScreen('player-setup');
+                  } catch (e) {
+                    console.error("Error creating game as host:", e);
                   }
-                } catch (e) {
-                  console.error("Error creating game as host:", e);
-                }
-              } else {
-                if (!pendingPlayer) {
-                  setScreen('guest-setup');
                 } else {
-                  // We already have their info, let's insert them and wait in lobby
-                  const guestId = localPlayerId || Math.random().toString(36).substring(2, 9);
-                  await supabase.from('room_participants').upsert({
-                    room_id: code,
-                    player_id: guestId,
-                    name: pendingPlayer.name,
-                    avatar_url: pendingPlayer.avatar || '',
-                    is_host: false
-                  }).catch(console.error);
-                  setScreen('lobby');
+                  if (!pendingPlayer) {
+                    setScreen('guest-setup');
+                  } else {
+                    // We already have their info, let's insert them and wait in lobby
+                    const guestId = localPlayerId || Math.random().toString(36).substring(2, 9);
+                    await supabase.from('room_participants').upsert({
+                      room_id: code,
+                      player_id: guestId,
+                      name: pendingPlayer.name,
+                      avatar_url: pendingPlayer.avatar || '',
+                      is_host: false
+                    }).catch(console.error);
+                    setScreen('lobby');
+                  }
                 }
-              }
-            }}
-            onBack={handleBack}
-          />
+              }}
+              onBack={handleBack}
+            />
+          </Suspense>
         );
 
       case 'team-mode-select':
@@ -507,30 +516,36 @@ function GameAppInner() {
         return null;
 
       case 'player-setup':
-        return <PlayerSetup onStart={handleStartGame} onBack={handleBack} isTeamMode={isTeamMode} isMultiplayer={!!roomId} roomId={roomId} />;
+        return (
+          <Suspense fallback={<div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white"><Loader2 className="w-8 h-8 animate-spin text-primary" /> Configurando jugadores...</div>}>
+            <PlayerSetup onStart={handleStartGame} onBack={handleBack} isTeamMode={isTeamMode} isMultiplayer={!!roomId} roomId={roomId} />
+          </Suspense>
+        );
 
       case 'guest-setup':
         return (
-          <GuestSetup
-            onJoin={async (name, avatar) => {
-              setPendingPlayer({ name, avatar });
+          <Suspense fallback={<div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white"><Loader2 className="w-8 h-8 animate-spin text-primary" /> Modo Invitado...</div>}>
+            <GuestSetup
+              onJoin={async (name, avatar) => {
+                setPendingPlayer({ name, avatar });
 
-              // If we already have a room selected, insert the guest into the DB now
-              if (roomId && !isHost) {
-                const guestId = localPlayerId || Math.random().toString(36).substring(2, 9);
-                await supabase.from('room_participants').upsert({
-                  room_id: roomId,
-                  player_id: guestId,
-                  name: name,
-                  avatar_url: avatar || '',
-                  is_host: false
-                }).catch(console.error);
-              }
+                // If we already have a room selected, insert the guest into the DB now
+                if (roomId && !isHost) {
+                  const guestId = localPlayerId || Math.random().toString(36).substring(2, 9);
+                  await supabase.from('room_participants').upsert({
+                    room_id: roomId,
+                    player_id: guestId,
+                    name: name,
+                    avatar_url: avatar || '',
+                    is_host: false
+                  }).catch(console.error);
+                }
 
-              setScreen('lobby');
-            }}
-            onBack={handleExit}
-          />
+                setScreen('lobby');
+              }}
+              onBack={handleExit}
+            />
+          </Suspense>
         );
 
       default:
@@ -551,6 +566,7 @@ function GameAppInner() {
                         <div className="min-w-0 flex items-center gap-4">
                           <h1 className="text-xl font-black text-white md:text-2xl font-arcade uppercase tracking-tighter">Elige modo</h1>
                           <ConnectionDot />
+                          <FeedbackDialog />
                         </div>
 
                         {roomId ? (
