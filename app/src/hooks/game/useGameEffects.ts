@@ -6,7 +6,6 @@ import { duelos } from '@/data/duelosContent';
 import { footballQuestions } from '@/data/footballQuestionsNew';
 import { cultureQuestions } from '@/data/cultureQuestions';
 import { getRandomMimica } from '@/data/mimicaContent';
-import { shuffleArray } from '@/lib/utils';
 
 export const useGameEffects = (mode: GameMode, players: Player[]) => {
     const [playerViruses, setPlayerViruses] = useState<PlayerVirus[]>([]);
@@ -107,7 +106,7 @@ export const useGameEffects = (mode: GameMode, players: Player[]) => {
             setPlayerViruses([]);
 
             const randomVirus = virusEffects[Math.floor(Math.random() * virusEffects.length)];
-            const nextIndex = (currentRound / 7) % players.length;
+            const nextIndex = Math.floor(currentRound / 7) % players.length;
             const targetPlayer = players[nextIndex];
 
             const newVirus: PlayerVirus = {
@@ -168,8 +167,6 @@ export const useGameEffects = (mode: GameMode, players: Player[]) => {
         if (mode !== 'megamix') return false;
 
         const roll = Math.random();
-        const lastImpostorTurn = lastMiniTurnRef.current['impostor_round'] ?? -9999;
-        const impostorCooldown = Math.max(players.length * 2, 18);
 
         // Random Norma removed - now strict every 3 rounds via manageMegamixNormas
 
@@ -182,14 +179,15 @@ export const useGameEffects = (mode: GameMode, players: Player[]) => {
 
             if (specialCycle === 0 || !players.length) {
                 // Impostor
+                if (impostorRounds.length === 0) return false;
                 const randomImpostor = impostorRounds[Math.floor(Math.random() * impostorRounds.length)];
                 const impostorPlayer = players[Math.floor(Math.random() * players.length)];
                 setGameState((prev: any) => ({
                     ...prev,
                     showImpostor: true,
                     impostorData: {
-                        currentImpostorReal: randomImpostor.normalQuestion,
-                        currentImpostorFake: randomImpostor.impostorQuestion,
+                        currentImpostorReal: randomImpostor.normalQuestion || randomImpostor.category || '',
+                        currentImpostorFake: randomImpostor.impostorQuestion || randomImpostor.hint || '',
                         impostorPlayerId: impostorPlayer.id,
                     }
                 }));

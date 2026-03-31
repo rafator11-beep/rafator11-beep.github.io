@@ -20,12 +20,16 @@ export function GemCatcher({ onAddGems }: GemCatcherProps) {
     const [score, setScore] = useState(0);
     const [items, setItems] = useState<FallingItem[]>([]);
     const containerRef = useRef<HTMLDivElement>(null);
+    // gameId tracks which game session spawned each item timeout
+    // so old-game timeouts never mutate a new game's items
+    const gameIdRef = useRef(0);
 
     useEffect(() => {
         let gameInterval: NodeJS.Timeout;
         let spawnInterval: NodeJS.Timeout;
 
         if (isPlaying && timeLeft > 0) {
+            const currentGameId = gameIdRef.current;
             gameInterval = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
 
             // Spawn items progressively faster
@@ -40,9 +44,11 @@ export function GemCatcher({ onAddGems }: GemCatcherProps) {
                 };
                 setItems(prev => [...prev, newItem]);
 
-                // Clean up old items after they fall
+                // Clean up item only if still in the same game session
                 setTimeout(() => {
-                    setItems(prev => prev.filter(i => i.id !== newItem.id));
+                    if (gameIdRef.current === currentGameId) {
+                        setItems(prev => prev.filter(i => i.id !== newItem.id));
+                    }
                 }, newItem.speed * 1000);
             }, spawnRate);
 
@@ -57,6 +63,7 @@ export function GemCatcher({ onAddGems }: GemCatcherProps) {
     }, [isPlaying, timeLeft]);
 
     const startGame = () => {
+        gameIdRef.current += 1; // new session: invalidates any pending old timeouts
         setScore(0);
         setTimeLeft(30);
         setItems([]);

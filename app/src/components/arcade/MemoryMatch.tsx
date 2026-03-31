@@ -75,7 +75,7 @@ export function MemoryMatch({ onAddGems }: MemoryMatchProps) {
                     setFlippedIds([]);
                     const newMatchCount = matches + 1;
                     setMatches(newMatchCount);
-                    if (newMatchCount === 32) { // Won!
+                    if (newMatchCount === EMOJIS.length) { // Won!
                         setIsPlaying(false);
                         onAddGems(500);
                         toast.success('¡IMPRESIONANTE! Has resuelto la Memoria Extrema. 500 Gemas para ti.');

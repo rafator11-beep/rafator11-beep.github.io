@@ -69,7 +69,6 @@ export function LobbyScreen({ onJoin, onBack, initialMode, initialWaiting = fals
         );
       })
       .on('broadcast', { event: 'game_start' }, () => {
-        console.log('Game started broadcast received in Lobby');
       })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {

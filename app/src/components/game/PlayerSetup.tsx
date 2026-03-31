@@ -103,7 +103,6 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
   useEffect(() => {
     if (!isMultiplayer || !roomId) return;
 
-    console.log("Host listening for participants in room:", roomId);
 
     const syncExistingParticipants = async () => {
       const { data: participants } = await supabase
@@ -114,7 +113,6 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
       if (participants) {
         for (const p of participants) {
           if (!players.some(gp => gp.name.toLowerCase() === p.name.toLowerCase())) {
-            console.log("Auto-adding existing participant:", p.name);
             addPlayer(p.name, p.avatar_url).catch(console.error);
           }
         }
@@ -132,7 +130,6 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
       }, payload => {
         const newPart = payload.new;
         if (!players.some(gp => gp.name.toLowerCase() === newPart.name.toLowerCase())) {
-          console.log("New participant detected, auto-adding to game:", newPart.name);
           addPlayer(newPart.name, newPart.avatar_url).catch(console.error);
           toast.info(`${newPart.name} se ha unido a la sala`);
         }

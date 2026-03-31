@@ -24,7 +24,7 @@ interface AuthContextType {
     signUp: (email: string, pass: string, username: string, avatarUrl?: string) => Promise<void>;
     signOut: () => Promise<void>;
     syncEconomy: (coins: number, gems: number) => Promise<void>;
-    syncGameEnd: (xpGained: number, won: boolean) => Promise<void>;
+    syncGameEnd: (xpGained: number, won: boolean, gameMode?: string) => Promise<void>;
     equipItem: (category: string, itemId: string) => Promise<void>;
     isAuthOverlayOpen: boolean;
     setAuthOverlayOpen: (isOpen: boolean) => void;

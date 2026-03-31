@@ -156,13 +156,14 @@ export const useGameEngine = (mode: GameMode) => {
     return (teamsWithScore?.length || 0) > 0 && playersWithScore.some(p => !!p.team_id);
   }, [teamsWithScore, playersWithScore]);
 
-  const advanceTurn = useCallback(() => {
+  const advanceTurn = useCallback((skipPlayerAdvance: boolean = false) => {
     setCurrentIndex(prev => prev + 1);
 
     setGameState(prev => {
       // 1. Check if we completed a full circle of players
       // We use current round to check for game over
-      const isEndOfRound = (currentPlayerIndex + 1) % players.length === 0;
+      // Bugfix: Solo finaliza la ronda si realmente vamos a avanzar de jugador
+      const isEndOfRound = !skipPlayerAdvance && (currentPlayerIndex + 1) % players.length === 0;
       let nextState = { ...prev };
 
       if (isEndOfRound) {
@@ -195,8 +196,8 @@ export const useGameEngine = (mode: GameMode) => {
         };
       }
 
-      // 2. Handle Norma Turn Expiration
-      if (nextState.currentNorma && nextState.currentNormaTurnsRemaining && nextState.currentNormaTurnsRemaining > 0) {
+      // 2. Handle Norma Turn Expiration (solo se descuenta si avanza el turno real)
+      if (!skipPlayerAdvance && nextState.currentNorma && nextState.currentNormaTurnsRemaining && nextState.currentNormaTurnsRemaining > 0) {
         const nextTurns = nextState.currentNormaTurnsRemaining - 1;
         if (nextTurns === 0) {
           nextState = { ...nextState, currentNorma: null, currentNormaTurnsRemaining: 0 };
@@ -208,7 +209,9 @@ export const useGameEngine = (mode: GameMode) => {
       return nextState;
     });
 
-    setCurrentPlayerIndex(prev => (prev + 1) % players.length);
+    if (!skipPlayerAdvance) {
+      setCurrentPlayerIndex(prev => (prev + 1) % players.length);
+    }
   }, [players.length, currentPlayerIndex]);
 
   const addScore = (playerId: string, points: number) => {

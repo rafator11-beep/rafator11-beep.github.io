@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Users, Trophy, AlertCircle, Video, VideoOff, Copy, Crown, Plus, Minus, Eye, EyeOff, Zap, Flame, UserPlus, Globe, History, Play, Trash2, X, Cast, TrendingUp, Music } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Trophy, AlertCircle, Video, VideoOff, Copy, Crown, Plus, Minus, EyeOff, Cast, TrendingUp, Music } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import {
@@ -44,8 +44,6 @@ import { YoNuncaEquiposFlow } from './YoNuncaEquiposFlow';
 import { PodiumScreen } from './PodiumScreen';
 import confetti from 'canvas-confetti';
 
-// Helper component for TTS
-// TTSTrigger removed
 
 // ─── Visual Improvements Sub-components ──────────────────────────────────────
 
@@ -428,9 +426,9 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     manageMegamixNormas   // Every 3 rounds norma
   } = useGameEffects(mode, players);
   
-  const performTurnAdvance = useCallback(() => {
+  const performTurnAdvance = useCallback((skipPlayerAdvance: boolean = false) => {
     sfx.whoosh();
-    advanceTurn();
+    advanceTurn(skipPlayerAdvance);
   }, [advanceTurn]);
 
   // --- TRACKING DATA for Classifications ---
@@ -501,12 +499,11 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         currentNormaTurnsRemaining: (players.length > 0 ? players.length * 2 : 10)
       }));
       toast.success("¡Nueva Norma Activa!", { description: rule, duration: 4000 });
-      // BUG 5: Guard against double advance
       if (!normaAutoAdvanceRef.current) {
         normaAutoAdvanceRef.current = true;
         const timer = setTimeout(() => {
           normaAutoAdvanceRef.current = false;
-          performTurnAdvance();
+          performTurnAdvance(true);
         }, 500);
         return () => { clearTimeout(timer); normaAutoAdvanceRef.current = false; };
       }
@@ -706,6 +703,13 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     sfx.click();
     vibe(10);
 
+    // Detect if current card is Global so we don't pass the turn
+    // (Asegura que el jugador activo no pierda su carta personal en un evento que es general)
+    const cardText = getCurrentContent();
+    const isGlobal = 
+      currentQuestion?.type === 'yo_nunca' || 
+      (typeof cardText === 'string' && (cardText.toUpperCase().includes('NORMA:') || cardText.toUpperCase().includes('NUEVA NORMA:') || cardText.startsWith('TRIGGER:')));
+
     // Global Reset of all potential "active overlay" flags to prevent ghost states
     setGameState(prev => ({
       ...prev,
@@ -725,12 +729,12 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     // Check specific game modes first
     if ((mode === 'trivia_futbol' || mode === 'cultura') && loadNextQuestion) {
       loadNextQuestion();
-      advanceTurn();
+      advanceTurn(isGlobal);
       return;
     }
 
     if (checkDrinkingGame(currentIndex, currentPlayer?.name || 'Jugador', setGameState)) {
-      advanceTurn();
+      advanceTurn(isGlobal);
       return;
     }
 
@@ -784,12 +788,12 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         setGameState,
         lastMiniTurnRef
       )) {
-        advanceTurn();
+        advanceTurn(isGlobal);
         return;
       }
     }
 
-    performTurnAdvance();
+    performTurnAdvance(isGlobal);
   };
 
   // Bug 6/8: NORMA - Auto turn advance logic (Megamix)
@@ -842,7 +846,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       } else if (triggerType === 'VIRUS') {
         // BUG 4: Don't fire virus alerts before round 3
         if (gameState.round < 3) {
-          const timer = setTimeout(() => advanceTurn(), 100);
+          const timer = setTimeout(() => advanceTurn(true), 100);
           return () => clearTimeout(timer);
         }
         const virusResult = applyRandomVirus(true);
@@ -870,12 +874,12 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
             duelPlayers: [currentPlayer || players[0], opponent],
           }));
         } else {
-          const timer = setTimeout(() => advanceTurn(), 100);
+          const timer = setTimeout(() => advanceTurn(true), 100);
           return () => clearTimeout(timer);
         }
       } else if (triggerType === 'IMPOSTOR') {
-        // BUG 3: Handle IMPOSTOR triggers from deck cards
-        if (players.length >= 3) {
+        // Handle IMPOSTOR triggers from deck cards
+        if (players.length >= 3 && impostorRounds.length > 0) {
           const round = impostorRounds[Math.floor(Math.random() * impostorRounds.length)];
           const impostorPlayer = players[Math.floor(Math.random() * players.length)];
           setGameState(prev => ({
@@ -883,18 +887,17 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
             showImpostorWarning: true,
             impostorData: {
               impostorPlayerId: impostorPlayer.id,
-              currentImpostorReal: round.normalQuestion || round.category,
-              currentImpostorFake: round.impostorQuestion || round.hint,
+              currentImpostorReal: round.normalQuestion || round.category || '',
+              currentImpostorFake: round.impostorQuestion || round.hint || '',
             },
           }));
         } else {
-          const timer = setTimeout(() => advanceTurn(), 100);
+          const timer = setTimeout(() => advanceTurn(true), 100);
           return () => clearTimeout(timer);
         }
       } else {
         // Unknown triggers - auto-skip to prevent getting stuck
-        console.log("Auto-skipping trigger:", triggerType);
-        const timer = setTimeout(() => advanceTurn(), 100);
+        const timer = setTimeout(() => advanceTurn(true), 100);
         return () => clearTimeout(timer);
       }
       return;
@@ -1735,7 +1738,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
             onClick={() => {
               setGameState(prev => ({ ...prev, showVirusCycleAlert: false }));
               // Ensure we advance the card after closing the global cycle alert
-              performTurnAdvance();
+              performTurnAdvance(true);
             }}
           >
             ENTENDIDO

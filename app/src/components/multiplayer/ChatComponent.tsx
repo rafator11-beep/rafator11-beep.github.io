@@ -48,7 +48,6 @@ export function ChatComponent({ roomId, playerName }: { roomId: string, playerNa
     useEffect(() => {
         if (!roomId || !isSupabaseConfigured) return;
 
-        console.log(`[Chat] Subscribing to room chat: ${roomId}`);
         const channel = supabase.channel(`chat:${roomId}`);
 
         channel
@@ -63,16 +62,11 @@ export function ChatComponent({ roomId, playerName }: { roomId: string, playerNa
                     return !isOpen;
                 });
             })
-            .subscribe((status) => {
-                if (status === 'SUBSCRIBED') {
-                    console.log(`[Chat] Connected to ${roomId}`);
-                }
-            });
+            .subscribe();
 
         channelRef.current = channel;
 
         return () => {
-            console.log(`[Chat] Unsubscribing from ${roomId}`);
             supabase.removeChannel(channel);
         };
     }, [roomId]); // ONLY depend on roomId

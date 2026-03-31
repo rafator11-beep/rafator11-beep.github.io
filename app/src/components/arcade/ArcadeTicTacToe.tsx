@@ -305,7 +305,7 @@ export function ArcadeTicTacToe({ roomId, playerId, onClose }: ArcadeTicTacToePr
                                 {winner === effectivePlayerId ? '🏆 ¡VICTORIA! 🏆' : winner === 'tie' ? '🤝 EMPATE 🤝' : '💀 DERROTA 💀'}
                             </h2>
                             <p className="text-muted-foreground mb-8 text-lg">
-                                {winner === localPlayerId ? 'No hay rival para ti en 3 en Raya.' : winner === 'tie' ? 'Defensas perfectas.' : 'Fuiste más lento o te engañaron...'}
+                                {winner === effectivePlayerId ? 'No hay rival para ti en 3 en Raya.' : winner === 'tie' ? 'Defensas perfectas.' : 'Fuiste más lento o te engañaron...'}
                             </p>
 
                             <Button size="lg" className="w-full h-16 text-xl" onClick={() => setPhase('waiting_sync')}> {/* Actually we should recreate room to rematch but for MVP just exit */}

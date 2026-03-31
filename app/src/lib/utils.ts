@@ -14,12 +14,9 @@ export function shuffleWithMemory<T>(array: T[], lastItems: T[] = [], memorySize
 
 export function shuffleArray<T>(array: T[]): T[] {
   const shuffled = [...array];
-  // Double-pass Fisher-Yates for stronger randomization
-  for (let pass = 0; pass < 2; pass++) {
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
   return shuffled;
 }

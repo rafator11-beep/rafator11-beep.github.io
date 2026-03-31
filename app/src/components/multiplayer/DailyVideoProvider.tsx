@@ -38,7 +38,6 @@ export async function createDailyRoom(roomName: string): Promise<{ url: string; 
         });
         if (res.ok) {
             const data = await res.json();
-            console.log('[Daily] Room created via Netlify function:', data);
             return data;
         }
         console.warn('[Daily] Netlify function failed (status:', res.status, '), trying direct API...');
@@ -69,7 +68,6 @@ export async function createDailyRoom(roomName: string): Promise<{ url: string; 
 
         if (createRes.ok) {
             const room = await createRes.json();
-            console.log('[Daily] Room created via direct API:', room.url);
             return { url: room.url, name: room.name };
         }
 
@@ -81,7 +79,6 @@ export async function createDailyRoom(roomName: string): Promise<{ url: string; 
             });
             if (getRes.ok) {
                 const existingRoom = await getRes.json();
-                console.log('[Daily] Room already exists:', existingRoom.url);
                 return { url: existingRoom.url, name: existingRoom.name };
             }
         }
@@ -125,7 +122,6 @@ export function DailyVideoProvider({ children }: { children: ReactNode }) {
                 if (p.local) return;
                 list.push(extractParticipant(p, false));
             });
-            console.log('[Daily] Participants:', list.map(p => `${p.userName}(${p.isLocal ? 'local' : 'remote'}, v:${!!p.videoTrack}, a:${!!p.audioTrack})`).join(', '));
             setParticipants(list);
         } catch (err) {
             console.error('[Daily] Error updating participants:', err);
@@ -134,8 +130,6 @@ export function DailyVideoProvider({ children }: { children: ReactNode }) {
 
     const joinRoom = useCallback(async (roomUrl: string, userName: string) => {
         try {
-            console.log('[Daily] Joining:', roomUrl, 'as', userName);
-
             if (callRef.current) {
                 try { await callRef.current.destroy(); } catch { /* */ }
                 callRef.current = null;
@@ -147,17 +141,16 @@ export function DailyVideoProvider({ children }: { children: ReactNode }) {
             });
             callRef.current = call;
 
-            call.on('joined-meeting', () => { console.log('[Daily] ✅ Joined meeting!'); updateParticipants(); });
-            call.on('participant-joined', (e) => { console.log('[Daily] + Participant joined:', e?.participant?.user_name); updateParticipants(); });
+            call.on('joined-meeting', () => { updateParticipants(); });
+            call.on('participant-joined', () => { updateParticipants(); });
             call.on('participant-left', () => { updateParticipants(); });
             call.on('participant-updated', () => { updateParticipants(); });
-            call.on('track-started', (e) => { console.log('[Daily] 🎥 Track started:', e?.participant?.user_name, e?.track?.kind); updateParticipants(); });
+            call.on('track-started', () => { updateParticipants(); });
             call.on('track-stopped', () => { updateParticipants(); });
             call.on('error', (e) => { console.error('[Daily] ❌ Error:', e); setError(e?.errorMsg || 'Video error'); });
             call.on('camera-error', (e) => { console.error('[Daily] 📷 Camera error:', e); });
 
             await call.join({ url: roomUrl, userName });
-            console.log('[Daily] ✅ Join succeeded!');
             setIsJoined(true);
             setError(null);
             updateParticipants();

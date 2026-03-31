@@ -64,11 +64,7 @@ export function SlotMachine({ currentCoins, onAddGems, onSpendCoins }: SlotMachi
             r2 = pos === 1 ? diff : sym;
             r3 = pos === 2 ? diff : sym;
         } else {
-            // 50% chance for total loss
-            r1 = SYMBOLS[0];
-            r2 = SYMBOLS[1];
-            r3 = SYMBOLS[2];
-            // Just shuffle 3 different
+            // 50% chance for total loss - guaranteed 3 different symbols
             const shuffled = [...SYMBOLS].sort(() => Math.random() - 0.5);
             r1 = shuffled[0];
             r2 = shuffled[1];

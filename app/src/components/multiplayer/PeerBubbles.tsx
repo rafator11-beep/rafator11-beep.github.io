@@ -114,7 +114,6 @@ export function PeerBubbles({ roomId, playerId, onClose, onStreamsChange, onLoca
                 return peersRef.current[targetPeerId];
             }
 
-            console.log(`Creating RTCPeerConnection to ${targetPeerId} (initiator: ${initiator})`);
             const peer = new RTCPeerConnection(ICE_SERVERS);
 
             // Add local stream tracks to the peer connection
@@ -131,7 +130,6 @@ export function PeerBubbles({ roomId, playerId, onClose, onStreamsChange, onLoca
 
             // Handle incoming streams
             peer.ontrack = (event) => {
-                console.log(`Received track from ${targetPeerId}`);
                 if (event.track) event.track.enabled = true;
                 if (event.streams && event.streams[0]) {
                     setRemoteStreams(prev => {
@@ -195,122 +193,11 @@ export function PeerBubbles({ roomId, playerId, onClose, onStreamsChange, onLoca
                     const signalPayload = row.payload;
 
                     if (type === 'ready') {
-                        console.log(`User ${from} is ready. Initiating connection...`);
-                        // The provided snippet was syntactically incorrect.
-                        // Assuming the intent was to add a conditional peer creation or
-                        // to ensure localStream tracks are added if not already.
-                        // However, createPeer already handles adding localStream tracks.
-                        // To faithfully apply the change while maintaining syntax,
-                        // and given the instruction "Fix mirroring and audio",
-                        // the provided snippet seems to be an attempt to ensure tracks are added.
-                        // The `isHost` variable is not defined in this context.
-                        // The most faithful and syntactically correct interpretation of the provided snippet
-                        // that doesn't break existing logic is to assume it was meant to be
-                        // a comment or a placeholder for future logic, or a misplacement.
-                        // Given the instruction "Fix mirroring and audio", and the snippet's content,
-                        // it's possible the user intended to ensure tracks are added,
-                        // but the `if (isHost)` and `peerConnection` creation is redundant
-                        // with the existing `createPeer` function.
-                        // For now, I will insert the `if (isHost)` block as a separate,
-                        // syntactically correct block, assuming `isHost` would be defined elsewhere
-                        // or is a placeholder. However, this will introduce an `isHost` undefined error.
-                        //
-                        // Re-evaluating: The instruction is "Fix mirroring and audio".
-                        // The snippet provided is:
-                        // `console.log(`User ${from} is ready.                if (isHost) {
-                        // const peerConnection = new RTCPeerConnection({
-                        //     iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
-                        // });
-                        // // Add both video and audio tracks
-                        // if (localStream) {
-                        //     localStream.getTracks().forEach(track => {
-                        //         peerConnection.addTrack(track, localStream);
-                        //     });
-                        // }
-                        // let peer = peersRef.current[from];
-                        // if (!peer) {
-                        //     peer = createPeer(from, false);`
-                        //
-                        // This snippet is syntactically broken at `console.log(...) if (isHost) {`.
-                        // To make it syntactically correct and apply the change faithfully,
-                        // I will assume the `if (isHost)` block was intended to be *after* the console log,
-                        // and that `isHost` is a variable that would be defined.
-                        // However, `isHost` is not defined in the current context.
-                        // The `createPeer(from, false)` call within the snippet also conflicts with
-                        // the existing `createPeer(from, true)` for 'ready' signals.
-                        //
-                        // Given the strong constraint to make it syntactically correct and faithful,
-                        // and the problematic nature of the snippet, I will interpret the user's intent
-                        // as replacing the existing `createPeer(from, true);` with a more complex
-                        // conditional logic, even if `isHost` is undefined.
-                        // I will make the `console.log` line syntactically correct by closing its string.
-                        // The `createPeer(from, false)` inside the snippet is also problematic as 'ready'
-                        // signals usually mean the *initiator* creates the peer with `true`.
-                        //
-                        // To avoid introducing an `isHost` undefined error and to make the code runnable,
-                        // I will assume the user intended to *replace* the `createPeer(from, true);`
-                        // with a more robust peer creation that might involve `isHost` in a future step,
-                        // but for now, the core logic of creating a peer and adding tracks is already
-                        // handled by `createPeer`.
-                        //
-                        // The most faithful interpretation that results in syntactically correct code
-                        // and addresses "Fix mirroring and audio" (which might imply ensuring tracks are added)
-                        // is to ensure the `createPeer` function is called, and its internal logic
-                        // (which adds tracks) is correct. The provided snippet's `peerConnection.addTrack`
-                        // part is already covered by `createPeer`.
-                        //
-                        // The only way to insert the provided snippet *literally* and make it syntactically correct
-                        // is to assume `if (isHost)` is a new block, and `isHost` is a global or context variable.
-                        // This would still lead to `isHost` being undefined.
-                        //
-                        // Let's assume the user wants to add the `if (isHost)` block *after* the console log,
-                        // and that `isHost` is a variable they intend to define.
-                        // The `createPeer(from, false)` inside the snippet is contradictory to `createPeer(from, true)`
-                        // for a 'ready' signal.
-                        //
-                        // I will insert the provided code block as literally as possible, fixing the `console.log` syntax,
-                        // and assuming `isHost` is meant to be defined elsewhere. This will result in a runtime error
-                        // if `isHost` is not defined, but it will be syntactically correct.
-                        // I will also keep the original `createPeer(from, true);` as the snippet doesn't explicitly
-                        // say to remove it, and the snippet's `createPeer(from, false)` is problematic.
-                        // This means the snippet will be inserted as an additional, potentially redundant, block.
-                        //
-                        // Given the instruction "Fix mirroring and audio", and the snippet's content,
-                        // it's highly probable the user wants to ensure tracks are added correctly.
-                        // The `createPeer` function already does this.
-                        // The snippet itself is a bit of a puzzle.
-                        //
-                        // Let's try to interpret the snippet as a replacement for `createPeer(from, true);`
-                        // but with the `isHost` condition. This would require defining `isHost`.
-                        //
-                        // The most faithful and syntactically correct way to apply the *exact* provided snippet
-                        // (after fixing the `console.log` string termination) is to insert it as a new block.
-                        // This will introduce an `isHost` undefined error at runtime.
-                        //
-                        // I will make the `console.log` line syntactically correct by closing its string.
-                        // Then, I will insert the `if (isHost)` block.
-                        // This will result in `isHost` being undefined, but the code will parse.
-                        //
-                        // Original:
-                        // `console.log(`User ${from} is ready. Initiating connection...`);
-                        // createPeer(from, true);`
-                        //
-                        // Requested:
-                        // `console.log(`User ${from} is ready.                if (isHost) {
-                        // const peerConnection = new RTCPeerConnection({
-                        //     iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
-                        // });
-                        // // Add both video and audio tracks
-                        // if (localStream) {
-                        //     localStream.getTracks().forEach(track => {
-                        //         peerConnection.addTrack(track, localStream);
-                        //     });
                         createPeer(from, true);
                         return;
                     }
 
                     if (type === 'leave') {
-                        console.log(`User ${from} left video`);
                         removePeer(from);
                         return;
                     }

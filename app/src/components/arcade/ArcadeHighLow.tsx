@@ -161,29 +161,20 @@ export function ArcadeHighLow({ roomId, playerId, onClose }: ArcadeHighLowProps)
     };
 
 
+    // Bot win condition: check after remoteScore updates
+    useEffect(() => {
+        if (isBotMatch && phase === 'playing' && !winner && remoteScore >= WIN_STREAK_TARGET) {
+            setWinner('remote');
+            setPhase('result');
+        }
+    }, [isBotMatch, phase, winner, remoteScore]);
+
     useEffect(() => {
         if (!isBotMatch || phase !== 'playing' || winner) return;
 
         const botTurn = setTimeout(() => {
-            // Revalidar phase y winner dentro de functional update para evitar pisar la victoria del usuario
-            setRemoteScore((prev) => {
-                const willScore = Math.random() > 0.35;
-                const next = willScore ? prev + 1 : 0;
-                
-                // Extra de seguridad: si el componente o phase ya cambió, abortar sin llegar a 7.
-                setPhase(currentPhase => {
-                    setWinner(currentWinner => {
-                        if (currentPhase === 'playing' && !currentWinner && next >= WIN_STREAK_TARGET) {
-                            setWinner('remote');
-                            setPhase('result');
-                        }
-                        return currentWinner;
-                    });
-                    return currentPhase;
-                });
-                
-                return next;
-            });
+            const willScore = Math.random() > 0.35;
+            setRemoteScore(prev => willScore ? prev + 1 : 0);
         }, 900 + Math.random() * 900);
 
         return () => clearTimeout(botTurn);

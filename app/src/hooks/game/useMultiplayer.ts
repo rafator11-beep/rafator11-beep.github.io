@@ -17,7 +17,6 @@ export function useMultiplayer(
     useEffect(() => {
         if (!roomId || !playerName) return;
 
-        console.log(`[useMultiplayer] Joining room: ${roomId} as ${playerName} (${playerId})`);
         setConnectionStatus('JOINING');
 
         const channel = supabase.channel(`room:${roomId}`, {
@@ -51,7 +50,6 @@ export function useMultiplayer(
             .subscribe(async (status) => {
                 setConnectionStatus(status as any);
                 if (status === 'SUBSCRIBED') {
-                    console.log(`[useMultiplayer] Successfully joined room: ${roomId}`);
                     await channel.track({ 
                         online_at: new Date().toISOString(), 
                         isHost,
@@ -66,7 +64,6 @@ export function useMultiplayer(
         channelRef.current = channel;
 
         return () => {
-            console.log(`[useMultiplayer] Leaving room: ${roomId}`);
             supabase.removeChannel(channel);
         };
     }, [roomId, playerName, playerId, isHost]);
