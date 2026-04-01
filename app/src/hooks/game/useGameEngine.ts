@@ -174,15 +174,15 @@ export const useGameEngine = (mode: GameMode) => {
           setGameOver(true);
         }
         
-        // Global Events: Change Norma Global every 5 rounds
+        // Norma cambia cada 3 rondas completas
         let showNormaGlobal = prev.showNormaGlobal;
-        if (nextRound % 5 === 0) {
+        if (nextRound % 3 === 0) {
            showNormaGlobal = true;
         }
 
-        // Global Events: Virus changes player every 8 rounds
+        // Virus cambia cada 5 rondas completas
         let nextVirusId = prev.virusPlayerId;
-        if (nextRound % 8 === 0 && players.length > 0) {
+        if (nextRound % 5 === 0 && players.length > 0) {
           const currentIndex = players.findIndex(p => p.id === prev.virusPlayerId);
           const nextIndex = (currentIndex + 1) % players.length;
           nextVirusId = players[nextIndex].id;

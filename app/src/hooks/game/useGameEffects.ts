@@ -98,15 +98,15 @@ export const useGameEffects = (mode: GameMode, players: Player[]) => {
             return { type: 'INFECTION', title: '¡VIRUS DETECTADO!', message: `El virus inicial ha infectado a ${targetPlayer.name}.` };
         }
 
-        // Check if round is multiple of 7 and we haven't triggered yet for this round
-        if (currentRound > 1 && currentRound % 7 === 0 && currentRound !== lastVirusRoundRef.current) {
+        // Check if round is multiple of 5 (As requested: Virus change every 5 rounds)
+        if (currentRound > 1 && currentRound % 5 === 0 && currentRound !== lastVirusRoundRef.current) {
             lastVirusRoundRef.current = currentRound;
 
             // Logic: Rotate Virus to next player
             setPlayerViruses([]);
 
             const randomVirus = virusEffects[Math.floor(Math.random() * virusEffects.length)];
-            const nextIndex = Math.floor(currentRound / 7) % players.length;
+            const nextIndex = Math.floor(currentRound / 5) % players.length;
             const targetPlayer = players[nextIndex];
 
             const newVirus: PlayerVirus = {

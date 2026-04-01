@@ -325,6 +325,33 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     };
   }, []);
 
+  // Shake to randomize
+  useEffect(() => {
+    let lastShake = 0;
+    let lastX = 0, lastY = 0, lastZ = 0;
+    const onMotion = (e: DeviceMotionEvent) => {
+      const acc = e.accelerationIncludingGravity;
+      if (!acc) return;
+      const dx = Math.abs((acc.x ?? 0) - lastX);
+      const dy = Math.abs((acc.y ?? 0) - lastY);
+      const dz = Math.abs((acc.z ?? 0) - lastZ);
+      lastX = acc.x ?? 0; lastY = acc.y ?? 0; lastZ = acc.z ?? 0;
+      if (dx + dy + dz > 30) {
+        const now = Date.now();
+        if (now - lastShake > 1500) {
+          lastShake = now;
+          const overlayActive = gameState.showTrivia || gameState.showDuel || gameState.showImpostor || gameState.showMimica || gameState.showVoting;
+          if (!overlayActive && !isMultiplayer) {
+            handleNext();
+            if (navigator.vibrate) navigator.vibrate(60);
+          }
+        }
+      }
+    };
+    window.addEventListener('devicemotion', onMotion);
+    return () => window.removeEventListener('devicemotion', onMotion);
+  }, [gameState.showTrivia, gameState.showDuel, gameState.showImpostor, gameState.showMimica, gameState.showVoting, isMultiplayer]);
+
   // Improvements State
   const [showTurnBanner, setShowTurnBanner] = useState(false);
   const [showPodium, setShowPodium] = useState(false);
@@ -2004,6 +2031,28 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               </motion.div>
             )}
         </AnimatePresence>
+
+        {/* BOTÓN SIGUIENTE TURNO — anti-parálisis */}
+        {!(gameState.showTrivia && currentQuestion) &&
+         !gameState.showDuel &&
+         !gameState.showVoting &&
+         !gameState.showImpostor &&
+         !gameState.showCaptainPass &&
+         gameState.yoNuncaEquiposPhase === 'idle' && (
+          <motion.button
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            onClick={() => { if (isMultiplayer && !isHost) return; handleNext(); }}
+            className="mt-3 mb-1 w-full max-w-sm mx-auto flex items-center justify-center gap-2 py-4 rounded-2xl font-black text-base uppercase tracking-widest
+              bg-white/10 backdrop-blur-md border border-white/20 text-white
+              hover:bg-white/20 active:scale-[0.97] transition-all shadow-lg"
+            style={{ WebkitTapHighlightColor: 'transparent' }}
+          >
+            <ArrowRight className="w-5 h-5" />
+            Siguiente turno — {currentPlayer?.name}
+          </motion.button>
+        )}
 
         {/* Render other game components (Trivia, Drinking, etc) overlaying or replacing card */}
         {((gameState.showTrivia) || (mode === 'cultura') || (mode === 'trivia_futbol')) && currentQuestion && (

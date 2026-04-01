@@ -7,6 +7,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="theme-color" content="#0a0a0a" />
     <link rel="icon" type="image/x-icon" href="./assets/favicon-dd821076.ico" />
+    <link rel="manifest" href="./manifest.json" />
     <meta name="description" content="BEEP - El mejor juego de fiesta para jugar con amigos." />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,14 +25,35 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@Lovable" />
     <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
-    <script type="module" crossorigin src="./assets/index-c0472009.js"></script>
-    <link rel="modulepreload" crossorigin href="./assets/react-vendor-310d0b36.js">
-    <link rel="modulepreload" crossorigin href="./assets/ui-vendor-0e636bb0.js">
-    <link rel="stylesheet" href="./assets/index-66ef9f8d.css">
-  </head>
+    <script type="module" crossorigin src="./assets/index-6361382d.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/react-vendor-f68b4ada.js">
+    <link rel="modulepreload" crossorigin href="./assets/ui-vendor-32721831.js">
+    <link rel="stylesheet" href="./assets/index-00a4c24b.css">
+  <link rel="manifest" href="./manifest.webmanifest"></head>
 
   <body>
+    <!-- PWA Native Splash Screen -->
+    <style>
+      #pwa-splash { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #020817; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 99999; animation: fadeOut 0.5s ease-out 1.5s forwards; }
+      #pwa-splash h1 { color: #fff; font-family: 'Space Mono', monospace; font-size: 3rem; margin-bottom: 2rem; letter-spacing: 0.2em; text-transform: uppercase; text-shadow: 0 0 20px rgba(34, 211, 238, 0.5); }
+      .pwa-loader { width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.1); border-left-color: #22d3ee; border-radius: 50%; animation: spin 1s linear infinite; }
+      @keyframes spin { 100% { transform: rotate(360deg); } }
+      @keyframes fadeOut { 100% { opacity: 0; visibility: hidden; pointer-events: none; } }
+      body { margin: 0; background-color: #020817; }
+    </style>
+    <div id="pwa-splash">
+      <h1>BEEP</h1>
+      <div class="pwa-loader"></div>
+    </div>
+    
     <div id="root"></div>
     
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(() => {});
+        });
+      }
+    </script>
   </body>
 </html>

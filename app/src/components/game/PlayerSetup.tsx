@@ -489,7 +489,7 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
 
               {/* Jugadores sin equipo */}
               {players.filter(p => !p.team_id).length > 0 && teams.length > 0 && (
-                <div className="mb-3 p-3 rounded-xl bg-white/5 border border-white/10" onMouseLeave={() => setOpenDropdownId(null)}>
+                <div className="mb-3 p-3 rounded-xl bg-white/5 border border-white/10">
                   <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2">
                     Sin equipo — toca para asignar
                   </p>

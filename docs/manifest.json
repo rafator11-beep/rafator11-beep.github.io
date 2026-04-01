@@ -1,0 +1,17 @@
+{
+  "name": "BEEP – Juego de Fiesta",
+  "short_name": "BEEP",
+  "description": "El mejor juego de fiesta para jugar con amigos.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "/favicon.ico", "sizes": "48x48", "type": "image/x-icon" },
+    { "src": "/favicon.ico", "sizes": "192x192", "type": "image/x-icon", "purpose": "any maskable" },
+    { "src": "/favicon.ico", "sizes": "512x512", "type": "image/x-icon", "purpose": "any maskable" }
+  ],
+  "categories": ["games", "entertainment"],
+  "lang": "es"
+}
