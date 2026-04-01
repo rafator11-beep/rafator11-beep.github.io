@@ -186,14 +186,21 @@ export function useGame(gameId: string | null) {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error("Error creating game in Supabase:", error);
+      toast.error(`Error al crear partida en línea: ${error.message}. Comprueba la configuración de base de datos.`);
+      throw error;
+    }
 
     // If football mode, create tictactoe state
     if (mode === 'futbol') {
-      await supabase.from('tictactoe_state').insert({
+      const { error: tttError } = await supabase.from('tictactoe_state').insert({
         game_id: data.id,
         board: [[null, null, null], [null, null, null], [null, null, null]],
       });
+      if (tttError) {
+        console.warn("TicTacToe state initialization failed (non-critical):", tttError.message);
+      }
     }
 
     return data;
@@ -248,7 +255,11 @@ export function useGame(gameId: string | null) {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error("Error adding player to Supabase:", error);
+      toast.error(`Error al añadir jugador en línea: ${error.message}`);
+      throw error;
+    }
     return data;
   };
 

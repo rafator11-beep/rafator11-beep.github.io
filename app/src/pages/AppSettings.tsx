@@ -140,6 +140,25 @@ export function AppSettings() {
     setTimeout(() => window.location.reload(), 1500);
   };
 
+  const clearLocalSession = async () => {
+    try {
+      if (isSupabaseConfigured) {
+        await supabase.auth.signOut();
+      }
+    } catch (e) {
+      console.warn("Sign out error:", e);
+    }
+    // Remove all Supabase related local storage
+    Object.keys(localStorage).forEach(key => {
+      if (key.includes('supabase') || key.includes('sb-') || key.includes('fiesta_auth')) {
+        localStorage.removeItem(key);
+      }
+    });
+    localStorage.removeItem('fiesta_player_name');
+    toast.success('Sesión y caché de red limpiados con éxito.');
+    setTimeout(() => window.location.reload(), 1000);
+  };
+
   return (
     <div className="premium-screen min-h-screen px-4 pb-28 pt-5 md:px-6 md:pb-32 md:pt-6">
       <div className="mx-auto max-w-6xl">
@@ -434,19 +453,31 @@ export function AppSettings() {
                     </div>
                   </div>
 
-                  <div className="flex gap-2 pt-2">
+                  <div className="flex flex-col gap-2 pt-2">
+                    <div className="flex gap-2">
+                      <Button 
+                        onClick={saveSupabaseConfig}
+                        className="flex-1 h-11 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold"
+                      >
+                        Actualizar Conexión
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        onClick={clearSupabaseConfig}
+                        className="aspect-square h-11 w-11 p-0 rounded-xl border border-white/10 text-white hover:bg-red-500/20 hover:text-red-400"
+                        title="Resetear URL/Key"
+                      >
+                        <RefreshCw className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    
                     <Button 
-                      onClick={saveSupabaseConfig}
-                      className="flex-1 h-11 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold"
+                      variant="outline"
+                      onClick={clearLocalSession}
+                      className="w-full h-10 rounded-xl border-white/5 bg-white/5 text-xs text-white/60 hover:bg-white/10 hover:text-white"
                     >
-                      Actualizar Conexión
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      onClick={clearSupabaseConfig}
-                      className="aspect-square h-11 w-11 p-0 rounded-xl border border-white/10 text-white hover:bg-red-500/20 hover:text-red-400"
-                    >
-                      <RefreshCw className="h-4 w-4" />
+                      <RotateCcw className="mr-2 h-3.5 w-3.5" />
+                      Limpiar Sesión y Caché de Red
                     </Button>
                   </div>
                 </div>
