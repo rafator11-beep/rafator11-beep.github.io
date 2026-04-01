@@ -45,7 +45,7 @@ const HallOfFame = lazy(() => import('@/pages/HallOfFame').then(module => ({ def
 export type GameScreen = 'mode-select' | 'team-mode-select' | 'player-setup' | 'playing' | 'lobby' | 'guest-setup';
 
 // Modes that support team play
-const TEAM_CAPABLE_MODES: GameMode[] = ['cultura', 'trivia_futbol', 'futbol'];
+const TEAM_CAPABLE_MODES: GameMode[] = ['cultura', 'trivia_futbol', 'futbol', 'yo_nunca'];
 
 function GameAppInner() {
   const [screen, setScreen] = useState<GameScreen>('mode-select');

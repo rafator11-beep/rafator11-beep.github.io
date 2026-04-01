@@ -2346,16 +2346,17 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
       {/* Podium Screen Overlay */}
       {showPodium && (
-        <PodiumScreen 
+        <PodiumScreen
           players={players.map(p => ({
             id: p.id,
             name: p.name,
             score: scores[p.id] || 0,
             avatar_url: p.avatar_url
           }))}
+          trackingData={{ voteCounts, drinkCounts, virusReceived, skipCounts }}
           onRestart={() => {
             setShowPodium(false);
-            onExit(); // Go back to lobby/mode selection
+            onExit();
           }}
           onHome={() => {
             setShowPodium(false);
