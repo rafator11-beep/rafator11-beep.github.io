@@ -853,14 +853,6 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         if (virusResult) {
           setGameState(prev => ({ ...prev, showVirusAlert: true, virusAlertData: virusResult }));
         }
-      } else if (triggerType === 'BOCA_CERRADA') {
-        // Trigger Boca Cerrada warning — phone needs to be passed
-        const targetPlayer = currentPlayer || players[0];
-        setGameState(prev => ({
-          ...prev,
-          showBocaCerradaWarning: true,
-          bocaCerradaData: { playerId: targetPlayer.id, playerName: targetPlayer.name }
-        }));
       } else if (triggerType === 'DUELO') {
         // BUG 3: Handle DUELO triggers from deck cards
         if (players.length >= 2) {
@@ -1787,97 +1779,75 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
         {/* CAPTAIN ACTION PANEL - Give/Take XP in real-time */}
         {(!gameState.showTrivia && !gameState.showVoting && !gameState.showDuel && !gameState.showImpostor && !gameState.showMimica && !gameState.showImpostorWord && mode !== 'cultura' && mode !== 'trivia_futbol') && (
-          <div className="w-full max-w-md mt-4 mb-2 z-10 flex flex-col items-center bg-slate-950/40 backdrop-blur-3xl border border-white/10 rounded-[40px] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
-              <p className="text-[11px] text-amber-400 font-black uppercase tracking-[0.3em]">Mesa del Capitán</p>
+          <div className="w-full max-w-md mt-3 mb-2 z-10">
+            <div className="flex items-center justify-between px-3 mb-2">
+              <div className="flex items-center gap-1.5">
+                <Crown className="w-3 h-3 text-amber-400" />
+                <span className="text-[10px] text-amber-400 font-black uppercase tracking-[0.25em]">Mesa del Capitán</span>
+              </div>
+              <span className="text-[9px] text-white/30 font-bold">
+                +{Math.min(50, 10 + Math.floor(gameState.round / 2) * 5)} / -{Math.max(5, Math.floor(Math.min(50, 10 + Math.floor(gameState.round / 2) * 5) / 2))} XP
+              </span>
             </div>
-            <div className="flex flex-wrap justify-center gap-4">
+            <div className="flex flex-wrap justify-center gap-2 bg-black/30 backdrop-blur-xl border border-white/8 rounded-2xl px-4 py-3">
               {players.map(p => {
                 const isCaptain = gameState.captainId === p.id;
-                // Bug 16: Ensure consistent XP calculation
+                const isActive = currentPlayer?.id === p.id;
                 const baseXP = 10 + Math.floor(gameState.round / 2) * 5;
                 const rewardXP = Math.min(50, baseXP);
                 const penaltyXP = Math.max(5, Math.floor(rewardXP / 2));
-                
                 return (
-                  <div key={p.id} className="flex flex-col items-center gap-2 group/player">
-                    {/* Avatar with status */}
-                    <div className="relative">
-                      <div className={`w-14 h-14 rounded-full border-2 transition-all duration-300 overflow-hidden
-                        ${currentPlayer?.id === p.id ? 'border-primary ring-4 ring-primary/20 scale-105 shadow-[0_0_15px_rgba(var(--primary-rgb),0.5)]' : 'border-white/10 opacity-80 group-hover/player:opacity-100 group-hover/player:border-white/30'}`}>
-                        {p.avatar_url ? (
-                          <img src={p.avatar_url} className="w-full h-full object-cover" alt={p.name} />
-                        ) : (
-                          <div className="w-full h-full bg-slate-800 flex items-center justify-center text-sm font-black text-white/40">
-                            {p.name.substring(0, 2).toUpperCase()}
-                          </div>
-                        )}
+                  <div key={p.id} className="flex flex-col items-center gap-1">
+                    <div className="flex items-center gap-1">
+                      {/* Minus */}
+                      <motion.button
+                        whileTap={{ scale: 0.8 }}
+                        disabled={isCaptain || (isMultiplayer && !isHost)}
+                        onClick={() => {
+                          if (isCaptain) { toast.error("El Capitán no puede penalizarse 👑"); return; }
+                          handleAdjustXP(p.id, -penaltyXP);
+                          toast.error(`-${penaltyXP} XP ${p.name}`, { duration: 1200 });
+                        }}
+                        className="w-6 h-6 rounded-lg bg-red-500/80 text-white flex items-center justify-center hover:bg-red-500 disabled:opacity-30 transition-colors"
+                      >
+                        <Minus className="w-3 h-3" />
+                      </motion.button>
+
+                      {/* Avatar */}
+                      <div className={`relative w-10 h-10 rounded-xl overflow-hidden border transition-all duration-200
+                        ${isActive ? 'border-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.4)] scale-110' : 'border-white/10'}`}>
+                        {p.avatar_url
+                          ? <img src={p.avatar_url} className="w-full h-full object-cover" alt={p.name} />
+                          : <div className="w-full h-full bg-slate-800 flex items-center justify-center text-xs font-black text-white/60">{p.name[0]}</div>
+                        }
                         {isCaptain && (
-                          <div className="absolute top-0 right-0 p-1 bg-amber-500 rounded-bl-lg z-10 shadow-md">
-                            <Crown className="w-2.5 h-2.5 text-black" />
+                          <div className="absolute top-0 right-0 w-3 h-3 bg-amber-500 flex items-center justify-center rounded-bl">
+                            <Crown className="w-2 h-2 text-black" />
                           </div>
                         )}
                       </div>
-                      
-                      {/* Floating XP adjustment buttons */}
-                      <div className="absolute -bottom-2 -right-2 flex flex-col gap-1.5">
-                        <motion.button
-                          whileTap={{ scale: 0.8 }}
-                          onClick={() => {
-                            if (isMultiplayer && !isHost) return;
-                            // Bug 18: Captain shouldn't adjust their own XP
-                            if (isCaptain) {
-                              toast.error("El Capitán no puede auto-asignarse XP 👑");
-                              return;
-                            }
-                            handleAdjustXP(p.id, rewardXP);
-                            toast.custom((t) => (
-                              <div className="bg-black/90 border-2 border-emerald-500/50 p-4 rounded-2xl shadow-[0_0_20px_rgba(16,185,129,0.4)] flex items-center gap-3 font-arcade animate-in fade-in zoom-in duration-300">
-                                <div className="bg-emerald-500/20 p-2 rounded-xl text-xl">🔥</div>
-                                <div>
-                                  <p className="text-white font-black">+{rewardXP} XP</p>
-                                  <p className="text-white/50 text-[10px] uppercase tracking-wider">{p.name} ha cumplido!</p>
-                                </div>
-                              </div>
-                            ));
-                          }}
-                          className="w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center shadow-lg hover:bg-emerald-400 transition-colors"
-                        >
-                          <Plus className="w-4 h-4" />
-                        </motion.button>
-                        <motion.button
-                          whileTap={{ scale: 0.8 }}
-                          onClick={() => {
-                            if (isMultiplayer && !isHost) return;
-                            // Bug 18: Captain shouldn't adjust their own XP
-                            if (isCaptain) {
-                              toast.error("El Capitán no puede auto-penalizarse 👑");
-                              return;
-                            }
-                            handleAdjustXP(p.id, -penaltyXP);
-                            toast.error(`-${penaltyXP} XP para ${p.name} ❌`, { 
-                              className: "bg-slate-900 border-red-500/50 text-red-400 font-bold" 
-                            });
-                          }}
-                          className="w-7 h-7 rounded-lg bg-red-500 text-white flex items-center justify-center shadow-lg hover:bg-red-400 transition-colors"
-                        >
-                          <Minus className="w-4 h-4" />
-                        </motion.button>
-                      </div>
+
+                      {/* Plus */}
+                      <motion.button
+                        whileTap={{ scale: 0.8 }}
+                        disabled={isCaptain || (isMultiplayer && !isHost)}
+                        onClick={() => {
+                          if (isCaptain) { toast.error("El Capitán no puede auto-asignarse XP 👑"); return; }
+                          handleAdjustXP(p.id, rewardXP);
+                          toast.success(`+${rewardXP} XP ${p.name} 🔥`, { duration: 1200 });
+                        }}
+                        className="w-6 h-6 rounded-lg bg-emerald-500/80 text-white flex items-center justify-center hover:bg-emerald-500 disabled:opacity-30 transition-colors"
+                      >
+                        <Plus className="w-3 h-3" />
+                      </motion.button>
                     </div>
-                    <span className={`text-[10px] font-black uppercase tracking-tight truncate max-w-[60px] 
-                      ${currentPlayer?.id === p.id ? 'text-primary' : (isCaptain ? 'text-amber-400' : 'text-white/40')}`}>
+                    <span className={`text-[9px] font-black uppercase truncate max-w-[56px] text-center
+                      ${isActive ? 'text-primary' : isCaptain ? 'text-amber-400' : 'text-white/30'}`}>
                       {p.name}
                     </span>
                   </div>
                 );
               })}
-            </div>
-            <div className="mt-4 pt-3 border-t border-white/5 w-full text-center">
-              <p className="text-[9px] text-white/30 uppercase font-bold tracking-widest">
-                Recompensa actual: <span className="text-emerald-400">+{Math.min(50, 10 + Math.floor(gameState.round / 2) * 5)} XP</span>
-              </p>
             </div>
           </div>
         )}
@@ -1980,6 +1950,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                   }}
                   gameMode={mode}
                   players={players}
+                  currentPlayer={currentPlayer}
                   round={gameState.round}
                 />
 

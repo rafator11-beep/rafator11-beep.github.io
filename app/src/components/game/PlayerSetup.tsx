@@ -46,6 +46,7 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
   const [showTeamCreator, setShowTeamCreator] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 
   const modeInfo = GAME_MODES.find(m => m.id === game?.mode);
   const isTeamMode = forceTeamMode !== undefined ? forceTeamMode : (modeInfo?.teamBased || false);
@@ -486,6 +487,62 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
                 </Button>
               )}
 
+              {/* Jugadores sin equipo */}
+              {players.filter(p => !p.team_id).length > 0 && teams.length > 0 && (
+                <div className="mb-3 p-3 rounded-xl bg-white/5 border border-white/10" onMouseLeave={() => setOpenDropdownId(null)}>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2">
+                    Sin equipo — toca para asignar
+                  </p>
+                  <div className="flex flex-wrap gap-2 pt-1 pb-4">
+                    {players.filter(p => !p.team_id).map(p => (
+                      <div key={p.id} className="relative z-50">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOpenDropdownId(openDropdownId === p.id ? null : p.id);
+                          }}
+                          className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary/10 hover:bg-primary/20 border border-primary/30 text-sm font-black uppercase shadow-sm transition-colors active:scale-95"
+                        >
+                          {p.avatar_url ? (
+                            <img src={p.avatar_url} className="w-5 h-5 rounded-full object-cover" alt={p.name} />
+                          ) : (
+                            <span className="w-5 h-5 rounded-full bg-slate-600 flex items-center justify-center text-[10px] text-white">{p.name.substring(0, 2)}</span>
+                          )}
+                          <span className="text-white">{p.name}</span>
+                        </button>
+
+                        {/* Dropdown de equipos */}
+                        <AnimatePresence>
+                          {openDropdownId === p.id && (
+                            <motion.div
+                              initial={{ opacity: 0, y: -10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, scale: 0.9 }}
+                              className="absolute top-full left-0 mt-2 z-[100] flex flex-col gap-1.5 bg-slate-800 border-2 border-primary/40 rounded-xl p-2 shadow-2xl min-w-[140px]"
+                            >
+                              {teams.map(t => (
+                                <button
+                                  key={t.id}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    assignPlayerToTeam(p.id, t.id);
+                                    setOpenDropdownId(null);
+                                  }}
+                                  className="flex items-center gap-2 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-left text-xs font-black text-white hover:text-white"
+                                >
+                                  <span className="w-3 h-3 rounded-full shadow-md flex-shrink-0" style={{ backgroundColor: t.color }} />
+                                  {t.name}
+                                </button>
+                              ))}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-3">
                 {teams.map((team) => {
                   const teamPlayers = players.filter(p => p.team_id === team.id);
@@ -507,13 +564,19 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
                       </div>
                       <div className="flex flex-wrap gap-1">
                         {teamPlayers.map(p => (
-                          <span
+                          <button
                             key={p.id}
-                            className="text-[10px] bg-muted px-2 py-1 rounded-full font-bold uppercase"
+                            onClick={() => assignPlayerToTeam(p.id, null)}
+                            title="Quitar del equipo"
+                            className="flex items-center gap-1 text-[10px] bg-muted hover:bg-red-500/20 hover:text-red-400 px-2 py-1 rounded-full font-bold uppercase transition-colors group"
                           >
                             {p.name}
-                          </span>
+                            <X className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </button>
                         ))}
+                        {teamPlayers.length === 0 && (
+                          <span className="text-[10px] text-muted-foreground/50 italic">Sin jugadores</span>
+                        )}
                       </div>
                     </div>
                   );

@@ -6592,7 +6592,6 @@ export function getMegamixContent(count: number): string[] {
     ...Array(15).fill("TRIGGER:TRIVIA_CULTURA"),
     ...Array(10).fill("TRIGGER:VIRUS"),
     ...Array(1).fill("TRIGGER:MIMICA"),
-    ...Array(1).fill("TRIGGER:BOCA_CERRADA"),
   ];
   return getRandomItems(allContent, count);
 }
@@ -6725,14 +6724,6 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
   const mimicaItems = getRandomItems(mimicaPool, mimicaPool.length);
   const mimicaCards = mimicaItems.map(q => `🎭 MÍMICA: ${q} o reparte 3 tragos`);
 
-  // Pool de boca cerrada: combina bocaCerradaChallenges + bocaCerradaExtra2
-  const bocaPool = cleanDeckPool([
-    ...bocaCerradaChallenges.map((b: any) => b.text || b),
-    ...(bocaCerradaExtra2 || []),
-  ]);
-  const bocaItems = getRandomItems(bocaPool, bocaPool.length);
-  const bocaCards = bocaItems.map(q => `🤐 BOCA CERRADA: ${q}`);
-
   const impostorPool = cleanDeckPool(impostorRounds.map(r => `ESPECIAL IMPOSTOR: El tema es "${r.category}". Pista: ${r.hint}`));
   const impostorCards = getRandomItems(impostorPool, impostorPool.length);
 
@@ -6765,7 +6756,6 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     ...spread(mimicaCards, 2),
     ...spread(duelosCards, 2),
     // 1x — eventos especiales
-    ...bocaCards,
     ...impostorCards,
   ]);
 
@@ -6790,7 +6780,6 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
       ...masProbableCards,
       ...categoriasCards,
       ...mimicaCards,
-      ...bocaCards,
       ...duelosCards,
       ...impostorCards
     ]))

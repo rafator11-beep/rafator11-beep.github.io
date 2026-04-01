@@ -39,16 +39,34 @@ const AddPlayerModal: React.FC<AddPlayerModalProps> = ({ onAddPlayer, isOpen, on
         const timer = setTimeout(async () => {
             setIsSearching(true);
             try {
-                const { data, error } = await supabase
+                // Buscar en player_rankings primero
+                const { data: rankData } = await supabase
                     .from('player_rankings')
                     .select('player_name, avatar_url, total_score')
                     .ilike('player_name', `%${searchQuery}%`)
                     .order('total_score', { ascending: false })
                     .limit(10);
 
-                if (data && !error) {
-                    setSearchResults(data);
-                }
+                // Buscar también en la tabla players (historial de partidas)
+                const { data: playersData } = await supabase
+                    .from('players')
+                    .select('name, avatar_url')
+                    .ilike('name', `%${searchQuery}%`)
+                    .not('name', 'ilike', '%bot%')
+                    .limit(15);
+
+                // Combinar resultados sin duplicados
+                const rankNames = new Set((rankData || []).map((r: any) => r.player_name?.toLowerCase()));
+                const extraFromPlayers = (playersData || [])
+                    .filter((p: any) => p.name && !rankNames.has(p.name.toLowerCase()))
+                    .reduce((acc: any[], p: any) => {
+                        if (!acc.some(x => x.player_name?.toLowerCase() === p.name?.toLowerCase())) {
+                            acc.push({ player_name: p.name, avatar_url: p.avatar_url, total_score: 0 });
+                        }
+                        return acc;
+                    }, []);
+
+                setSearchResults([...(rankData || []), ...extraFromPlayers].slice(0, 12));
             } catch (err) {
                 console.error('Error fetching community profiles:', err);
             } finally {
