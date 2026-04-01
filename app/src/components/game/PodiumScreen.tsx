@@ -1,7 +1,107 @@
 import { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, RotateCcw, Crown, ChevronRight, BarChart2 } from 'lucide-react';
+import { Home, RotateCcw, Crown, ChevronRight, BarChart2, Share2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+
+// ── SHARE IMAGE ───────────────────────────────────────────────────────────────
+async function shareAwardsImage(
+  awards: { emoji: string; title: string; subtitle: string; playerId: string; accent: string; stat?: string }[],
+  players: { id: string; name: string; score: number }[]
+) {
+  const W = 800, H = 1200;
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d')!;
+
+  // Background
+  const bg = ctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, '#080810'); bg.addColorStop(1, '#0e0e1a');
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(255,255,255,0.03)'; ctx.lineWidth = 1;
+  for (let x = 0; x < W; x += 50) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+  for (let y = 0; y < H; y += 50) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+
+  // Header
+  ctx.fillStyle = '#a78bfa';
+  ctx.font = 'bold 16px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('POST-GAME · BIG DATA', W / 2, 50);
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 64px sans-serif';
+  ctx.fillText('BEEP', W / 2, 115);
+
+  // Winner
+  const winner = [...players].sort((a, b) => b.score - a.score)[0];
+  if (winner) {
+    ctx.fillStyle = 'rgba(250,204,21,0.12)';
+    ctx.beginPath(); ctx.roundRect(60, 135, W - 120, 70, 16); ctx.fill();
+    ctx.fillStyle = '#fcd34d'; ctx.font = 'bold 13px monospace'; ctx.textAlign = 'center';
+    ctx.fillText('GANADOR', W / 2, 163);
+    ctx.fillStyle = '#ffffff'; ctx.font = 'bold 26px sans-serif';
+    ctx.fillText(`🏆  ${winner.name}  ·  ${winner.score} XP`, W / 2, 193);
+  }
+
+  // Awards
+  const sliced = awards.slice(0, 10);
+  const cardH = 82, gap = 10, startY = 230;
+  for (let i = 0; i < sliced.length; i++) {
+    const a = sliced[i];
+    const y = startY + i * (cardH + gap);
+    const px = players.find(p => p.id === a.playerId);
+
+    // Card bg
+    ctx.fillStyle = `${a.accent}18`;
+    ctx.beginPath(); ctx.roundRect(40, y, W - 80, cardH, 14); ctx.fill();
+
+    // Accent left bar
+    ctx.fillStyle = a.accent;
+    ctx.beginPath(); ctx.roundRect(40, y, 5, cardH, [4, 0, 0, 4]); ctx.fill();
+
+    // Emoji
+    ctx.font = '34px serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(a.emoji, 62, y + cardH / 2 + 13);
+
+    // Title
+    ctx.fillStyle = a.accent; ctx.font = 'bold 11px monospace';
+    ctx.fillText(a.title, 108, y + 28);
+    ctx.fillStyle = '#ffffff'; ctx.font = 'bold 20px sans-serif';
+    ctx.fillText(px?.name || '???', 108, y + 52);
+    ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.font = '12px sans-serif';
+    ctx.fillText(a.subtitle, 108, y + 70);
+
+    // Stat pill
+    if (a.stat) {
+      ctx.fillStyle = `${a.accent}30`;
+      const tw = ctx.measureText(a.stat).width;
+      ctx.beginPath(); ctx.roundRect(W - 80 - tw, y + 26, tw + 20, 26, 13); ctx.fill();
+      ctx.fillStyle = a.accent; ctx.font = 'bold 13px monospace'; ctx.textAlign = 'right';
+      ctx.fillText(a.stat, W - 50, y + 44); ctx.textAlign = 'left';
+    }
+  }
+
+  // Footer
+  ctx.fillStyle = 'rgba(255,255,255,0.2)';
+  ctx.font = '13px monospace'; ctx.textAlign = 'center';
+  ctx.fillText('beep.app · ¿Y tú, qué nunca has hecho?', W / 2, H - 30);
+
+  return new Promise<void>((resolve) => {
+    canvas.toBlob(async (blob) => {
+      if (!blob) { resolve(); return; }
+      const file = new File([blob], 'beep-bigdata.png', { type: 'image/png' });
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'BEEP – Big Data', text: '¡Mira los premios de nuestra partida!' }).catch(() => {});
+      } else {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'beep-bigdata.png';
+        a.click(); URL.revokeObjectURL(url);
+      }
+      resolve();
+    }, 'image/png');
+  });
+}
 
 interface PodiumPlayer {
   id: string;
@@ -314,8 +414,15 @@ export const PodiumScreen = ({ players, onRestart, onHome, trackingData }: Podiu
                 <RotateCcw className="w-5 h-5" /> NUEVA PARTIDA
               </button>
               <button
+                onClick={() => shareAwardsImage(awards, players)}
+                className="h-14 px-4 flex items-center justify-center rounded-2xl bg-violet-600/20 border border-violet-500/30 text-violet-300 active:scale-95 transition-transform"
+                title="Compartir"
+              >
+                <Share2 className="w-5 h-5" />
+              </button>
+              <button
                 onClick={onHome}
-                className="h-14 px-5 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-white active:scale-95 transition-transform"
+                className="h-14 px-4 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-white active:scale-95 transition-transform"
               >
                 <Home className="w-5 h-5" />
               </button>

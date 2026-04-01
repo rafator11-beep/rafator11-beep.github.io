@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
-import { ArrowLeft, Target, Zap } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Target, Zap, Wifi, QrCode, Copy, Check, Users, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { useGameContext } from '@/contexts/GameContext';
 import { isSupabaseConfigured, supabase } from '@/integrations/supabase/client';
+import { QRCodeSVG } from 'qrcode.react';
+import { globalNetwork } from './engine/NetworkManager';
 import { ArcadeQuickDraw } from './ArcadeQuickDraw';
 import { ArcadeTapRace } from './ArcadeTapRace';
 import { ArcadeRPS } from './ArcadeRPS';
@@ -41,7 +43,7 @@ function getPersistentArcadePlayerId(localPlayerId?: string | null) {
   if (localPlayerId) return localPlayerId;
   const saved = localStorage.getItem('arcade_guest_id');
   if (saved) return saved;
-  const generated = `guest_${Math.random().toString(36).slice(2, 10)}`;
+  const generated = crypto.randomUUID();
   localStorage.setItem('arcade_guest_id', generated);
   return generated;
 }
@@ -56,6 +58,60 @@ export function ArcadeOnlineHub({ onReturn }: ArcadeOnlineHubProps) {
   const [matchRoomId, setMatchRoomId] = useState<string | null>(null);
   const [searchSince, setSearchSince] = useState<number | null>(null);
   const matchedRef = useRef(false);
+
+  // P2P room state
+  const [p2pPanel, setP2pPanel] = useState<'closed' | 'host' | 'join'>('closed');
+  const [p2pHostId, setP2pHostId] = useState<string | null>(null);
+  const [p2pJoinCode, setP2pJoinCode] = useState('');
+  const [p2pStatus, setP2pStatus] = useState<'idle' | 'waiting' | 'connecting' | 'connected'>('idle');
+  const [p2pCopied, setP2pCopied] = useState(false);
+
+  const startP2PHost = async () => {
+    setP2pStatus('waiting');
+    try {
+      const id = await globalNetwork.initAsHost();
+      setP2pHostId(id);
+      globalNetwork.onConnected(() => {
+        setP2pStatus('connected');
+        toast.success('¡Rival conectado via P2P!');
+        setTimeout(() => {
+          setP2pPanel('closed');
+          setSelectedGame('engine_p2p');
+          setMatchRoomId(`p2p_host_${id}`);
+          setView('playing');
+        }, 800);
+      });
+    } catch {
+      setP2pStatus('idle');
+      toast.error('Error al crear sala P2P');
+    }
+  };
+
+  const startP2PJoin = async () => {
+    if (!p2pJoinCode.trim()) return;
+    setP2pStatus('connecting');
+    try {
+      await globalNetwork.joinRoom(p2pJoinCode.trim());
+      setP2pStatus('connected');
+      toast.success('¡Conectado al host!');
+      setTimeout(() => {
+        setP2pPanel('closed');
+        setSelectedGame('engine_p2p');
+        setMatchRoomId(`p2p_guest_${p2pJoinCode}`);
+        setView('playing');
+      }, 600);
+    } catch {
+      setP2pStatus('idle');
+      toast.error('No se pudo conectar. Revisa el código');
+    }
+  };
+
+  const copyP2PCode = () => {
+    if (!p2pHostId) return;
+    navigator.clipboard.writeText(p2pHostId);
+    setP2pCopied(true);
+    setTimeout(() => setP2pCopied(false), 2000);
+  };
 
   useEffect(() => {
     if (view !== 'finding_match' || !selectedGame) return;
@@ -221,6 +277,86 @@ export function ArcadeOnlineHub({ onReturn }: ArcadeOnlineHubProps) {
             <ArrowLeft className="mr-2 h-4 w-4" />
             Volver
           </Button>
+        </div>
+
+        {/* P2P Direct Room */}
+        <div className="mb-6 rounded-3xl border border-violet-500/20 bg-violet-500/5 p-4 backdrop-blur-md">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Wifi className="w-5 h-5 text-violet-400" />
+              <span className="font-black text-white text-sm uppercase tracking-wider">Sala P2P Directa</span>
+              <span className="text-[10px] bg-violet-500/20 text-violet-300 px-2 py-0.5 rounded-full font-bold uppercase">WebRTC</span>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => { setP2pPanel(p => p === 'host' ? 'closed' : 'host'); setP2pStatus('idle'); setP2pHostId(null); }}
+                className={`px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${p2pPanel === 'host' ? 'bg-violet-600 text-white' : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'}`}>
+                <Users className="w-3.5 h-3.5 inline mr-1" />Crear
+              </button>
+              <button onClick={() => { setP2pPanel(p => p === 'join' ? 'closed' : 'join'); setP2pStatus('idle'); }}
+                className={`px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${p2pPanel === 'join' ? 'bg-indigo-600 text-white' : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'}`}>
+                <QrCode className="w-3.5 h-3.5 inline mr-1" />Unirse
+              </button>
+            </div>
+          </div>
+
+          <AnimatePresence mode="wait">
+            {p2pPanel === 'host' && (
+              <motion.div key="host" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="mt-2">
+                {p2pStatus === 'idle' && (
+                  <button onClick={startP2PHost}
+                    className="w-full py-3 rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 text-white font-black text-sm uppercase tracking-wider shadow-[0_4px_20px_rgba(139,92,246,0.4)] active:scale-95 transition-transform">
+                    Generar código de sala
+                  </button>
+                )}
+                {(p2pStatus === 'waiting' || p2pStatus === 'connected') && p2pHostId && (
+                  <div className="flex flex-col items-center gap-4 py-2">
+                    <div className="p-3 bg-white rounded-2xl shadow-xl">
+                      <QRCodeSVG value={p2pHostId} size={140} bgColor="#ffffff" fgColor="#0a0a0a" />
+                    </div>
+                    <div className="w-full">
+                      <p className="text-[10px] text-white/40 uppercase tracking-widest text-center mb-1">Código de sala</p>
+                      <div className="flex items-center gap-2 bg-black/40 rounded-xl px-3 py-2 border border-white/10">
+                        <code className="flex-1 text-violet-300 text-xs font-mono truncate">{p2pHostId}</code>
+                        <button onClick={copyP2PCode} className="text-white/60 hover:text-white transition-colors flex-shrink-0">
+                          {p2pCopied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
+                    {p2pStatus === 'waiting' && (
+                      <p className="text-xs text-white/40 flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse inline-block" />
+                        Esperando que alguien escanee el QR…
+                      </p>
+                    )}
+                    {p2pStatus === 'connected' && (
+                      <p className="text-sm font-black text-emerald-400 flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block" />
+                        ¡Conectado! Arrancando…
+                      </p>
+                    )}
+                  </div>
+                )}
+              </motion.div>
+            )}
+
+            {p2pPanel === 'join' && (
+              <motion.div key="join" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="mt-2 flex flex-col gap-3">
+                <input
+                  value={p2pJoinCode}
+                  onChange={e => setP2pJoinCode(e.target.value)}
+                  placeholder="Pega el código del host aquí…"
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm font-mono placeholder:text-white/20 outline-none focus:border-indigo-500/60"
+                />
+                <button
+                  onClick={startP2PJoin}
+                  disabled={p2pStatus === 'connecting' || !p2pJoinCode.trim()}
+                  className="w-full py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-black text-sm uppercase tracking-wider disabled:opacity-40 active:scale-95 transition-transform"
+                >
+                  {p2pStatus === 'connecting' ? '⏳ Conectando…' : p2pStatus === 'connected' ? '✅ Conectado' : 'Conectar al host'}
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

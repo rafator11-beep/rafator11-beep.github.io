@@ -1,5 +1,49 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Sparkles, Loader2, Volume2, VolumeX } from 'lucide-react';
+import { generateAIChallenge } from '@/lib/aiService';
+import { toast } from 'sonner';
+
+// ── TTS ───────────────────────────────────────────────────────────────────────
+function useTTS(text: string, autoSpeak: boolean) {
+    const [speaking, setSpeaking] = useState(false);
+    const utterRef = useRef<SpeechSynthesisUtterance | null>(null);
+
+    const speak = () => {
+        if (!('speechSynthesis' in window)) return;
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'es-ES';
+        utter.rate = 0.92;
+        utter.pitch = 1.05;
+        // Prefer a Spanish voice if available
+        const voices = window.speechSynthesis.getVoices();
+        const esVoice = voices.find(v => v.lang.startsWith('es') && !v.name.includes('Google') ? false : v.lang.startsWith('es'));
+        if (esVoice) utter.voice = esVoice;
+        utter.onstart = () => setSpeaking(true);
+        utter.onend = () => setSpeaking(false);
+        utter.onerror = () => setSpeaking(false);
+        utterRef.current = utter;
+        window.speechSynthesis.speak(utter);
+    };
+
+    const cancel = () => {
+        window.speechSynthesis?.cancel();
+        setSpeaking(false);
+    };
+
+    // Auto-speak when text changes (only if enabled)
+    useEffect(() => {
+        if (!autoSpeak) return;
+        const timer = setTimeout(speak, 400);
+        return () => { clearTimeout(timer); window.speechSynthesis?.cancel(); };
+    }, [text, autoSpeak]);
+
+    // Cancel on unmount
+    useEffect(() => () => { window.speechSynthesis?.cancel(); }, []);
+
+    return { speaking, speak, cancel };
+}
 
 interface CardDisplayProps {
     content: string;
@@ -9,6 +53,7 @@ interface CardDisplayProps {
     players?: any[];
     currentPlayer?: any;
     round?: number;
+    onAIUpdate?: (newContent: string, newType: any) => void;
 }
 
 // ── SANITIZE ──────────────────────────────────────────────────────────────────
@@ -100,48 +145,48 @@ interface CardTheme {
 
 const CARD_THEMES: Record<string, CardTheme> = {
     yoNunca: {
-        bg: 'from-emerald-500 via-teal-600 to-teal-800',
-        textBoxBg: 'bg-white/95 backdrop-blur-sm',
-        textColor: 'text-gray-900',
+        bg: 'from-emerald-900/40 via-teal-900/30 to-slate-950/80',
+        textBoxBg: 'bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.37)]',
+        textColor: 'text-white',
         accentColor: '#10b981',
         modeName: 'YO NUNCA HE...',
         modeEmoji: '🙈',
-        emojiCircle: 'bg-white/25 shadow-[0_0_30px_rgba(255,255,255,0.2)]',
+        emojiCircle: 'bg-emerald-500/10 shadow-[0_0_40px_rgba(16,185,129,0.15)]',
         extra: 'drinkBar',
-        pillStyle: 'bg-emerald-600 text-white shadow-[0_0_12px_rgba(16,185,129,0.5)]',
+        pillStyle: 'bg-white/10 text-white border border-white/20 backdrop-blur-md shadow-lg',
     },
     drink: {
-        bg: 'from-amber-400 via-orange-500 to-orange-700',
-        textBoxBg: 'bg-black/80 backdrop-blur-sm',
+        bg: 'from-amber-900/50 via-orange-950/40 to-slate-950/90',
+        textBoxBg: 'bg-black/40 backdrop-blur-xl border border-white/5',
         textColor: 'text-white',
         accentColor: '#f59e0b',
         modeName: '¡BEBE!',
         modeEmoji: '🍺',
-        emojiCircle: 'bg-white/20',
+        emojiCircle: 'bg-white/5',
         extra: 'drinkCounter',
-        pillStyle: 'bg-amber-500 text-black shadow-[0_0_12px_rgba(245,158,11,0.5)]',
+        pillStyle: 'bg-amber-500/80 text-black font-bold shadow-lg',
     },
     reto: {
-        bg: 'from-blue-500 via-blue-600 to-indigo-800',
-        textBoxBg: 'bg-white/95 backdrop-blur-sm',
-        textColor: 'text-gray-900',
+        bg: 'from-blue-900/40 via-indigo-950/30 to-slate-950/80',
+        textBoxBg: 'bg-white/5 backdrop-blur-xl border border-white/10',
+        textColor: 'text-white',
         accentColor: '#3b82f6',
         modeName: 'RETO',
         modeEmoji: '🎯',
-        emojiCircle: 'bg-white/20',
+        emojiCircle: 'bg-white/5',
         extra: 'stars',
-        pillStyle: 'bg-blue-600 text-white shadow-[0_0_12px_rgba(59,130,246,0.5)]',
+        pillStyle: 'bg-blue-600/80 text-white shadow-lg',
     },
     picante: {
-        bg: 'from-rose-500 via-pink-600 to-pink-800',
-        textBoxBg: 'bg-white/95 backdrop-blur-sm',
-        textColor: 'text-gray-900',
+        bg: 'from-rose-900/40 via-pink-950/30 to-slate-950/80',
+        textBoxBg: 'bg-white/5 backdrop-blur-xl border border-white/10',
+        textColor: 'text-white',
         accentColor: '#f43f5e',
         modeName: 'PICANTE 🔞',
         modeEmoji: '🌶️',
-        emojiCircle: 'bg-white/20',
+        emojiCircle: 'bg-white/5',
         extra: 'thermometer',
-        pillStyle: 'bg-rose-500 text-white shadow-[0_0_12px_rgba(244,63,94,0.5)]',
+        pillStyle: 'bg-rose-500/80 text-white shadow-lg',
     },
     masProbable: {
         bg: 'from-violet-500 via-purple-600 to-purple-800',
@@ -406,9 +451,11 @@ function renderCardExtra(extra: string, theme: CardTheme, content: string): Reac
 
 // ── MAIN COMPONENT ───────────────────────────────────────────────────────────
 
-export const CardDisplay = React.memo(({ content, type = 'common', onClick, gameMode, players, currentPlayer, round = 1 }: CardDisplayProps) => {
+export const CardDisplay = React.memo(({ content, type = 'common', onClick, gameMode, players, currentPlayer, round = 1, onAIUpdate }: CardDisplayProps) => {
     const theme = getCardTheme(content, type, gameMode);
     const cleanText = sanitizeCardText(content);
+    const [isGenerating, setIsGenerating] = useState(false);
+    const { speaking, speak, cancel } = useTTS(cleanText, false);
 
     // Jugador mencionado en el texto (para cartas de duelo/reto específico)
     const mentionedPlayer = players?.find(p =>
@@ -418,8 +465,43 @@ export const CardDisplay = React.memo(({ content, type = 'common', onClick, game
     // Mostrar pill: si hay jugador mencionado en texto → ese; si no → el jugador actual
     const displayPlayer = mentionedPlayer || currentPlayer || null;
 
+    const handleMagicAI = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (isGenerating) return;
+
+        setIsGenerating(true);
+        try {
+            const result = await generateAIChallenge(players || [], gameMode);
+            onAIUpdate?.(result.content, result.type);
+            toast.success("Reto Generativo Creado por Claude", { 
+                icon: "✨",
+                style: { backgroundColor: '#1e1b4b', color: '#fff', border: '1px solid #4338ca' } 
+            });
+        } catch (error) {
+            toast.error("Bridge Error: Local Inference fallida");
+        } finally {
+            setIsGenerating(false);
+        }
+    };
+
     return (
-        <div className="w-full max-w-sm mx-auto" style={{ minHeight: '72vh' }}>
+        <div className="w-full max-w-sm mx-auto relative" style={{ minHeight: '72vh' }}>
+            
+            {/* AI GLOW EFFECT */}
+            <AnimatePresence>
+                {isGenerating && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1.1 }}
+                        exit={{ opacity: 0, scale: 1.2 }}
+                        className="absolute inset-0 z-0"
+                    >
+                        <div className="absolute inset-0 bg-white/20 blur-[120px] rounded-full animate-pulse" />
+                        <div className="absolute inset-0 bg-primary/30 blur-[80px] rounded-full animate-ping" />
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             <AnimatePresence mode="wait">
                 <motion.div
                     key={content}
@@ -427,7 +509,7 @@ export const CardDisplay = React.memo(({ content, type = 'common', onClick, game
                     animate={{ rotateY: 0, opacity: 1, scale: 1 }}
                     exit={{ rotateY: -90, opacity: 0, scale: 0.85 }}
                     transition={{ type: 'spring', stiffness: 120, damping: 22 }}
-                    className={`w-full rounded-[2.5rem] overflow-hidden shadow-2xl bg-gradient-to-b ${theme.bg} flex flex-col relative cursor-pointer`}
+                    className={`w-full rounded-[2.5rem] overflow-hidden shadow-2xl bg-gradient-to-b ${theme.bg} flex flex-col relative cursor-pointer border border-white/5`}
                     style={{ minHeight: '72vh' }}
                     onClick={onClick}
                 >
@@ -438,9 +520,36 @@ export const CardDisplay = React.memo(({ content, type = 'common', onClick, game
                     {/* Top shine */}
                     <div className="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-white/10 to-transparent pointer-events-none rounded-t-[2.5rem]" />
 
+                    {/* TTS BUTTON */}
+                    <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={e => { e.stopPropagation(); speaking ? cancel() : speak(); }}
+                        className="absolute top-6 left-6 z-50 p-3 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl hover:bg-white/20 transition-all text-white"
+                    >
+                        {speaking
+                            ? <VolumeX className="w-5 h-5 text-red-400" />
+                            : <Volume2 className="w-5 h-5" />}
+                    </motion.button>
+
+                    {/* AI MAGIC BUTTON */}
+                    <motion.button
+                        whileHover={{ scale: 1.1, rotate: 5 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={handleMagicAI}
+                        disabled={isGenerating}
+                        className="absolute top-6 right-6 z-50 p-3 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl hover:bg-white/20 transition-all text-white group"
+                    >
+                        {isGenerating ? (
+                            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                        ) : (
+                            <Sparkles className="w-6 h-6 group-hover:text-yellow-400 transition-colors" />
+                        )}
+                    </motion.button>
+
                     {/* CABECERA: emoji + nombre del modo */}
                     <div className="flex flex-col items-center pt-10 pb-4 px-6">
-                        <div className={`rounded-full p-5 mb-3 ${theme.emojiCircle}`}>
+                        <div className={`rounded-full p-5 mb-3 ${theme.emojiCircle} backdrop-blur-xl`}>
                             <motion.div
                                 key={`emoji-${content}`}
                                 initial={{ scale: 0, rotate: -25, y: -15 }}
@@ -489,19 +598,19 @@ export const CardDisplay = React.memo(({ content, type = 'common', onClick, game
                             initial={{ opacity: 0, y: 16 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.15 }}
-                            className={`w-full rounded-2xl p-5 shadow-xl ${theme.textBoxBg} relative overflow-hidden`}
+                            className={`w-full rounded-[2rem] p-6 shadow-2xl ${theme.textBoxBg} relative overflow-hidden`}
                         >
                             {/* Subtle inner top highlight */}
-                            <div className="absolute top-0 inset-x-0 h-px bg-white/50" />
+                            <div className="absolute top-0 inset-x-0 h-px bg-white/20" />
 
                             {/* Badge de rareza si no es common */}
                             {type !== 'common' && (
                                 <div className="flex justify-center mb-2">
                                     <span className={`text-[10px] font-black uppercase tracking-[0.3em] px-3 py-0.5 rounded-full
-                                        ${type === 'legendary' ? 'bg-yellow-500/20 text-yellow-600' :
+                                        ${type === 'legendary' ? 'bg-yellow-500/20 text-yellow-500' :
                                             type === 'chaos' ? 'bg-pink-500/20 text-pink-500' :
                                                 type === 'rare' ? 'bg-blue-500/20 text-blue-500' :
-                                                    'bg-green-500/20 text-green-600'}`}>
+                                                    'bg-green-500/20 text-green-500'}`}>
                                         {type === 'legendary' ? '👑 LEGENDARIA' :
                                             type === 'chaos' ? '💥 CAOS' :
                                                 type === 'rare' ? '⭐ RARA' : '🦠 VIRUS'}
@@ -509,7 +618,7 @@ export const CardDisplay = React.memo(({ content, type = 'common', onClick, game
                                 </div>
                             )}
 
-                            <p className={`text-lg md:text-xl font-semibold text-center leading-snug no-scrollbar overflow-y-auto ${theme.textColor}`}
+                            <p className={`text-lg md:text-xl font-semibold text-center leading-relaxed no-scrollbar overflow-y-auto ${theme.textColor}`}
                                 style={{ maxHeight: '28vh' }}>
                                 {processDrinkingMultiplier(cleanText, round)}
                             </p>

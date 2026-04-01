@@ -719,6 +719,23 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
   };
 
 
+    const handleAIUpdate = (newContent: string, newType: any) => {
+      setGameState(prev => ({
+        ...prev,
+        currentCard: {
+          ...prev.currentCard,
+          content: newContent,
+          type: newType || 'common'
+        }
+      }));
+      // SFX de magia
+      try {
+        const audio = new Audio('/sounds/magic_ping.mp3');
+        audio.volume = 0.4;
+        audio.play();
+      } catch (e) {}
+    };
+
   const handleExit = async () => {
     // Fire and forget to prevent freeze, but ensure it runs
     saveGameToHistory();
@@ -1767,8 +1784,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
       {/* Main Content Area */}
       <main className={`flex-1 flex flex-col items-center justify-center p-4 relative transition-opacity duration-300 ${isMultiplayer && !isHost && (currentPlayer?.id !== localPlayerId) ? 'opacity-80 pointer-events-none' : ''}`}>
-
-        {/* Turn Blocker Overlay */}
+{/* Turn Blocker Overlay */}
         {isMultiplayer && !isHost && false && (
           <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-auto">
             <div className="bg-gradient-to-r from-black/80 to-slate-900/80 text-white px-6 py-3 rounded-full backdrop-blur-md border border-white/10 animate-pulse shadow-2xl skew-x-[-10deg]">
@@ -1979,6 +1995,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                   players={players}
                   currentPlayer={currentPlayer}
                   round={gameState.round}
+                  onAIUpdate={handleAIUpdate}
                 />
 
                 {/* Partículas doradas — legendary */}

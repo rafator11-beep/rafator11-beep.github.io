@@ -64,7 +64,7 @@ export function LobbyScreen({ onJoin, onBack, initialMode, initialWaiting = fals
           presenceList.map((p) => ({
             name: p.name,
             avatar: p.avatar,
-            id: p.id || Math.random().toString(),
+            id: p.id || crypto.randomUUID(),
           })),
         );
       })
@@ -78,7 +78,7 @@ export function LobbyScreen({ onJoin, onBack, initialMode, initialWaiting = fals
           }
           if (currentPlayer) {
             await channel.track({
-              id: Math.random().toString(36).substring(2, 9),
+              id: crypto.randomUUID(),
               name: currentPlayer.name,
               avatar: currentPlayer.avatar,
               online_at: new Date().toISOString(),

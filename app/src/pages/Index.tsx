@@ -1,4 +1,5 @@
 import { useState, useEffect, Suspense, lazy } from 'react';
+import { useGSAPFlash } from '@/hooks/useGSAPFlash';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Globe, Smartphone, Coins } from 'lucide-react';
 import { toast } from 'sonner';
@@ -51,6 +52,7 @@ function GameAppInner() {
   const [screen, setScreen] = useState<GameScreen>('mode-select');
   const [activeTab, setActiveTab] = useState<AppTab>('inicio');
   const [mainTab, setMainTab] = useState<TabId>('fiesta');
+  const { fire: flashScreen } = useGSAPFlash('rgba(139,92,246,0.35)');
   const [isTeamMode, setIsTeamMode] = useState(false);
   const [pendingMode, setPendingMode] = useState<GameMode | null>(null);
   const [showSplash, setShowSplash] = useState(true);
@@ -166,6 +168,7 @@ function GameAppInner() {
   }, [gameId, isHost, localPlayerId, addPlayer, createTeam, assignPlayerToTeam, setLocalPlayerId]);
 
   const handleModeClick = (mode: GameMode) => {
+    flashScreen();
     if (mode === 'poker' || mode === 'parchis') {
       setPendingBetMode({ mode, isOnline: true });
       return;
@@ -446,7 +449,7 @@ function GameAppInner() {
                   try {
                     const validMode = GAME_MODES.find(m => m.id === mode)?.id;
                     if (validMode) {
-                      const hostId = localPlayerId || Math.random().toString(36).substring(2, 9);
+                      const hostId = localPlayerId || crypto.randomUUID();
 
                       // 1. Create robust Room in DB
                       await supabase.from('rooms').upsert({
@@ -485,7 +488,7 @@ function GameAppInner() {
                     setScreen('guest-setup');
                   } else {
                     // We already have their info, let's insert them and wait in lobby
-                    const guestId = localPlayerId || Math.random().toString(36).substring(2, 9);
+                    const guestId = localPlayerId || crypto.randomUUID();
                     await supabase.from('room_participants').upsert({
                       room_id: code,
                       player_id: guestId,
@@ -531,7 +534,7 @@ function GameAppInner() {
 
                 // If we already have a room selected, insert the guest into the DB now
                 if (roomId && !isHost) {
-                  const guestId = localPlayerId || Math.random().toString(36).substring(2, 9);
+                  const guestId = localPlayerId || crypto.randomUUID();
                   await supabase.from('room_participants').upsert({
                     room_id: roomId,
                     player_id: guestId,
@@ -789,7 +792,7 @@ function GameAppInner() {
           // Try to find name in established players
           players.find(p => p.id === localPlayerId)?.name
           // Fallback for Host/Guest
-          || (roomId ? (isHost ? 'Anfitrión' : 'Invitado') : `Usuario ${localPlayerId?.slice(0, 4) || Math.floor(Math.random() * 9000) + 1000}`)
+          || (roomId ? (isHost ? 'Anfitrión' : 'Invitado') : `Usuario ${localPlayerId?.slice(0, 4) || 'Guest'}`)
         }
       />
     </>
