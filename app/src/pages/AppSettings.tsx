@@ -159,6 +159,12 @@ export function AppSettings() {
     setTimeout(() => window.location.reload(), 1000);
   };
 
+  const factoryReset = () => {
+    localStorage.clear();
+    toast.success('Restablecimiento completo realizado. Redirigiendo...');
+    setTimeout(() => window.location.href = '/', 1500);
+  };
+
   return (
     <div className="premium-screen min-h-screen px-4 pb-28 pt-5 md:px-6 md:pb-32 md:pt-6">
       <div className="mx-auto max-w-6xl">
@@ -478,6 +484,15 @@ export function AppSettings() {
                     >
                       <RotateCcw className="mr-2 h-3.5 w-3.5" />
                       Limpiar Sesión y Caché de Red
+                    </Button>
+                    
+                    <Button 
+                      variant="ghost"
+                      onClick={factoryReset}
+                      className="w-full h-8 mt-2 rounded-lg text-[10px] text-red-500/40 hover:bg-red-500/10 hover:text-red-400 border border-transparent hover:border-red-500/20"
+                    >
+                      <RotateCcw className="mr-1.5 h-3 w-3" />
+                      Restablecimiento de fábrica (Borrador total)
                     </Button>
                   </div>
                 </div>

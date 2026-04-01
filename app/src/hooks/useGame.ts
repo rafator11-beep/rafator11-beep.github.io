@@ -236,6 +236,14 @@ export function useGame(gameId: string | null) {
     }
 
     if (!gameId) throw new Error('No game ID');
+    
+    // Validación de UUID para evitar errores 400 de sintaxis en Postgres
+    const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[45][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/;
+    if (!uuidRegex.test(gameId)) {
+      console.warn("DEBUG: Invalid UUID detected for gameId:", gameId);
+      toast.error(`Error de sesión: El ID de partida (${gameId}) no es válido. Prueba a limpiar sesión en Ajustes.`);
+      return;
+    }
 
     // Bug 5: Guard against duplicate names
     if (players.some(p => p.name.toLowerCase() === name.toLowerCase())) {
@@ -244,22 +252,33 @@ export function useGame(gameId: string | null) {
     }
 
     const turnOrder = players.length;
+    const payload = {
+      game_id: gameId,
+      name,
+      avatar_url: avatarUrl || null,
+      turn_order: turnOrder,
+    };
+    
+    console.log("DEBUG: Attempting to add player with payload:", payload);
+
     const { data, error } = await supabase
       .from('players')
-      .insert({
-        game_id: gameId,
-        name,
-        avatar_url: avatarUrl || null,
-        turn_order: turnOrder,
-      })
+      .insert(payload)
       .select()
       .single();
 
     if (error) {
-      console.error("Error adding player to Supabase:", error);
-      toast.error(`Error al añadir jugador en línea: ${error.message}`);
+      console.error("DEBUG: addPlayer error details:", error);
+      // Mejorar mensaje según el código de error
+      if (error.code === '23503') {
+        toast.error("La partida ya no existe en el servidor. Por favor, crea una nueva.");
+      } else {
+        toast.error(`Error al añadir jugador: ${error.message}`);
+      }
       throw error;
     }
+    
+    console.log("DEBUG: addPlayer success:", data);
     return data;
   };
 
