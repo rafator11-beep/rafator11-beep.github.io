@@ -16,7 +16,7 @@ export function ConnectionDot() {
     const checkConnection = async () => {
       setStatus('syncing');
       try {
-        const { error } = await supabase.from('profiles').select('id').limit(1);
+        const { error } = await supabase.from('games').select('id').limit(1);
         if (error) setStatus('error');
         else setStatus('online');
       } catch {
@@ -60,7 +60,7 @@ export function ConnectionDot() {
            const checkConnection = async () => {
             setStatus('syncing');
             try {
-              await supabase.from('profiles').select('id').limit(1);
+              await supabase.from('games').select('id').limit(1);
               setStatus('online');
             } catch { setStatus('error'); }
           };

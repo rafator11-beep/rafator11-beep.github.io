@@ -205,7 +205,6 @@ export function useRanking() {
     const channel = supabase
       .channel('user_stats_realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'user_stats' }, () => fetchRankings())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => fetchRankings())
       .subscribe();
 
     return () => {
