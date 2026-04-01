@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { globalInput } from './engine/InputManager';
 import { globalVFX } from './engine/VFXManager';
-import { globalNetwork, PlayerState } from './engine/NetworkManager';
 import { PhysicsEngine, AABB } from './engine/PhysicsEngine';
+import { globalPerformance } from './engine/PerformanceMonitor';
+import { globalNetwork, PlayerState } from './engine/NetworkManager';
 import { ArcadeMatchmaking } from './ArcadeMatchmaking';
 import { VirtualJoystick } from './VirtualJoystick';
 
@@ -11,31 +12,45 @@ const GRAVITY = 0.5;
 const JUMP_FORCE = -12;
 const SPEED = 5;
 
+import { ARCADE_LEVELS } from '../../data/arcadeLevels';
+
 export function ArcadeCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const levelData = ARCADE_LEVELS['neo_tokyo'];
   const [inLobby, setInLobby] = useState(true);
   
   // Estado local independiente de React para evitar re-renders cada Frame
   const engineState = useRef({
     localPlayer: { x: 50, y: 300, vx: 0, vy: 0, width: 30, height: 30, health: 100 },
     remotePlayer: { x: 400, y: 300, vx: 0, vy: 0, width: 30, height: 30, health: 100 },
-    platforms: [
-      { x: 0, y: 400, width: 800, height: 50 },
-      { x: 200, y: 250, width: 200, height: 20 }
-    ],
+    platforms: [...levelData.platforms], // Loaded securely from decoupled JSON Schema
     lastFrameTime: performance.now(),
   });
+
+  // Level Editor Console Exporter (Debugger Shortcut)
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      // Secret combo (Ctrl + Shift + E) dumps current RAM layout to JSON
+      if (e.ctrlKey && e.shiftKey && e.code === 'KeyE') {
+         console.warn("==== LEVEL EXPORT ====");
+         console.log(JSON.stringify({ platforms: engineState.current.platforms }, null, 2));
+         console.warn("======================");
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
 
   // Bucle de inicialización del Engine P2P
   const handleConnected = (isHost: boolean) => {
     setInLobby(false);
 
     if (isHost) {
-      engineState.current.localPlayer.x = 100;
-      engineState.current.remotePlayer.x = 600;
+      engineState.current.localPlayer.x = levelData.spawns.host.x;
+      engineState.current.remotePlayer.x = levelData.spawns.guest.x;
     } else {
-      engineState.current.localPlayer.x = 600;
-      engineState.current.remotePlayer.x = 100;
+      engineState.current.localPlayer.x = levelData.spawns.guest.x;
+      engineState.current.remotePlayer.x = levelData.spawns.host.x;
     }
 
     // Configizar recepción de red
@@ -61,6 +76,8 @@ export function ArcadeCanvas() {
   };
 
   const gameLoop = (time: number) => {
+    globalPerformance.update(time); // FPS Monitoring
+    
     const deltaTime = (time - engineState.current.lastFrameTime) / 1000;
     engineState.current.lastFrameTime = time;
 
@@ -121,7 +138,9 @@ export function ArcadeCanvas() {
       p.vy = JUMP_FORCE;
       globalInput.clearBuffer();
       globalInput.lastGroundedTime = 0;
-      globalVFX.spawnExplosion(p.x + p.width/2, p.y + p.height, '#00FFFF', 5);
+      if (globalPerformance.useParticles) {
+          globalVFX.spawnExplosion(p.x + p.width/2, p.y + p.height, '#00FFFF', 5);
+      }
     }
 
     // Remote Player Prediction (Extrapolar trayectoria básica)
@@ -169,13 +188,21 @@ export function ArcadeCanvas() {
     // Dibujar Local Player (Cyan)
     const lp = engineState.current.localPlayer;
     ctx.fillStyle = '#00FFFF';
-    ctx.shadowColor = '#00FFFF';
-    ctx.shadowBlur = 15;
+    
+    if (globalPerformance.useShadows) {
+      ctx.shadowColor = '#00FFFF';
+      ctx.shadowBlur = 15;
+    } else {
+      ctx.shadowBlur = 0;
+    }
+
     ctx.fillRect(lp.x, lp.y, lp.width, lp.height);
     ctx.shadowBlur = 0; // Reset
 
-    // Particles Render
-    globalVFX.render(ctx);
+    // Particles Render (only if enabled via scaler)
+    if (globalPerformance.useParticles) {
+      globalVFX.render(ctx);
+    }
 
     ctx.restore();
   };
