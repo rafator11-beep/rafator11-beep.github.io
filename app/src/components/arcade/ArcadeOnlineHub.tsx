@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Target, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -15,12 +15,14 @@ import { ArcadeCoinFlip } from './ArcadeCoinFlip';
 import { ArcadeRussianRoulette } from './ArcadeRussianRoulette';
 import { ArcadeSimonPvP } from './ArcadeSimonPvP';
 import { ArcadeMinesweeper } from './ArcadeMinesweeper';
+import { ArcadeCanvas } from './ArcadeCanvas';
 
 interface ArcadeOnlineHubProps {
   onReturn: () => void;
 }
 
 const ONLINE_GAMES = [
+  { id: 'engine_p2p', name: 'Plataformas P2P (Alpha)', icon: '🕹️', desc: 'Engine Experimental: PeerJS + Virtual Joystick + VFX.' },
   { id: 'quick_draw', name: 'Reflejos (Quick Draw)', icon: '⚡', desc: 'El primero en tocar cuando salga el verde, gana.' },
   { id: 'tap_race', name: 'Carrera de Clics', icon: '🏃', desc: 'Machaca botones durante 10 segundos.' },
   { id: 'rps', name: 'Piedra, Papel, Tijera', icon: '✂️', desc: 'Duelo mental 1v1 clásico.' },
@@ -167,6 +169,7 @@ export function ArcadeOnlineHub({ onReturn }: ArcadeOnlineHubProps) {
   if (view === 'playing' && selectedGame && matchRoomId) {
     const playerIdToUse = stablePresenceId;
 
+    if (selectedGame === 'engine_p2p') return <ArcadeCanvas />;
     if (selectedGame === 'quick_draw') return <ArcadeQuickDraw roomId={matchRoomId} playerId={playerIdToUse} onClose={resetToLobby} />;
     if (selectedGame === 'tap_race') return <ArcadeTapRace roomId={matchRoomId} playerId={playerIdToUse} onClose={resetToLobby} />;
     if (selectedGame === 'rps') return <ArcadeRPS roomId={matchRoomId} playerId={playerIdToUse} onClose={resetToLobby} />;
