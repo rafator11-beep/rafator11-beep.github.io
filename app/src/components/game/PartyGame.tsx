@@ -728,12 +728,6 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           type: newType || 'common'
         }
       }));
-      // SFX de magia
-      try {
-        const audio = new Audio('/sounds/magic_ping.mp3');
-        audio.volume = 0.4;
-        audio.play();
-      } catch (e) {}
     };
 
   const handleExit = async () => {

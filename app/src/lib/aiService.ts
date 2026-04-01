@@ -33,6 +33,17 @@ export const generateAIChallenge = async (
   4. Sé original, evita clichés. Aprovecha que tienes nombres de jugadores para crear piques sanos.
   5. Responde SOLO el JSON.`;
 
+  // Only attempt Ollama on localhost — CORS blocks it from production origins
+  const isLocalhost = typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+  if (!isLocalhost) {
+    return {
+      content: "La IA solo funciona en modo local. ¡Sigue con las cartas normales!",
+      type: 'common'
+    };
+  }
+
   try {
     const response = await fetch(OLLAMA_URL, {
       method: 'POST',
