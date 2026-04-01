@@ -226,7 +226,8 @@ export function useGame(gameId: string | null) {
         turn_order: players.length,
         team_id: null,
         has_played_this_round: false,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       };
 
       const updatedPlayers = [...players, newPlayer];
@@ -303,7 +304,8 @@ export function useGame(gameId: string | null) {
         name,
         color,
         score: 0,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       };
       const updatedTeams = [...teams, newTeam];
       setTeams(updatedTeams);

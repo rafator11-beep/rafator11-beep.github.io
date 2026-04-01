@@ -1,4 +1,4 @@
-﻿export type GameMode = 'futbol' | 'megamix' | 'clasico' | 'yo_nunca' | 'yo_nunca_equipos' | 'picante' | 'cultura' | 'espana' | 'votacion' | 'pacovers' | 'trivia_futbol' | 'tictactoe' | 'poker' | 'parchis' | 'megaboard';
+export type GameMode = 'futbol' | 'megamix' | 'clasico' | 'yo_nunca' | 'yo_nunca_equipos' | 'picante' | 'cultura' | 'espana' | 'votacion' | 'pacovers' | 'trivia_futbol' | 'tictactoe' | 'poker' | 'parchis' | 'megaboard';
 export type TabId = 'fiesta' | 'juego';
 export type PlayMode = 'local' | 'online';
 
@@ -50,6 +50,7 @@ export interface Player {
   has_played_this_round: boolean;
   turn_order: number;
   created_at: string;
+  updated_at: string;
 }
 
 export interface Team {
@@ -59,6 +60,7 @@ export interface Team {
   color: string;
   score: number;
   created_at: string;
+  updated_at: string;
 }
 
 export interface Question {
