@@ -48,11 +48,11 @@ import confetti from 'canvas-confetti';
 // ─── Visual Improvements Sub-components ──────────────────────────────────────
 
 const RARITY_CONFIG = {
-  common:    { orbLeft:'rgba(99,102,241,0.08)',  orbRight:'rgba(139,92,246,0.08)',  via:'slate-900/50'  },
-  rare:      { orbLeft:'rgba(59,130,246,0.18)',  orbRight:'rgba(99,102,241,0.15)', via:'blue-950/40'   },
-  legendary: { orbLeft:'rgba(251,191,36,0.20)',  orbRight:'rgba(245,158,11,0.15)', via:'amber-950/40'  },
-  chaos:     { orbLeft:'rgba(239,68,68,0.22)',   orbRight:'rgba(220,38,38,0.15)',  via:'red-950/50'    },
-  virus:     { orbLeft:'rgba(34,197,94,0.18)',   orbRight:'rgba(16,185,129,0.14)', via:'green-950/40'  },
+  common: { orbLeft: 'rgba(99,102,241,0.08)', orbRight: 'rgba(139,92,246,0.08)', via: 'slate-900/50' },
+  rare: { orbLeft: 'rgba(59,130,246,0.18)', orbRight: 'rgba(99,102,241,0.15)', via: 'blue-950/40' },
+  legendary: { orbLeft: 'rgba(251,191,36,0.20)', orbRight: 'rgba(245,158,11,0.15)', via: 'amber-950/40' },
+  chaos: { orbLeft: 'rgba(239,68,68,0.22)', orbRight: 'rgba(220,38,38,0.15)', via: 'red-950/50' },
+  virus: { orbLeft: 'rgba(34,197,94,0.18)', orbRight: 'rgba(16,185,129,0.14)', via: 'green-950/40' },
 } as const;
 
 const DynamicBackground = ({ rarity }: { rarity: keyof typeof RARITY_CONFIG }) => {
@@ -81,7 +81,7 @@ const DynamicBackground = ({ rarity }: { rarity: keyof typeof RARITY_CONFIG }) =
 const AnimatedXP = ({ value, playerId }: { value: number; playerId: string }) => {
   const prevRef = useRef(value);
   const [popping, setPopping] = useState(false);
-  const [floater, setFloater] = useState<number|null>(null);
+  const [floater, setFloater] = useState<number | null>(null);
 
   useEffect(() => {
     if (value > prevRef.current) {
@@ -99,8 +99,8 @@ const AnimatedXP = ({ value, playerId }: { value: number; playerId: string }) =>
     <div className="relative flex items-center justify-center">
       <motion.span
         className="text-[11px] font-black text-white px-2 py-0.5 rounded-full bg-white/5 border border-white/10 tabular-nums shadow-[0_0_10px_rgba(255,255,255,0.1)]"
-        animate={popping ? { 
-          scale: [1, 1.4, 1], 
+        animate={popping ? {
+          scale: [1, 1.4, 1],
           color: ['#fff', '#10b981', '#fff'],
           rotate: [0, -10, 10, 0]
         } : { scale: 1 }}
@@ -152,14 +152,14 @@ const VirusFlash = ({ show }: { show: boolean }) => (
     {show && (
       <motion.div
         className="fixed inset-0 z-[160] pointer-events-none"
-        initial={{ opacity:0, scale:1.1 }}
-        animate={{ 
-          opacity:[0, 0.8, 0],
-          scale:[1.1, 1, 1],
-          backgroundColor:['#22c55e', '#166534', '#22c55e']
+        initial={{ opacity: 0, scale: 1.1 }}
+        animate={{
+          opacity: [0, 0.8, 0],
+          scale: [1.1, 1, 1],
+          backgroundColor: ['#22c55e', '#166534', '#22c55e']
         }}
-        exit={{ opacity:0 }}
-        transition={{ duration:0.5, ease:'easeOut' }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
       >
         <div className="absolute inset-0 opacity-20 invert mix-blend-overlay" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }} />
       </motion.div>
@@ -170,7 +170,7 @@ const VirusFlash = ({ show }: { show: boolean }) => (
 function useScrambleText(target: string, active: boolean) {
   const [display, setDisplay] = useState(target);
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#!';
-  
+
   useEffect(() => {
     if (!active) { setDisplay(target); return; }
     let iterations = 0;
@@ -267,13 +267,13 @@ const PlayerProfilesBottom = ({ players, currentPlayer, scores, playerViruses = 
                   <span className={isTurn ? 'text-primary' : (isCaptain ? 'text-amber-400' : 'text-white/80')}>{p.name[0].toUpperCase()}</span>
                 )}
                 {showVirus && (
-                  <motion.div 
+                  <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     className="absolute inset-0 bg-green-500/20 animate-pulse pointer-events-none flex items-center justify-center"
                   >
                     <div className="w-full h-full border-2 border-green-500/50 rounded-[22px]" />
-                    <motion.div 
+                    <motion.div
                       animate={{ rotate: 360 }}
                       transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
                       className="absolute inset-0 border-t-2 border-green-400/80 rounded-full opacity-40"
@@ -361,9 +361,9 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
   useEffect(() => {
     if (!currentPlayer?.name) return;
-    if (prevPlayerNameRef.current && 
-        prevPlayerNameRef.current !== currentPlayer.name &&
-        players.length > 1) {
+    if (prevPlayerNameRef.current &&
+      prevPlayerNameRef.current !== currentPlayer.name &&
+      players.length > 1) {
       setShowTurnBanner(true);
       const t = setTimeout(() => setShowTurnBanner(false), 2500);
       return () => clearTimeout(t);
@@ -377,7 +377,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       const t = setTimeout(() => setVirusFlash(false), 400);
       return () => clearTimeout(t);
     }
-  prevVirusAlertRef.current = gameState.showVirusAlert;
+    prevVirusAlertRef.current = gameState.showVirusAlert;
   }, [gameState.showVirusAlert]);
 
   // Scramble text for Virus Alert (Top-level hook call)
@@ -396,7 +396,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
   const handleAdjustXP = (playerId: string, delta: number) => {
     addScore(playerId, delta);
     const playerName = players.find(p => p.id === playerId)?.name || 'Jugador';
-    
+
     // Mejora 4.2: Toast personalizado para XP
     toast.custom((t) => (
       <motion.div
@@ -452,7 +452,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     manageMegamixViruses, // Every 5 rounds virus cycle
     manageMegamixNormas   // Every 3 rounds norma
   } = useGameEffects(mode, players);
-  
+
   const performTurnAdvance = useCallback((skipPlayerAdvance: boolean = false) => {
     sfx.whoosh();
     advanceTurn(skipPlayerAdvance);
@@ -479,8 +479,8 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
   // Mejora 8: Passing currentPlayer ID as presence key
   const { broadcastState, sendActionToHost, connectionStatus } = useMultiplayer(
-    roomId, 
-    isHost, 
+    roomId,
+    isHost,
     localPlayerId || 'Observer', // Use localPlayerId as name if available or obs
     localPlayerId || 'observer', // Passed ID
     (remoteState) => {
@@ -489,38 +489,38 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         if (remoteState.currentIndex !== undefined && remoteState.currentIndex !== currentIndex) {
           setCurrentIndex(remoteState.currentIndex);
         }
-        
+
         // Siempre sincronizar gameState y pregunta, independientemente del índice
         if (remoteState.gameState) setGameState(remoteState.gameState);
         if (remoteState.currentQuestion) setCurrentQuestion(remoteState.currentQuestion);
       }
     }, (action) => {
-    // Host Logic: Receive Action from Guest
-    if (isHost && action) {
-      if (action.type === 'YO_NUNCA_VOTE') {
-        const { phase, votes } = action.payload;
-        if (phase === 'truth_phase') {
-          setGameState(prev => ({ ...prev, yoNuncaTruthVotes: { ...prev.yoNuncaTruthVotes, ...votes } }));
-        } else if (phase === 'guess_phase') {
-          setGameState(prev => ({ ...prev, yoNuncaGuessVotes: { ...prev.yoNuncaGuessVotes, ...votes } }));
+      // Host Logic: Receive Action from Guest
+      if (isHost && action) {
+        if (action.type === 'YO_NUNCA_VOTE') {
+          const { phase, votes } = action.payload;
+          if (phase === 'truth_phase') {
+            setGameState(prev => ({ ...prev, yoNuncaTruthVotes: { ...prev.yoNuncaTruthVotes, ...votes } }));
+          } else if (phase === 'guess_phase') {
+            setGameState(prev => ({ ...prev, yoNuncaGuessVotes: { ...prev.yoNuncaGuessVotes, ...votes } }));
+          }
+        } else if (action.type === 'YO_NUNCA_PHASE_CHANGE') {
+          setGameState(prev => ({ ...prev, yoNuncaEquiposPhase: action.payload.phase }));
         }
-      } else if (action.type === 'YO_NUNCA_PHASE_CHANGE') {
-        setGameState(prev => ({ ...prev, yoNuncaEquiposPhase: action.payload.phase }));
       }
-    }
-  });
+    });
 
   // Effect: Parse NORMA from content for Clasico/Megamix — auto-skip the card
   const normaAutoAdvanceRef = useRef(false);
   useEffect(() => {
     const txt = getCurrentContent();
-    const isOverlayActive = gameState.showVirusAlert || gameState.showTrivia || gameState.showDuel || 
-                            gameState.showImpostor || gameState.showMimica;
+    const isOverlayActive = gameState.showVirusAlert || gameState.showTrivia || gameState.showDuel ||
+      gameState.showImpostor || gameState.showMimica;
 
     if (!isOverlayActive && typeof txt === 'string' && (txt.toUpperCase().startsWith('NORMA:') || txt.toUpperCase().startsWith('NUEVA NORMA:'))) {
       const rule = txt.split(':')[1]?.trim() || txt;
-      setGameState(prev => ({ 
-        ...prev, 
+      setGameState(prev => ({
+        ...prev,
         currentNorma: rule,
         showNormaGlobal: true,
         currentNormaTurnsRemaining: (players.length > 0 ? players.length * 2 : 10)
@@ -535,21 +535,21 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         return () => { clearTimeout(timer); normaAutoAdvanceRef.current = false; };
       }
     }
-  }, [currentIndex, isHost, mode, getCurrentContent, setGameState, performTurnAdvance, 
-      gameState.showVirusAlert, gameState.showTrivia, gameState.showDuel, 
-      gameState.showImpostor, gameState.showMimica]);
+  }, [currentIndex, isHost, mode, getCurrentContent, setGameState, performTurnAdvance,
+    gameState.showVirusAlert, gameState.showTrivia, gameState.showDuel,
+    gameState.showImpostor, gameState.showMimica]);
 
   const hasInitializedRound1 = useRef(false);
   // Trigger: Ronda 1 Norma Global + Virus Assignment (Robust Unified Sync)
   useEffect(() => {
     if (mode === 'megamix' && gameState.round === 1 && currentIndex === 0 && !hasInitializedRound1.current && players.length > 0) {
       hasInitializedRound1.current = true;
-      
+
       // Get the virus first to include it in the single state update
       const randomVirus = applyRandomVirus(true);
-      
-      setGameState(prev => ({ 
-        ...prev, 
+
+      setGameState(prev => ({
+        ...prev,
         showNormaGlobal: true,
         currentNorma: "Prohibido decir nombres de jugadores",
         currentNormaTurnsRemaining: players.length * 2,
@@ -719,16 +719,16 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
   };
 
 
-    const handleAIUpdate = (newContent: string, newType: any) => {
-      setGameState(prev => ({
-        ...prev,
-        currentCard: {
-          ...prev.currentCard,
-          content: newContent,
-          type: newType || 'common'
-        }
-      }));
-    };
+  const handleAIUpdate = (newContent: string, newType: any) => {
+    setGameState(prev => ({
+      ...prev,
+      currentCard: {
+        ...prev.currentCard,
+        content: newContent,
+        type: newType || 'common'
+      }
+    }));
+  };
 
   const handleExit = async () => {
     // Fire and forget to prevent freeze, but ensure it runs
@@ -744,8 +744,8 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     // Detect if current card is Global so we don't pass the turn
     // (Asegura que el jugador activo no pierda su carta personal en un evento que es general)
     const cardText = getCurrentContent();
-    const isGlobal = 
-      currentQuestion?.type === 'yo_nunca' || 
+    const isGlobal =
+      currentQuestion?.type === 'yo_nunca' ||
       (typeof cardText === 'string' && (cardText.toUpperCase().includes('NORMA:') || cardText.toUpperCase().includes('NUEVA NORMA:') || cardText.startsWith('TRIGGER:')));
 
     // Global Reset of all potential "active overlay" flags to prevent ghost states
@@ -795,11 +795,17 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           return; // STOP: wait for user to accept cycle event
         }
 
+        // --- MEJORA: CAPTAIN DECISION RANDOM CHANCE ---
+        if (Math.random() < 0.15 && players.length > 2) {
+          setGameState(prev => ({ ...prev, showCaptainDecision: true }));
+          return; // STOP: wait for captain decision
+        }
+
         const normaCycleEvent = manageMegamixNormas(gameState.round);
         if (normaCycleEvent) {
-          setGameState(prev => ({ 
-            ...prev, 
-            showVirusCycleAlert: true, 
+          setGameState(prev => ({
+            ...prev,
+            showVirusCycleAlert: true,
             virusCycleData: normaCycleEvent,
             currentNorma: normaCycleEvent.message,
             currentNormaTurnsRemaining: normaCycleEvent.duration
@@ -838,11 +844,11 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
   // Moved here to avoid 'handleNext' hoisting issues
   useEffect(() => {
     if (mode !== 'megamix' || !gameState.currentNorma) return;
-    
+
     // Bug 8: Guard against overlays - Do not skip if an interaction is pending
-    if (gameState.showVirusAlert || gameState.showTrivia || gameState.showVoting || 
-        gameState.showDuel || gameState.showImpostor || gameState.showMimica || 
-        gameState.showImpostorWord) return;
+    if (gameState.showVirusAlert || gameState.showTrivia || gameState.showVoting ||
+      gameState.showDuel || gameState.showImpostor || gameState.showMimica ||
+      gameState.showImpostorWord) return;
 
     if (gameState.currentNorma.includes('AVANCE AUTOMÁTICO') || gameState.currentNorma.includes('AUTO-SKIP')) {
       const timer = setTimeout(() => {
@@ -853,9 +859,9 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       }, 5000);
       return () => clearTimeout(timer);
     }
-  }, [gameState.currentNorma, gameState.showVirusAlert, gameState.showTrivia, gameState.showVoting, 
-      gameState.showDuel, gameState.showImpostor, gameState.showMimica, 
-      gameState.showImpostorWord, mode, handleNext]);
+  }, [gameState.currentNorma, gameState.showVirusAlert, gameState.showTrivia, gameState.showVoting,
+  gameState.showDuel, gameState.showImpostor, gameState.showMimica,
+  gameState.showImpostorWord, mode, handleNext]);
 
   // Rarity calculation for CardDisplay
   const currentText = getCurrentContent();
@@ -1026,15 +1032,15 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               try {
                 const raw = localStorage.getItem('fiesta-party-local-rankings-v1');
                 const all = raw ? JSON.parse(raw) : [];
-                return all.find((r: any) => 
+                return all.find((r: any) =>
                   r.player_name?.toLowerCase() === p.name?.toLowerCase()
                 );
               } catch { return null; }
             })();
 
-            const historicalXP = existingRanking?.total_xp || 
-                                 existingRanking?.xp || 0;
-            const sessionXP    = scores[p.id] || 0;
+            const historicalXP = existingRanking?.total_xp ||
+              existingRanking?.xp || 0;
+            const sessionXP = scores[p.id] || 0;
 
             return {
               id: p.id,
@@ -1042,7 +1048,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               games_played: 1, // As requested in Mejora 3
             };
           });
-          
+
           // await supabase.from('profiles').upsert(updates);
           toast.success("¡Sincronización Cyber-Party Elite completada!");
         } catch (err) {
@@ -1182,23 +1188,23 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       {/* Top Bar with Chromecast */}
       <header className="p-4 flex justify-between items-center z-10 relative">
         <div className="flex gap-2 items-center">
-            <Button variant="ghost" size="icon" onClick={() => {
+          <Button variant="ghost" size="icon" onClick={() => {
             if (window.confirm("¿Seguro que quieres salir?")) {
-                onExit();
+              onExit();
             }
-            }}>
+          }}>
             <ArrowLeft className="h-6 w-6 text-white/80" />
-            </Button>
+          </Button>
 
-            {/* Botón Chromecast */}
-            <Button 
-                variant="ghost" 
-                size="icon" 
-                className="bg-primary/10 hover:bg-primary/20 hover:text-white rounded-full transition-all border border-primary/20"
-                onClick={() => setShowChromecastModal(true)}
-            >
-              <Cast className="h-5 w-5 text-primary-200" />
-            </Button>
+          {/* Botón Chromecast */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="bg-primary/10 hover:bg-primary/20 hover:text-white rounded-full transition-all border border-primary/20"
+            onClick={() => setShowChromecastModal(true)}
+          >
+            <Cast className="h-5 w-5 text-primary-200" />
+          </Button>
         </div>
 
         {/* Captain Indicator — integrated in header */}
@@ -1263,7 +1269,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
             <p className="text-center text-slate-300">
               Para ver el juego en tu televisor, utiliza la función de transmitir (Cast/Screen Mirroring) integrada en tu dispositivo:
             </p>
-            
+
             <div className="grid gap-4">
               <div className="bg-slate-800/50 p-4 rounded-xl border border-white/5">
                 <h3 className="font-bold flex items-center gap-2 mb-2"><TrendingUp className="w-4 h-4 text-blue-400" /> Dispositivos Android</h3>
@@ -1273,7 +1279,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                   <li>Selecciona tu TV o Chromecast en la lista.</li>
                 </ol>
               </div>
-              
+
               <div className="bg-slate-800/50 p-4 rounded-xl border border-white/5">
                 <h3 className="font-bold flex items-center gap-2 mb-2"><Music className="w-4 h-4 text-pink-400" /> Dispositivos Apple (iOS)</h3>
                 <ol className="text-sm text-slate-400 list-decimal list-inside space-y-1">
@@ -1283,17 +1289,17 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                 </ol>
               </div>
             </div>
-            
-            <Button 
+
+            <Button
               className="w-full bg-primary hover:bg-primary-600 text-white font-bold h-14 rounded-xl shadow-lg border-2 border-primary/50 text-lg flex items-center justify-center gap-2"
               onClick={async () => {
                 try {
                   if (typeof navigator !== 'undefined' && 'presentation' in navigator && (navigator as any).presentation?.defaultRequest) {
-                      await (navigator as any).presentation.defaultRequest.start();
+                    await (navigator as any).presentation.defaultRequest.start();
                   } else if (typeof navigator !== 'undefined' && navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
-                      await navigator.mediaDevices.getDisplayMedia({ video: true });
+                    await navigator.mediaDevices.getDisplayMedia({ video: true });
                   } else {
-                      throw new Error("No API");
+                    throw new Error("No API");
                   }
                   setShowChromecastModal(false);
                 } catch (e) {
@@ -1505,19 +1511,19 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       </div>
 
       {/* Reveal Overlay (Mimica) with Long Press */}
-      <Dialog 
+      <Dialog
         open={gameState.showMimica}
         onOpenChange={(open) => {
           if (!open) {
-            setGameState(prev => ({ 
-              ...prev, 
-              showMimica: false, 
+            setGameState(prev => ({
+              ...prev,
+              showMimica: false,
               showMimicaReveal: false
             }));
           }
         }}
       >
-        <DialogContent 
+        <DialogContent
           className="sm:max-w-md bg-[url('/modern_bg.png')] bg-cover bg-center border-none p-0 text-white z-[70] overflow-hidden shadow-2xl"
           onOpenAutoFocus={(e) => e.preventDefault()}
           onCloseAutoFocus={(e) => e.preventDefault()}
@@ -1548,8 +1554,8 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                 className="w-full relative preserve-3d transition-transform duration-300 shadow-2xl rounded-[2rem] overflow-hidden group-active:scale-[0.98] select-none touch-none"
               >
                 <div className={`w-full min-h-[220px] rounded-[2rem] border-4 flex flex-col items-center justify-center p-6 transition-all backdrop-blur-md
-                  ${gameState.showMimicaReveal 
-                    ? 'bg-slate-900/80 border-primary shadow-[0_0_30px_rgba(168,85,247,0.6)]' 
+                  ${gameState.showMimicaReveal
+                    ? 'bg-slate-900/80 border-primary shadow-[0_0_30px_rgba(168,85,247,0.6)]'
                     : 'bg-slate-800/50 border-white/10 shadow-lg hover:border-primary/50'}`}>
                   <AnimatePresence mode="popLayout">
                     {!gameState.showMimicaReveal ? (
@@ -1610,7 +1616,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               <span>ELÍGE AL CAPITÁN</span>
             </DialogTitle>
             <DialogDescription className="text-center text-slate-400 font-medium">
-                El Capitán tendrá el control total del móvil y las puntuaciones.
+              El Capitán tendrá el control total del móvil y las puntuaciones.
             </DialogDescription>
           </DialogHeader>
 
@@ -1631,8 +1637,8 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                   className="h-28 flex flex-col items-center justify-center gap-2 bg-white/5 hover:bg-yellow-500/20 border border-white/10 hover:border-yellow-500/50 transition-all rounded-2xl relative overflow-hidden group shadow-xl"
                   onClick={() => {
                     try {
-                        if (typeof sfx !== 'undefined' && sfx.click) sfx.click();
-                    } catch (e) {}
+                      if (typeof sfx !== 'undefined' && sfx.click) sfx.click();
+                    } catch (e) { }
                     setGameState(prev => ({
                       ...prev,
                       captainId: p.id,
@@ -1647,7 +1653,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                 </Button>
               ))}
             </div>
-            
+
             <p className="text-[9px] text-center text-slate-500 font-bold uppercase tracking-widest italic animate-pulse">
               ¿Quién tiene el dispositivo ahora mismo?
             </p>
@@ -1673,7 +1679,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                 {players.find(p => p.id === gameState.impostorData?.impostorPlayerId)?.name || currentPlayer?.name}
               </p>
             </div>
-            
+
             <div className="bg-slate-800/50 p-3 rounded-xl border border-white/5">
               <p className="text-red-400 font-black text-xs uppercase tracking-[0.3em]">¡CAPITÁN! NO MIRES LA PANTALLA</p>
             </div>
@@ -1776,9 +1782,57 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         </DialogContent>
       </Dialog>
 
+      {/* Captain Decision Overlay */}
+      <Dialog open={gameState.showCaptainDecision}>
+        <DialogContent className="sm:max-w-md bg-slate-950/95 backdrop-blur-3xl border-amber-500/40 text-white z-[90] rounded-[3rem] p-8">
+          <DialogHeader>
+            <DialogTitle className="text-3xl font-black text-center text-amber-500 flex flex-col items-center gap-4 uppercase">
+              <div className="p-4 bg-amber-500/10 rounded-3xl border border-amber-500/20">
+                <Crown className="w-10 h-10 text-amber-500 fill-amber-500" />
+              </div>
+              <span>Decisión del Capitán</span>
+            </DialogTitle>
+            <DialogDescription className="text-center text-slate-300 font-bold mt-4">
+              {currentText?.includes('VIRUS') ? '¿Quién debe recibir este VIRUS? 🦠' : '¿Quién debe cumplir este RETO? 🎯'}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="mt-6 space-y-4">
+            <div className="grid grid-cols-2 gap-4 max-h-[40vh] overflow-y-auto no-scrollbar pb-2">
+              {players.filter(p => p.id !== gameState.captainId).map(p => (
+                <Button
+                  key={`decision-p-${p.id}`}
+                  className="h-24 flex flex-col items-center justify-center gap-2 bg-white/5 hover:bg-amber-500/20 border border-white/10 hover:border-amber-500/50 transition-all rounded-2xl group shadow-xl"
+                  onClick={() => {
+                    sfx.click();
+                    toast.success(`Capitán ha decidido: ${p.name}`);
+                    // Si era un virus, aplicarlo aquí o simplemente avanzar
+                    setGameState(prev => ({ ...prev, showCaptainDecision: false }));
+                    // Forzamos el avance pero asegurando que el contenido se leyó
+                    performTurnAdvance(true);
+                  }}
+                >
+                  <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-sm font-black overflow-hidden border-2 border-white/10 group-hover:border-amber-400 transition-all">
+                    {p.avatar_url ? <img src={p.avatar_url} className="w-full h-full object-cover" /> : p.name.substring(0, 2).toUpperCase()}
+                  </div>
+                  <span className="font-bold truncate w-full px-2 text-white/90 text-xs">{p.name}</span>
+                </Button>
+              ))}
+            </div>
+            <Button
+              variant="ghost"
+              className="w-full text-xs text-white/40 hover:text-white"
+              onClick={() => setGameState(prev => ({ ...prev, showCaptainDecision: false }))}
+            >
+              Cancelar Decisión
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Main Content Area */}
       <main className={`flex-1 flex flex-col items-center justify-center p-4 relative transition-opacity duration-300 ${isMultiplayer && !isHost && (currentPlayer?.id !== localPlayerId) ? 'opacity-80 pointer-events-none' : ''}`}>
-{/* Turn Blocker Overlay */}
+        {/* Turn Blocker Overlay */}
         {isMultiplayer && !isHost && false && (
           <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-auto">
             <div className="bg-gradient-to-r from-black/80 to-slate-900/80 text-white px-6 py-3 rounded-full backdrop-blur-md border border-white/10 animate-pulse shadow-2xl skew-x-[-10deg]">
@@ -1935,15 +1989,15 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         )}
 
         {/* Virus Cycle Alert (Periodic Infection/Mutation) - Manual overlay removed to use Dialog instead */}
-        
+
         <AnimatePresence mode="wait">
           {/* CONTENT-AWARE VISIBILITY: Only hide the main card if an overlay is ACTIVE AND HAS DATA */}
-          {!(gameState.showTrivia && currentQuestion) && 
-           !(gameState.showDuel && gameState.currentDuelo) && 
-           !gameState.showVoting && 
-           !gameState.showImpostor && 
-           !gameState.showCaptainPass && 
-           gameState.yoNuncaEquiposPhase === 'idle' && (
+          {!(gameState.showTrivia && currentQuestion) &&
+            !(gameState.showDuel && gameState.currentDuelo) &&
+            !gameState.showVoting &&
+            !gameState.showImpostor &&
+            !gameState.showCaptainPass &&
+            gameState.yoNuncaEquiposPhase === 'idle' && (
               <motion.div
                 key={currentIndex}
                 drag="x"
@@ -1954,18 +2008,18 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                     handleNext();
                   }
                 }}
-                initial={{ rotateY: 90,  opacity: 0, scale: 0.9 }}
-                animate={{ rotateY: 0,   opacity: 1, scale: 1   }}
-                exit={{    rotateY: -90, opacity: 0, scale: 0.9 }}
+                initial={{ rotateY: 90, opacity: 0, scale: 0.9 }}
+                animate={{ rotateY: 0, opacity: 1, scale: 1 }}
+                exit={{ rotateY: -90, opacity: 0, scale: 0.9 }}
                 transition={{
-                  rotateY: { type:'spring', stiffness:280, damping:24 },
+                  rotateY: { type: 'spring', stiffness: 280, damping: 24 },
                   opacity: { duration: 0.12 },
-                  scale:   { type:'spring', stiffness:300, damping:26 },
+                  scale: { type: 'spring', stiffness: 300, damping: 26 },
                 }}
-                style={{ 
-                  perspective:'1000px', 
-                  transformStyle:'preserve-3d',
-                  willChange:'transform',
+                style={{
+                  perspective: '1000px',
+                  transformStyle: 'preserve-3d',
+                  willChange: 'transform',
                   cursor: 'grab'
                 }}
                 whileTap={{ cursor: 'grabbing' }}
@@ -1995,14 +2049,16 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                 {/* Partículas doradas — legendary */}
                 {rarity === 'legendary' && (
                   <div className="absolute inset-0 pointer-events-none overflow-hidden 
-                    flex items-center justify-center" style={{zIndex:5}}>
-                    {[...Array(6)].map((_,i) => (
+                    flex items-center justify-center" style={{ zIndex: 5 }}>
+                    {[...Array(6)].map((_, i) => (
                       <motion.div key={i}
                         className="absolute w-1.5 h-1.5 rounded-full bg-amber-400"
-                        style={{ left:`${18+i*13}%`, bottom:'38%', filter:'blur(0.5px)' }}
-                        animate={{ y:[0,-(55+i*15),-(110+i*20)], opacity:[0,1,0], scale:[0.5,1,0.3] }}
-                        transition={{ duration:1.8+i*0.2, repeat:Infinity, 
-                          repeatDelay:i*0.3, ease:'easeOut' }}
+                        style={{ left: `${18 + i * 13}%`, bottom: '38%', filter: 'blur(0.5px)' }}
+                        animate={{ y: [0, -(55 + i * 15), -(110 + i * 20)], opacity: [0, 1, 0], scale: [0.5, 1, 0.3] }}
+                        transition={{
+                          duration: 1.8 + i * 0.2, repeat: Infinity,
+                          repeatDelay: i * 0.3, ease: 'easeOut'
+                        }}
                       />
                     ))}
                   </div>
@@ -2022,7 +2078,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                       }
                     `}</style>
                     <div className="absolute inset-0 rounded-[2.5rem] pointer-events-none"
-                      style={{ animation:'glitch 0.4s infinite', zIndex:4 }} />
+                      style={{ animation: 'glitch 0.4s infinite', zIndex: 4 }} />
                   </>
                 )}
 
@@ -2030,13 +2086,15 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                 {rarity === 'virus' && (
                   <motion.div
                     className="absolute inset-0 rounded-[2.5rem] pointer-events-none"
-                    style={{ zIndex:4 }}
-                    animate={{ boxShadow:[
-                      '0 0 0 0px rgba(34,197,94,0)',
-                      '0 0 0 7px rgba(34,197,94,0.28)',
-                      '0 0 0 0px rgba(34,197,94,0)',
-                    ]}}
-                    transition={{ duration:1.8, repeat:Infinity, ease:'easeInOut' }}
+                    style={{ zIndex: 4 }}
+                    animate={{
+                      boxShadow: [
+                        '0 0 0 0px rgba(34,197,94,0)',
+                        '0 0 0 7px rgba(34,197,94,0.28)',
+                        '0 0 0 0px rgba(34,197,94,0)',
+                      ]
+                    }}
+                    transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
                   />
                 )}
               </motion.div>
@@ -2045,25 +2103,25 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
         {/* BOTÓN SIGUIENTE TURNO — anti-parálisis */}
         {!(gameState.showTrivia && currentQuestion) &&
-         !gameState.showDuel &&
-         !gameState.showVoting &&
-         !gameState.showImpostor &&
-         !gameState.showCaptainPass &&
-         gameState.yoNuncaEquiposPhase === 'idle' && (
-          <motion.button
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            onClick={() => { if (isMultiplayer && !isHost) return; handleNext(); }}
-            className="mt-3 mb-1 w-full max-w-sm mx-auto flex items-center justify-center gap-2 py-4 rounded-2xl font-black text-base uppercase tracking-widest
+          !gameState.showDuel &&
+          !gameState.showVoting &&
+          !gameState.showImpostor &&
+          !gameState.showCaptainPass &&
+          gameState.yoNuncaEquiposPhase === 'idle' && (
+            <motion.button
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              onClick={() => { if (isMultiplayer && !isHost) return; handleNext(); }}
+              className="mt-3 mb-1 w-full max-w-sm mx-auto flex items-center justify-center gap-2 py-4 rounded-2xl font-black text-base uppercase tracking-widest
               bg-white/10 backdrop-blur-md border border-white/20 text-white
               hover:bg-white/20 active:scale-[0.97] transition-all shadow-lg"
-            style={{ WebkitTapHighlightColor: 'transparent' }}
-          >
-            <ArrowRight className="w-5 h-5" />
-            Siguiente turno — {currentPlayer?.name}
-          </motion.button>
-        )}
+              style={{ WebkitTapHighlightColor: 'transparent' }}
+            >
+              <ArrowRight className="w-5 h-5" />
+              Siguiente turno — {currentPlayer?.name}
+            </motion.button>
+          )}
 
         {/* Render other game components (Trivia, Drinking, etc) overlaying or replacing card */}
         {((gameState.showTrivia) || (mode === 'cultura') || (mode === 'trivia_futbol')) && currentQuestion && (
@@ -2100,20 +2158,20 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
               <div className="relative z-10 space-y-6">
                 <div>
-                   <p className="text-[10px] text-indigo-300 font-black uppercase tracking-[0.3em] mb-2">Evento Especial</p>
-                   <h2 className="text-3xl font-black text-white leading-tight uppercase tracking-tighter drop-shadow-lg">{gameState.currentDrinkingGame.name}</h2>
+                  <p className="text-[10px] text-indigo-300 font-black uppercase tracking-[0.3em] mb-2">Evento Especial</p>
+                  <h2 className="text-3xl font-black text-white leading-tight uppercase tracking-tighter drop-shadow-lg">{gameState.currentDrinkingGame.name}</h2>
                 </div>
                 <div className="bg-black/40 p-5 rounded-2xl border border-white/10 shadow-inner">
-                   <p className="text-lg font-bold text-indigo-100 leading-snug">{gameState.currentDrinkingGame.description}</p>
+                  <p className="text-lg font-bold text-indigo-100 leading-snug">{gameState.currentDrinkingGame.description}</p>
                 </div>
-                <Button 
-                   className="w-full h-14 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-lg rounded-xl shadow-xl transition-all active:scale-95"
-                   onClick={() => {
-                     setGameState((prev: any) => ({ ...prev, showDrinkingGame: false }));
-                     handleNext();
-                   }}
+                <Button
+                  className="w-full h-14 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-lg rounded-xl shadow-xl transition-all active:scale-95"
+                  onClick={() => {
+                    setGameState((prev: any) => ({ ...prev, showDrinkingGame: false }));
+                    handleNext();
+                  }}
                 >
-                   ENTENDIDO, CONTINUAR ⏭
+                  ENTENDIDO, CONTINUAR ⏭
                 </Button>
               </div>
             </motion.div>

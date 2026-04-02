@@ -455,7 +455,35 @@ export const CardDisplay = React.memo(({ content, type = 'common', onClick, game
     const theme = getCardTheme(content, type, gameMode);
     const cleanText = sanitizeCardText(content);
     const [isGenerating, setIsGenerating] = useState(false);
+    const [isRevealed, setIsRevealed] = useState(false);
+    const [canClickVirus, setCanClickVirus] = useState(false);
     const { speaking, speak, cancel } = useTTS(cleanText, false);
+
+    // Effect for Virus delay
+    useEffect(() => {
+        if (type === 'virus') {
+            setCanClickVirus(false);
+            const timer = setTimeout(() => setCanClickVirus(true), 500);
+            return () => clearTimeout(timer);
+        }
+    }, [content, type]);
+
+    // Reset reveal when content changes
+    useEffect(() => {
+        setIsRevealed(false);
+    }, [content]);
+
+    const isBocaCerrada = theme.modeName.includes('BOCA CERRADA') || theme.modeName.includes('IMPOSTOR');
+
+    const handleCardClick = () => {
+        // Virus: Only the specific button in the card body should trigger the next turn
+        if (type === 'virus') return; 
+        
+        // Boca Cerrada: Must reveal before clicking to advance
+        if (isBocaCerrada && !isRevealed) return;
+        
+        onClick();
+    };
 
     // Jugador mencionado en el texto (para cartas de duelo/reto específico)
     const mentionedPlayer = players?.find(p =>
@@ -515,7 +543,7 @@ export const CardDisplay = React.memo(({ content, type = 'common', onClick, game
                     transition={{ type: 'spring', stiffness: 120, damping: 22 }}
                     className={`w-full rounded-[2.5rem] overflow-hidden shadow-2xl bg-gradient-to-b ${theme.bg} flex flex-col relative cursor-pointer border border-white/5`}
                     style={{ minHeight: '72vh' }}
-                    onClick={onClick}
+                    onClick={handleCardClick}
                 >
                     {/* Noise texture overlay */}
                     <div className="absolute inset-0 opacity-[0.04] pointer-events-none"
@@ -602,7 +630,7 @@ export const CardDisplay = React.memo(({ content, type = 'common', onClick, game
                             initial={{ opacity: 0, y: 16 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.15 }}
-                            className={`w-full rounded-[2rem] p-6 shadow-2xl ${theme.textBoxBg} relative overflow-hidden`}
+                            className={`w-full rounded-[2rem] p-6 shadow-2xl ${theme.textBoxBg} relative overflow-hidden flex flex-col items-center justify-center`}
                         >
                             {/* Subtle inner top highlight */}
                             <div className="absolute top-0 inset-x-0 h-px bg-white/20" />
@@ -622,10 +650,36 @@ export const CardDisplay = React.memo(({ content, type = 'common', onClick, game
                                 </div>
                             )}
 
-                            <p className={`text-lg md:text-xl font-semibold text-center leading-relaxed no-scrollbar overflow-y-auto ${theme.textColor}`}
-                                style={{ maxHeight: '28vh' }}>
-                                {processDrinkingMultiplier(cleanText, round)}
-                            </p>
+                            <div className="relative w-full">
+                                <p className={`text-lg md:text-xl font-semibold text-center leading-relaxed no-scrollbar overflow-y-auto transition-all duration-500 ${theme.textColor} ${isBocaCerrada && !isRevealed ? 'blur-[15px] select-none' : ''}`}
+                                    style={{ maxHeight: '28vh' }}>
+                                    {processDrinkingMultiplier(cleanText, round)}
+                                </p>
+
+                                {isBocaCerrada && !isRevealed && (
+                                    <div className="absolute inset-0 flex items-center justify-center z-20">
+                                        <motion.button
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            onClick={(e) => { e.stopPropagation(); setIsRevealed(true); }}
+                                            className="bg-white/20 backdrop-blur-md border border-white/30 px-6 py-3 rounded-2xl font-black text-white shadow-xl hover:bg-white/30 transition-all uppercase tracking-widest text-sm"
+                                        >
+                                            PULSAR PARA VER
+                                        </motion.button>
+                                    </div>
+                                )}
+                            </div>
+
+                            {type === 'virus' && (
+                                <motion.button
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: canClickVirus ? 1 : 0.5, scale: canClickVirus ? 1 : 0.9 }}
+                                    onClick={(e) => { e.stopPropagation(); if (canClickVirus) onClick(); }}
+                                    className={`mt-6 px-8 py-3 rounded-2xl font-black text-white shadow-2xl transition-all uppercase tracking-[0.2em] text-sm border-2 ${canClickVirus ? 'bg-green-500 border-green-400 hover:bg-green-400 animate-pulse' : 'bg-gray-600 border-gray-500 cursor-not-allowed'}`}
+                                >
+                                    {canClickVirus ? 'ACEPTAR VIRUS 🦠' : 'CARGANDO VIRUS...'}
+                                </motion.button>
+                            )}
                         </motion.div>
 
                         {/* Extra decorativo */}

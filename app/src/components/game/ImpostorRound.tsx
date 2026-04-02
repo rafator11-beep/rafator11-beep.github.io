@@ -174,9 +174,12 @@ export function ImpostorRound({
                             className="text-center py-2"
                           >
                             <p className="text-xs font-bold text-slate-500 uppercase mb-1">Palabra / Acción:</p>
-                            <p className="text-2xl font-black text-slate-900 leading-tight">
-                              {getPlayerQuestion(player.id)}
-                            </p>
+                            <div className="relative group/secret">
+                              <p className={`text-2xl font-black transition-all duration-300 ${!isRevealing ? 'blur-[20px] select-none opacity-0' : 'text-slate-900'}`}>
+                                {getPlayerQuestion(player.id)}
+                              </p>
+                              {/* Central reveal button (if needed, but already inside the motion button) */}
+                            </div>
                           </motion.div>
                         ) : (
                           <motion.div

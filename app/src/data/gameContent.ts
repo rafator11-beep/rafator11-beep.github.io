@@ -1,4 +1,4 @@
-﻿// Main game content with all modes - 500+ entries each from Word document
+// Main game content with all modes - 500+ entries each from Word document
 
 import {
   clasicoExtra, yoNuncaExtra, picanteExtra, masProbableExtra,
@@ -6635,7 +6635,7 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     ...spread(mimicaCards, 2),
     ...spread(duelosCards, 2),
     // 1x — eventos especiales
-    ...impostorCards,
+    ...spread(impostorCards, 3), // Increased from 1x to 3x for more variety
   ]);
 
   // --- NEW FAIR-PLAY SCHEDULER (Phase 2) ---
@@ -6729,14 +6729,20 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
       deck.push(card);
 
       // 2. Periodic Injections (High Priority Overlays)
-      // Every 10 cards, inject a Trigger
-      if (deck.length > 0 && deck.length % 10 === 0 && deck.length < count) {
-        deck.push(specialTriggers[triggerPtr % specialTriggers.length]);
+      // Every 15 cards, inject specifically an IMPOSTOR trigger (User Request)
+      if (deck.length > 0 && deck.length % 15 === 0 && deck.length < count) {
+        deck.push("TRIGGER:IMPOSTOR");
+      }
+      
+      // Every 10 cards, inject a random Trigger (excluding Impostor if already handled by period 15)
+      else if (deck.length > 0 && deck.length % 10 === 0 && deck.length < count) {
+        const filteredTriggers = specialTriggers.filter(t => t !== "TRIGGER:IMPOSTOR");
+        deck.push(filteredTriggers[triggerPtr % filteredTriggers.length]);
         triggerPtr++;
       }
       
-      // Every 15 cards, inject a Norma
-      else if (deck.length > 0 && deck.length % 15 === 0 && deck.length < count) {
+      // Every 25 cards, inject a Norma (Adjusted frequency to avoid overlap with Impostor)
+      else if (deck.length > 0 && deck.length % 25 === 0 && deck.length < count) {
         deck.push(globalNormas[normaPtr % globalNormas.length]);
         normaPtr++;
       }

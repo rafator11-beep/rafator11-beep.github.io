@@ -26,6 +26,7 @@ export interface GameState {
   showVirusCycleAlert?: boolean; // Added
   showImpostorWarning?: boolean;
   showCaptainSelection?: boolean; // Added
+  showCaptainDecision?: boolean; // Added
   showNormaGlobal?: boolean; // Norma global overlay
   virusPlayerId: string | null;
 
@@ -91,6 +92,7 @@ export const useGameEngine = (mode: GameMode) => {
     showVirusAlert: false,
     showVirusCycleAlert: false,
     showImpostorWarning: false,
+    showCaptainDecision: false,
     showCaptainSelection: mode === 'megamix' || mode === 'clasico',
     showNormaGlobal: false,
     virusPlayerId: null,
@@ -168,16 +170,16 @@ export const useGameEngine = (mode: GameMode) => {
 
       if (isEndOfRound) {
         const nextRound = prev.round + 1;
-        
+
         // Check Game Over Condition with fresh value
         if (nextRound > 20) {
           setGameOver(true);
         }
-        
+
         // Norma cambia cada 3 rondas completas
         let showNormaGlobal = prev.showNormaGlobal;
         if (nextRound % 3 === 0) {
-           showNormaGlobal = true;
+          showNormaGlobal = true;
         }
 
         // Virus cambia cada 5 rondas completas
@@ -188,8 +190,8 @@ export const useGameEngine = (mode: GameMode) => {
           nextVirusId = players[nextIndex].id;
         }
 
-        nextState = { 
-          ...nextState, 
+        nextState = {
+          ...nextState,
           round: nextRound,
           showNormaGlobal,
           virusPlayerId: nextVirusId

@@ -19,6 +19,7 @@ export const useGameEffects = (mode: GameMode, players: Player[]) => {
     // State for tracking periodic events
     const lastVirusRoundRef = useRef<number>(-1);
     const lastNormaRoundRef = useRef<number>(-1);
+    const lastImpostorIndexRef = useRef<number>(0);
 
     const applyRandomVirus = useCallback((force: boolean = false, specificPlayerId?: string) => {
         // If not forced, apply random chance
@@ -166,6 +167,23 @@ export const useGameEffects = (mode: GameMode, players: Player[]) => {
     ) => {
         if (mode !== 'megamix') return false;
 
+        // Force Impostor every 15 cards
+        if (currentIndex - lastImpostorIndexRef.current >= 15 && players.length >= 3) {
+            lastImpostorIndexRef.current = currentIndex;
+            const randomImpostor = impostorRounds[Math.floor(Math.random() * impostorRounds.length)];
+            const impostorPlayer = players[Math.floor(Math.random() * players.length)];
+            setGameState((prev: any) => ({
+                ...prev,
+                showImpostorWarning: true,
+                impostorData: {
+                    currentImpostorReal: randomImpostor.normalQuestion || randomImpostor.category || '',
+                    currentImpostorFake: randomImpostor.impostorQuestion || randomImpostor.hint || '',
+                    impostorPlayerId: impostorPlayer.id,
+                }
+            }));
+            return true;
+        }
+
         const roll = Math.random();
 
         // Random Norma removed - now strict every 3 rounds via manageMegamixNormas
@@ -175,16 +193,17 @@ export const useGameEffects = (mode: GameMode, players: Player[]) => {
         const isSpecialRoundTurn = currentRound > 0 && currentRound % 6 === 0 && (currentIndex % players.length === 0);
 
         if (players.length >= 3 && isSpecialRoundTurn && mode === 'megamix') {
-            const specialCycle = Math.floor(currentRound / 6) % 2; // Only 2 types now
+            const specialCycle = Math.floor(currentRound / 6) % 3; // 3 types now: Impostor, Mimica, Impostor
 
-            if (specialCycle === 0 || !players.length) {
+            if (specialCycle === 0 || specialCycle === 2) {
                 // Impostor
                 if (impostorRounds.length === 0) return false;
+                lastImpostorIndexRef.current = currentIndex; // Reset manual counter when cycle hits
                 const randomImpostor = impostorRounds[Math.floor(Math.random() * impostorRounds.length)];
                 const impostorPlayer = players[Math.floor(Math.random() * players.length)];
                 setGameState((prev: any) => ({
                     ...prev,
-                    showImpostor: true,
+                    showImpostorWarning: true, // Use warning screen for privacy
                     impostorData: {
                         currentImpostorReal: randomImpostor.normalQuestion || randomImpostor.category || '',
                         currentImpostorFake: randomImpostor.impostorQuestion || randomImpostor.hint || '',
@@ -201,7 +220,7 @@ export const useGameEffects = (mode: GameMode, players: Player[]) => {
                     currentMimicaText: randomMimica.text
                 }));
             }
-            
+
             lastMiniTurnRef.current['impostor_round'] = currentIndex;
             return true;
         }
