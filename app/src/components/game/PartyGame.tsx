@@ -1859,53 +1859,93 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         </DialogContent>
       </Dialog>
 
-      {/* Captain Decision Overlay */}
-      <Dialog open={gameState.showCaptainDecision}>
-        <DialogContent className="sm:max-w-md bg-slate-950/95 backdrop-blur-3xl border-amber-500/40 text-white z-[90] rounded-[3rem] p-8">
-          <DialogHeader>
-            <DialogTitle className="text-3xl font-black text-center text-amber-500 flex flex-col items-center gap-4 uppercase">
-              <div className="p-4 bg-amber-500/10 rounded-3xl border border-amber-500/20">
-                <Crown className="w-10 h-10 text-amber-500 fill-amber-500" />
-              </div>
-              <span>Decisión del Capitán</span>
-            </DialogTitle>
-            <DialogDescription className="text-center text-slate-300 font-bold mt-4">
-              {currentText?.includes('VIRUS') ? '¿Quién debe recibir este VIRUS? 🦠' : '¿Quién debe cumplir este RETO? 🎯'}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="mt-6 space-y-4">
-            <div className="grid grid-cols-2 gap-4 max-h-[40vh] overflow-y-auto no-scrollbar pb-2">
-              {players.filter(p => p.id !== gameState.captainId).map(p => (
-                <Button
-                  key={`decision-p-${p.id}`}
-                  className="h-24 flex flex-col items-center justify-center gap-2 bg-white/5 hover:bg-amber-500/20 border border-white/10 hover:border-amber-500/50 transition-all rounded-2xl group shadow-xl"
-                  onClick={() => {
-                    sfx.click();
-                    toast.success(`Capitán ha decidido: ${p.name}`);
-                    // Si era un virus, aplicarlo aquí o simplemente avanzar
-                    setGameState(prev => ({ ...prev, showCaptainDecision: false }));
-                    // Forzamos el avance pero asegurando que el contenido se leyó
-                    performTurnAdvance(true);
-                  }}
-                >
-                  <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-sm font-black overflow-hidden border-2 border-white/10 group-hover:border-amber-400 transition-all">
-                    {p.avatar_url ? <img src={p.avatar_url} className="w-full h-full object-cover" /> : p.name.substring(0, 2).toUpperCase()}
-                  </div>
-                  <span className="font-bold truncate w-full px-2 text-white/90 text-xs">{p.name}</span>
-                </Button>
-              ))}
-            </div>
-            <Button
-              variant="ghost"
-              className="w-full text-xs text-white/40 hover:text-white"
-              onClick={() => setGameState(prev => ({ ...prev, showCaptainDecision: false }))}
+      {/* Captain Decision Overlay — Mandato del Capitán */}
+      {gameState.showCaptainDecision && (() => {
+        const captainCommands = [
+          { id: 'drink', icon: '🍺', label: 'Elige quién bebe ahora' },
+          { id: 'virus', icon: '🦠', label: 'Asigna el Virus a alguien' },
+          { id: 'norma', icon: '📜', label: 'Anula norma si alguien cumple castigo' },
+        ];
+        const [captainCmd, setCaptainCmd] = React.useState<string | null>(null);
+        return (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[90] bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              className="w-full max-w-sm bg-gradient-to-b from-amber-950 to-slate-950 border-2 border-amber-500/50 rounded-[2.5rem] p-6 shadow-[0_0_80px_rgba(251,191,36,0.2)]"
             >
-              Cancelar Decisión
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+              <div className="flex flex-col items-center gap-2 mb-5">
+                <div className="p-3 bg-amber-500/15 rounded-2xl border border-amber-500/30">
+                  <Crown className="w-10 h-10 text-amber-400 fill-amber-400" />
+                </div>
+                <h2 className="text-2xl font-black text-amber-400 uppercase tracking-tighter">Mandato del Capitán</h2>
+                <p className="text-xs text-white/50 text-center">{players.find(p => p.id === gameState.captainId)?.name} tiene el mando</p>
+              </div>
+
+              {/* Selector de comando */}
+              <div className="grid grid-cols-3 gap-2 mb-5">
+                {captainCommands.map(cmd => (
+                  <button
+                    key={cmd.id}
+                    onClick={() => setCaptainCmd(cmd.id)}
+                    className={`flex flex-col items-center gap-1 p-3 rounded-2xl border transition-all text-center ${captainCmd === cmd.id ? 'bg-amber-500/30 border-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.3)]' : 'bg-white/5 border-white/10 hover:border-amber-500/50'}`}
+                  >
+                    <span className="text-2xl">{cmd.icon}</span>
+                    <span className="text-[9px] font-black uppercase tracking-wide text-white/70 leading-tight">{cmd.label}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Selector de jugador (visible cuando hay comando elegido) */}
+              {captainCmd && (
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-4">
+                  <p className="text-[9px] text-amber-400 font-black uppercase tracking-widest mb-2 text-center">Elige al jugador</p>
+                  <div className="grid grid-cols-2 gap-2 max-h-[30vh] overflow-y-auto no-scrollbar">
+                    {players.filter(p => p.id !== gameState.captainId).map(p => (
+                      <button
+                        key={`capt-cmd-${p.id}`}
+                        onClick={() => {
+                          sfx.click();
+                          if (captainCmd === 'virus') {
+                            applyRandomVirus(true, p.id);
+                            toast(`🦠 Capitán asignó el virus a ${p.name}!`, { duration: 3000 });
+                          } else if (captainCmd === 'drink') {
+                            trackDrink(p.id);
+                            addScore(p.id, 5);
+                            toast(`🍺 ${p.name} debe beber por orden del Capitán!`, { duration: 3000 });
+                          } else if (captainCmd === 'norma') {
+                            toast(`📜 Norma anulada si ${p.name} cumple el castigo.`, { duration: 3000 });
+                          }
+                          setGameState(prev => ({ ...prev, showCaptainDecision: false }));
+                          performTurnAdvance(true);
+                        }}
+                        className="h-20 flex flex-col items-center justify-center gap-1 bg-white/5 hover:bg-amber-500/20 border border-white/10 hover:border-amber-400 rounded-2xl transition-all"
+                      >
+                        <div className="w-9 h-9 rounded-full bg-slate-800 overflow-hidden border border-white/20 flex items-center justify-center text-xs font-black">
+                          {p.avatar_url ? <img src={p.avatar_url} className="w-full h-full object-cover" /> : p.name.substring(0, 2).toUpperCase()}
+                        </div>
+                        <span className="text-[10px] font-bold text-white/80 truncate px-1">{p.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
+              <button
+                onClick={() => setGameState(prev => ({ ...prev, showCaptainDecision: false }))}
+                className="w-full py-3 rounded-2xl bg-white/5 border border-white/10 text-white/40 text-xs font-bold uppercase tracking-widest hover:text-white transition-colors"
+              >
+                Cancelar
+              </button>
+            </motion.div>
+          </motion.div>
+        );
+      })()}
 
       {/* Main Content Area */}
       <main className={`flex-1 flex flex-col items-center justify-center p-4 relative transition-opacity duration-300 ${isMultiplayer && !isHost && (currentPlayer?.id !== localPlayerId) ? 'opacity-80 pointer-events-none' : ''}`}>
@@ -1922,7 +1962,10 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         {/* Turn Banner Overlay */}
         <AnimatePresence>
           {showTurnBanner && currentPlayer && (
-            <TurnBanner playerName={currentPlayer.name} />
+            <TurnBanner
+              playerName={currentPlayer.name}
+              isCaptain={currentPlayer.id === gameState.captainId}
+            />
           )}
         </AnimatePresence>
 
