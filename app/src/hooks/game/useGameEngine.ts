@@ -28,6 +28,8 @@ export interface GameState {
   showCaptainSelection?: boolean; // Added
   showCaptainDecision?: boolean; // Added
   showNormaGlobal?: boolean; // Norma global overlay
+  showBocaCerrada?: boolean;
+  currentBocaCerrada?: string | null;
   virusPlayerId: string | null;
 
   // Data for specific screens
@@ -95,6 +97,8 @@ export const useGameEngine = (mode: GameMode) => {
     showCaptainDecision: false,
     showCaptainSelection: mode === 'megamix' || mode === 'clasico',
     showNormaGlobal: false,
+    showBocaCerrada: false,
+    currentBocaCerrada: null,
     virusPlayerId: null,
     currentDrinkingGame: null,
     currentMimicaText: null,
@@ -176,9 +180,9 @@ export const useGameEngine = (mode: GameMode) => {
           setGameOver(true);
         }
 
-        // Norma cambia cada 3 rondas completas
+        // Norma cambia cada 6 rondas completas
         let showNormaGlobal = prev.showNormaGlobal;
-        if (nextRound % 3 === 0) {
+        if (nextRound % 6 === 0) {
           showNormaGlobal = true;
         }
 

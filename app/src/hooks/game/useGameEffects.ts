@@ -140,8 +140,8 @@ export const useGameEffects = (mode: GameMode, players: Player[]) => {
             };
         }
 
-        // Manage Periodic Normas (Every 3 Rounds)
-        if (currentRound > 1 && currentRound % 3 === 0 && currentRound !== lastNormaRoundRef.current) {
+        // Manage Periodic Normas (Every 6 Rounds)
+        if (currentRound > 1 && currentRound % 6 === 0 && currentRound !== lastNormaRoundRef.current) {
             lastNormaRoundRef.current = currentRound;
             const randomNorma = normasRonda[Math.floor(Math.random() * normasRonda.length)];
             return {
@@ -167,8 +167,8 @@ export const useGameEffects = (mode: GameMode, players: Player[]) => {
     ) => {
         if (mode !== 'megamix') return false;
 
-        // Force Impostor every 15 cards
-        if (currentIndex - lastImpostorIndexRef.current >= 15 && players.length >= 3) {
+        // Force Impostor every 40 cards
+        if (currentIndex - lastImpostorIndexRef.current >= 40 && players.length >= 3) {
             lastImpostorIndexRef.current = currentIndex;
             const randomImpostor = impostorRounds[Math.floor(Math.random() * impostorRounds.length)];
             const impostorPlayer = players[Math.floor(Math.random() * players.length)];
@@ -189,7 +189,7 @@ export const useGameEffects = (mode: GameMode, players: Player[]) => {
         // Random Norma removed - now strict every 3 rounds via manageMegamixNormas
 
 
-        // Special Megamix events every 6 rounds, triggered exactly when the first player of that round starts
+        // Special Megamix events: Impostor every 6 rounds (at start of round), Mimica also at alternate cycles
         const isSpecialRoundTurn = currentRound > 0 && currentRound % 6 === 0 && (currentIndex % players.length === 0);
 
         if (players.length >= 3 && isSpecialRoundTurn && mode === 'megamix') {

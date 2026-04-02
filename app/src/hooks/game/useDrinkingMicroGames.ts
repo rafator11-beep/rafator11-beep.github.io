@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import { GameMode } from '@/types/game';
 import { getRandomDrinkingGame, getRandomCascade, getRandomCoinGame, getRandomImpostorWord, DrinkingGame } from '@/data/drinkingGames';
 import { formatMimicaChallenge, getRandomMimica } from '@/data/mimicaContent';
+import { bocaCerradaChallenges } from '@/data/bocaCerradaContent';
 import { pickWeighted } from '@/lib/godDeck';
 
 export const useDrinkingMicroGames = (mode: GameMode, playersCount: number) => {
@@ -91,6 +92,15 @@ export const useDrinkingMicroGames = (mode: GameMode, playersCount: number) => {
                 run: () => {
                     const word = getRandomImpostorWord();
                     setGameState((prev: any) => ({ ...prev, showImpostorWord: true, currentImpostorWord: word }));
+                },
+            },
+            {
+                type: 'boca_cerrada',
+                weight: 1.2,
+                ok: canUse('boca_cerrada', 10) && turn > 0 && turn % 10 === 0,
+                run: () => {
+                    const challenge = bocaCerradaChallenges[Math.floor(Math.random() * bocaCerradaChallenges.length)];
+                    setGameState((prev: any) => ({ ...prev, showBocaCerrada: true, currentBocaCerrada: challenge.text }));
                 },
             },
         ];

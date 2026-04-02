@@ -126,7 +126,7 @@ const AnimatedXP = ({ value, playerId }: { value: number; playerId: string }) =>
   );
 };
 
-const TurnBanner = ({ playerName }: { playerName: string }) => (
+const TurnBanner = ({ playerName, isCaptain = false }: { playerName: string; isCaptain?: boolean }) => (
   <motion.div
     className="fixed top-24 left-0 right-0 z-[200] flex justify-center pointer-events-none px-4"
     initial={{ y: -50, opacity: 0 }}
@@ -134,13 +134,20 @@ const TurnBanner = ({ playerName }: { playerName: string }) => (
     exit={{ y: -50, opacity: 0 }}
     transition={{ type: 'spring', stiffness: 300, damping: 25 }}
   >
-    <div className="bg-slate-900/90 backdrop-blur-2xl border-2 border-primary/50 
-      px-8 py-3 rounded-full shadow-[0_10px_40px_rgba(var(--primary-rgb),0.4)] flex items-center gap-3">
-      <div className="w-2 h-2 rounded-full bg-primary animate-ping" />
-      <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/80">
-        Turno de
+    <div className={`backdrop-blur-2xl border-2 px-8 py-3 rounded-full flex items-center gap-3 ${
+      isCaptain
+        ? 'bg-amber-950/90 border-amber-400/70 shadow-[0_10px_40px_rgba(251,191,36,0.5)]'
+        : 'bg-slate-900/90 border-primary/50 shadow-[0_10px_40px_rgba(var(--primary-rgb),0.4)]'
+    }`}>
+      {isCaptain ? (
+        <Crown className="w-4 h-4 text-amber-400 fill-amber-400 animate-pulse" />
+      ) : (
+        <div className="w-2 h-2 rounded-full bg-primary animate-ping" />
+      )}
+      <span className={`text-[10px] font-black uppercase tracking-[0.3em] ${isCaptain ? 'text-amber-400' : 'text-primary/80'}`}>
+        {isCaptain ? 'TURNO DEL CAPITÁN' : 'Turno de'}
       </span>
-      <span className="font-black text-xl text-white uppercase tracking-tighter">
+      <span className={`font-black text-xl uppercase tracking-tighter ${isCaptain ? 'text-amber-300' : 'text-white'}`}>
         {playerName}
       </span>
     </div>
@@ -166,6 +173,58 @@ const VirusFlash = ({ show }: { show: boolean }) => (
     )}
   </AnimatePresence>
 );
+
+const BocaCerradaOverlay = ({ text, playerName, onDone }: { text: string; playerName: string; onDone: () => void }) => {
+  const [holding, setHolding] = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
+  return (
+    <div className="flex flex-col items-center gap-6 p-6 text-center">
+      <div className="text-5xl" style={{ filter: 'drop-shadow(0 0 15px rgba(168,85,247,0.8))' }}>🤐</div>
+      <div>
+        <p className="text-[9px] text-purple-400 font-black uppercase tracking-[0.4em] mb-1">BOCA CERRADA</p>
+        <p className="text-white font-black text-xl">{playerName}</p>
+        <p className="text-white/40 text-xs mt-0.5">debes decirlo con los labios cerrados</p>
+      </div>
+
+      <motion.button
+        onPointerDown={() => setHolding(true)}
+        onPointerUp={() => setHolding(false)}
+        onPointerLeave={() => setHolding(false)}
+        className="w-full min-h-[130px] rounded-2xl border-2 border-dashed border-purple-500/50 flex flex-col items-center justify-center gap-3 relative overflow-hidden select-none touch-none active:scale-[0.98] transition-transform"
+        style={{ background: holding ? 'rgba(168,85,247,0.15)' : 'rgba(0,0,0,0.4)' }}
+      >
+        <AnimatePresence mode="wait">
+          {!holding ? (
+            <motion.div key="locked" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center gap-2">
+              <EyeOff className="w-8 h-8 text-purple-400" />
+              <p className="text-purple-300 font-black text-[10px] uppercase tracking-widest">Mantén pulsado para ver</p>
+            </motion.div>
+          ) : (
+            <motion.div key="shown" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="px-4 text-center">
+              <p className="text-white font-black text-xl leading-snug">{text}</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.button>
+
+      {!confirmed ? (
+        <button
+          onClick={() => setConfirmed(true)}
+          className="w-full py-4 rounded-2xl bg-white/10 border border-white/20 text-white font-black text-sm uppercase tracking-widest hover:bg-white/20 active:scale-95 transition-all"
+        >
+          Ya lo he dicho 🤐
+        </button>
+      ) : (
+        <button
+          onClick={onDone}
+          className="w-full py-4 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-black text-sm uppercase tracking-widest active:scale-95 transition-all shadow-lg"
+        >
+          El grupo lo adivina → Siguiente ▶
+        </button>
+      )}
+    </div>
+  );
+};
 
 function useScrambleText(target: string, active: boolean) {
   const [display, setDisplay] = useState(target);
@@ -761,6 +820,8 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       showCaptainPass: false,
       showVirusAlert: false,
       showImpostorWarning: false,
+      showBocaCerrada: false,
+      currentBocaCerrada: null,
       votingSelections: []
     }));
 
@@ -1753,7 +1814,23 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         </DialogContent>
       </Dialog>
 
-      {/* Deleted old Mimica & Boca Cerrada overlays */}
+      {/* BOCA CERRADA — hold-to-reveal */}
+      <Dialog open={gameState.showBocaCerrada}>
+        <DialogContent className="sm:max-w-md bg-slate-950/98 backdrop-blur-3xl border-purple-500/40 text-white z-[85] rounded-[2.5rem] p-0 overflow-hidden">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Boca Cerrada</DialogTitle>
+            <DialogDescription>Mantén pulsado para ver la frase que debes decir con la boca cerrada.</DialogDescription>
+          </DialogHeader>
+          <BocaCerradaOverlay
+            text={gameState.currentBocaCerrada || ''}
+            playerName={currentPlayer?.name || 'Jugador'}
+            onDone={() => {
+              setGameState(prev => ({ ...prev, showBocaCerrada: false, currentBocaCerrada: null }));
+              performTurnAdvance();
+            }}
+          />
+        </DialogContent>
+      </Dialog>
 
       {/* Virus Cycle Notification */}
       <Dialog open={gameState.showVirusCycleAlert}>
@@ -2107,6 +2184,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           !gameState.showVoting &&
           !gameState.showImpostor &&
           !gameState.showCaptainPass &&
+          !gameState.showCaptainDecision &&
           gameState.yoNuncaEquiposPhase === 'idle' && (
             <motion.button
               initial={{ opacity: 0, y: 12 }}
@@ -2116,10 +2194,10 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               className="mt-3 mb-1 w-full max-w-sm mx-auto flex items-center justify-center gap-2 py-4 rounded-2xl font-black text-base uppercase tracking-widest
               bg-white/10 backdrop-blur-md border border-white/20 text-white
               hover:bg-white/20 active:scale-[0.97] transition-all shadow-lg"
-              style={{ WebkitTapHighlightColor: 'transparent' }}
+              style={{ WebkitTapHighlightColor: 'transparent', zIndex: 100 }}
             >
               <ArrowRight className="w-5 h-5" />
-              Siguiente turno — {currentPlayer?.name}
+              <span>Siguiente turno — {players[(currentIndex + 1) % players.length]?.name}</span>
             </motion.button>
           )}
 
@@ -2247,54 +2325,53 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         {/* Virus Flash */}
         <VirusFlash show={virusFlash} />
 
-        {/* COMPACT VIRUS BANNER (Fixed Top) */}
+        {/* VIRUS ALERT — doble paso: mostrar info → confirmar para avanzar */}
         <AnimatePresence>
           {gameState.showVirusAlert && gameState.virusAlertData && (
             <motion.div
               key="virus-banner"
-              initial={{ y: -120, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: -120, opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-              className="fixed top-0 left-0 right-0 z-[200] bg-black/97 border-b-2 border-green-400 px-4 py-3 backdrop-blur-sm"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+              className="fixed inset-0 z-[200] bg-black/90 backdrop-blur-md flex items-center justify-center p-6"
             >
-              <div className="flex items-center gap-3 max-w-md mx-auto">
-                {/* Emoji animado */}
+              <div className="w-full max-w-sm bg-gradient-to-b from-green-950 to-slate-950 border-2 border-green-400/50 rounded-[2rem] p-6 shadow-[0_0_60px_rgba(34,197,94,0.3)] flex flex-col items-center gap-5">
                 <motion.span
-                  animate={{ scale: [1, 1.3, 1] }}
-                  transition={{ repeat: Infinity, duration: 1.5 }}
-                  className="text-4xl shrink-0"
-                  style={{ filter: 'drop-shadow(0 0 12px rgba(34,197,94,0.9))' }}
+                  animate={{ scale: [1, 1.25, 1], rotate: [0, 10, -10, 0] }}
+                  transition={{ repeat: Infinity, duration: 2 }}
+                  className="text-6xl"
+                  style={{ filter: 'drop-shadow(0 0 20px rgba(34,197,94,0.9))' }}
                 >🦠</motion.span>
 
-                {/* Info del virus */}
-                <div className="flex-1 min-w-0">
-                  <p className="text-[9px] text-green-400 font-black uppercase tracking-[0.35em] mb-0.5">
-                    ⚠ VIRUS DETECTADO
-                  </p>
-                  <p className="text-white font-black text-base leading-tight truncate">
+                <div className="text-center">
+                  <p className="text-[9px] text-green-400 font-black uppercase tracking-[0.4em] mb-1">VIRUS DETECTADO</p>
+                  <p className="text-white font-black text-2xl leading-tight">
                     {gameState.virusAlertData.player?.name}
                   </p>
-                  <p className="text-[11px] font-bold leading-tight">
-                    <span className="text-green-300">
-                      {gameState.virusAlertData.virus?.virusName || gameState.virusAlertData.virus?.name}
-                    </span>
-                    <span className="text-white/40 mx-1">—</span>
-                    <span className="text-white/55 truncate inline-block max-w-[180px]">
-                      {gameState.virusAlertData.virus?.virusDescription || gameState.virusAlertData.virus?.description}
-                    </span>
+                  <p className="text-[10px] text-white/40 mt-0.5">ha sido infectado</p>
+                </div>
+
+                <div className="w-full bg-black/40 rounded-2xl p-4 border border-green-500/20 text-center space-y-1">
+                  <p className="text-green-300 font-black text-lg">
+                    {gameState.virusAlertData.virus?.virusName || gameState.virusAlertData.virus?.name}
+                  </p>
+                  <p className="text-white/70 text-sm leading-snug">
+                    {gameState.virusAlertData.virus?.virusDescription || gameState.virusAlertData.virus?.description}
+                  </p>
+                  <p className="text-[10px] text-green-400/60 font-bold uppercase mt-2">
+                    Dura {gameState.virusAlertData.virus?.turnsRemaining} turnos
                   </p>
                 </div>
 
-                {/* Botón OK */}
                 <button
                   onClick={() => {
                     setGameState(prev => ({ ...prev, showVirusAlert: false, virusAlertData: null }));
                     performTurnAdvance();
                   }}
-                  className="shrink-0 h-10 px-4 rounded-xl bg-green-500 hover:bg-green-400 text-black font-black text-xs uppercase tracking-wider active:scale-95 transition-all shadow-lg"
+                  className="w-full py-4 rounded-2xl bg-green-500 hover:bg-green-400 text-black font-black text-base uppercase tracking-widest active:scale-95 transition-all shadow-lg"
                 >
-                  OK ✓
+                  ENTENDIDO, APLICAR VIRUS ✓
                 </button>
               </div>
             </motion.div>
