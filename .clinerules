@@ -1,6 +1,27 @@
-# REGLAS ESTRICTAS PARA AHORRAR DINERO (IMPERATIVO)
-1. NUNCA analices la carpeta node_modules, dist, build, ni leas archivos de imágenes (.jpg, .png, .svg).
-2. NUNCA leas todo el proyecto para "buscar contexto" a menos que yo escriba la palabra "EXPLORAR".
-3. ANTES de escribir código, dime exactamente qué archivos vas a leer y espera mi confirmación.
-4. Trabaja ÚNICAMENTE en la ruta específica que yo te indique en el chat.
-5. No intentes arreglar errores en bucle por tu cuenta. Si fallas una vez, detente y explícame el error.
+# REGLAS DE DEPLOY — Roo Code
+
+## GitHub Pages
+- GitHub Pages sirve EXCLUSIVAMENTE desde la carpeta `/docs` en la rama `main`.
+- La raíz del repo NO se sirve. No copies builds ahí.
+
+## Flujo obligatorio al hacer build
+1. `cd app && npm run build`
+2. `rm -rf ../docs/*`
+3. `cp -r dist/* ../docs/`
+4. `cd .. && git add docs/ && git commit -m "deploy: build sync" && git push origin main`
+
+## Atajo
+Puedes usar el script de la raíz:
+```bash
+bash deploy.sh
+```
+
+## Prohibido
+- Copiar build a la raíz del repo (`/assets`, `/index.html`, etc.)
+- Hacer commit de archivos de build fuera de `/docs`
+- Usar rutas absolutas de Windows en index.html
+
+## Stack
+- Vite + React + TypeScript
+- Build output: `app/dist/` → copiar a `docs/`
+- PWA con Workbox (genera `docs/sw.js` y `docs/workbox-*.js`)
