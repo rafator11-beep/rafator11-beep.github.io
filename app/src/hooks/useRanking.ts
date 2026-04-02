@@ -127,7 +127,7 @@ export function useRanking() {
         if (fetchError) throw fetchError;
 
         const cloudStats = ((data as any[]) || []).map((row) => ({
-          user_id: row.user_id || row.id || row.profile_id || row.player_name || crypto.randomUUID(),
+          user_id: row.user_id || row.id || row.profile_id || crypto.randomUUID(),
           name: row.player_name || row.username || 'Jugador',
           avatar_url: row.avatar_url || null,
           games_played: row.games_played || 0,

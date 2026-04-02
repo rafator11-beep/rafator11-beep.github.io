@@ -1,4 +1,4 @@
-﻿import { safeLower, asString } from '@/utils/safeText';
+import { safeLower, asString } from '@/utils/safeText';
 
 const LOCAL_RANKING_KEY = 'fiesta-party-local-rankings-v1';
 
@@ -104,7 +104,7 @@ function migrateFromGameHistory(): PlayerRanking[] {
       for (const name of (game.players || [])) {
         if (!statsMap[name]) {
           statsMap[name] = {
-            id: `migrated_${Math.random().toString(36).slice(2)}`,
+            id: crypto.randomUUID(),
             player_name: name,
             avatar_url: null,
             city: null,
@@ -275,7 +275,7 @@ export function upsertLocalRanking(params: {
     current[idx] = r;
   } else {
     const base: PlayerRanking = {
-      id: `local_${Math.random().toString(36).slice(2)}`,
+      id: crypto.randomUUID(),
       player_name: asString(playerName),
       avatar_url: avatarUrl ?? null,
       city: city ?? null,
