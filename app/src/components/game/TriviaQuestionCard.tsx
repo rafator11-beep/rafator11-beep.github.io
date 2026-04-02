@@ -8,6 +8,7 @@ import { FootballQuestion } from '@/data/footballQuestionsNew';
 import { getFamousHint } from '@/data/famousCalls';
 import { QuestionVote } from './QuestionVote';
 import confetti from 'canvas-confetti';
+import { cleanGameText } from '@/utils/sanitize';
 
 interface TriviaQuestionCardProps {
   question: CultureQuestion | FootballQuestion;
@@ -342,7 +343,7 @@ export function TriviaQuestionCard({
             </div>
 
             <h2 className="text-xl md:text-2xl font-bold leading-snug tracking-tight text-white drop-shadow-sm">
-                {question.question}
+                {cleanGameText(question.question)}
             </h2>
         </div>
 
@@ -453,7 +454,7 @@ export function TriviaQuestionCard({
               className={`p-4 rounded-xl text-center transition-all ${bgClass} ${textColor}`}
             >
               {!showResult && !isSelected && <span className={`font-black ${letterColor} mr-2`}>{letter}.</span>}
-              <span className="font-semibold text-[1.1rem] tracking-tight">{option}</span>
+              <span className="font-semibold text-[1.1rem] tracking-tight">{cleanGameText(option)}</span>
             </motion.button>
           );
         })}

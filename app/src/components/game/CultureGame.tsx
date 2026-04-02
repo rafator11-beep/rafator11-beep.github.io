@@ -1,9 +1,10 @@
-﻿import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Lightbulb, Phone, RefreshCw, Check, X, Trophy, Users } from 'lucide-react';
 import { useGameContext } from '@/contexts/GameContext';
 import { Player } from '@/types/game';
 import { Button } from '@/components/ui/button';
+import { cleanGameText } from '@/utils/sanitize';
 import { cultureQuestions, CultureQuestion, getRandomCultureQuestions } from '@/data/cultureQuestions';
 
 interface Lifeline {
@@ -275,7 +276,7 @@ export default function CultureGame() {
         {/* Question Card */}
         <div className="bg-card rounded-3xl p-6 border mb-6">
           <p className="text-xl font-bold text-center mb-6">
-            {currentQuestion.question}
+            {cleanGameText(currentQuestion.question)}
           </p>
 
           {showHint && currentQuestion.hint && (
@@ -318,7 +319,7 @@ export default function CultureGame() {
                     <span className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold">
                       {String.fromCharCode(65 + index)}
                     </span>
-                    <span className="flex-1">{option}</span>
+                    <span className="flex-1">{cleanGameText(option)}</span>
                     {showResult && isCorrect && <Check className="w-6 h-6 text-green-500" />}
                     {showResult && isSelected && !isCorrect && <X className="w-6 h-6 text-destructive" />}
                   </div>

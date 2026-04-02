@@ -22,10 +22,13 @@ const parseTicTacToeState = (data: any): TicTacToeState | null => {
 
 const parseQuestion = (data: any): Question => ({
   ...data,
-  text: cleanGameText(data.text),
+  question: cleanGameText(data.question || ''),
+  text: cleanGameText(data.text || ''),
+  description: cleanGameText(data.description || ''),
   mode: data.mode as GameMode,
   type: data.type as QuestionType,
   options: data.options ? data.options.map((opt: string) => cleanGameText(opt)) : null,
+  correctAnswer: typeof data.correctAnswer === 'string' ? cleanGameText(data.correctAnswer) : data.correctAnswer
 });
 
 export function useGame(gameId: string | null) {

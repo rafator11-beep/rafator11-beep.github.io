@@ -21,6 +21,10 @@ const CORRUPTION_MAP: Record<string, string> = {
   'ðŸŽµ': '🎵',
   'ðŸ’ƒ': '💃',
   'ðŸ🕺': '🕺',
+  'ðŸ 🍺': '🍺',
+  'ðŸ 🥂': '🥂',
+  'ðŸ‘½': '👽',
+  'ðŸ’¯': '💯',
   'SIN S /NO': 'SIN SÍ/NO',
   'V CTIMA': 'VÍCTIMA',
   'EL CR TICO': 'EL CRÍTICO'
@@ -30,12 +34,13 @@ const CORRUPTION_MAP: Record<string, string> = {
  * Aggressive recovery for UTF-8 bytes read as single characters.
  */
 const recoverUTF8 = (str: string): string => {
+  if (!str) return str;
   try {
     // This is the "Gold Standard" for fixing double-encoding in JS
-    // It works for sequences like "Ã¡" -> "á"
     return decodeURIComponent(escape(str));
   } catch (e) {
-    // If it fails (invalid UTF-8), try to fix parts of it
+    // If it fails (invalid UTF-8), try to fix parts of it using a regex that looks for 
+    // common Latin-1 encoded UTF-8 start bytes followed by continuation bytes.
     return str.replace(/[\u00C0-\u00FF][\u0080-\u00BF]+/g, (match) => {
       try {
         return decodeURIComponent(escape(match));
@@ -47,17 +52,22 @@ const recoverUTF8 = (str: string): string => {
 };
 
 export const cleanGameText = (text: string): string => {
-  if (!text) return text;
+  if (!text || typeof text !== 'string') return text;
 
   let cleaned = text;
 
-  // 1. Manual map for persistent offenders
+  // 1. Manual map for persistent offenders (high priority)
   Object.entries(CORRUPTION_MAP).forEach(([corrupt, fixed]) => {
-    cleaned = cleaned.split(corrupt).join(fixed);
+    if (cleaned.includes(corrupt)) {
+      cleaned = cleaned.split(corrupt).join(fixed);
+    }
   });
 
   // 2. Automated UTF-8 recovery
-  cleaned = recoverUTF8(cleaned);
+  const recovered = recoverUTF8(cleaned);
+  if (recovered !== cleaned) {
+    cleaned = recovered;
+  }
 
   // 3. Final polish for remaining Unicode Replacement Characters or common artifacts
   cleaned = cleaned.replace(/\uFFFD/g, (match, offset, str) => {
@@ -68,9 +78,9 @@ export const cleanGameText = (text: string): string => {
     return ''; 
   });
 
-  // 4. Special case for the common "ÐŸ" prefix in many emojis
+  // 4. Special case for the common "ÐŸ" prefix in many emojis if still present
   if (cleaned.includes('ÐŸ')) {
-    cleaned = cleaned.replace(/ÐŸ[\u0080-\u00BF][\u0080-\u00BF][\u0080-\u00BF]/g, (m) => {
+    cleaned = cleaned.replace(/ÐŸ[\u0080-\u00BF]{1,3}/g, (m) => {
        try { return decodeURIComponent(escape(m)); } catch { return m; }
     });
   }
