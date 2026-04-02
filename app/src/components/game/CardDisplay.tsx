@@ -471,11 +471,15 @@ export const CardDisplay = React.memo(({ content, type = 'common', onClick, game
 
         setIsGenerating(true);
         try {
-            const result = await generateAIChallenge(players || [], gameMode);
+            // Determinar intensidad basada en la ronda o aleatoria para más dinamismo
+            const intensities: ('soft' | 'medium' | 'hard')[] = ['soft', 'medium', 'hard'];
+            const randomIntensity = intensities[Math.floor(Math.random() * intensities.length)];
+
+            const result = await generateAIChallenge(players || [], gameMode, randomIntensity);
             onAIUpdate?.(result.content, result.type);
-            toast.success("Reto Generativo Creado por Claude", { 
+            toast.success(`Reto ${result.type} generado (${randomIntensity})`, {
                 icon: "✨",
-                style: { backgroundColor: '#1e1b4b', color: '#fff', border: '1px solid #4338ca' } 
+                style: { backgroundColor: '#1e1b4b', color: '#fff', border: '1px solid #4338ca' }
             });
         } catch (error) {
             toast.error("Bridge Error: Local Inference fallida");
@@ -486,7 +490,7 @@ export const CardDisplay = React.memo(({ content, type = 'common', onClick, game
 
     return (
         <div className="w-full max-w-sm mx-auto relative" style={{ minHeight: '72vh' }}>
-            
+
             {/* AI GLOW EFFECT */}
             <AnimatePresence>
                 {isGenerating && (
