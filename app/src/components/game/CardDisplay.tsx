@@ -68,7 +68,7 @@ export function sanitizeCardText(text: string): string {
     clean = clean.replace(/^📜\s*NORMA\s*:\s*/i, '');
     clean = clean.replace(/^NORMA\s*:\s*/i, '');
     clean = clean.replace(/^NUEVA\s*NORMA\s*:\s*/i, '');
-    clean = clean.replace(/^🙈\s*(Yo\s*nunca[.…]?\s*)?/i, '');
+    clean = clean.replace(/^🙈\s*(?:Yo\s*nunca[.…]*\s*)?/i, '');
     clean = clean.replace(/^🎯\s*/i, '');
     clean = clean.replace(/^🌶️\s*/i, '');
     clean = clean.replace(/^🗳️\s*/i, '');
