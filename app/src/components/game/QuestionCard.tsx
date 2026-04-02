@@ -1,9 +1,10 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Timer, CheckCircle2, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Question } from '@/types/game';
 import { QuestionVote } from './QuestionVote';
+import { cleanGameText } from '@/utils/sanitize';
 
 interface QuestionCardProps {
   question: Question;
@@ -104,7 +105,7 @@ export function QuestionCard({ question, onAnswer, timeLimit = 30, playerName }:
                 className={`p-4 rounded-xl text-center transition-all ${bgClass} ${textColor}`}
               >
                 {!showResult && !isSelected && <span className={`font-black ${letterColor} mr-2`}>{letter}.</span>}
-                <span className="font-semibold text-[1.1rem] tracking-tight">{option}</span>
+                <span className="font-semibold text-[1.1rem] tracking-tight">{cleanGameText(option)}</span>
               </motion.button>
             );
           })}
@@ -209,7 +210,7 @@ export function QuestionCard({ question, onAnswer, timeLimit = 30, playerName }:
             )}
 
             <h2 className="text-xl md:text-2xl font-bold leading-snug tracking-tight text-white drop-shadow-sm">
-                {question.question}
+                {cleanGameText(question.question)}
             </h2>
         </div>
 

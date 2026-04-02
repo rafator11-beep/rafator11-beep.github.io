@@ -19,19 +19,20 @@ export const generateAIChallenge = async (
   const playerNames = players.map(p => p.name).join(', ');
 
   const systemPrompt = `Actúa como un Senior Game Designer experto en juegos de fiesta ("Yo Nunca", "Retos", "Picante"). 
-  Tu objetivo es generar una única tarjeta de juego creativa, divertida y sorprendente.
+  Tu objetivo es generar una única tarjeta de juego creativa, divertida, sorprendente y relevante para los jugadores.
   
   CONTEXTO:
   - Jugadores actuales: ${playerNames}
   - Modo: ${currentMode}
-  - Intensidad: ${intensity}
+  - Intensidad: ${intensity} (soft = amigable y divertido, medium = puede ser un poco más picante o personal, hard = atrevido y desafiante)
 
   REGLAS:
   1. Si el modo es "yo_nunca", responde con una frase que empiece por "Yo nunca...".
   2. Si el modo es "clasico" o "megamix", responde con un Reto para uno de los jugadores. Ejemplo: "Reto: {player} haz X...".
   3. Usa el formato JSON: { "content": "texto del reto", "type": "common|rare|legendary|chaos|virus" }.
   4. Sé original, evita clichés. Aprovecha que tienes nombres de jugadores para crear piques sanos.
-  5. Responde SOLO el JSON.`;
+  5. Responde SOLO el JSON.
+  6. Ajusta el tono del desafío según la Intensidad. Para \'hard\', busca generar piques sanos y situaciones divertidas entre los jugadores mencionados.`;
 
   // Only attempt Ollama on localhost — CORS blocks it from production origins
   const isLocalhost = typeof window !== 'undefined' &&

@@ -3,6 +3,7 @@ import { supabase, isSupabaseConfigured } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Game, Player, Team, Question, TicTacToeState, GameMode, QuestionType } from '@/types/game';
 import { v4 as uuidv4 } from 'uuid';
+import { cleanGameText } from '@/utils/sanitize';
 
 // Helper functions to safely cast database types
 const parseGame = (data: any): Game => ({
@@ -21,9 +22,10 @@ const parseTicTacToeState = (data: any): TicTacToeState | null => {
 
 const parseQuestion = (data: any): Question => ({
   ...data,
+  text: cleanGameText(data.text),
   mode: data.mode as GameMode,
   type: data.type as QuestionType,
-  options: data.options as string[] | null,
+  options: data.options ? data.options.map((opt: string) => cleanGameText(opt)) : null,
 });
 
 export function useGame(gameId: string | null) {

@@ -1,11 +1,11 @@
-﻿import { motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Trophy, ArrowRight, RotateCcw, Home, Users, Star, Medal, TrendingUp, Crown, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Player, Team, Game } from '@/types/game';
 import { PlayerStats } from '@/hooks/useRanking';
-import confetti from 'canvas-confetti';
 import { useEffect, useState } from 'react';
+import { usePremiumEffects } from '@/components/effects/PremiumEffectsProvider';
 
 interface RoundSummaryProps {
   game?: Game;
@@ -40,6 +40,7 @@ export function RoundSummary({
   trackingData
 }: RoundSummaryProps) {
   const [activeTab, setActiveTab] = useState<'partida' | 'global'>('partida');
+  const { triggerSuccess, playSfx } = usePremiumEffects();
 
   // Merge scores if provided
   const playersWithScores = scores
@@ -80,10 +81,11 @@ export function RoundSummary({
 
   useEffect(() => {
     if (isGameOver && winner) {
-      confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
-      setTimeout(() => confetti({ particleCount: 100, spread: 120, origin: { y: 0.5 } }), 500);
+      triggerSuccess();
+      const timer = setTimeout(() => triggerSuccess(), 800);
+      return () => clearTimeout(timer);
     }
-  }, [isGameOver, winner]);
+  }, [isGameOver, winner, triggerSuccess]);
 
   const medalEmoji = (i: number) => i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}`;
 

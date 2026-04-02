@@ -104,7 +104,7 @@
 
   body {
     @apply text-foreground antialiased;
-    background: url('/modern_bg.png') center/cover fixed, #0a0a0a;
+    background: #060810;
     font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     overflow-x: hidden;
     overscroll-behavior-y: none;
@@ -223,10 +223,27 @@
 
 
   .premium-screen {
-    background:
-      radial-gradient(circle at top, rgba(236, 72, 153, 0.10), transparent 22%),
-      radial-gradient(circle at 88% 8%, rgba(56, 189, 248, 0.10), transparent 18%),
-      linear-gradient(180deg, rgba(9, 11, 28, 0.98) 0%, rgba(10, 14, 30, 0.98) 48%, rgba(6, 10, 22, 1) 100%);
+    position: relative;
+    background: #060810;
+    overflow: hidden;
+  }
+
+  .premium-screen::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(circle at 20% 30%, hsla(var(--primary) / 0.15) 0%, transparent 40%),
+      radial-gradient(circle at 80% 70%, hsla(var(--accent) / 0.15) 0%, transparent 40%),
+      radial-gradient(circle at 50% 50%, hsla(var(--neon-pink) / 0.05) 0%, transparent 60%);
+    filter: blur(80px);
+    z-index: -1;
+    animation: mesh-float 20s ease-in-out infinite alternate;
+  }
+
+  @keyframes mesh-float {
+    0% { transform: scale(1) translate(0, 0); }
+    100% { transform: scale(1.1) translate(2%, 2%); }
   }
 
   .premium-panel {
@@ -288,5 +305,30 @@
   }
   .animate-float-gentle {
     animation: float-gentle 4s ease-in-out infinite;
+  }
+
+  /* BEEP ULTRA OVERLAY */
+  .beep-ultra-overlay {
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    border: 1px solid hsla(var(--primary) / 0.1);
+    box-shadow: inset 0 0 100px hsla(var(--primary) / 0.05);
+    mix-blend-mode: screen;
+  }
+
+  .beep-ultra-scanlines {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(18, 16, 16, 0.03) 50%,
+      transparent 100%
+    );
+    background-size: 100% 4px;
+    z-index: 10000;
+    pointer-events: none;
   }
 }
