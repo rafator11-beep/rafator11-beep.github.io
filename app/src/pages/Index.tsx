@@ -9,6 +9,7 @@ import { FiestaTab } from '@/components/game/FiestaTab';
 import { JuegoTab } from '@/components/game/JuegoTab';
 import { TeamModeSelector } from '@/components/game/TeamModeSelector';
 import { SplashScreen } from '@/components/SplashScreen';
+import { WhatsNewModal } from '@/components/WhatsNewModal';
 import { GameMode, GAME_MODES, TabId, PlayMode } from '@/types/game';
 import { supabase } from '@/integrations/supabase/client';
 import { ConnectionDot } from '@/components/multiplayer/ConnectionDot';
@@ -675,6 +676,7 @@ function GameAppInner() {
   return (
     <>
       <SplashScreen onComplete={() => setShowSplash(false)} />
+      <WhatsNewModal />
       {isAuthOverlayOpen && <WelcomeScreen />}
       <AuthOverlay />
       <GlobalPresence />

@@ -1,4 +1,4 @@
-﻿export const duelos = [
+export const duelos = [
   { name: "Duelo de Pulgares", description: "Elige a un oponente. El que pierda bebe 3 tragos.", type: "physical" },
   { name: "Duelo de Miradas", description: "Tú y el jugador de enfrente. El primero que parpadee o se ría, bebe.", type: "social" },
   { name: "Duelo de Nombres", description: "Tú y un oponente debéis decir marcas de coches alternadamente. El primero que repita o tarde más de 3 segundos, bebe.", type: "knowledge" },
@@ -138,5 +138,88 @@
   { name: "Duelo de Toques de Rodilla", description: "De pie, debéis intentar tocar vuestra propia rodilla con el codo opuesto lo más rápido posible durante 20 segundos. El grupo elige al más lento para que beba.", type: "physical" },
   { name: "Duelo de Salto de Cuerda Imaginaria", description: "Saltad a la comba sin comba. El grupo marcará ritmos cada vez más rápidos. El primero que se trabe o pierda el ritmo, bebe.", type: "physical" },
   { name: "Duelo de Abdominales en V", description: "Sentados en el suelo, levantad piernas y tronco formando una 'V' sin apoyar las manos. El primero que toque el suelo con los pies, bebe.", type: "physical" },
-  { name: "Duelo de Flexión con Palmada", description: "Haced flexiones intentando dar una palmada en el aire. El que consiga hacer más (o el único que lo logre), reparte 5 tragos.", type: "physical" }
+  { name: "Duelo de Flexión con Palmada", description: "Haced flexiones intentando dar una palmada en el aire. El que consiga hacer más (o el único que lo logre), reparte 5 tragos.", type: "physical" },
+
+  // — NUEVOS DUELOS SOCIALES —
+  { name: "Duelo de Mentiras", description: "Cada uno dice 3 frases sobre sí mismo: 2 verdades y 1 mentira. El que adivine menos mentiras del otro, bebe 3 tragos.", type: "social" },
+  { name: "Duelo de Cumplidos Mortales", description: "Decíos cumplidos ridículos y exagerados alternadamente. El primero que se ría o repita uno, bebe doble.", type: "social" },
+  { name: "Duelo de Insultos de Amor", description: "Cread insultos cariñosos el uno al otro durante 20 segundos. El grupo vota el peor creador — ese bebe.", type: "social" },
+  { name: "Duelo del Juicio Final", description: "El grupo os plantea un dilema moral imposible. El que dé la respuesta más cuestionable, bebe 3 tragos.", type: "social" },
+  { name: "Duelo de Storytelling", description: "Ambos tenéis 30 segundos para inventar una historia con inicio y final. El grupo vota quién contó la más absurda. El que gane, reparte.", type: "social" },
+  { name: "Duelo de Discurso Político", description: "Tenéis 20 segundos cada uno para dar un discurso electoral con promesas imposibles. El grupo vota el más ridículo — reparte 4 tragos.", type: "social" },
+  { name: "Duelo de Rap Improvisado", description: "El grupo da 3 palabras. Cada uno hace un verso con ellas. El peor rimador, bebe 3 tragos.", type: "social" },
+  { name: "Duelo de Excusas", description: "El grupo da una situación (ej: llegaste tarde al trabajo). Tenéis 15 segundos para inventar la mejor excusa. La más convincente reparte.", type: "social" },
+  { name: "Duelo de Eslogan", description: "Inventad un eslogan publicitario para el jugador que os indica el grupo. El que haga el más ridículo, bebe.", type: "social" },
+  { name: "Duelo del Confesionario", description: "Cada uno dice una cosa que el otro no sabe de sí mismo. El que revele algo más impactante, reparte 4 tragos.", type: "social" },
+  { name: "Duelo de Roast", description: "Tenéis 20 segundos para hacerle un 'roast' al otro con chistes a su costa. El grupo vota el más cruel. Ese bebe… o reparte — el grupo decide.", type: "social" },
+  { name: "Duelo de Títulos de Película", description: "Inventad el título de una película donde el protagonista es el otro jugador. El más ridiculo gana. El que pierde bebe.", type: "social" },
+  { name: "Duelo de Obituario Absurdo", description: "Escribid mentalmente en 15 segundos el obituario del otro. El que lea el suyo más gracioso, reparte 4 tragos.", type: "social" },
+  { name: "Duelo de LinkedIn Falso", description: "Inventad el perfil de LinkedIn del otro con cargos y habilidades absurdas. El grupo vota el más realista-ridículo. El perdedor bebe.", type: "social" },
+  { name: "Duelo de Primer Mensaje", description: "Inventad el primer mensaje de ligue que mandaríais al otro si os encontraseis en Tinder. El grupo vota el más cringe. Ese bebe.", type: "social" },
+
+  // — NUEVOS DUELOS FÍSICOS —
+  { name: "Duelo de Codos", description: "Apoyad los codos en la mesa, juntad las palmas. El primero que separe los codos o doble las muñecas, bebe 3 tragos.", type: "physical" },
+  { name: "Duelo de Silla Musical", description: "Con una silla menos que jugadores. La primera vez que el grupo para la música, el que se quede sin silla bebe 4 tragos.", type: "physical" },
+  { name: "Duelo de Globo", description: "Con un papel o servilleta hecha bola: golpeadla al aire alternadamente. El primero al que se le caiga al suelo, bebe.", type: "physical" },
+  { name: "Duelo de Mímica Rápida", description: "El grupo da una palabra. Ambos mimáis a la vez durante 10 segundos. El grupo vota quién lo hizo peor — bebe 3 tragos.", type: "physical" },
+  { name: "Duelo del Vaso Quieto", description: "Poned el vaso en el dorso de la mano estirada. El que se le caiga primero o lo mueva más, bebe lo que queda dentro del otro.", type: "physical" },
+  { name: "Duelo de Carrera de Dedos", description: "Mano plana en la mesa. A la señal, levantad y bajad los dedos del 1 al 5 en orden. El grupo dice quién fue más lento — ese bebe.", type: "physical" },
+  { name: "Duelo del Robot Humano", description: "Moved el brazo en círculos mientras mantenéis el otro completamente quieto durante 15 segundos. El que mueva el brazo quieto, bebe doble.", type: "physical" },
+  { name: "Duelo de Tabla", description: "Ambos en posición de plancha lateral. El primero que baje la cadera, bebe 4 tragos.", type: "physical" },
+  { name: "Duelo Finger Twister", description: "El grupo indica qué dedo de qué mano poner en qué superficie. El primero que pierda el equilibrio o se equivoque, bebe.", type: "physical" },
+  { name: "Duelo de Patadas de Karate", description: "Simulad una patada de karate. El grupo vota quién tiene peor técnica. Ese bebe 3 tragos.", type: "physical" },
+  { name: "Duelo de Cucharas en Pies", description: "Poneos una cuchara en el empeine del pie derecho. El primero al que se le caiga mientras caminéis 3 metros, bebe.", type: "physical" },
+  { name: "Duelo de Caída Controlada", description: "De pie con los pies juntos, inclinaos hacia adelante sin doblar rodillas. El primero que mueva los pies para no caerse, bebe.", type: "physical" },
+
+  // — NUEVOS DUELOS DE CONOCIMIENTO —
+  { name: "Duelo de Capitales Raras", description: "Decid capitales de países poco conocidos alternadamente. El primero que no sepa o repita, bebe 3 tragos.", type: "knowledge" },
+  { name: "Duelo de Años", description: "El grupo dice un evento histórico. El que acierte el año (o quede más cerca), reparte 4 tragos. El otro bebe.", type: "knowledge" },
+  { name: "Duelo de Bandas Sonoras", description: "Uno tararea y el otro adivina la banda sonora de película en 10 segundos. Si falla, bebe. Si acierta, el que tarareó bebe.", type: "knowledge" },
+  { name: "Duelo de Sinónimos", description: "El grupo da una palabra. Decid sinónimos alternadamente. El primero que se repita o tartamudee, bebe.", type: "knowledge" },
+  { name: "Duelo de Marcas vs Logos", description: "El grupo describe un logo de memoria. El primero de los dos que adivine la marca, reparte 3 tragos.", type: "knowledge" },
+  { name: "Duelo de Fechas Raras", description: "El grupo menciona un efeméride raro. El que adivine el día y mes más cercano a la respuesta real, reparte 3 tragos.", type: "knowledge" },
+  { name: "Duelo de Palabras del Revés", description: "El grupo da una palabra. Debéis decirla al revés. El primero que lo consiga bien, reparte. El que falle o tarde más, bebe.", type: "knowledge" },
+  { name: "Duelo de Cantantes vs Canciones", description: "Decid pares cantante-canción alternadamente sin repetir. El primero que falle, bebe 4 tragos.", type: "knowledge" },
+  { name: "Duelo de Ingredientes", description: "El grupo elige un plato típico. Decid ingredientes alternadamente. El que diga uno incorrecto o repita, bebe.", type: "knowledge" },
+  { name: "Duelo de Frases Hechas", description: "Decid frases hechas en español alternadamente. El que se quede en blanco o repita, bebe 3 tragos.", type: "knowledge" },
+  { name: "Duelo de Países por Continente", description: "El grupo elige un continente. Decid países de ese continente alternadamente. El primero que falle, bebe doble.", type: "knowledge" },
+  { name: "Duelo de Presidentes", description: "Decid nombres de expresidentes del gobierno de España en orden cronológico. El primero que falle, bebe.", type: "knowledge" },
+  { name: "Duelo de Verbos Irregulares", description: "El grupo dice un verbo irregular. Debéis conjugarlo completamente en pasado. El que se equivoque primero, bebe.", type: "knowledge" },
+
+  // — NUEVOS DUELOS TECH —
+  { name: "Duelo de Galería sin Filtros", description: "El grupo elige una categoría (animales, comida, amigos). El que encuentre una foto de esa categoría más rápido en su galería, reparte 3 tragos.", type: "tech" },
+  { name: "Duelo de Contactos VIP", description: "El que tenga al contacto más famoso o importante en la agenda (nombre completo sin alias), reparte 4 tragos.", type: "tech" },
+  { name: "Duelo de Mapas Mentales", description: "Buscad en Google Maps vuestra ciudad. El que llegue a la vista satélite de vuestra ubicación actual más rápido, reparte.", type: "tech" },
+  { name: "Duelo de Historial de Búsqueda", description: "El que tenga la búsqueda más vergonzosa en el historial reciente de Google, bebe 4 tragos y la lee en voz alta.", type: "tech" },
+  { name: "Duelo de Apps Raras", description: "Mostrad la app más inútil o extraña que tengáis instalada. El grupo vota la más absurda — ese jugador reparte 3 tragos.", type: "tech" },
+  { name: "Duelo de Pantalla de Bloqueo", description: "Enseñad la pantalla de bloqueo. El grupo vota la foto más cringe o rara. Ese jugador bebe.", type: "tech" },
+  { name: "Duelo de Screenshot", description: "El que encuentre el screenshot más antiguo en su galería (¡sin borrar!), reparte 3 tragos. El otro bebe.", type: "tech" },
+  { name: "Duelo de Ultimo Tweet/Post", description: "Buscad vuestro último post en cualquier red social. El grupo vota el más aburrido o ridículo — ese jugador bebe.", type: "tech" },
+  { name: "Duelo de Saldo de Bizum", description: "El que tenga el saldo más bajo en su cuenta visible de banca online, bebe por arruinado (o reparte si tiene más de 500€).", type: "tech" },
+  { name: "Duelo de Velocidad Wifi", description: "Buscad 'test de velocidad' en Google y corred el test. El que tenga peor velocidad de descarga, bebe 3 tragos.", type: "tech" },
+  { name: "Duelo de Emoji Frecuente", description: "Abrid el teclado de emoji. El que tenga el emoji más raro o inesperado en los 'más usados', bebe y explica por qué.", type: "tech" },
+  { name: "Duelo de Contraseñas Débiles", description: "Confesad (sin decirla) vuestra contraseña más débil. El grupo decide quién tiene la más insegura — ese bebe.", type: "tech" },
+  { name: "Duelo de Feed", description: "Mostrad la última publicación que os salió en el feed de Instagram/TikTok. El grupo vota la más random. Ese jugador bebe.", type: "tech" },
+
+  // — NUEVOS DUELOS DE SUERTE —
+  { name: "Duelo del Número Misterioso", description: "Pensad en un número del 1 al 100. El grupo acierta el de uno de los dos (adivinan 3 veces). El no adivinado bebe.", type: "luck" },
+  { name: "Duelo de la Brújula", description: "Abrid la brújula del móvil. El que señale en dirección más cercana al Norte real (comprobad con otra referencia), reparte.", type: "luck" },
+  { name: "Duelo de Dados Dobles", description: "Lanzad un dado virtual dos veces cada uno (en Google: 'roll a dice'). El que saque la suma más baja, bebe esa diferencia en tragos.", type: "luck" },
+  { name: "Duelo de Predicción", description: "Cada uno predice en voz alta un evento de los próximos 30 minutos (ej: quién beberá antes). El que falle en su predicción, bebe doble.", type: "luck" },
+  { name: "Duelo del Ruleta del Destino", description: "Buscad 'ruleta' en Google. El que saque número más alto, reparte 5 tragos. El que saque el más bajo, bebe solo.", type: "luck" },
+  { name: "Duelo de la Moneda Táctica", description: "Uno elige cara o cruz ANTES de que el otro lance. Si acierta, el lanzador bebe; si falla, bebe quien eligió.", type: "luck" },
+  { name: "Duelo de Carta de Color", description: "Pensad un color de carta (rojo o negro) mientras el otro saca una carta del mazo virtual. Si acierta, el que sacó bebe. Si falla, el que pensó bebe.", type: "luck" },
+  { name: "Duelo del Reloj Parado", description: "A la señal, ambos bloquead el móvil y mostrad el reloj del sistema. El que tenga los segundos más cercanos al 00, reparte 4 tragos.", type: "luck" },
+  { name: "Duelo de Temperatura", description: "El grupo busca la temperatura actual de una ciudad aleatoria. El que adivine más cerca sin pasarse, reparte 3 tragos.", type: "luck" },
+  { name: "Duelo del Porcentaje de Batería", description: "El que tenga el porcentaje de batería más cercano a 50% en este momento, reparte 4 tragos. El más alejado, bebe.", type: "luck" },
+
+  // — DUELOS GRUPALES (implican al resto) —
+  { name: "Duelo Tribunal", description: "El grupo actúa como jurado. Los dos duelistas argumentan por qué merecen NO beber. El grupo vota. El perdedor apura su vaso.", type: "social" },
+  { name: "Duelo de Coro", description: "El grupo humea una canción. Los duelistas deben identificarla y gritar el título al mismo tiempo. El primero que grite bien, reparte 5 tragos. El otro bebe.", type: "social" },
+  { name: "Duelo del Escudo", description: "Cada duelista elige a un 'escudo' del grupo. El escudo hace el reto en lugar del jugador. Si el escudo falla, ambos beben. Si gana, el duelista reparte.", type: "social" },
+  { name: "Duelo de Alianza Rota", description: "Los duelistas deben hacer el mismo gesto al mismo tiempo sin hablarse. Si coinciden exactamente, el grupo bebe. Si fallan, beben los dos.", type: "social" },
+  { name: "Duelo del Árbitro Borracho", description: "El jugador que más haya bebido hasta ahora actúa como árbitro. Inventa el reto (10 segundos para pensarlo). Los duelistas lo ejecutan. El árbitro decide quién perdió.", type: "social" },
+  { name: "Duelo de Apuestas", description: "Antes del duelo, el resto del grupo apuesta (1 trago cada uno) por el ganador. El duelo es: ¿quién adivina el número que pienso? Solo un intento cada uno. El que pierda el duelo, bebe lo apostado por todos.", type: "luck" },
+  { name: "Duelo Doble o Nada", description: "Clásico piedra-papel-tijera, pero el perdedor puede proponer 'doble o nada'. Si acepta y vuelve a perder: apura el vaso. Si acepta y gana: reparte el doble.", type: "luck" },
+  { name: "Duelo Sorpresa", description: "El grupo decide el reto en secreto y lo revela solo al empezar. Los duelistas no saben qué harán hasta que el árbitro diga '¡YA!'. El perdedor bebe 4 tragos.", type: "social" }
 ];

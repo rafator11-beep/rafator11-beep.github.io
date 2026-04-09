@@ -49,7 +49,7 @@ export interface GameState {
   };
   captainId: string | null;
   virusAlertData: { player: Player; virus: any } | null;
-  virusCycleData?: { type: string; title: string; message: string }; // Added
+  virusCycleData?: { type: string; title: string; message: string; virusName?: string; virusDescription?: string; challenge?: string }; // Added
 
   // Yo Nunca Equipos State
   yoNuncaEquiposPhase?: 'idle' | 'truth_phase' | 'guess_phase' | 'result_phase';

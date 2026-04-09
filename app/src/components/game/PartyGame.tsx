@@ -1834,27 +1834,41 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
       {/* Virus Cycle Notification */}
       <Dialog open={gameState.showVirusCycleAlert}>
-        <DialogContent className="sm:max-w-md bg-slate-900/95 backdrop-blur-2xl border-purple-500/50 text-white z-[70]">
+        <DialogContent className="sm:max-w-md bg-slate-900/95 backdrop-blur-2xl border-green-500/50 text-white z-[70]">
           <DialogHeader>
-            <DialogTitle className="text-3xl font-black text-center text-purple-400 uppercase tracking-tighter">
+            <DialogTitle className="text-3xl font-black text-center text-green-400 uppercase tracking-tighter">
               {gameState.virusCycleData?.title || 'Evento Megamix'}
             </DialogTitle>
-            <DialogDescription className="text-center text-white/60 text-sm">
-              Informativo sobre cambios periódicos en virus o normas durante el ciclo Megamix.
-            </DialogDescription>
           </DialogHeader>
-          <div className="text-center py-8">
-            <p className="text-xl font-bold text-white/90">{gameState.virusCycleData?.message}</p>
+          <div className="flex flex-col gap-4 py-2">
+            {/* Infected player */}
+            <p className="text-center text-white/80 text-base font-semibold">{gameState.virusCycleData?.message}</p>
+
+            {/* Virus name + description */}
+            {gameState.virusCycleData?.virusName && (
+              <div className="bg-green-950/60 border border-green-500/30 rounded-2xl p-4 text-center space-y-1">
+                <p className="text-[10px] text-green-400 font-black uppercase tracking-widest">Virus activo</p>
+                <p className="text-green-300 font-black text-xl">{gameState.virusCycleData.virusName}</p>
+                <p className="text-white/70 text-sm leading-snug">{gameState.virusCycleData.virusDescription}</p>
+              </div>
+            )}
+
+            {/* Icebreaker challenge */}
+            {gameState.virusCycleData?.challenge && (
+              <div className="bg-purple-950/60 border border-purple-500/30 rounded-2xl p-4 text-center space-y-1">
+                <p className="text-[10px] text-purple-400 font-black uppercase tracking-widest">Reto grupal</p>
+                <p className="text-white/90 text-sm leading-snug">{gameState.virusCycleData.challenge}</p>
+              </div>
+            )}
           </div>
           <Button
-            className="w-full h-16 text-lg font-black bg-purple-600 hover:bg-purple-500 text-white rounded-2xl shadow-xl transition-all"
+            className="w-full h-14 text-base font-black bg-green-600 hover:bg-green-500 text-white rounded-2xl shadow-xl transition-all mt-2"
             onClick={() => {
               setGameState(prev => ({ ...prev, showVirusCycleAlert: false }));
-              // Ensure we advance the card after closing the global cycle alert
               performTurnAdvance(true);
             }}
           >
-            ENTENDIDO
+            ENTENDIDO, SIGUIENTE TURNO
           </Button>
         </DialogContent>
       </Dialog>

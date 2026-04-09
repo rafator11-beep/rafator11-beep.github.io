@@ -176,6 +176,75 @@ export const mimicaChallenges: MimicaChallenge[] = [
   { text: "Una lavadora en el ciclo de centrifugado a toda potencia", category: "objetos" },
   { text: "Un sacapuntas manual afilando un lápiz muy pequeño", category: "objetos" },
   { text: "Una caja de música con una bailarina girando dentro", category: "objetos" },
+
+  // OFICIOS EXTRA (+12)
+  { text: "Un monitor de yoga que se le va la cabeza al hacer el pino y no puede volver", category: "oficios" },
+  { text: "Un chef estrella Michelin que se da cuenta de que se ha saltado un ingrediente clave del plato", category: "oficios" },
+  { text: "Un buzo que descubre un pulpo dentro de su casco", category: "oficios" },
+  { text: "Un mago de cumpleaños al que se le escapa la paloma antes del truco", category: "oficios" },
+  { text: "Un payaso intentando desmaquillarse y que nada le quite la pintura", category: "oficios" },
+  { text: "Un entrenador personal que le hace el ejercicio al cliente porque no puede aguantar verlo mal", category: "oficios" },
+  { text: "Un notario leyendo un testamento y aguantando la risa porque es muy raro", category: "oficios" },
+  { text: "Un ornitólogo intentando fotografiar un pájaro rarísimo que no para de moverse", category: "oficios" },
+  { text: "Un dentista con el taladro que se le va de las manos dentro de la boca del paciente", category: "oficios" },
+  { text: "Un pintor de paredes que moja el rodillo demasiado y le cae pintura encima", category: "oficios" },
+  { text: "Un árbitro de tenis que sigue el peloteo tan rápido que le da torticolis", category: "oficios" },
+  { text: "Un afinador de pianos que descubre que el piano está totalmente destrozado por dentro", category: "oficios" },
+
+  // SITUACIONES EXTRA (+12)
+  { text: "Intentar encender una barbacoa con el viento en contra y que el fuego siempre se apague", category: "situaciones" },
+  { text: "Sacar una camiseta del cajón y que salgan veinte calcetines colgando", category: "situaciones" },
+  { text: "Intentar abrir un envase de leche de cartón que no se abre bien y terminar derramándola", category: "situaciones" },
+  { text: "Hablar por teléfono mientras das señas por gestos a alguien que se ha perdido", category: "situaciones" },
+  { text: "Intentar enrollar una manguera sin que se hagan nudos y siempre salir perdiendo", category: "situaciones" },
+  { text: "Encestar papel arrugado en una papelera desde lejos fallando cinco veces seguidas", category: "situaciones" },
+  { text: "Pelar una naranja entera en un solo trozo de piel sin romperla", category: "situaciones" },
+  { text: "Intentar poner una sábana ajustable en un colchón y que siempre se salte una esquina", category: "situaciones" },
+  { text: "Bajar las escaleras mecánicas averiadas como si fueran escalones normales con mucho esfuerzo", category: "situaciones" },
+  { text: "Intentar mantener el equilibrio en un bus lleno sin agarrarte a nada ni rozar a nadie", category: "situaciones" },
+  { text: "Pagar con tarjeta pero el datáfono no reconoce ninguna posición y lo pruebas de 10 formas distintas", category: "situaciones" },
+  { text: "Intentar sacar un chicle del envoltorio sin que se te pegue en los dedos", category: "situaciones" },
+
+  // ANIMALES EXTRA (+10)
+  { text: "Una medusa flotando a la deriva y de repente encogiendo para moverse", category: "animales" },
+  { text: "Un calamar disparando tinta y escapando hacia atrás", category: "animales" },
+  { text: "Un castor construyendo una presa mordiendo los troncos", category: "animales" },
+  { text: "Un suricato vigilando el horizonte de pie con las patitas en jarras", category: "animales" },
+  { text: "Un delfín saltando fuera del agua y haciendo un giro en el aire", category: "animales" },
+  { text: "Una mantis religiosa mirando fijamente a su presa antes de atacar", category: "animales" },
+  { text: "Un ornitorrinco buscando comida bajo el agua moviendo el hocico", category: "animales" },
+  { text: "Un canario cantando feliz pero al que de repente le entra el hipo", category: "animales" },
+  { text: "Un erizo enrollándose en una bola al notar peligro", category: "animales" },
+  { text: "Una nutria flotando boca arriba usando una piedra para romper una almeja en el pecho", category: "animales" },
+
+  // PELÍCULAS EXTRA (+6)
+  { text: "La película Indiana Jones huyendo de una enorme roca rodante", category: "peliculas" },
+  { text: "La película El Señor de los Anillos (Gollum acariciando su tesoro 'mi tesoro')", category: "peliculas" },
+  { text: "La película Karate Kid haciendo la grulla con una pierna", category: "peliculas" },
+  { text: "La película Forrest Gump corriendo sin parar cruzando todo el país", category: "peliculas" },
+  { text: "La película Gladiator en el Coliseo romano esperando el pulgar arriba o abajo", category: "peliculas" },
+  { text: "La película Dirty Dancing levantando a la pareja por encima de la cabeza al final", category: "peliculas" },
+
+  // SERIES EXTRA (+6)
+  { text: "La serie The Office (Michael Scott mirando a cámara con cara de desesperación)", category: "series" },
+  { text: "La serie Wednesday bailando de forma totalmente surrealista e inexpresiva", category: "series" },
+  { text: "La serie Bridgerton repartiendo cartas de cotilleo con guantes blancos muy elegante", category: "series" },
+  { text: "La serie Squid Game haciendo estatuas en 'luz roja, luz verde' con cara de terror", category: "series" },
+  { text: "La serie Merlí dando una clase de filosofía gesticulando muchísimo sin que nadie entienda nada", category: "series" },
+  { text: "La serie Vis a Vis (Macarena intentando escapar por los conductos de ventilación)", category: "series" },
+
+  // DISNEY EXTRA (+5)
+  { text: "La película Coco tocando la guitarra en el reino de los muertos rodeado de calaveras", category: "disney" },
+  { text: "La película Encanto haciendo que las plantas crezcan a su alrededor con magia", category: "disney" },
+  { text: "La película Vaiana surfeando una ola gigante con la ayuda de un semidiós", category: "disney" },
+  { text: "La película Luca intentando parecer humano cuando se le moja el brazo y se transforma", category: "disney" },
+  { text: "La película Elementos siendo una llamarada de fuego intentando tocar agua sin apagarse", category: "disney" },
+
+  // OBJETOS EXTRA (+4)
+  { text: "Un dispensador de jabón automático que detecta la mano demasiado tarde y siempre dispara cuando ya te vas", category: "objetos" },
+  { text: "Un paraguas que se invierte por el viento y se niega a cerrarse", category: "objetos" },
+  { text: "Una impresora que empieza a hacer ruidos raros, se detiene y escupe el papel arrugado", category: "objetos" },
+  { text: "Un dron que pierde el control y da vueltas en círculos antes de caer", category: "objetos" },
 ];
 
 // Helper para obtener un reto de mímica aleatorio
