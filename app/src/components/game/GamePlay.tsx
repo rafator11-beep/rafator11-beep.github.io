@@ -43,7 +43,7 @@ export function GamePlay({ onExit, isTeamMode = false, roomId = null, isHost = f
   const [selectedCell, setSelectedCell] = useState<[number, number] | null>(null);
   const [isAnswering, setIsAnswering] = useState(false);
 
-  const modeInfo = GAME_MODES.find(m => m.id === game?.mode) ?? { icon: '🎮', name: 'Juego', teamBased: false };
+  const modeInfo = GAME_MODES.find(m => m.id === game?.mode);
   const currentPlayer = getCurrentPlayer();
 
   const handleNextRound = async () => {

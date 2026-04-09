@@ -13,8 +13,8 @@
     --popover: 228 28% 10%;
     --popover-foreground: 210 20% 98%;
 
-    --primary: 318 95% 62%;
-    --primary-strong: 338 90% 58%;
+    --primary: 268 88% 67%;
+    --primary-strong: 284 82% 60%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 223 22% 18%;
@@ -23,7 +23,7 @@
     --muted: 223 18% 18%;
     --muted-foreground: 220 14% 68%;
 
-    --accent: 28 100% 60%;
+    --accent: 184 83% 58%;
     --accent-foreground: 228 30% 8%;
 
     --destructive: 0 78% 58%;
@@ -35,11 +35,11 @@
 
     --radius: 1rem;
 
-    --neon-pink: 318 95% 62%;
+    --neon-pink: 334 88% 63%;
     --neon-blue: 198 94% 63%;
     --neon-purple: 268 88% 67%;
     --neon-green: 153 73% 52%;
-    --neon-orange: 28 100% 60%;
+    --neon-orange: 29 94% 59%;
     --neon-yellow: 46 95% 60%;
 
     --sidebar-background: 228 26% 12%;
@@ -59,14 +59,14 @@
     --card-foreground: 210 20% 98%;
     --popover: 228 28% 10%;
     --popover-foreground: 210 20% 98%;
-    --primary: 318 95% 62%;
-    --primary-strong: 338 90% 58%;
+    --primary: 268 88% 67%;
+    --primary-strong: 284 82% 60%;
     --primary-foreground: 0 0% 100%;
     --secondary: 223 22% 18%;
     --secondary-foreground: 210 20% 98%;
     --muted: 223 18% 18%;
     --muted-foreground: 220 14% 68%;
-    --accent: 28 100% 60%;
+    --accent: 184 83% 58%;
     --accent-foreground: 228 30% 8%;
     --destructive: 0 78% 58%;
     --destructive-foreground: 0 0% 98%;
@@ -233,13 +233,12 @@
     position: absolute;
     inset: 0;
     background: 
-      radial-gradient(circle at 20% 30%, hsla(var(--primary) / 0.28) 0%, transparent 40%),
-      radial-gradient(circle at 80% 70%, hsla(var(--accent) / 0.22) 0%, transparent 40%),
-      radial-gradient(circle at 50% 50%, hsla(var(--neon-pink) / 0.12) 0%, transparent 60%),
-      radial-gradient(circle at 10% 80%, hsla(var(--neon-orange) / 0.15) 0%, transparent 35%);
-    filter: blur(60px);
+      radial-gradient(circle at 20% 30%, hsla(var(--primary) / 0.15) 0%, transparent 40%),
+      radial-gradient(circle at 80% 70%, hsla(var(--accent) / 0.15) 0%, transparent 40%),
+      radial-gradient(circle at 50% 50%, hsla(var(--neon-pink) / 0.05) 0%, transparent 60%);
+    filter: blur(80px);
     z-index: -1;
-    animation: mesh-float 14s ease-in-out infinite alternate;
+    animation: mesh-float 20s ease-in-out infinite alternate;
   }
 
   @keyframes mesh-float {
@@ -331,101 +330,5 @@
     background-size: 100% 4px;
     z-index: 10000;
     pointer-events: none;
-  }
-
-  /* ── CARD SLAM ANIMATION ─────────────────────────────────────── */
-  @keyframes card-slam {
-    0%   { transform: translateY(80px) scale(0.88); opacity: 0; }
-    60%  { transform: translateY(-8px) scale(1.03); opacity: 1; }
-    80%  { transform: translateY(4px) scale(0.99); }
-    100% { transform: translateY(0) scale(1); opacity: 1; }
-  }
-  .animate-card-slam {
-    animation: card-slam 0.42s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  }
-
-  /* ── LEGENDARY PARTICLES ─────────────────────────────────────── */
-  @keyframes particle-float-1 {
-    0%,100% { transform: translate(0,0) scale(1); opacity: 0.7; }
-    50%      { transform: translate(-18px,-28px) scale(1.4); opacity: 1; }
-  }
-  @keyframes particle-float-2 {
-    0%,100% { transform: translate(0,0) scale(1); opacity: 0.5; }
-    50%      { transform: translate(22px,-20px) scale(1.2); opacity: 0.9; }
-  }
-  @keyframes particle-float-3 {
-    0%,100% { transform: translate(0,0) scale(0.8); opacity: 0.6; }
-    50%      { transform: translate(-10px,24px) scale(1.3); opacity: 1; }
-  }
-  @keyframes particle-float-4 {
-    0%,100% { transform: translate(0,0) scale(1.1); opacity: 0.4; }
-    50%      { transform: translate(16px,18px) scale(0.7); opacity: 0.8; }
-  }
-  @keyframes particle-float-5 {
-    0%,100% { transform: translate(0,0) scale(0.9); opacity: 0.6; }
-    50%      { transform: translate(-24px,10px) scale(1.5); opacity: 1; }
-  }
-
-  .card-particle {
-    position: absolute;
-    border-radius: 50%;
-    pointer-events: none;
-    filter: blur(1px);
-  }
-  .card-particle-1 { width:10px; height:10px; top:12%; left:8%;  background: #fbbf24; animation: particle-float-1 2.8s ease-in-out infinite; }
-  .card-particle-2 { width:7px;  height:7px;  top:18%; right:10%; background: #f472b6; animation: particle-float-2 3.2s ease-in-out infinite 0.4s; }
-  .card-particle-3 { width:12px; height:12px; bottom:20%; left:12%; background: #a78bfa; animation: particle-float-3 2.5s ease-in-out infinite 0.8s; }
-  .card-particle-4 { width:8px;  height:8px;  bottom:15%; right:8%; background: #34d399; animation: particle-float-4 3.6s ease-in-out infinite 0.2s; }
-  .card-particle-5 { width:6px;  height:6px;  top:45%; left:5%;  background: #60a5fa; animation: particle-float-5 2.2s ease-in-out infinite 1s; }
-
-  /* ── CHAOS SHAKE ─────────────────────────────────────────────── */
-  @keyframes chaos-shake {
-    0%,100% { transform: rotate(0deg) scale(1); }
-    10%      { transform: rotate(-2deg) scale(1.01); }
-    20%      { transform: rotate(2deg) scale(1.02); }
-    30%      { transform: rotate(-1.5deg) scale(1.01); }
-    40%      { transform: rotate(1.5deg) scale(1.02); }
-    50%      { transform: rotate(-1deg) scale(1); }
-  }
-  .animate-chaos-shake {
-    animation: chaos-shake 0.6s ease-in-out;
-  }
-
-  /* ── NEXT BUTTON PULSE ───────────────────────────────────────── */
-  @keyframes btn-pulse-ring {
-    0%   { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.7); }
-    70%  { box-shadow: 0 0 0 14px hsl(var(--primary) / 0); }
-    100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0); }
-  }
-  .btn-pulse {
-    animation: btn-pulse-ring 1.8s ease-out infinite;
-  }
-
-  /* ── TURN FLASH ──────────────────────────────────────────────── */
-  @keyframes turn-flash {
-    0%   { opacity: 0; transform: scale(0.7) translateY(10px); }
-    40%  { opacity: 1; transform: scale(1.08) translateY(-4px); }
-    70%  { transform: scale(0.97) translateY(0); }
-    100% { opacity: 1; transform: scale(1) translateY(0); }
-  }
-  .animate-turn-flash {
-    animation: turn-flash 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  }
-
-  /* ── RAINBOW BORDER for legendary ───────────────────────────── */
-  @keyframes rainbow-border {
-    0%   { border-color: #fbbf24; box-shadow: 0 0 20px #fbbf2466; }
-    25%  { border-color: #f472b6; box-shadow: 0 0 20px #f472b666; }
-    50%  { border-color: #a78bfa; box-shadow: 0 0 20px #a78bfa66; }
-    75%  { border-color: #34d399; box-shadow: 0 0 20px #34d39966; }
-    100% { border-color: #fbbf24; box-shadow: 0 0 20px #fbbf2466; }
-  }
-  .animate-rainbow-border {
-    animation: rainbow-border 2s linear infinite;
-  }
-
-  /* ── FIESTA BODY GLOW (active game) ─────────────────────────── */
-  body.beep-game-mode {
-    background: radial-gradient(ellipse at 50% 0%, hsla(318,95%,62%,0.08) 0%, #060810 55%);
   }
 }

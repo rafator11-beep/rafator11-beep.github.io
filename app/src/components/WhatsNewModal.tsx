@@ -2,51 +2,44 @@ import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Sparkles, Zap, Users, Dices, Shield, Flame } from 'lucide-react';
 
-const CURRENT_VERSION = '3.0';
+const CURRENT_VERSION = '2.2';
 const STORAGE_KEY = 'beep_version_seen';
 
 const updates = [
   {
-    icon: <Sparkles className="w-5 h-5 text-yellow-400" />,
+    icon: <Zap className="w-5 h-5 text-yellow-400" />,
     color: 'from-yellow-950/60 to-slate-950/60 border-yellow-500/30',
-    label: 'NUEVO',
-    title: '14 modos de juego',
-    desc: 'MegaBoard 3D, Parchís Huesca, Poker Online, Yo Nunca Equipos y más. La mayor actualización de contenido hasta ahora.',
+    label: 'MEGAMIX',
+    title: 'Virus con identidad',
+    desc: 'Cuando el virus muta ves exactamente qué virus toca y cuál es su regla. Sin sorpresas.',
   },
   {
-    icon: <Zap className="w-5 h-5 text-purple-400" />,
+    icon: <Users className="w-5 h-5 text-purple-400" />,
     color: 'from-purple-950/60 to-slate-950/60 border-purple-500/30',
-    label: 'ARCADE',
-    title: 'Arcade completo',
-    desc: 'Coin Flip, Quick Draw, Simon PvP, Minesweeper, Slot Machine, Memory Match y más minijuegos para jugar entre rondas.',
+    label: 'NUEVO',
+    title: '200 retos grupales',
+    desc: 'Cada mutación del virus trae un reto de interacción entre jugadores. Para romper el hielo y forzar la guerra.',
   },
   {
     icon: <Dices className="w-5 h-5 text-green-400" />,
     color: 'from-green-950/60 to-slate-950/60 border-green-500/30',
     label: 'MEGAMIX',
-    title: 'Virus, normas y caos',
-    desc: 'Sistema de virus con identidad, normas activas por rondas, poderes del capitán y eventos especiales rebalanceados.',
+    title: 'Game loop mejorado',
+    desc: 'Boca cerrada, confirmación de virus, poderes del capitán y frecuencias de eventos rebalanceadas.',
   },
   {
     icon: <Shield className="w-5 h-5 text-blue-400" />,
     color: 'from-blue-950/60 to-slate-950/60 border-blue-500/30',
-    label: 'ONLINE',
-    title: 'Multijugador mejorado',
-    desc: 'Salas online más estables, sincronización en tiempo real y videollamada integrada para el modo Poker.',
+    label: 'MEJORA',
+    title: 'Poderes del capitán',
+    desc: 'El capitán ahora puede asignar el virus, elegir quién bebe o anular normas con un comando directo.',
   },
   {
     icon: <Flame className="w-5 h-5 text-red-400" />,
     color: 'from-red-950/60 to-slate-950/60 border-red-500/30',
-    label: 'UI',
-    title: 'Diseño premium renovado',
-    desc: 'Tabs Fiesta y Competitivo rediseñadas, podio con Big Data al final de partida y Hall of Fame con temporadas.',
-  },
-  {
-    icon: <Users className="w-5 h-5 text-cyan-400" />,
-    color: 'from-cyan-950/60 to-slate-950/60 border-cyan-500/30',
-    label: 'CONTENIDO',
-    title: '+19.000 pruebas',
-    desc: 'Más de 19.000 cartas, retos, normas, preguntas de cultura y fútbol. El mazo más grande hasta la fecha.',
+    label: 'MEJORA',
+    title: 'Megamix UX',
+    desc: 'Normas, virus y eventos especiales ahora fluyen sin bloquear el turno. Todo más rápido.',
   },
 ];
 

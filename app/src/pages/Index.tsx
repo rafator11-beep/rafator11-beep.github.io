@@ -686,6 +686,12 @@ function GameAppInner() {
       <Dialog open={!!pendingBetMode} onOpenChange={(o) => !o && setPendingBetMode(null)}>
         <DialogContent className="sm:max-w-xl border-white/10 bg-[linear-gradient(180deg,hsl(var(--card)/0.98),hsl(var(--card)/0.92))]">
           <DialogHeader>
+            <DialogTitle>Configuración</DialogTitle>
+            <DialogDescription>
+              Ajusta las opciones del juego y las preferencias de usuario.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-2xl">
               <Coins className="text-yellow-400" />
               <span>Elige Sala de Apuestas</span>
@@ -730,6 +736,12 @@ function GameAppInner() {
       {/* MODE OPTIONS DIALOG (Local vs Online) */}
       <Dialog open={!!selectedModeForOptions} onOpenChange={(o) => !o && setSelectedModeForOptions(null)}>
         <DialogContent className="sm:max-w-xl border-white/10 bg-[linear-gradient(180deg,hsl(var(--card)/0.98),hsl(var(--card)/0.92))]">
+          <DialogHeader>
+            <DialogTitle>Ayuda y Reglas</DialogTitle>
+            <DialogDescription>
+              Aprende cómo jugar y entiende todas las mecánicas del juego.
+            </DialogDescription>
+          </DialogHeader>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-2xl">
               {selectedModeForOptions && GAME_MODES.find(m => m.id === selectedModeForOptions)?.icon}

@@ -537,28 +537,17 @@ export const CardDisplay = React.memo(({ content, type = 'common', onClick, game
             <AnimatePresence mode="wait">
                 <motion.div
                     key={content}
-                    initial={{ y: 100, scale: 0.88, opacity: 0 }}
-                    animate={{ y: 0, scale: 1, opacity: 1 }}
-                    exit={{ y: -60, scale: 0.92, opacity: 0 }}
-                    transition={{ type: 'spring', stiffness: 480, damping: 24 }}
-                    className={`w-full rounded-[2.5rem] overflow-hidden shadow-2xl bg-gradient-to-b ${theme.bg} flex flex-col relative cursor-pointer border-2 ${type === 'legendary' ? 'animate-rainbow-border' : type === 'chaos' ? 'border-pink-500/60' : 'border-white/8'}`}
+                    initial={{ rotateY: 90, opacity: 0, scale: 0.85 }}
+                    animate={{ rotateY: 0, opacity: 1, scale: 1 }}
+                    exit={{ rotateY: -90, opacity: 0, scale: 0.85 }}
+                    transition={{ type: 'spring', stiffness: 120, damping: 22 }}
+                    className={`w-full rounded-[2.5rem] overflow-hidden shadow-2xl bg-gradient-to-b ${theme.bg} flex flex-col relative cursor-pointer border border-white/5`}
                     style={{ minHeight: '72vh' }}
                     onClick={handleCardClick}
                 >
                     {/* Noise texture overlay */}
                     <div className="absolute inset-0 opacity-[0.04] pointer-events-none"
                         style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`, backgroundRepeat: 'repeat' }} />
-
-                    {/* Legendary particles */}
-                    {(type === 'legendary' || type === 'chaos') && (
-                        <>
-                            <div className="card-particle card-particle-1" />
-                            <div className="card-particle card-particle-2" />
-                            <div className="card-particle card-particle-3" />
-                            <div className="card-particle card-particle-4" />
-                            <div className="card-particle card-particle-5" />
-                        </>
-                    )}
 
                     {/* Top shine */}
                     <div className="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-white/10 to-transparent pointer-events-none rounded-t-[2.5rem]" />

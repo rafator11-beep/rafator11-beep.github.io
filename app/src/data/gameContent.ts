@@ -20,6 +20,11 @@ import { espanaExtra7, picanteExtra7 } from './gameContentExtra7';
 import { yoNuncaExtra8 } from './gameContentExtra8';
 import { clasicoExtra9 } from './gameContentExtra9';
 import { yoNuncaExtra10, quienEsMasProbableExtra10, clasicoExtra10, picanteExtra10, pacoversExtra10, enLaCamaYExtra10 } from './gameContentExtra10';
+import {
+  yoNuncaExtra11,
+  picanteExtra11, picanteExtra11b, picanteExtra11c,
+  pacoversExtra11, pacoversExtra11b, pacoversExtra11c
+} from './gameContentExtra11';
 import { mimicaChallenges } from './mimicaContent';
 import { bocaCerradaChallenges } from './bocaCerradaContent';
 import { impostorRounds } from './impostorContent';
@@ -6567,7 +6572,7 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
   // --- Build content with weighted frequencies ---
 
   // Get unique samples to avoid duplicates, now using ALL available items
-  const yoNuncaPool = cleanDeckPool([...yoNunca, ...(yoNuncaExtra || []), ...(yoNuncaExtra2 || []), ...(yoNuncaExtra3 || []), ...(yoNuncaExtra4 || []), ...(yoNuncaExtra8 || []), ...(yoNuncaExtra10 || [])]);
+  const yoNuncaPool = cleanDeckPool([...yoNunca, ...(yoNuncaExtra || []), ...(yoNuncaExtra2 || []), ...(yoNuncaExtra3 || []), ...(yoNuncaExtra4 || []), ...(yoNuncaExtra8 || []), ...(yoNuncaExtra10 || []), ...(yoNuncaExtra11 || [])]);
   const yoNuncaItems = getRandomItems(yoNuncaPool, yoNuncaPool.length);
   const yoNuncaCards = yoNuncaItems.map(q => addDrinking(`🙈 Yo nunca... ${q}`, Math.random() < 0.4 ? 'medio' : 'leve'));
 
@@ -6583,7 +6588,7 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
   const clasicoItems = getRandomItems(clasicoPool, clasicoPool.length);
   const clasicoCards = clasicoItems.map(q => addDrinking(q, Math.random() < 0.5 ? 'leve' : 'grupo'));
 
-  const pacoversPool = cleanDeckPool([...pacovers, ...(pacoversExtra || []), ...(pacoversExtra2 || []), ...(pacoversExtra3 || []), ...(pacoversExtra6 || []), ...(pacoversExtra10 || [])]);
+  const pacoversPool = cleanDeckPool([...pacovers, ...(pacoversExtra || []), ...(pacoversExtra2 || []), ...(pacoversExtra3 || []), ...(pacoversExtra6 || []), ...(pacoversExtra10 || []), ...(pacoversExtra11 || []), ...(pacoversExtra11b || []), ...(pacoversExtra11c || [])]);
   const pacoversItems = getRandomItems(pacoversPool, pacoversPool.length);
   const pacoversCards = pacoversItems.map(q => addDrinking(`🇪🇸 ${q}`, 'leve'));
 
@@ -6592,7 +6597,7 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
   const espanaItems = getRandomItems(espanaPool, espanaPool.length);
   const espanaCards = espanaItems.map(q => addDrinking(`🇪🇸 ${q}`, 'leve'));
 
-  const picantePool = cleanDeckPool([...picante, ...(picanteExtra || []), ...(picanteExtra2 || []), ...(picanteExtra3 || []), ...(picanteExtra5 || []), ...(picanteExtra7 || []), ...(picanteExtra10 || [])]);
+  const picantePool = cleanDeckPool([...picante, ...(picanteExtra || []), ...(picanteExtra2 || []), ...(picanteExtra3 || []), ...(picanteExtra5 || []), ...(picanteExtra7 || []), ...(picanteExtra10 || []), ...(picanteExtra11 || []), ...(picanteExtra11b || []), ...(picanteExtra11c || [])]);
   const picanteItems = getRandomItems(picantePool, picantePool.length);
   const picanteCards = picanteItems.map(q => addDrinking(`🌶Ï ${q}`, Math.random() < 0.5 ? 'medio' : 'fuerte'));
 
