@@ -1,154 +1,132 @@
 ﻿import { motion } from 'framer-motion';
-import { ArrowRight, Flame, ShieldCheck, Sparkles, TimerReset, Users } from 'lucide-react';
+import { ArrowRight, Zap, Users, Flame } from 'lucide-react';
 import { GAME_MODES, GameMode, TAB_MAPPING } from '@/types/game';
 
 interface FiestaTabProps {
   onSelectMode: (mode: GameMode) => void;
 }
 
-const highlightChips: Array<{ icon: any; label: string }> = [
-  { icon: TimerReset, label: 'Rondas rápidas' },
-  { icon: Users, label: 'Grupo grande' },
-  { icon: ShieldCheck, label: 'Lectura clara' },
-];
-
 export function FiestaTab({ onSelectMode }: FiestaTabProps) {
   const fiestaModes = GAME_MODES.filter((m) => TAB_MAPPING.fiesta.includes(m.id));
-  const featuredModes = fiestaModes.slice(0, 3);
 
   return (
     <div className="app-shell pt-4">
+
+      {/* ── HERO BANNER ─────────────────────────────────────────── */}
       <motion.div
-        initial={{ opacity: 0, y: -18 }}
+        initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-6 grid gap-4 xl:grid-cols-[1.4fr_0.8fr]"
+        transition={{ duration: 0.4 }}
+        className="fiesta-hero mb-6 p-6 md:p-8"
       >
-        <div className="surface-panel relative overflow-hidden p-5 md:p-7">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.06),transparent_40%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.04),transparent_40%)] opacity-90" />
-          <div className="relative space-y-5">
-            <div className="space-y-3">
+        {/* Orbe decorativo */}
+        <div className="pointer-events-none absolute -left-16 -top-16 h-64 w-64 rounded-full bg-[hsl(var(--primary)/0.15)] blur-[80px]" />
+        <div className="pointer-events-none absolute -bottom-10 -right-10 h-48 w-48 rounded-full bg-[hsl(var(--neon-orange)/0.12)] blur-[60px]" />
+
+        <div className="relative z-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
               <span className="section-badge">
-                <Sparkles className="mr-2 h-3.5 w-3.5" />
-                Fiesta y risas
+                <Flame className="mr-1.5 h-3 w-3" />
+                Modo Fiesta
               </span>
-              <div>
-                <h1 className="text-3xl font-black tracking-tight text-white md:text-5xl">
-                  Modos para <span className="premium-title">romper el hielo</span>
-                </h1>
-                <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground md:text-base">
-                  Tarjetas más limpias, mejor jerarquía visual y acceso rápido a los modos más sociales desde tu dispositivo.
-                </p>
+              <span className="flex items-center gap-1.5 rounded-full bg-white/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-white/50">
+                <span className="live-dot" />
+                En vivo
+              </span>
+            </div>
+            <h1 className="text-4xl font-black tracking-tight text-white md:text-6xl">
+              La fiesta<br />
+              <span className="premium-title">empieza aquí</span>
+            </h1>
+            <p className="max-w-md text-sm leading-relaxed text-white/50 md:text-base">
+              +19.000 cartas, retos, normas y caos. Elige modo y pasa el móvil.
+            </p>
+          </div>
+
+          {/* Stats rápidos */}
+          <div className="flex gap-3 md:flex-col">
+            {[
+              { icon: '🎲', label: 'Modos', value: `${fiestaModes.length}` },
+              { icon: '🃏', label: 'Cartas', value: '19K+' },
+              { icon: '👥', label: 'Jugadores', value: '2–20' },
+            ].map(({ icon, label, value }) => (
+              <div key={label} className="flex flex-col items-center rounded-2xl border border-white/8 bg-white/5 px-4 py-3 text-center backdrop-blur-sm">
+                <span className="text-xl">{icon}</span>
+                <span className="mt-1 text-lg font-black text-white">{value}</span>
+                <span className="text-[9px] font-bold uppercase tracking-widest text-white/40">{label}</span>
               </div>
-            </div>
-
-            <div className="flex flex-wrap gap-2.5">
-              {highlightChips.map(({ icon: Icon, label }) => (
-                <span key={label} className="premium-chip text-white/80 border-white/5 bg-white/5">
-                  <Icon className="h-3.5 w-3.5 text-white/50" />
-                  {label}
-                </span>
-              ))}
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-3">
-              {featuredModes.map((mode) => (
-                <button
-                  key={mode.id}
-                  onClick={() => onSelectMode(mode.id)}
-                  className="premium-panel-soft rounded-[22px] p-4 text-left transition hover:-translate-y-0.5 hover:border-white/15 hover:bg-white/[0.10]"
-                >
-                  <div className="mb-3 flex items-center justify-between gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-2xl shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
-                      {mode.icon}
-                    </div>
-                    {mode.badge && (
-                      <span className="rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white/75">
-                        {mode.badge}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-sm font-bold text-white">{mode.name}</p>
-                  <p className="mt-1 text-xs leading-5 text-muted-foreground">{mode.description}</p>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="surface-soft rounded-[28px] p-5 md:p-6">
-          <div className="flex items-center gap-3">
-            <div className="rounded-2xl bg-white/5 border border-white/5 p-3 text-white">
-              <Flame className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-white">Empieza en segundos</p>
-              <p className="text-xs text-muted-foreground">Selecciona un modo y luego decide si juegas local o con sala.</p>
-            </div>
-          </div>
-
-          <div className="mt-5 grid gap-3">
-            <div className="premium-stat">
-              <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground">Ideal para</p>
-              <p className="mt-2 text-lg font-black text-white">Cumples, previas y cenas</p>
-              <p className="mt-1 text-sm text-muted-foreground">Todo se entiende de un vistazo y con menos ruido visual.</p>
-            </div>
-            <div className="premium-stat">
-              <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground">Experiencia</p>
-              <p className="mt-2 text-lg font-black text-white">Más clara en móvil</p>
-              <p className="mt-1 text-sm text-muted-foreground">Botones grandes, tarjetas respiradas y mejor lectura al pasar el teléfono.</p>
-            </div>
+            ))}
           </div>
         </div>
       </motion.div>
 
+      {/* ── GRID DE MODOS ───────────────────────────────────────── */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {fiestaModes.map((mode, index) => (
           <motion.button
             key={mode.id}
-            initial={{ opacity: 0, y: 18 }}
+            initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.03 }}
+            transition={{ delay: index * 0.04, type: 'spring', stiffness: 260, damping: 22 }}
             onClick={() => onSelectMode(mode.id)}
-            whileHover={{ y: -4 }}
-            whileTap={{ scale: 0.985 }}
-            className="card-hover group surface-panel relative overflow-hidden p-5 text-left"
+            whileTap={{ scale: 0.97 }}
+            className="mode-card group text-left p-5"
           >
-            <div className={`absolute inset-0 bg-gradient-to-br ${mode.color} opacity-[0.14]`} />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.12),transparent_28%)] opacity-90" />
-            <div className="relative flex h-full flex-col gap-4">
+            {/* Glow de color del modo */}
+            <div
+              className={`mode-card-glow bg-gradient-to-br ${mode.color}`}
+            />
+
+            {/* Brillo superior */}
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+
+            <div className="relative z-10 flex h-full flex-col gap-4">
+
+              {/* Header: icono + badge */}
               <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.07] text-3xl shadow-[inset_0_1px_0_hsl(0_0%_100%/0.05)]">
-                    {mode.icon}
-                  </div>
-                  <div>
-                    <h2 className="text-lg font-bold text-white">{mode.name}</h2>
-                    <p className="mt-1 text-xs uppercase tracking-[0.22em] text-muted-foreground">Modo fiesta</p>
-                  </div>
+                <div className="mode-icon-wrap">
+                  {mode.icon}
                 </div>
-                {mode.badge && (
-                  <span className="rounded-full border border-white/10 bg-white/[0.08] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white/80">
-                    {mode.badge}
+                <div className="flex flex-col items-end gap-1.5">
+                  {mode.badge && (
+                    <span className="rounded-full border border-white/15 bg-white/10 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.2em] text-white/80">
+                      {mode.badge}
+                    </span>
+                  )}
+                  {mode.adultOnly && (
+                    <span className="rounded-full bg-red-500/20 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-widest text-red-300 border border-red-500/30">
+                      +18
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Nombre y descripción */}
+              <div className="flex-1">
+                <h2 className="text-lg font-black text-white leading-tight">{mode.name}</h2>
+                <p className="mt-1.5 text-sm leading-relaxed text-white/50">{mode.description}</p>
+              </div>
+
+              {/* Tags */}
+              <div className="flex flex-wrap gap-1.5">
+                {mode.teamBased && (
+                  <span className="flex items-center gap-1 rounded-full bg-white/6 px-2.5 py-1 text-[10px] font-semibold text-white/50">
+                    <Users className="h-3 w-3" /> Equipos
                   </span>
                 )}
+                <span className="flex items-center gap-1 rounded-full bg-white/6 px-2.5 py-1 text-[10px] font-semibold text-white/50">
+                  <Zap className="h-3 w-3" /> Offline
+                </span>
               </div>
 
-              <p className="min-h-[68px] text-sm leading-6 text-muted-foreground">{mode.description}</p>
-
-              <div className="mt-auto flex flex-wrap gap-2">
-                <span className="rounded-full bg-white/[0.06] px-3 py-1 text-xs text-muted-foreground">Móvil</span>
-                <span className="rounded-full bg-white/[0.06] px-3 py-1 text-xs text-muted-foreground">Premium UI</span>
-                {mode.adultOnly && <span className="rounded-full bg-red-500/10 px-3 py-1 text-xs text-red-300">+18</span>}
-                {mode.teamBased && <span className="rounded-full bg-white/[0.06] px-3 py-1 text-xs text-muted-foreground">Equipos</span>}
-              </div>
-
-              <div className="flex items-center justify-between border-t border-white/8 pt-4">
-                <div>
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">Entrada</p>
-                  <p className="mt-1 text-sm font-semibold text-white">Toca y elige formato</p>
-                </div>
-                <span className="inline-flex items-center gap-1 text-sm font-semibold text-white transition-transform group-hover:translate-x-1">
-                  Jugar <ArrowRight className="h-4 w-4" />
+              {/* Footer CTA */}
+              <div className="flex items-center justify-between border-t border-white/6 pt-3">
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">
+                  Toca para jugar
+                </span>
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/8 text-white transition-all group-hover:bg-[hsl(var(--primary)/0.3)] group-hover:text-[hsl(var(--primary))]">
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                 </span>
               </div>
             </div>
