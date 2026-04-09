@@ -6,25 +6,10 @@ interface ModeSelectorProps {
   onSelectMode: (mode: GameMode) => void;
 }
 
-// Total de preguntas por modo (actualizado con extras)
-const QUESTIONS_COUNT: Record<string, number> = {
-  megamix: 12000,
-  clasico: 1500,
-  yo_nunca: 500,
-  yo_nunca_equipos: 500,
-  picante: 500,
-  cultura: 1400,
-  espana: 500,
-  votacion: 300,
-  pacovers: 500,
-  trivia_futbol: 900,
-  futbol: 900,
-};
-
-import { getTotalContentCount } from '@/data/contentStats';
+const TOTAL_QUESTIONS = 19000;
 
 export function ModeSelector({ onSelectMode }: ModeSelectorProps) {
-  const totalQuestions = Object.values(QUESTIONS_COUNT).reduce((a, b) => a + b, 0);
+  const totalQuestions = TOTAL_QUESTIONS;
 
   return (
     <div className="min-h-screen bg-background bg-grid-pattern pb-24 pt-8 px-4 relative overflow-hidden">
