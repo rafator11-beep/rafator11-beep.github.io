@@ -165,60 +165,43 @@ export const useGameEngine = (mode: GameMode) => {
   const advanceTurn = useCallback((skipPlayerAdvance: boolean = false) => {
     setCurrentIndex(prev => prev + 1);
 
-    setGameState(prev => {
-      // 1. Check if we completed a full circle of players
-      // We use current round to check for game over
-      // Bugfix: Solo finaliza la ronda si realmente vamos a avanzar de jugador
-      const isEndOfRound = !skipPlayerAdvance && (currentPlayerIndex + 1) % players.length === 0;
-      let nextState = { ...prev };
+    setCurrentPlayerIndex(prevPlayerIdx => {
+      const nextPlayerIdx = skipPlayerAdvance ? prevPlayerIdx : (prevPlayerIdx + 1) % Math.max(1, players.length);
 
-      if (isEndOfRound) {
-        const nextRound = prev.round + 1;
+      setGameState(prev => {
+        const isEndOfRound = !skipPlayerAdvance && nextPlayerIdx === 0 && players.length > 1;
+        let nextState = { ...prev };
 
-        // Check Game Over Condition with fresh value
-        if (nextRound > 20) {
-          setGameOver(true);
+        if (isEndOfRound) {
+          const nextRound = prev.round + 1;
+
+          // No hard game-over limit — let the host decide when to end
+          let showNormaGlobal = prev.showNormaGlobal;
+          if (nextRound % 6 === 0) showNormaGlobal = true;
+
+          let nextVirusId = prev.virusPlayerId;
+          if (nextRound % 5 === 0 && players.length > 0) {
+            const currentVirusIdx = players.findIndex(p => p.id === prev.virusPlayerId);
+            const nextVirusIdx = (currentVirusIdx + 1) % players.length;
+            nextVirusId = players[nextVirusIdx].id;
+          }
+
+          nextState = { ...nextState, round: nextRound, showNormaGlobal, virusPlayerId: nextVirusId };
         }
 
-        // Norma cambia cada 6 rondas completas
-        let showNormaGlobal = prev.showNormaGlobal;
-        if (nextRound % 6 === 0) {
-          showNormaGlobal = true;
+        if (!skipPlayerAdvance && nextState.currentNorma && (nextState.currentNormaTurnsRemaining ?? 0) > 0) {
+          const nextTurns = (nextState.currentNormaTurnsRemaining ?? 0) - 1;
+          nextState = nextTurns === 0
+            ? { ...nextState, currentNorma: null, currentNormaTurnsRemaining: 0 }
+            : { ...nextState, currentNormaTurnsRemaining: nextTurns };
         }
 
-        // Virus cambia cada 5 rondas completas
-        let nextVirusId = prev.virusPlayerId;
-        if (nextRound % 5 === 0 && players.length > 0) {
-          const currentIndex = players.findIndex(p => p.id === prev.virusPlayerId);
-          const nextIndex = (currentIndex + 1) % players.length;
-          nextVirusId = players[nextIndex].id;
-        }
+        return nextState;
+      });
 
-        nextState = {
-          ...nextState,
-          round: nextRound,
-          showNormaGlobal,
-          virusPlayerId: nextVirusId
-        };
-      }
-
-      // 2. Handle Norma Turn Expiration (solo se descuenta si avanza el turno real)
-      if (!skipPlayerAdvance && nextState.currentNorma && nextState.currentNormaTurnsRemaining && nextState.currentNormaTurnsRemaining > 0) {
-        const nextTurns = nextState.currentNormaTurnsRemaining - 1;
-        if (nextTurns === 0) {
-          nextState = { ...nextState, currentNorma: null, currentNormaTurnsRemaining: 0 };
-        } else {
-          nextState = { ...nextState, currentNormaTurnsRemaining: nextTurns };
-        }
-      }
-
-      return nextState;
+      return nextPlayerIdx;
     });
-
-    if (!skipPlayerAdvance) {
-      setCurrentPlayerIndex(prev => (prev + 1) % players.length);
-    }
-  }, [players.length, currentPlayerIndex]);
+  }, [players]);
 
   const addScore = (playerId: string, points: number) => {
     setScores(prev => ({

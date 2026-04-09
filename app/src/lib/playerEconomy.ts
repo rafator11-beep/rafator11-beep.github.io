@@ -99,8 +99,6 @@ export const SHOP_ITEMS: ShopItem[] = [
     { id: 'carta_fuego', name: 'Cartas en Llamas', description: 'Queman al tocarlas', price: 500, currency: 'coins', category: 'carta', emoji: '🔥', rarity: 'legendary' },
     { id: 'carta_oro', name: 'Láminas de Oro 24K', description: 'Para auténticos High Rollers', price: 100, currency: 'gems', category: 'carta', emoji: '💰', rarity: 'legendary' },
     { id: 'carta_magica', name: 'Tarot Místico', description: 'Cartas con movimiento interior', price: 150, currency: 'gems', category: 'carta', emoji: '🔮', rarity: 'legendary' },
-    { id: 'ficha_diamond', name: 'Ficha Diamante', description: 'Efecto cristal premium', price: 50, currency: 'gems', category: 'ficha', emoji: '💎', rarity: 'legendary' },
-    { id: 'ficha_hologram', name: 'Ficha Holograma', description: 'Translúcida del futuro', price: 75, currency: 'gems', category: 'ficha', emoji: '🛸', rarity: 'legendary' },
 
     // --- MARCOS DE AVATAR ---
     { id: 'frame_silver', name: 'Marco Plata', description: 'Borde plateado para tu avatar', price: 75, currency: 'coins', category: 'marco', emoji: '🪞', rarity: 'common' },

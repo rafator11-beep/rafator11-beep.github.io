@@ -1,4 +1,4 @@
-﻿import React, { createContext, useContext, useState, ReactNode } from 'react';
+﻿import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { useGame } from '@/hooks/useGame';
 import { GameMode } from '@/types/game';
 
@@ -16,11 +16,23 @@ interface GameContextType extends ReturnType<typeof useGame> {
 const GameContext = createContext<GameContextType | null>(null);
 
 export function GameProvider({ children }: { children: ReactNode }) {
-  const [gameId, setGameId] = useState<string | null>(null);
+  const [gameId, setGameIdRaw] = useState<string | null>(null);
   const [localPlayerId, setLocalPlayerId] = useState<string | null>(null);
   const [remoteStreams, setRemoteStreams] = useState<any[]>([]);
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const gameHook = useGame(gameId);
+
+  // When clearing the game, also reset multiplayer state
+  const setGameId = useCallback((id: string | null) => {
+    setGameIdRaw(id);
+    if (id === null) {
+      setRemoteStreams([]);
+      setLocalStream(prev => {
+        prev?.getTracks().forEach(t => t.stop());
+        return null;
+      });
+    }
+  }, []);
 
   return (
     <GameContext.Provider value={{

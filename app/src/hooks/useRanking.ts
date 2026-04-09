@@ -322,9 +322,40 @@ export function useRanking() {
     players: Array<{ name: string; score: number; won: boolean; avatarUrl?: string; city?: string; gameMode?: string; brutalMeta?: BrutalMeta; gameId?: string }>
   ) => {
     try {
+      // Batch all local upserts first, then do a single fetchRankings at the end
       for (const player of players) {
-        await updatePlayerScore(player.name, player.score, player.won, player.avatarUrl, player.city, player.gameMode, player.brutalMeta, player.gameId);
+        const localRows = upsertLocalRanking({
+          playerName: player.name,
+          scoreToAdd: player.score,
+          won: player.won,
+          avatarUrl: player.avatarUrl,
+          city: player.city,
+          gameMode: player.gameMode,
+          brutalMeta: player.brutalMeta,
+        });
+
+        if (isSupabaseConfigured) {
+          const actGameId = player.gameId || `local-${Date.now()}-${Math.random()}`;
+          const tabId: TabId = TAB_MAPPING.fiesta.includes((player.gameMode || 'megamix') as GameMode) ? 'fiesta' : 'juego';
+          const identity = resolveCloudIdentity(player.name, profile?.username, user?.id || null);
+          if (identity.shouldSyncToCloud) {
+            supabase.rpc('register_guest_event', {
+              p_game_id: actGameId,
+              p_event_type: 'game_finish',
+              p_actor_user_id: identity.actorUserId,
+              p_tab_id: tabId,
+              p_mode_id: player.gameMode || 'megamix',
+              p_play_mode: 'local',
+              p_score: player.score,
+              p_is_winner: !!player.won,
+              p_player_name: identity.canonicalName,
+              p_avatar_url: player.avatarUrl || profile?.avatar_url || null,
+            }).catch(err => console.warn('Batch RPC error (non-critical):', err));
+          }
+        }
       }
+      // Single fetch at the end instead of one per player
+      await fetchRankings();
     } catch (err) {
       console.error('Error updating multiple players:', err);
     }

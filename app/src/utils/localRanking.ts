@@ -231,6 +231,11 @@ export function upsertLocalRanking(params: {
       r.picante_games = (r.picante_games || 0) + 1;
       r.picante_wins = (r.picante_wins || 0) + (won ? 1 : 0);
     }
+    if (isParchis) {
+      r.parchis_score = (r.parchis_score || 0) + scoreToAdd;
+      r.parchis_games = (r.parchis_games || 0) + 1;
+      r.parchis_wins = (r.parchis_wins || 0) + (won ? 1 : 0);
+    }
 
     // Economy accumulation (Coins are shared, XP is separated by mode)
     const baseCoins = won ? 10 : 2;
