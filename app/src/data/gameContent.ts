@@ -1483,7 +1483,7 @@ export const clasico: string[] = [
   "LA MONEDA 💰: Una ronda del juego de la moneda.",
   "POR LA CARA: {player} te toca beber 2 tragos.",
   "EL CUENTACUENTOS: {player}, cuenta una historia erótica que hayas vivido o escuchado.",
-  "DEMOCRACIA: Decidid en grupo: Í Dedo arriba: polvos cortos e intensos. 👎 Dedo abajo: polvos largos y fluidos. La minoría bebe.",
+  "DEMOCRACIA: Decidid en grupo: 👍 Dedo arriba: polvos cortos e intensos. 👎 Dedo abajo: polvos largos y fluidos. La minoría bebe.",
   "LA CAGASTE: Entre todo el grupo tenéis que elegir un castigo para {player}. Ahora verás lo que te quieren tus \"amigos\".",
   "🧠¡PIENSA RÁPIDO! ⚡: Por orden decid cosas antimorbo. El que se quede en blanco o repita bebe. Empieza {player}.",
   "¿HALAGO O CASTIGO?: {player}, manda beber 3 tragos a la persona que más te ponga.",

@@ -1,4 +1,4 @@
-// gameContentExtra5.ts — Nuevas cartas de votación, duelos sociales y retos grupales
+﻿// gameContentExtra5.ts — Nuevas cartas de votación, duelos sociales y retos grupales
 // Todas con consecuencias explícitas. UTF-8 puro.
 
 // — NUEVAS PREGUNTAS "¿QUIÉN ES MÁS PROBABLE?" —

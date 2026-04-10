@@ -1,4 +1,4 @@
-// gameContentExtra7.ts — Bloque 2: España Nostálgica + Picante
+﻿// gameContentExtra7.ts — Bloque 2: España Nostálgica + Picante
 // ~60 cartas nuevas. Dinámicas de grupo, nivel gamberro, consecuencias explícitas.
 // UTF-8 puro.
 

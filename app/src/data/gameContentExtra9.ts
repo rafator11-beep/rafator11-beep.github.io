@@ -1,4 +1,4 @@
-// gameContentExtra9.ts — Bloque 4: Clásico
+﻿// gameContentExtra9.ts — Bloque 4: Clásico
 // 45 cartas nuevas. Dinámicas grupales, retos físicos, consecuencias explícitas.
 // UTF-8 puro. Sin caracteres corruptos.
 

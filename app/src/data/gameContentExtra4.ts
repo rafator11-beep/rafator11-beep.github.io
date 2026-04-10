@@ -1,4 +1,4 @@
-// gameContentExtra4.ts — +200 frases Yo Nunca (situaciones cotidianas, redes sociales, relaciones, tecnología)
+﻿// gameContentExtra4.ts — +200 frases Yo Nunca (situaciones cotidianas, redes sociales, relaciones, tecnología)
 
 export const yoNuncaExtra4: string[] = [
   // --- Redes sociales & móvil ---

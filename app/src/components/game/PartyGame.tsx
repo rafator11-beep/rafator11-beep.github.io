@@ -1395,6 +1395,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               <Cast className="w-6 h-6 text-primary" />
               Compartir en la TV
             </DialogTitle>
+            <DialogDescription className="sr-only">Instrucciones para compartir la pantalla en TV</DialogDescription>
           </DialogHeader>
           <div className="py-6 space-y-6">
             <p className="text-center text-slate-300">
@@ -1909,6 +1910,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
             <DialogTitle className="text-3xl font-black text-center text-green-400 uppercase tracking-tighter">
               {gameState.virusCycleData?.title || 'Evento Megamix'}
             </DialogTitle>
+            <DialogDescription className="sr-only">Evento especial del Megamix</DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-4 py-2">
             {/* Infected player */}

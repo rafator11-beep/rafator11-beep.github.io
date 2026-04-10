@@ -1,4 +1,4 @@
-// gameContentExtra8.ts — Bloque 3: Yo Nunca
+﻿// gameContentExtra8.ts — Bloque 3: Yo Nunca
 // 60 cartas nuevas. Dinámicas grupales, consecuencias explícitas, nivel gamberro.
 // UTF-8 puro. Sin caracteres corruptos.
 

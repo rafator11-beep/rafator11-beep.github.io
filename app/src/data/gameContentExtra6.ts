@@ -1,4 +1,4 @@
-// gameContentExtra6.ts — Bloque 1: Pacovers + Quién es más probable
+﻿// gameContentExtra6.ts — Bloque 1: Pacovers + Quién es más probable
 // 80 cartas nuevas. Dinámicas grupales, consecuencias explícitas, nivel gamberro.
 // UTF-8 puro — sin caracteres corruptos.
 
