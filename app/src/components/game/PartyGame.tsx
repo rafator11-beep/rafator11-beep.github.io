@@ -20,7 +20,7 @@ import { useGameEffects } from '@/hooks/game/useGameEffects';
 import { useMultiplayer } from '@/hooks/game/useMultiplayer';
 import { useRanking } from '@/hooks/useRanking';
 import { useGameContext } from '@/contexts/GameContext';
-import { CardDisplay } from '@/components/game/CardDisplay';
+import { CardDisplay, sanitizeCardText } from '@/components/game/CardDisplay';
 import { detectRarity } from '@/lib/godDeck';
 import { sfx } from '@/lib/sfx';
 import { vibe } from '@/lib/vibration';
@@ -1738,7 +1738,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         </DialogContent>
       </Dialog>
       <Dialog open={gameState.showCaptainSelection} onOpenChange={() => { }}>
-        <DialogContent className="sm:max-w-md bg-slate-950/95 backdrop-blur-3xl border-yellow-500/40 text-white z-[60] rounded-[3rem] p-8">
+        <DialogContent className="sm:max-w-md bg-slate-950/98 backdrop-blur-3xl border-yellow-500/40 text-white z-[300] rounded-[3rem] p-8">
           <DialogHeader>
             <DialogTitle className="text-4xl font-black text-center text-yellow-500 flex flex-col items-center gap-4">
               <div className="p-4 bg-yellow-500/10 rounded-3xl border border-yellow-500/20">
@@ -2464,7 +2464,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
         {/* VIRUS ALERT — sheet compacto desde abajo */}
         <AnimatePresence>
-          {gameState.showVirusAlert && gameState.virusAlertData && (
+          {gameState.showVirusAlert && gameState.virusAlertData && !gameState.showCaptainSelection && (
             <motion.div
               key="virus-banner"
               initial={{ opacity: 0, y: '100%' }}
