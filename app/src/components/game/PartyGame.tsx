@@ -2271,7 +2271,6 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-white/20">
                 <ArrowRight className="w-5 h-5 text-white" />
               </div>
-              <span>Siguiente turno — {players[(currentIndex + 1) % players.length]?.name}</span>
             </motion.button>
           )}
 
@@ -2399,43 +2398,48 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         {/* Virus Flash */}
         <VirusFlash show={virusFlash} />
 
-        {/* VIRUS ALERT — doble paso: mostrar info → confirmar para avanzar */}
+        {/* VIRUS ALERT — sheet compacto desde abajo */}
         <AnimatePresence>
           {gameState.showVirusAlert && gameState.virusAlertData && (
             <motion.div
               key="virus-banner"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 28 }}
-              className="fixed inset-0 z-[200] bg-black/90 backdrop-blur-md flex items-center justify-center p-6"
+              initial={{ opacity: 0, y: '100%' }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: '100%' }}
+              transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+              className="fixed bottom-0 left-0 right-0 z-[200] px-4 pb-6 pt-2"
+              style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}
             >
-              <div className="w-full max-w-sm bg-gradient-to-b from-green-950 to-slate-950 border-2 border-green-400/50 rounded-[2rem] p-6 shadow-[0_0_60px_rgba(34,197,94,0.3)] flex flex-col items-center gap-5">
-                <motion.span
-                  animate={{ scale: [1, 1.25, 1], rotate: [0, 10, -10, 0] }}
-                  transition={{ repeat: Infinity, duration: 2 }}
-                  className="text-6xl"
-                  style={{ filter: 'drop-shadow(0 0 20px rgba(34,197,94,0.9))' }}
-                >🦠</motion.span>
+              <div className="w-full max-w-sm mx-auto bg-gradient-to-b from-green-950/98 to-slate-950/98 border-2 border-green-400/50 rounded-[2rem] p-5 shadow-[0_-8px_40px_rgba(34,197,94,0.25)] flex flex-col items-center gap-4">
+                {/* Handle */}
+                <div className="w-10 h-1 rounded-full bg-white/20 mb-1" />
 
-                <div className="text-center">
-                  <p className="text-[9px] text-green-400 font-black uppercase tracking-[0.4em] mb-1">VIRUS DETECTADO</p>
-                  <p className="text-white font-black text-2xl leading-tight">
-                    {gameState.virusAlertData.player?.name}
-                  </p>
-                  <p className="text-[10px] text-white/40 mt-0.5">ha sido infectado</p>
+                <div className="flex items-center gap-4 w-full">
+                  <motion.span
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ repeat: Infinity, duration: 1.8 }}
+                    className="text-4xl flex-shrink-0"
+                    style={{ filter: 'drop-shadow(0 0 12px rgba(34,197,94,0.8))' }}
+                  >🦠</motion.span>
+                  <div className="text-left">
+                    <p className="text-[9px] text-green-400 font-black uppercase tracking-[0.3em]">VIRUS DETECTADO</p>
+                    <p className="text-white font-black text-xl leading-tight">{gameState.virusAlertData.player?.name}</p>
+                    <p className="text-[10px] text-white/40">ha sido infectado</p>
+                  </div>
                 </div>
 
-                <div className="w-full bg-black/40 rounded-2xl p-4 border border-green-500/20 text-center space-y-1">
-                  <p className="text-green-300 font-black text-lg">
-                    {gameState.virusAlertData.virus?.virusName || gameState.virusAlertData.virus?.name}
-                  </p>
-                  <p className="text-white/70 text-sm leading-snug">
-                    {gameState.virusAlertData.virus?.virusDescription || gameState.virusAlertData.virus?.description}
-                  </p>
-                  <p className="text-[10px] text-green-400/60 font-bold uppercase mt-2">
-                    Dura {gameState.virusAlertData.virus?.turnsRemaining} turnos
-                  </p>
+                <div className="w-full bg-black/40 rounded-2xl px-4 py-3 border border-green-500/20 flex items-start gap-3">
+                  <div className="flex-1 text-left">
+                    <p className="text-green-300 font-black text-base leading-tight">
+                      {gameState.virusAlertData.virus?.virusName || gameState.virusAlertData.virus?.name}
+                    </p>
+                    <p className="text-white/60 text-sm leading-snug mt-1">
+                      {gameState.virusAlertData.virus?.virusDescription || gameState.virusAlertData.virus?.description}
+                    </p>
+                  </div>
+                  <span className="text-[10px] text-green-400/70 font-black uppercase bg-green-500/10 px-2 py-1 rounded-full border border-green-500/20 flex-shrink-0">
+                    {gameState.virusAlertData.virus?.turnsRemaining}T
+                  </span>
                 </div>
 
                 <button
@@ -2444,6 +2448,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                     performTurnAdvance();
                   }}
                   className="w-full py-4 rounded-2xl bg-green-500 hover:bg-green-400 text-black font-black text-base uppercase tracking-widest active:scale-95 transition-all shadow-lg"
+                  style={{ touchAction: 'manipulation' }}
                 >
                   ENTENDIDO, APLICAR VIRUS ✓
                 </button>
@@ -2506,42 +2511,6 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
             CARTA {currentIndex + 1}
           </p>
         )}
-
-        {/* Botón SIGUIENTE — estilo arcade 8-bit */}
-        {!gameState.showTrivia && !gameState.showDrinkingGame && !gameState.showImpostor &&
-          !gameState.showDuel && !gameState.showMimica &&
-          !gameState.showImpostorWord && !gameState.showVoting && !gameState.showCaptainPass &&
-          !gameState.showVirusAlert && (
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="w-full max-w-md px-6 mb-6 mt-6 flex flex-col items-center"
-            >
-              {/* Botón principal arcade */}
-              <motion.button
-                onClick={() => {
-                  if (isMultiplayer && !isHost) return;
-                  handleNext();
-                }}
-                whileTap={{ y: 4, boxShadow: 'none' }}
-                className="w-full font-arcade font-black text-white uppercase tracking-[0.2em] text-xl py-5 px-8 bg-black select-none rounded-none active:scale-[0.98] transition-all"
-                style={{
-                  boxShadow: `
-                    4px 0 0 0 ${rarity === 'legendary' ? '#fbbf24' : rarity === 'chaos' ? '#f472b6' : rarity === 'rare' ? '#60a5fa' : '#ffffff'},
-                    -4px 0 0 0 ${rarity === 'legendary' ? '#fbbf24' : rarity === 'chaos' ? '#f472b6' : rarity === 'rare' ? '#60a5fa' : '#ffffff'},
-                    0 4px 0 0 ${rarity === 'legendary' ? '#fbbf24' : rarity === 'chaos' ? '#f472b6' : rarity === 'rare' ? '#60a5fa' : '#ffffff'},
-                    0 -4px 0 0 ${rarity === 'legendary' ? '#fbbf24' : rarity === 'chaos' ? '#f472b6' : rarity === 'rare' ? '#60a5fa' : '#ffffff'},
-                    0 8px 0 0 rgba(0,0,0,0.7)
-                  `
-                }}
-              >
-                ► SIGUIENTE
-              </motion.button>
-              <p className="text-center text-white/25 text-[9px] mt-3 font-mono uppercase tracking-[0.35em]">
-                [ TOCA PARA AVANZAR ]
-              </p>
-            </motion.div>
-          )}
 
       </main>
 

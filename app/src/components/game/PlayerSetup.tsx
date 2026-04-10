@@ -598,13 +598,14 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
               animate={{ opacity: 1, x: 0 }}
               className="bg-card rounded-2xl p-4 shadow-lg border"
             >
-              <div className="flex items-center justify-between gap-3 px-2 pt-1 pb-3 border-b border-white/5 mb-3">
+              {/* Header del lobby */}
+              <div className="flex items-center justify-between gap-3 mb-4">
                 <div className="flex items-center gap-3">
                   <div className="text-2xl">{modeInfo?.icon}</div>
                   <div className="text-left">
-                    <h3 className="text-base font-semibold leading-tight">Lobby Virtual</h3>
+                    <h3 className="text-base font-semibold leading-tight">Lobby</h3>
                     <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
-                      {players.length} listos
+                      {players.length} {players.length === 1 ? 'jugador' : 'jugadores'}
                     </p>
                   </div>
                 </div>
@@ -613,70 +614,56 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
                 </div>
               </div>
 
-              {/* Zona baile */}
+              {/* Zona de avatares rebotando — altura fija razonable */}
               <div
                 ref={lobbyRef}
-                className="relative w-full h-[200px] md:h-[320px] rounded-2xl overflow-hidden border bg-black/80"
+                className="relative w-full rounded-2xl overflow-hidden border bg-black/60"
+                style={{ height: Math.max(120, Math.min(players.length * 40 + 60, 200)) }}
               >
-                {/* glow */}
-                <div className="absolute inset-0 opacity-60 pointer-events-none"
+                <div className="absolute inset-0 opacity-50 pointer-events-none"
                   style={{
                     background:
-                      'radial-gradient(circle at 20% 20%, rgba(168,85,247,0.25), transparent 35%), radial-gradient(circle at 80% 60%, rgba(236,72,153,0.20), transparent 45%), radial-gradient(circle at 50% 100%, rgba(59,130,246,0.14), transparent 45%)'
+                      'radial-gradient(circle at 20% 20%, rgba(255,30,160,0.2), transparent 40%), radial-gradient(circle at 80% 60%, rgba(255,140,0,0.15), transparent 45%)'
                   }}
                 />
 
-                {/* Avatares rebotando */}
+                {lobbyPlayers.length === 0 && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <p className="text-white/30 text-xs font-bold uppercase tracking-widest">Añade jugadores</p>
+                  </div>
+                )}
+
                 {lobbyPlayers.map((p) => (
                   <div
                     key={p.id}
-                    ref={(node) => {
-                      ballElsRef.current[p.id] = node;
-                    }}
-                    className="absolute top-0 left-0 w-[42px] h-[42px] md:w-[52px] md:h-[52px] rounded-full overflow-hidden border-2 shadow-[0_0_12px_rgba(168,85,247,0.45)]"
-                    style={{ borderColor: 'rgba(168,85,247,0.9)' }}
+                    ref={(node) => { ballElsRef.current[p.id] = node; }}
+                    className="absolute top-0 left-0 w-[44px] h-[44px] rounded-full overflow-hidden border-2 shadow-lg"
+                    style={{ borderColor: 'hsl(318 100% 60% / 0.8)' }}
                     title={p.name}
                   >
                     {p.avatar_url ? (
-                      <img
-                        src={p.avatar_url}
-                        alt={p.name}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                      />
+                      <img src={p.avatar_url} alt={p.name} className="w-full h-full object-cover" loading="lazy" />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-primary to-pink-500 flex items-center justify-center">
-                        <span className="font-black text-white text-xs md:text-sm">
+                      <div className="w-full h-full bg-gradient-to-br from-[hsl(318_100%_60%)] to-[hsl(28_100%_58%)] flex items-center justify-center">
+                        <span className="font-black text-white text-xs">
                           {p.name?.trim()?.charAt(0)?.toUpperCase() || '?'}
                         </span>
                       </div>
                     )}
                   </div>
                 ))}
-
-                {/* Botón central épico */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <button
-                    type="button"
-                    onClick={handleStartGame}
-                    disabled={!canStart || isLoading}
-                    className="px-5 py-2.5 md:px-6 md:py-3 rounded-full font-black text-white text-sm md:text-base border border-white/10 bg-gradient-to-r from-purple-500 to-pink-500 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-tighter"
-                    style={{
-                      animation: 'pulse-neon 1.9s ease-in-out infinite',
-                    }}
-                  >
-                    🚀 ¡Despegar!
-                  </button>
-                </div>
-
-                <style>{`
-                  @keyframes pulse-neon {
-                    0% { transform: translateZ(0) scale(1); box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.55); }
-                    70% { transform: translateZ(0) scale(1.04); box-shadow: 0 0 0 18px rgba(168, 85, 247, 0); }
-                    100% { transform: translateZ(0) scale(1); box-shadow: 0 0 0 0 rgba(168, 85, 247, 0); }
-                  }
-                `}</style>
               </div>
+
+              {/* Info de estado */}
+              {players.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {players.map(p => (
+                    <span key={p.id} className="text-[10px] font-bold text-white/60 bg-white/5 px-2 py-1 rounded-full border border-white/10">
+                      {p.name}
+                    </span>
+                  ))}
+                </div>
+              )}
             </motion.div>
           )}
         </div>
