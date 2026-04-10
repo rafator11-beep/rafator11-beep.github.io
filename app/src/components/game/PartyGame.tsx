@@ -796,7 +796,19 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
   };
 
 
+  // ── ANTI-TAP ACCIDENTAL ─────────────────────────────────────────────────────
+  const lastTapRef = useRef<number>(0);
+  const isProcessingRef = useRef<boolean>(false);
+
   const handleNext = () => {
+    // Debounce: ignora taps en menos de 400ms
+    const now = Date.now();
+    if (now - lastTapRef.current < 400) return;
+    if (isProcessingRef.current) return;
+    lastTapRef.current = now;
+    isProcessingRef.current = true;
+    setTimeout(() => { isProcessingRef.current = false; }, 400);
+
     sfx.click();
     vibe(10);
 
@@ -2134,35 +2146,25 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
             gameState.yoNuncaEquiposPhase === 'idle' && (
               <motion.div
                 key={currentIndex}
-                drag="x"
-                dragConstraints={{ left: 0, right: 0 }}
-                onDragEnd={(e, { offset, velocity }) => {
-                  const swipe = offset.x;
-                  if (swipe < -100 || velocity.x < -500) {
-                    handleNext();
-                  }
-                }}
-                initial={{ rotateY: 90, opacity: 0, scale: 0.9 }}
-                animate={{ rotateY: 0, opacity: 1, scale: 1 }}
-                exit={{ rotateY: -90, opacity: 0, scale: 0.9 }}
-                transition={{
-                  rotateY: { type: 'spring', stiffness: 280, damping: 24 },
-                  opacity: { duration: 0.12 },
-                  scale: { type: 'spring', stiffness: 300, damping: 26 },
-                }}
-                style={{
-                  perspective: '1000px',
-                  transformStyle: 'preserve-3d',
-                  willChange: 'transform',
-                  cursor: 'grab'
-                }}
-                whileTap={{ cursor: 'grabbing' }}
+                drag={false}
                 className="w-full flex flex-col items-center justify-center relative"
               >
+                <motion.div
+                  key={`card-inner-${currentIndex}`}
+                  initial={{ rotateY: 90, opacity: 0, scale: 0.9 }}
+                  animate={{ rotateY: 0, opacity: 1, scale: 1 }}
+                  exit={{ rotateY: -90, opacity: 0, scale: 0.9 }}
+                  transition={{
+                    rotateY: { type: 'spring', stiffness: 280, damping: 24 },
+                    opacity: { duration: 0.12 },
+                    scale: { type: 'spring', stiffness: 300, damping: 26 },
+                  }}
+                  style={{ perspective: '1000px', transformStyle: 'preserve-3d', willChange: 'transform' }}
+                  className="w-full flex flex-col items-center justify-center relative"
+                >
                 <div className="absolute -top-8 left-0 right-0 flex justify-center opacity-30 pointer-events-none sm:hidden">
                   <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.4em] text-white">
-                    <span>Desliza para saltar</span>
-                    <ArrowRight className="w-3 h-3 animate-bounce-x" />
+                    <span>Pulsa el botón para avanzar</span>
                   </div>
                 </div>
 
@@ -2170,8 +2172,9 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                   content={safeCurrentText}
                   type={rarity}
                   onClick={() => {
-                    if (isMultiplayer && !isHost) return;
-                    handleNext();
+                    // La carta NO avanza el turno — solo el botón de abajo lo hace
+                    // Esto evita taps accidentales al leer la carta
+                    return;
                   }}
                   gameMode={mode}
                   players={players}
@@ -2232,10 +2235,11 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                   />
                 )}
               </motion.div>
+              </motion.div>
             )}
         </AnimatePresence>
 
-        {/* BOTÓN SIGUIENTE TURNO — anti-parálisis */}
+        {/* BOTÓN SIGUIENTE TURNO — único punto de avance */}
         {!(gameState.showTrivia && currentQuestion) &&
           !gameState.showDuel &&
           !gameState.showVoting &&
@@ -2244,16 +2248,29 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           !gameState.showCaptainDecision &&
           gameState.yoNuncaEquiposPhase === 'idle' && (
             <motion.button
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
+              key={`next-btn-${currentIndex}`}
+              initial={{ opacity: 0, y: 16, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ delay: 0.5, type: 'spring', stiffness: 300, damping: 22 }}
               onClick={() => { if (isMultiplayer && !isHost) return; handleNext(); }}
-              className="mt-3 mb-1 w-full max-w-sm mx-auto flex items-center justify-center gap-2 py-4 rounded-2xl font-black text-base uppercase tracking-widest
-              bg-white/10 backdrop-blur-md border border-white/20 text-white
-              hover:bg-white/20 active:scale-[0.97] transition-all shadow-lg"
-              style={{ WebkitTapHighlightColor: 'transparent', zIndex: 100 }}
+              className="mt-4 mb-2 w-full max-w-sm mx-auto flex items-center justify-between gap-3 px-6 py-5 rounded-[24px] font-black text-base uppercase tracking-widest select-none"
+              style={{
+                background: 'linear-gradient(135deg, hsl(318 100% 60% / 0.9) 0%, hsl(338 95% 55% / 0.9) 100%)',
+                boxShadow: '0 8px 32px -8px hsl(318 100% 60% / 0.6), 0 0 0 1px rgba(255,255,255,0.15) inset',
+                WebkitTapHighlightColor: 'transparent',
+                touchAction: 'manipulation',
+              }}
+              whileTap={{ scale: 0.96 }}
             >
-              <ArrowRight className="w-5 h-5" />
+              <div className="flex flex-col items-start">
+                <span className="text-[10px] font-bold opacity-70 tracking-[0.3em] normal-case">Siguiente turno</span>
+                <span className="text-white text-lg font-black leading-tight">
+                  {players[(currentIndex + 1) % Math.max(1, players.length)]?.name || '—'}
+                </span>
+              </div>
+              <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-white/20">
+                <ArrowRight className="w-5 h-5 text-white" />
+              </div>
               <span>Siguiente turno — {players[(currentIndex + 1) % players.length]?.name}</span>
             </motion.button>
           )}

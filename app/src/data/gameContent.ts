@@ -6636,6 +6636,50 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
   const duelosItems = getRandomItems(duelosPool, duelosPool.length);
   const duelosCards = duelosItems.map(q => `⚔️ ${q}`);
 
+  // ── CARTAS GRUPALES NUEVAS — todos participan a la vez ──────────────────────
+  const grupalCards: string[] = shuffleArray([
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más miente del grupo. El más señalado bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: Pensad en un número del 1 al 5. Los que coincidan con alguien beben 2. 🍻",
+    "🙌 TODOS A LA VEZ: Señalad al que más tarda en responder los mensajes. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, decid el nombre de un famoso. Los que coincidan reparten 3. 👑",
+    "🙌 TODOS A LA VEZ: Señalad al que más drama genera en el grupo. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: Pensad quién del grupo se casará primero. El más votado reparte 2. 👑",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al más tóxico en una relación. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: Señalad al que más se queja. Ese bebe 2. El que no señale a nadie bebe 1. 🍺",
+    "🙌 TODOS A LA VEZ: Pensad en una palabra. Los que coincidan con alguien reparten 3. 👑",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más ligará esta noche. Ese reparte 3. 👑",
+    "🙌 TODOS A LA VEZ: Señalad al que más fotos hace en las salidas. Ese bebe 2. 🍻",
+    "🙌 TODOS A LA VEZ: Pensad quién del grupo tiene más secretos. El más votado bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que peor baila. Ese bebe 2 o demuestra lo contrario. 🍻",
+    "🙌 TODOS A LA VEZ: Señalad al que más tarde llega siempre. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: Pensad en un número del 1 al 10. El que diga el número más alto reparte 3. 👑",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más gasta en salir. Ese reparte 2. 👑",
+    "🙌 TODOS A LA VEZ: Señalad al que más veces ha cancelado un plan. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: Pensad quién del grupo es más probable que llore esta noche. El más votado bebe 2. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más stalkeará a alguien esta semana. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: Señalad al que más audios largos manda. Ese bebe 2. 🍻",
+    "🙌 TODOS A LA VEZ: Pensad en un color. Los que coincidan con alguien beben 1. 🍺",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más se arrepiente de algo esta noche. Ese bebe 2. 🍻",
+    "🙌 TODOS A LA VEZ: Señalad al que más probable es que acabe durmiendo en el sofá. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: Pensad quién del grupo tiene más labia. El más votado reparte 3. 👑",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más veces ha dicho 'la última y nos vamos'. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: Señalad al que más probable es que se tatúe algo raro. Ese bebe 2. 🍻",
+    "🙌 TODOS A LA VEZ: Pensad en un animal. Los que coincidan con alguien reparten 2. 👑",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que llame a un ex esta noche. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: Señalad al que más probable es que se haga famoso. Ese reparte 3. 👑",
+    "🙌 TODOS A LA VEZ: Pensad quién del grupo es el más inocente. El menos votado reparte 2. 👑",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que acabe en el hospital esta noche. Ese bebe 2. 🍻",
+    "🙌 TODOS A LA VEZ: Señalad al que más probable es que se case por dinero. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: Pensad en un número del 1 al 3. Los que coincidan beben 2. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que tenga un lío esta noche. Ese reparte 3. 👑",
+    "🙌 TODOS A LA VEZ: Señalad al que más probable es que llore en una peli de Disney. Ese bebe 2. 🍻",
+    "🙌 TODOS A LA VEZ: Pensad quién del grupo es el más dramático. El más votado bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que se quede dormido primero. Ese bebe 2. 🍻",
+    "🙌 TODOS A LA VEZ: Señalad al que más probable es que acabe siendo el más rico del grupo. Ese reparte 3. 👑",
+    "🙌 TODOS A LA VEZ: Pensad en una ciudad española. Los que coincidan con alguien beben 1. 🍺",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que tenga un accidente de coche. Ese bebe 2. 🍻",
+  ]);
+
   // Helper: repite un array N veces sin mutarlo
   function spread<T>(arr: T[], times: number): T[] {
     const result: T[] = [];
@@ -6643,54 +6687,59 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     return result;
   }
 
-  // Combine with weights using spread helper
+  // ── PESOS DEL MEGAMIX (sin mímica, más grupales) ─────────────────────────
+  // Filosofía: cada carta debe involucrar a TODOS, no solo al jugador activo
   const weightedContent = shuffleArray([
-    // 5x — más frecuentes
-    ...spread(yoNuncaCards, 5),
-    ...spread(masProbableCards, 5),
-    ...spread(clasicoCards, 5),
+    // 6x — el núcleo del juego
+    ...spread(yoNuncaCards, 6),       // "Yo nunca" — todos levantan la mano
+    ...spread(masProbableCards, 6),   // Votaciones — todos señalan
+    ...spread(grupalCards, 5),        // Grupales nuevas — todos a la vez
     // 4x
-    ...spread(retosCards, 4),
+    ...spread(clasicoCards, 4),       // Retos clásicos
+    ...spread(duelosCards, 4),        // Duelos 1vs1 — el grupo observa y juzga
     // 3x
-    ...spread(pacoversCards, 3),
+    ...spread(retosCards, 3),
+    ...spread(picanteCards, 3),
     ...spread(enLaCamaCards, 3),
-    ...spread(espanaCards, 3),
     // 2x
-    ...spread(picanteCards, 2),
-    ...spread(categoriasCards, 2),
-    ...spread(mimicaCards, 2),
-    ...spread(duelosCards, 2),
-    // 1x — eventos especiales
-    ...spread(impostorCards, 3), // Increased from 1x to 3x for more variety
+    ...spread(pacoversCards, 2),
+    ...spread(espanaCards, 2),
+    // 1x — categorías solo de vez en cuando
+    ...spread(categoriasCards, 1),
+    // Especiales
+    ...spread(impostorCards, 3),
+    // MÍMICA ELIMINADA del Megamix
   ]);
 
-  // --- NEW FAIR-PLAY SCHEDULER (Phase 2) ---
+  // --- FAIR-PLAY SCHEDULER ---
   const safePlayersCount = Math.max(2, playersCount || 4);
   const totalRounds = Math.ceil(count / safePlayersCount);
 
-  // 1. Group pools by specific interaction type for Quota Map
+  // Pools agrupados por tipo de interacción
   const pools = {
-    yo_nunca: shuffleArray(cleanDeckPool([
+    // Cartas donde TODOS participan simultáneamente
+    grupal: shuffleArray(cleanDeckPool([
+      ...masProbableCards,
+      ...grupalCards,
+      ...duelosCards,
+    ])),
+    // Cartas donde el jugador activo confiesa / actúa
+    personal: shuffleArray(cleanDeckPool([
       ...yoNuncaCards,
       ...picanteCards,
-      ...enLaCamaCards
-    ])),
-    retos: shuffleArray(cleanDeckPool([
-      ...retosCards,
+      ...enLaCamaCards,
       ...clasicoCards,
-      ...pacoversCards,
-      ...espanaCards
     ])),
-    group: shuffleArray(cleanDeckPool([
-      ...masProbableCards,
+    // Retos y categorías
+    reto: shuffleArray(cleanDeckPool([
+      ...retosCards,
+      ...pacoversCards,
+      ...espanaCards,
       ...categoriasCards,
-      ...mimicaCards,
-      ...duelosCards,
-      ...impostorCards
-    ]))
+    ])),
   };
 
-  const ptrs = { yo_nunca: 0, retos: 0, group: 0 };
+  const ptrs = { grupal: 0, personal: 0, reto: 0 };
 
   const specialTriggers = shuffleArray([
     "TRIGGER:TRIVIA_FUTBOL",
@@ -6700,75 +6749,60 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     "TRIGGER:VIRUS"
   ]);
 
-  const globalNormas = shuffleArray(normasRonda.map(n => 
+  const globalNormas = shuffleArray(normasRonda.map(n =>
     `📜 NORMA: ${n.replace(/NORMA:|NORMA: |📜 |\\\./g, '').trim()}`
   ));
 
   let triggerPtr = 0;
   let normaPtr = 0;
-  
   let lastType = '';
   let streakCount = 0;
 
   const deck: string[] = [];
 
-  // Generate in rounds to ensure EVERY player gets a turn to act
   for (let r = 0; r < totalRounds; r++) {
-    // Generate Quotas
-    const blockQuotas: string[] = [];
+    // Patrón por ronda: grupal → personal → reto → grupal → personal → ...
+    // Garantiza variedad y que todos participen cada 3 cartas
+    const blockPattern: Array<keyof typeof pools> = [];
     for (let i = 0; i < safePlayersCount; i++) {
-      if (i % 4 === 3) blockQuotas.push('group');
-      else if (i % 2 === 1) blockQuotas.push('retos');
-      else blockQuotas.push('yo_nunca');
+      if (i % 3 === 0) blockPattern.push('grupal');
+      else if (i % 3 === 1) blockPattern.push('personal');
+      else blockPattern.push('reto');
     }
-    
-    // Shuffle the block types for this round
-    const shuffledBlock = shuffleArray(blockQuotas);
+    const shuffledBlock = shuffleArray(blockPattern);
 
     for (let t = 0; t < safePlayersCount; t++) {
       if (deck.length >= count) break;
 
       let type = shuffledBlock[t];
 
-      // Anti-streak logic: Max 2 of the same type in a row
+      // Anti-streak: máximo 2 del mismo tipo seguidas
       if (type === lastType && streakCount >= 2) {
-         const nextDiffIdx = shuffledBlock.findIndex((cand, idx) => idx > t && cand !== lastType);
-         if (nextDiffIdx !== -1) {
-            const temp = shuffledBlock[t];
-            shuffledBlock[t] = shuffledBlock[nextDiffIdx];
-            shuffledBlock[nextDiffIdx] = temp;
-            type = shuffledBlock[t];
-         }
+        const nextDiffIdx = shuffledBlock.findIndex((cand, idx) => idx > t && cand !== lastType);
+        if (nextDiffIdx !== -1) {
+          const temp = shuffledBlock[t];
+          shuffledBlock[t] = shuffledBlock[nextDiffIdx];
+          shuffledBlock[nextDiffIdx] = temp;
+          type = shuffledBlock[t];
+        }
       }
 
-      if (type === lastType) {
-         streakCount++;
-      } else {
-         lastType = type;
-         streakCount = 1;
-      }
+      if (type === lastType) streakCount++;
+      else { lastType = type; streakCount = 1; }
 
-      const pool = pools[type as keyof typeof pools];
-      const card = pool[ptrs[type as keyof typeof ptrs] % pool.length];
-      ptrs[type as keyof typeof ptrs]++;
-
+      const pool = pools[type];
+      const card = pool[ptrs[type] % pool.length];
+      ptrs[type]++;
       deck.push(card);
 
-      // 2. Periodic Injections (High Priority Overlays)
-      // Every 15 cards, inject specifically an IMPOSTOR trigger (User Request)
-      if (deck.length > 0 && deck.length % 15 === 0 && deck.length < count) {
+      // Inyecciones periódicas
+      if (deck.length % 20 === 0 && deck.length < count) {
         deck.push("TRIGGER:IMPOSTOR");
-      }
-      
-      // Every 10 cards, inject a random Trigger (excluding Impostor if already handled by period 15)
-      else if (deck.length > 0 && deck.length % 10 === 0 && deck.length < count) {
-        const filteredTriggers = specialTriggers.filter(t => t !== "TRIGGER:IMPOSTOR");
-        deck.push(filteredTriggers[triggerPtr % filteredTriggers.length]);
+      } else if (deck.length % 12 === 0 && deck.length < count) {
+        const filtered = specialTriggers.filter(t => t !== "TRIGGER:IMPOSTOR");
+        deck.push(filtered[triggerPtr % filtered.length]);
         triggerPtr++;
-      }
-      
-      // Every 25 cards, inject a Norma (Adjusted frequency to avoid overlap with Impostor)
-      else if (deck.length > 0 && deck.length % 25 === 0 && deck.length < count) {
+      } else if (deck.length % 30 === 0 && deck.length < count) {
         deck.push(globalNormas[normaPtr % globalNormas.length]);
         normaPtr++;
       }
