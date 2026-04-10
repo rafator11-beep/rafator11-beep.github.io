@@ -1155,106 +1155,164 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         onAdjustXP={handleAdjustXP}
       />
 
-      {/* Voting Overlay for "Who is most likely" and similar prompts */}
+      {/* ── VOTING OVERLAY — inmersivo ── */}
       {(() => {
         const isVoting = !!currentText && (
           (currentText.toLowerCase().includes('¿quién') && !currentText.toLowerCase().includes('yo nunca')) ||
           currentText.toLowerCase().includes('¿qué dos jugadores') ||
           currentText.toLowerCase().includes('¿qué tres jugadores') ||
-          currentText.toLowerCase().includes('votación:')
+          currentText.toLowerCase().includes('votación:') ||
+          currentText.toLowerCase().includes('todos a la vez') ||
+          currentText.toLowerCase().includes('señalad al')
         );
         let maxVotes = 1;
         if (currentText?.toLowerCase().includes('dos jugadores')) maxVotes = 2;
         if (currentText?.toLowerCase().includes('tres jugadores')) maxVotes = 3;
 
         return (
-          <Dialog open={isVoting} onOpenChange={() => { }}>
-            <DialogContent className="sm:max-w-md bg-gradient-to-r from-slate-900/95 to-slate-800/95 border-primary/50 text-white z-[60] max-h-[85vh] flex flex-col">
-              <DialogHeader className="shrink-0">
-                <DialogTitle className="text-xl font-bold text-center neon-text text-primary">
-                  🗳️ Votación {maxVotes > 1 ? `(Elige a ${maxVotes})` : ''}
-                </DialogTitle>
-                <DialogDescription className="text-center text-sm text-white/90 font-medium pt-2 px-2">
-                  {currentText}
-                </DialogDescription>
-              </DialogHeader>
-
-              <div className="grid grid-cols-2 gap-2 py-3 overflow-y-auto max-h-[45vh] no-scrollbar flex-1">
-                {players.map(p => {
-                  const isSelected = gameState.votingSelections?.includes(p.id);
-                  return (
-                    <motion.button
-                      key={p.id}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => {
-                        const currentSelections = gameState.votingSelections || [];
-                        if (maxVotes === 1) {
-                          handleAdjustXP(p.id, 5);
-                          trackVote(p.id);
-                          toast.success(`${p.name} ha sido elegido! (+5 XP)`);
-                          handleNext();
-                        } else {
-                          if (currentSelections.includes(p.id)) {
-                            setGameState(prev => ({ ...prev, votingSelections: currentSelections.filter(id => id !== p.id) }));
-                          } else if (currentSelections.length < maxVotes) {
-                            setGameState(prev => ({ ...prev, votingSelections: [...currentSelections, p.id] }));
-                          }
-                        }
-                      }}
-                      className={`flex flex-col items-center gap-2 p-3 rounded-2xl transition-all border-2 ${isSelected ? 'bg-primary/40 border-primary shadow-[0_0_20px_rgba(var(--primary-rgb),0.4)]' : 'bg-slate-800/40 border-white/10 hover:border-primary/50'}`}
-                    >
-                      <div className={`w-14 h-14 rounded-full overflow-hidden border-3 transition-transform ${isSelected ? 'border-primary scale-110' : 'border-white/20'}`}>
-                        {p.avatar_url ? (
-                          <img src={p.avatar_url} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full bg-slate-800 flex items-center justify-center text-lg font-black">
-                            {p.name.substring(0, 2).toUpperCase()}
-                          </div>
-                        )}
-                      </div>
-                      <span className="font-black text-sm tracking-tight text-white uppercase">{p.name}</span>
-                    </motion.button>
-                  );
-                })}
-              </div>
-
-              {/* Fixed bottom area — always visible */}
-              <div className="shrink-0 pt-3 border-t border-white/10 space-y-2">
-                <div className="text-center text-xs text-white/60">
-                  {maxVotes === 1 ? 'Pulsa en quien creas que es más probable.' : `Selecciona a ${maxVotes} jugadores.`}
+          <AnimatePresence>
+            {isVoting && (
+              <motion.div
+                key="voting-overlay"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[150] flex flex-col"
+                style={{ background: 'linear-gradient(180deg, rgba(88,28,135,0.97) 0%, rgba(15,10,30,0.99) 100%)' }}
+              >
+                {/* Orbes de fondo */}
+                <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full blur-[100px]"
+                    style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.35) 0%, transparent 70%)' }} />
+                  <div className="absolute bottom-0 right-0 w-64 h-64 rounded-full blur-[80px]"
+                    style={{ background: 'radial-gradient(circle, rgba(244,63,94,0.25) 0%, transparent 70%)' }} />
                 </div>
 
-                {maxVotes > 1 && (
-                  <Button
-                    className="w-full h-12 text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 border border-white/10"
-                    disabled={(gameState.votingSelections?.length || 0) < maxVotes}
-                    onClick={() => {
-                      const selections = gameState.votingSelections || [];
-                      selections.forEach(id => {
-                        handleAdjustXP(id, 5);
-                        trackVote(id);
-                        const name = players.find(p => p.id === id)?.name;
-                        toast.success(`${name} elegido! (+5 XP)`);
-                      });
-                      setGameState(prev => ({ ...prev, votingSelections: [] }));
-                      handleNext();
-                    }}
+                {/* Header */}
+                <div className="relative z-10 px-5 pt-safe pt-6 pb-4 text-center">
+                  <motion.div
+                    initial={{ y: -20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.1 }}
                   >
-                    Confirmar Votación
-                  </Button>
-                )}
+                    <span className="text-4xl">🗳️</span>
+                    <h2 className="text-xl font-black text-white mt-2 uppercase tracking-tight">
+                      {maxVotes > 1 ? `Elige a ${maxVotes}` : '¿Quién es?'}
+                    </h2>
+                    <p className="text-sm text-white/70 mt-1 leading-snug px-4 max-w-xs mx-auto">
+                      {sanitizeCardText(currentText || '')}
+                    </p>
+                  </motion.div>
+                </div>
 
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleNext}
-                  className="w-full text-xs text-white/60 hover:text-white border border-white/20"
-                >
-                  Saltar Votación ⏭
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+                {/* Player grid */}
+                <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-4">
+                  <div className={`grid gap-3 ${players.length <= 4 ? 'grid-cols-2' : 'grid-cols-3'}`}>
+                    {players.map((p, i) => {
+                      const isSelected = gameState.votingSelections?.includes(p.id);
+                      return (
+                        <motion.button
+                          key={p.id}
+                          initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          transition={{ delay: 0.05 * i, type: 'spring', stiffness: 300, damping: 22 }}
+                          whileTap={{ scale: 0.93 }}
+                          onClick={() => {
+                            const currentSelections = gameState.votingSelections || [];
+                            if (maxVotes === 1) {
+                              handleAdjustXP(p.id, 5);
+                              trackVote(p.id);
+                              setGameState(prev => ({ ...prev, votingSelections: [] }));
+                              handleNext();
+                            } else {
+                              if (currentSelections.includes(p.id)) {
+                                setGameState(prev => ({ ...prev, votingSelections: currentSelections.filter(id => id !== p.id) }));
+                              } else if (currentSelections.length < maxVotes) {
+                                setGameState(prev => ({ ...prev, votingSelections: [...currentSelections, p.id] }));
+                              }
+                            }
+                          }}
+                          className="relative flex flex-col items-center gap-2 p-4 rounded-[1.5rem] transition-all"
+                          style={{
+                            background: isSelected ? 'rgba(139,92,246,0.35)' : 'rgba(255,255,255,0.06)',
+                            border: `2px solid ${isSelected ? 'rgba(139,92,246,0.8)' : 'rgba(255,255,255,0.10)'}`,
+                            boxShadow: isSelected ? '0 0 24px rgba(139,92,246,0.4)' : 'none',
+                          }}
+                        >
+                          {/* Avatar */}
+                          <motion.div
+                            animate={isSelected ? { scale: 1.1 } : { scale: 1 }}
+                            className="relative"
+                          >
+                            <div className="w-16 h-16 rounded-full overflow-hidden border-2"
+                              style={{ borderColor: isSelected ? '#8b5cf6' : 'rgba(255,255,255,0.2)' }}>
+                              {p.avatar_url ? (
+                                <img src={p.avatar_url} className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-xl font-black text-white"
+                                  style={{ background: isSelected ? 'rgba(139,92,246,0.5)' : 'rgba(255,255,255,0.1)' }}>
+                                  {p.name.charAt(0).toUpperCase()}
+                                </div>
+                              )}
+                            </div>
+                            {isSelected && (
+                              <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-violet-500 flex items-center justify-center"
+                              >
+                                <span className="text-white text-xs font-black">✓</span>
+                              </motion.div>
+                            )}
+                          </motion.div>
+                          <span className="text-xs font-black uppercase tracking-wider text-white truncate w-full text-center">
+                            {p.name}
+                          </span>
+                          <span className="text-[9px] text-white/40 font-bold">
+                            {scores[p.id] || 0} XP
+                          </span>
+                        </motion.button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Bottom actions */}
+                <div className="relative z-10 px-4 pb-safe pb-6 pt-3 border-t border-white/8 space-y-2">
+                  {maxVotes > 1 && (
+                    <motion.button
+                      whileTap={{ scale: 0.97 }}
+                      disabled={(gameState.votingSelections?.length || 0) < maxVotes}
+                      onClick={() => {
+                        const selections = gameState.votingSelections || [];
+                        selections.forEach(id => {
+                          handleAdjustXP(id, 5);
+                          trackVote(id);
+                        });
+                        setGameState(prev => ({ ...prev, votingSelections: [] }));
+                        handleNext();
+                      }}
+                      className="w-full py-4 rounded-2xl font-black text-white text-base uppercase tracking-widest transition-all disabled:opacity-40"
+                      style={{
+                        background: 'linear-gradient(135deg, #7c3aed, #db2777)',
+                        boxShadow: '0 8px 24px rgba(124,58,237,0.4)',
+                        touchAction: 'manipulation',
+                      }}
+                    >
+                      Confirmar ({gameState.votingSelections?.length || 0}/{maxVotes})
+                    </motion.button>
+                  )}
+                  <button
+                    onClick={handleNext}
+                    className="w-full py-2.5 rounded-2xl text-xs font-bold text-white/40 uppercase tracking-widest border border-white/10"
+                    style={{ touchAction: 'manipulation' }}
+                  >
+                    Saltar ⏭
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         );
       })()}
 
@@ -2171,10 +2229,16 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                 <CardDisplay
                   content={safeCurrentText}
                   type={rarity}
-                  onClick={() => {
-                    // La carta NO avanza el turno — solo el botón de abajo lo hace
-                    // Esto evita taps accidentales al leer la carta
-                    return;
+                  onClick={() => { return; }}
+                  onSuccess={() => {
+                    // Jugador hizo el reto → reparte tragos (gana XP)
+                    if (currentPlayer) addScore(currentPlayer.id, 10);
+                    handleNext();
+                  }}
+                  onFail={() => {
+                    // Jugador no lo hizo → bebe (pierde XP)
+                    if (currentPlayer) addScore(currentPlayer.id, 2);
+                    handleNext();
                   }}
                   gameMode={mode}
                   players={players}
