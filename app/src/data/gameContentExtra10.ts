@@ -1,4 +1,4 @@
-// gameContentExtra10.ts — Bloque 5: 100 cartas nuevas, todos los modos menos Impostor
+﻿// gameContentExtra10.ts — Bloque 5: 100 cartas nuevas, todos los modos menos Impostor
 // Asequibles para todos. Sin referencias muy específicas. UTF-8 puro.
 
 // ─── YO NUNCA (20 cartas) ────────────────────────────────────────────────────
