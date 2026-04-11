@@ -579,25 +579,33 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
     if (!isOverlayActive && typeof txt === 'string' && (txt.toUpperCase().startsWith('NORMA:') || txt.toUpperCase().startsWith('NUEVA NORMA:'))) {
       const rule = txt.split(':')[1]?.trim() || txt;
-      setGameState(prev => ({
-        ...prev,
-        currentNorma: rule,
-        showNormaGlobal: true,
-        currentNormaTurnsRemaining: (players.length > 0 ? players.length * 2 : 10)
-      }));
-      toast.success("¡Nueva Norma Activa!", { description: rule, duration: 4000 });
+      
+      // Prevent infinite loop: Only update state if the norma actually changed
+      if (gameState.currentNorma !== rule) {
+        setGameState(prev => ({
+          ...prev,
+          currentNorma: rule,
+          showNormaGlobal: true,
+          currentNormaTurnsRemaining: (players.length > 0 ? players.length * 2 : 10)
+        }));
+        toast.success("¡Nueva Norma Activa!", { description: rule, duration: 4000 });
+      }
+      
       if (!normaAutoAdvanceRef.current) {
         normaAutoAdvanceRef.current = true;
         const timer = setTimeout(() => {
           normaAutoAdvanceRef.current = false;
           performTurnAdvance(true);
-        }, 500);
-        return () => { clearTimeout(timer); normaAutoAdvanceRef.current = false; };
+        }, 3000); // Give players 3 seconds to read it
+        
+        // BUG FIX: Do NOT reset the ref in the cleanup, otherwise any re-render 
+        // resets the flag, causing another timer + state update = infinite loop!
+        return () => { clearTimeout(timer); };
       }
     }
   }, [currentIndex, isHost, mode, getCurrentContent, setGameState, performTurnAdvance,
     gameState.showVirusAlert, gameState.showTrivia, gameState.showDuel,
-    gameState.showImpostor, gameState.showMimica]);
+    gameState.showImpostor, gameState.showMimica, gameState.currentNorma]);
 
   const hasInitializedRound1 = useRef(false);
   // Trigger: Ronda 1 Norma Global + Virus Assignment (Robust Unified Sync)
