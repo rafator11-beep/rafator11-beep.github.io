@@ -2591,7 +2591,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
             players={players}
             teams={teams}
             onNext={handleNext}
-            localPlayerId={currentPlayer?.id}
+            localPlayerId={localPlayerId}
             isHost={isHost}
             isMultiplayer={isMultiplayer}
             addScore={addScore}
