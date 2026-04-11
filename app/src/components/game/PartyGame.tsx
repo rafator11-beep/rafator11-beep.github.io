@@ -27,6 +27,7 @@ import { vibe } from '@/lib/vibration';
 import { GameMode } from '@/types/game';
 import { duelos } from '@/data/duelosContent';
 import { impostorRounds } from '@/data/impostorContent';
+import { isIndividualCard } from '@/data/gameContent';
 
 import { ChatComponent } from '@/components/multiplayer/ChatComponent';
 import { PeerBubbles } from '@/components/multiplayer/PeerBubbles';
@@ -813,11 +814,16 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     vibe(10);
 
     // Detect if current card is Global so we don't pass the turn
-    // (Asegura que el jugador activo no pierda su carta personal en un evento que es general)
     const cardText = getCurrentContent();
-    const isGlobal =
-      currentQuestion?.type === 'yo_nunca' ||
-      (typeof cardText === 'string' && (cardText.toUpperCase().includes('NORMA:') || cardText.toUpperCase().includes('NUEVA NORMA:') || cardText.startsWith('TRIGGER:')));
+    let isGlobal: boolean;
+    if (mode === 'megamix') {
+      // En megamix usamos clasificación por prefijo emoji: solo las cartas INDIVIDUALES avanzan turno
+      isGlobal = !isIndividualCard(typeof cardText === 'string' ? cardText : '');
+    } else {
+      isGlobal =
+        currentQuestion?.type === 'yo_nunca' ||
+        (typeof cardText === 'string' && (cardText.toUpperCase().includes('NORMA:') || cardText.toUpperCase().includes('NUEVA NORMA:') || cardText.startsWith('TRIGGER:')));
+    }
 
     // Global Reset of all potential "active overlay" flags to prevent ghost states
     setGameState(prev => ({
@@ -2222,9 +2228,11 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                   style={{ perspective: '1000px', transformStyle: 'preserve-3d', willChange: 'transform' }}
                   className="w-full flex flex-col items-center justify-center relative"
                 >
-                <div className="absolute -top-8 left-0 right-0 flex justify-center opacity-30 pointer-events-none sm:hidden">
-                  <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.4em] text-white">
-                    <span>Pulsa el botón para avanzar</span>
+                <div className="absolute -top-8 left-0 right-0 flex justify-center pointer-events-none">
+                  <div className="bg-slate-900/50 backdrop-blur-sm px-3 py-1 rounded-full border border-white/10 flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.3em] text-white/70 shadow-xl">
+                    <span>Carta {currentIndex + 1}</span>
+                    <span className="w-1 h-1 rounded-full bg-white/30" />
+                    <span>Ronda {gameState.round}</span>
                   </div>
                 </div>
 
@@ -2322,31 +2330,44 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           !gameState.showCaptainPass &&
           !gameState.showCaptainDecision &&
           gameState.yoNuncaEquiposPhase === 'idle' && (
-            <motion.button
-              key={`next-btn-${currentIndex}`}
-              initial={{ opacity: 0, y: 16, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ delay: 0.5, type: 'spring', stiffness: 300, damping: 22 }}
-              onClick={() => { if (isMultiplayer && !isHost) return; handleNext(); }}
-              className="mt-4 mb-2 w-full max-w-sm mx-auto flex items-center justify-between gap-3 px-6 py-5 rounded-[24px] font-black text-base uppercase tracking-widest select-none"
-              style={{
-                background: 'linear-gradient(135deg, hsl(318 100% 60% / 0.9) 0%, hsl(338 95% 55% / 0.9) 100%)',
-                boxShadow: '0 8px 32px -8px hsl(318 100% 60% / 0.6), 0 0 0 1px rgba(255,255,255,0.15) inset',
-                WebkitTapHighlightColor: 'transparent',
-                touchAction: 'manipulation',
-              }}
-              whileTap={{ scale: 0.96 }}
-            >
-              <div className="flex flex-col items-start">
-                <span className="text-[10px] font-bold opacity-70 tracking-[0.3em] normal-case">Siguiente turno</span>
-                <span className="text-white text-lg font-black leading-tight">
-                  {players[(currentIndex + 1) % Math.max(1, players.length)]?.name || '—'}
-                </span>
-              </div>
-              <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-white/20">
-                <ArrowRight className="w-5 h-5 text-white" />
-              </div>
-            </motion.button>
+            <div className="w-full max-w-sm mx-auto mt-4 mb-2 flex flex-col gap-2 relative z-10">
+              <motion.button
+                key={`next-btn-${currentIndex}`}
+                initial={{ opacity: 0, y: 16, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ delay: 0.5, type: 'spring', stiffness: 300, damping: 22 }}
+                onClick={() => { if (isMultiplayer && !isHost) return; handleNext(); }}
+                className="w-full flex items-center justify-between gap-3 px-6 py-5 rounded-[24px] font-black text-base uppercase tracking-widest select-none shadow-xl relative overflow-hidden"
+                style={{
+                  background: 'linear-gradient(135deg, hsl(318 100% 60% / 0.9) 0%, hsl(338 95% 55% / 0.9) 100%)',
+                  boxShadow: '0 8px 32px -8px hsl(318 100% 60% / 0.6), 0 0 0 1px rgba(255,255,255,0.15) inset',
+                  WebkitTapHighlightColor: 'transparent',
+                  touchAction: 'manipulation',
+                }}
+                whileTap={{ scale: 0.96 }}
+              >
+                <div className="flex flex-col items-start relative z-10">
+                  <span className="text-[10px] font-bold opacity-70 tracking-[0.3em] normal-case">Siguiente turno</span>
+                  <span className="text-white text-lg font-black leading-tight">
+                    {players[(currentIndex + 1) % Math.max(1, players.length)]?.name || '—'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-white/20 relative z-10">
+                  <ArrowRight className="w-5 h-5 text-white" />
+                </div>
+              </motion.button>
+              
+              <button 
+                onClick={() => { 
+                  if (isMultiplayer && !isHost) return; 
+                  // Advance without awarding any XP since it was skipped
+                  handleNext(); 
+                }}
+                className="text-white/40 text-[10px] font-bold uppercase tracking-widest text-center py-2 hover:text-white/80 transition-colors mx-auto active:scale-95"
+              >
+                ⏭️ Saltar esta carta
+              </button>
+            </div>
           )}
 
         {/* Render other game components (Trivia, Drinking, etc) overlaying or replacing card */}

@@ -1,4 +1,4 @@
-﻿// Main game content with all modes - 500+ entries each from Word document
+// Main game content with all modes - 500+ entries each from Word document
 
 import {
   clasicoExtra, yoNuncaExtra, picanteExtra, masProbableExtra,
@@ -32,10 +32,24 @@ import {
   cadenaExtra,
   salseoExtra,
 } from './gameContentExtra11';
+import {
+  yoNuncaExtra12, picanteExtra12, retosExtra12, votacionExtra12,
+} from './gameContentExtra12';
+import {
+  verdadOBebeExtra12, categoriasExtra12, cadenaExtra12, pacoversExtra12, duelosExtra12,
+} from './gameContentExtra12b';
 import { mimicaChallenges } from './mimicaContent';
 import { bocaCerradaChallenges } from './bocaCerradaContent';
 import { impostorRounds } from './impostorContent';
 import { duelos } from './duelosContent';
+// ── MEGA CONTENT EXPANSION (2024-2026) ──
+import { yoNuncaInfancia } from './gameContentMega1';
+import { yoNuncaInstituto } from './gameContentMega2';
+import { yoNuncaUniversidad } from './gameContentMega3';
+import { yoNuncaCurro } from './gameContentMega4';
+import { yoNuncaFiesta, picanteNuevo } from './gameContentMega5';
+import { votacionNuevo, verdadOBebeNuevo } from './gameContentMega6';
+import { retosNuevo, cadenaNuevo, categoriasNuevo, normasNuevas, mimicaNueva, enLaCamaNuevo, pacoversEspanaNuevo } from './gameContentMega7';
 export interface GameQuestion {
   text: string;
   type: 'reto' | 'yo_nunca' | 'pregunta' | 'votacion' | 'accion';
@@ -6503,6 +6517,27 @@ export function getMegamixContent(count: number): string[] {
 // 6. Categorías (2x)
 // 7. Trivia (triggers, periodic)
 // 8. Boca cerrada / Impostor (MINIMAL — rare events)
+/**
+ * Clasifica una carta como INDIVIDUAL (avanza turno) o GENERAL (toda la mesa, no avanza turno).
+ * INDIVIDUAL: 🎯 Retos, 🎤 Verdad o Bebe, ⚡ Trivia Express, 🔤 Categorías, ⚔️ Duelos,
+ *             texto con "Reto:", "Cultura Chupística"
+ * GENERAL: todo lo demás (🙈 Yo nunca, 🌶️ Picante, 🇪🇸 Pacovers/España, 🗳️ Más probable,
+ *          🙌 Todos, 🛌 En la cama, 🔗 Cadena, 🎭 Mímica, NORMA, TRIGGER)
+ */
+export function isIndividualCard(cardText: string): boolean {
+  if (!cardText || typeof cardText !== 'string') return false;
+  const t = cardText.trim();
+  // NORMA y TRIGGER nunca son individuales
+  if (t.toUpperCase().startsWith('NORMA:') || t.toUpperCase().startsWith('NUEVA NORMA:') || t.startsWith('TRIGGER:') || t.startsWith('📜')) return false;
+  // Prefijos individuales
+  if (t.startsWith('🎯') || t.startsWith('🎤') || t.startsWith('⚡') || t.startsWith('🔤') || t.startsWith('⚔️')) return true;
+  // Patrones de texto individuales (clasico cards)
+  if (t.includes('Reto:') || t.toLowerCase().includes('cultura chupística')) return true;
+  // Cartas personalizadas con nombre de jugador
+  if (t.includes('{player}')) return true;
+  return false;
+}
+
 export function getStructuredMegamix(count: number, playersCount: number = 4): string[] {
   function cleanDeckPool(items: any[]): string[] {
     const seen = new Set<string>();
@@ -6579,18 +6614,25 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
   // --- Build content with weighted frequencies ---
 
   // Get unique samples to avoid duplicates, now using ALL available items
-  const yoNuncaPool = cleanDeckPool([...yoNunca, ...(yoNuncaExtra || []), ...(yoNuncaExtra2 || []), ...(yoNuncaExtra3 || []), ...(yoNuncaExtra4 || []), ...(yoNuncaExtra8 || []), ...(yoNuncaExtra10 || []), ...(yoNuncaExtra11 || []),
-    // Salseo real — filtramos solo los "Yo nunca" del salseoExtra
+  const yoNuncaPool = cleanDeckPool([...yoNunca, ...(yoNuncaExtra || []), ...(yoNuncaExtra2 || []), ...(yoNuncaExtra3 || []), ...(yoNuncaExtra4 || []), ...(yoNuncaExtra8 || []), ...(yoNuncaExtra10 || []), ...(yoNuncaExtra11 || []), ...(yoNuncaExtra12 || []),
     ...(salseoExtra || []).filter(s => s.toLowerCase().startsWith('yo nunca')),
+    // ── MEGA EXPANSION: 1000 nuevas preguntas por etapa vital ──
+    ...yoNuncaInfancia, ...yoNuncaInstituto, ...yoNuncaUniversidad, ...yoNuncaCurro, ...yoNuncaFiesta,
   ]);
   const yoNuncaItems = getRandomItems(yoNuncaPool, yoNuncaPool.length);
   const yoNuncaCards = yoNuncaItems.map(q => addDrinking(`🙈 Yo nunca... ${q}`, Math.random() < 0.4 ? 'medio' : 'leve'));
 
-  const masProbablePool = cleanDeckPool([...quienEsMasProbable, ...(masProbableExtra || []), ...(quienEsMasProbableExtra2 || []), ...(masProbableExtra3 || []), ...(quienEsMasProbableExtra5 || []), ...(quienEsMasProbableExtra6 || []), ...(quienEsMasProbableExtra10 || [])]);
+  const masProbablePool = cleanDeckPool([...quienEsMasProbable, ...(masProbableExtra || []), ...(quienEsMasProbableExtra2 || []), ...(masProbableExtra3 || []), ...(quienEsMasProbableExtra5 || []), ...(quienEsMasProbableExtra6 || []), ...(quienEsMasProbableExtra10 || []), ...(votacionExtra12 || []),
+    // ── MEGA EXPANSION ──
+    ...votacionNuevo,
+  ]);
   const masProbableItems = getRandomItems(masProbablePool, masProbablePool.length);
   const masProbableCards = masProbableItems.map(q => addDrinking(`🗳️ ${q}`, Math.random() < 0.3 ? 'medio' : 'leve'));
 
-  const retosPool = cleanDeckPool([...categoriasReto, ...(categoriasRetoExtra || []), ...(categoriasRetoExtra2 || []), ...(categoriasRetoExtra3 || [])]);
+  const retosPool = cleanDeckPool([...categoriasReto, ...(categoriasRetoExtra || []), ...(categoriasRetoExtra2 || []), ...(categoriasRetoExtra3 || []), ...(retosExtra12 || []),
+    // ── MEGA EXPANSION ──
+    ...retosNuevo,
+  ]);
   const retosItems = getRandomItems(retosPool, retosPool.length);
   const retosCards = retosItems.map(q => addDrinking(`🎯 ${q}`, Math.random() < 0.5 ? 'medio' : 'reparte'));
 
@@ -6598,24 +6640,36 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
   const clasicoItems = getRandomItems(clasicoPool, clasicoPool.length);
   const clasicoCards = clasicoItems.map(q => addDrinking(q, Math.random() < 0.5 ? 'leve' : 'grupo'));
 
-  const pacoversPool = cleanDeckPool([...pacovers, ...(pacoversExtra || []), ...(pacoversExtra2 || []), ...(pacoversExtra3 || []), ...(pacoversExtra6 || []), ...(pacoversExtra10 || []), ...(pacoversExtra11 || []), ...(pacoversExtra11b || []), ...(pacoversExtra11c || [])]);
+  const pacoversPool = cleanDeckPool([...pacovers, ...(pacoversExtra || []), ...(pacoversExtra2 || []), ...(pacoversExtra3 || []), ...(pacoversExtra6 || []), ...(pacoversExtra10 || []), ...(pacoversExtra11 || []), ...(pacoversExtra11b || []), ...(pacoversExtra11c || []), ...(pacoversExtra12 || [])]);
   const pacoversItems = getRandomItems(pacoversPool, pacoversPool.length);
   const pacoversCards = pacoversItems.map(q => addDrinking(`🇪🇸 ${q}`, 'leve'));
 
   // Pool de España Nostálgica como pool separado
-  const espanaPool = cleanDeckPool([...(espanaExtra3 || []), ...(espanaExtra7 || [])]);
+  const espanaPool = cleanDeckPool([...(espanaExtra3 || []), ...(espanaExtra7 || []),
+    // ── MEGA EXPANSION ──
+    ...pacoversEspanaNuevo,
+  ]);
   const espanaItems = getRandomItems(espanaPool, espanaPool.length);
   const espanaCards = espanaItems.map(q => addDrinking(`🇪🇸 ${q}`, 'leve'));
 
-  const picantePool = cleanDeckPool([...picante, ...(picanteExtra || []), ...(picanteExtra2 || []), ...(picanteExtra3 || []), ...(picanteExtra5 || []), ...(picanteExtra7 || []), ...(picanteExtra10 || []), ...(picanteExtra11 || []), ...(picanteExtra11b || []), ...(picanteExtra11c || [])]);
+  const picantePool = cleanDeckPool([...picante, ...(picanteExtra || []), ...(picanteExtra2 || []), ...(picanteExtra3 || []), ...(picanteExtra5 || []), ...(picanteExtra7 || []), ...(picanteExtra10 || []), ...(picanteExtra11 || []), ...(picanteExtra11b || []), ...(picanteExtra11c || []), ...(picanteExtra12 || []),
+    // ── MEGA EXPANSION ──
+    ...picanteNuevo,
+  ]);
   const picanteItems = getRandomItems(picantePool, picantePool.length);
   const picanteCards = picanteItems.map(q => addDrinking(`🌶️ ${q}`, Math.random() < 0.5 ? 'medio' : 'fuerte'));
 
-  const enLaCamaPool = cleanDeckPool([...enLaCamaY, ...(enLaCamaYExtra || []), ...(enLaCamaYExtra2 || []), ...(enLaCamaYExtra3 || []), ...(enLaCamaYExtra10 || [])]);
+  const enLaCamaPool = cleanDeckPool([...enLaCamaY, ...(enLaCamaYExtra || []), ...(enLaCamaYExtra2 || []), ...(enLaCamaYExtra3 || []), ...(enLaCamaYExtra10 || []),
+    // ── MEGA EXPANSION ──
+    ...enLaCamaNuevo,
+  ]);
   const enLaCamaItems = getRandomItems(enLaCamaPool, enLaCamaPool.length);
   const enLaCamaCards = enLaCamaItems.map(q => addDrinking(`🛌 ${q}`, 'medio'));
 
-  const categoriasPool = cleanDeckPool([...categoriasLetras, ...(categoriasLetrasExtra || []), ...(categoriasLetrasExtra2 || []), ...(categoriasLetrasExtra3 || [])]);
+  const categoriasPool = cleanDeckPool([...categoriasLetras, ...(categoriasLetrasExtra || []), ...(categoriasLetrasExtra2 || []), ...(categoriasLetrasExtra3 || []), ...(categoriasExtra12 || []),
+    // ── MEGA EXPANSION ──
+    ...categoriasNuevo,
+  ]);
   const categoriasItems = getRandomItems(categoriasPool, categoriasPool.length);
   const categoriasCards = categoriasItems.map(q => {
     // Si ya tiene instrucción clara, la dejamos. Si es solo "Categorías: X", la mejoramos
@@ -6624,7 +6678,10 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
   });
 
   // Specialized Pool Integration
-  const mimicaPool = cleanDeckPool([...mimicaChallenges.map(m => m.text), ...(mimicaExtra11 || []), ...(mimicaExtra11b || []), ...(mimicaExtra11c || [])]);
+  const mimicaPool = cleanDeckPool([...mimicaChallenges.map(m => m.text), ...(mimicaExtra11 || []), ...(mimicaExtra11b || []), ...(mimicaExtra11c || []),
+    // ── MEGA EXPANSION ──
+    ...mimicaNueva,
+  ]);
   const mimicaItems = getRandomItems(mimicaPool, mimicaPool.length);
   const mimicaCards = mimicaItems.map(q => {
     // Evitar doble prefijo "🎭 MÍMICA: 🎭 MÍMICA:"
@@ -6637,7 +6694,8 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
 
   const duelosPool = cleanDeckPool([
     ...duelos.map(d => `${d.name}: ${d.description}`),
-    ...(duelosExtra11 || []).map(d => `${d.name}: ${d.description}`)
+    ...(duelosExtra11 || []).map(d => `${d.name}: ${d.description}`),
+    ...(duelosExtra12 || []).map(d => `${d.name}: ${d.description}`),
   ]);
   const duelosItems = getRandomItems(duelosPool, duelosPool.length);
   const duelosCards = duelosItems.map(q => `⚔️ ${q}`);
@@ -6675,8 +6733,10 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     "🎤 VERDAD O BEBE: {player} — ¿Cuál es la cosa más inmadura que has hecho por celos? Si no respondes, bebe 3. 🍻",
     "🎤 VERDAD O BEBE: {player} — ¿Has hablado mal de alguien del grupo a sus espaldas esta semana? Si no respondes, bebe 3. 🍻",
     ...(verdadOBebeExtra || []),
-    // Salseo real — verdades comprometidas
+    ...(verdadOBebeExtra12 || []),
     ...(salseoExtra || []).filter(s => s.startsWith('🎤')),
+    // ── MEGA EXPANSION ──
+    ...verdadOBebeNuevo,
   ]);
   const verdadOBebeCards = getRandomItems(verdadOBebePool, verdadOBebePool.length);
 
@@ -6703,6 +6763,8 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     "🔗 CADENA: Por turnos, decid apodos de jugadores de fútbol. El que falle bebe 2. 🍻",
     "🔗 CADENA: Por turnos, decid cosas que se pierden en una noche de fiesta. El que repita bebe 2. 🍻",
     ...(cadenaExtra || []),
+    // ── MEGA EXPANSION ──
+    ...cadenaNuevo,
   ]);
   const cadenaCards = getRandomItems(cadenaPool, cadenaPool.length);
 
@@ -6813,37 +6875,30 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
   ]);
 
   // --- FAIR-PLAY SCHEDULER ---
-  const safePlayersCount = Math.max(2, playersCount || 4);
-  const totalRounds = Math.ceil(count / safePlayersCount);
+  // ── TURNO GARANTIZADO ─────────────────────────────────────────────────────
+  // Patrón: [GENERAL, GENERAL, GENERAL, INDIVIDUAL, GENERAL, GENERAL, GENERAL, INDIVIDUAL, ...]
+  // GENERAL = toda la mesa participa, NO avanza turno de jugador
+  // INDIVIDUAL = el jugador activo actúa, SÍ avanza turno
+  const generalPool = shuffleArray(cleanDeckPool([
+    ...yoNuncaCards,        // 🙈 GENERAL
+    ...picanteCards,        // 🌶️ GENERAL
+    ...enLaCamaCards,       // 🛌 GENERAL
+    ...masProbableCards,    // 🗳️ GENERAL
+    ...grupalCards,         // 🙌 GENERAL
+    ...cadenaCards,         // 🔗 GENERAL
+    ...pacoversCards,       // 🇪🇸 GENERAL
+    ...espanaCards,         // 🇪🇸 GENERAL
+    ...mimicaCards,         // 🎭 GENERAL
+  ]));
 
-  // Pools agrupados por tipo de interacción
-  const pools = {
-    // Cartas donde TODOS participan simultáneamente
-    grupal: shuffleArray(cleanDeckPool([
-      ...masProbableCards,
-      ...grupalCards,
-      ...duelosCards,
-      ...cadenaCards,
-    ])),
-    // Cartas donde el jugador activo confiesa / actúa
-    personal: shuffleArray(cleanDeckPool([
-      ...yoNuncaCards,
-      ...verdadOBebeCards,
-      ...picanteCards,
-      ...enLaCamaCards,
-      ...clasicoCards,
-    ])),
-    // Retos, trivia y categorías
-    reto: shuffleArray(cleanDeckPool([
-      ...retosCards,
-      ...triviaExpressCards,
-      ...pacoversCards,
-      ...espanaCards,
-      ...categoriasCards,
-    ])),
-  };
-
-  const ptrs = { grupal: 0, personal: 0, reto: 0 };
+  const individualPool = shuffleArray(cleanDeckPool([
+    ...retosCards,          // 🎯 INDIVIDUAL
+    ...verdadOBebeCards,    // 🎤 INDIVIDUAL
+    ...triviaExpressCards,  // ⚡ INDIVIDUAL
+    ...categoriasCards,     // 🔤 INDIVIDUAL
+    ...duelosCards,         // ⚔️ INDIVIDUAL
+    ...clasicoCards,        // Reto: / Cultura Chupística — INDIVIDUAL
+  ]));
 
   const specialTriggers = shuffleArray([
     "TRIGGER:TRIVIA_FUTBOL",
@@ -6859,57 +6914,37 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
 
   let triggerPtr = 0;
   let normaPtr = 0;
-  let lastType = '';
-  let streakCount = 0;
+  let gPtr = 0;
+  let iPtr = 0;
 
   const deck: string[] = [];
 
-  for (let r = 0; r < totalRounds; r++) {
-    // Patrón por ronda: grupal → personal → reto → grupal → personal → ...
-    // Garantiza variedad y que todos participen cada 3 cartas
-    const blockPattern: Array<keyof typeof pools> = [];
-    for (let i = 0; i < safePlayersCount; i++) {
-      if (i % 3 === 0) blockPattern.push('grupal');
-      else if (i % 3 === 1) blockPattern.push('personal');
-      else blockPattern.push('reto');
-    }
-    const shuffledBlock = shuffleArray(blockPattern);
-
-    for (let t = 0; t < safePlayersCount; t++) {
-      if (deck.length >= count) break;
-
-      let type = shuffledBlock[t];
-
-      // Anti-streak: máximo 2 del mismo tipo seguidas
-      if (type === lastType && streakCount >= 2) {
-        const nextDiffIdx = shuffledBlock.findIndex((cand, idx) => idx > t && cand !== lastType);
-        if (nextDiffIdx !== -1) {
-          const temp = shuffledBlock[t];
-          shuffledBlock[t] = shuffledBlock[nextDiffIdx];
-          shuffledBlock[nextDiffIdx] = temp;
-          type = shuffledBlock[t];
-        }
-      }
-
-      if (type === lastType) streakCount++;
-      else { lastType = type; streakCount = 1; }
-
-      const pool = pools[type];
-      const card = pool[ptrs[type] % pool.length];
-      ptrs[type]++;
-      deck.push(card);
-
-      // Inyecciones periódicas
-      if (deck.length % 20 === 0 && deck.length < count) {
+  // Construir deck con patrón [G, G, G, I] garantizando turno individual por jugador
+  const GENERALS_PER_TURN = 3;
+  while (deck.length < count) {
+    // 3 cartas GENERALES (toda la mesa participa, NO avanza jugador)
+    for (let g = 0; g < GENERALS_PER_TURN && deck.length < count; g++) {
+      // Inyecciones periódicas (antes de añadir la carta normal)
+      if (deck.length > 0 && deck.length % 20 === 0) {
         deck.push("TRIGGER:IMPOSTOR");
-      } else if (deck.length % 12 === 0 && deck.length < count) {
+        if (deck.length >= count) break;
+      } else if (deck.length > 0 && deck.length % 30 === 0) {
+        deck.push(globalNormas[normaPtr % globalNormas.length]);
+        normaPtr++;
+        if (deck.length >= count) break;
+      } else if (deck.length > 0 && deck.length % 15 === 0) {
         const filtered = specialTriggers.filter(t => t !== "TRIGGER:IMPOSTOR");
         deck.push(filtered[triggerPtr % filtered.length]);
         triggerPtr++;
-      } else if (deck.length % 30 === 0 && deck.length < count) {
-        deck.push(globalNormas[normaPtr % globalNormas.length]);
-        normaPtr++;
+        if (deck.length >= count) break;
       }
+      deck.push(generalPool[gPtr % generalPool.length]);
+      gPtr++;
+    }
+    // 1 carta INDIVIDUAL (jugador activo actúa, SÍ avanza turno)
+    if (deck.length < count) {
+      deck.push(individualPool[iPtr % individualPool.length]);
+      iPtr++;
     }
   }
 
