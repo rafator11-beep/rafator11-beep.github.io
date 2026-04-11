@@ -2210,31 +2210,32 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
             !gameState.showImpostor &&
             !gameState.showCaptainPass &&
             gameState.yoNuncaEquiposPhase === 'idle' && (
-              <motion.div
-                key={currentIndex}
-                drag={false}
-                className="w-full flex flex-col items-center justify-center relative"
-              >
+              <div className="w-full flex flex-col items-center justify-center relative">
+                {/* Indicador de progreso superior */}
+                <div className="bg-slate-900/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-white/50 mb-3 shadow-[0_2px_10px_rgba(0,0,0,0.3)] z-10 transition-colors">
+                  <span>Carta {currentIndex + 1}</span>
+                  <span className="w-1 h-1 rounded-full bg-white/20" />
+                  <span>Ronda {gameState.round}</span>
+                </div>
+                
                 <motion.div
-                  key={`card-inner-${currentIndex}`}
-                  initial={{ rotateY: 90, opacity: 0, scale: 0.9 }}
-                  animate={{ rotateY: 0, opacity: 1, scale: 1 }}
-                  exit={{ rotateY: -90, opacity: 0, scale: 0.9 }}
-                  transition={{
-                    rotateY: { type: 'spring', stiffness: 280, damping: 24 },
-                    opacity: { duration: 0.12 },
-                    scale: { type: 'spring', stiffness: 300, damping: 26 },
-                  }}
-                  style={{ perspective: '1000px', transformStyle: 'preserve-3d', willChange: 'transform' }}
+                  key={currentIndex}
+                  drag={false}
                   className="w-full flex flex-col items-center justify-center relative"
                 >
-                <div className="absolute -top-8 left-0 right-0 flex justify-center pointer-events-none">
-                  <div className="bg-slate-900/50 backdrop-blur-sm px-3 py-1 rounded-full border border-white/10 flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.3em] text-white/70 shadow-xl">
-                    <span>Carta {currentIndex + 1}</span>
-                    <span className="w-1 h-1 rounded-full bg-white/30" />
-                    <span>Ronda {gameState.round}</span>
-                  </div>
-                </div>
+                  <motion.div
+                    key={`card-inner-${currentIndex}`}
+                    initial={{ rotateY: 90, opacity: 0, scale: 0.9 }}
+                    animate={{ rotateY: 0, opacity: 1, scale: 1 }}
+                    exit={{ rotateY: -90, opacity: 0, scale: 0.9 }}
+                    transition={{
+                      rotateY: { type: 'spring', stiffness: 280, damping: 24 },
+                      opacity: { duration: 0.12 },
+                      scale: { type: 'spring', stiffness: 300, damping: 26 },
+                    }}
+                    style={{ perspective: '1000px', transformStyle: 'preserve-3d', willChange: 'transform' }}
+                    className="w-full flex flex-col items-center justify-center relative z-20"
+                  >
 
                 <CardDisplay
                   content={safeCurrentText}
@@ -2319,6 +2320,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                 )}
               </motion.div>
               </motion.div>
+              </div>
             )}
         </AnimatePresence>
 
@@ -2601,12 +2603,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
             </div>
           )}
 
-        {/* Indicador de progreso discreto */}
-        {!gameState.showTrivia && !gameState.showDuel && (
-          <p className="text-white/20 text-[9px] font-arcade text-center tracking-widest mb-2">
-            CARTA {currentIndex + 1}
-          </p>
-        )}
+        {/* Eliminado el indicador legacy CARTA {X} duplicado */}
 
       </main>
 
