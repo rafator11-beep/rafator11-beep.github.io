@@ -111,12 +111,15 @@ export function processDrinkingMultiplier(text: string, round: number = 1): Reac
 }
 
 // ── CARD TYPE DETECTION ───────────────────────────────────────────────────────
-type CardKind = 'yo_nunca' | 'reto' | 'votacion' | 'grupal' | 'picante' | 'norma' | 'duelo' | 'espana' | 'categorias' | 'generic';
+type CardKind = 'yo_nunca' | 'reto' | 'votacion' | 'grupal' | 'picante' | 'norma' | 'duelo' | 'espana' | 'categorias' | 'verdad_o_bebe' | 'cadena' | 'trivia_express' | 'generic';
 
 function detectCardKind(content: string): CardKind {
     const c = content.toLowerCase();
     if (c.includes('yo nunca') || c.startsWith('🙈')) return 'yo_nunca';
     if (c.startsWith('🙌') || c.includes('todos a la vez')) return 'grupal';
+    if (c.startsWith('🎤') || c.includes('verdad o bebe')) return 'verdad_o_bebe';
+    if (c.startsWith('🔗') || c.includes('cadena:')) return 'cadena';
+    if (c.startsWith('⚡') || c.includes('trivia express')) return 'trivia_express';
     if (c.includes('quién es más probable') || c.includes('más probable') || c.startsWith('🗳️') || c.includes('votad')) return 'votacion';
     if (c.startsWith('⚔️') || c.includes('duelo')) return 'duelo';
     if (c.startsWith('🇪🇸') || c.includes('españa:')) return 'espana';
@@ -132,16 +135,19 @@ const KIND_CONFIG: Record<CardKind, {
     bg: string; accent: string; emoji: string; label: string;
     textDark: boolean; showDrinkButtons: boolean;
 }> = {
-    yo_nunca:   { bg: 'from-emerald-900 via-teal-950 to-slate-950',   accent: '#10b981', emoji: '🙈', label: 'YO NUNCA HE...', textDark: false, showDrinkButtons: true },
-    reto:       { bg: 'from-blue-900 via-indigo-950 to-slate-950',    accent: '#3b82f6', emoji: '🎯', label: 'RETO',           textDark: false, showDrinkButtons: true },
-    votacion:   { bg: 'from-violet-800 via-purple-900 to-slate-950',  accent: '#8b5cf6', emoji: '🗳️', label: '¿QUIÉN ES?',    textDark: false, showDrinkButtons: false },
-    grupal:     { bg: 'from-pink-800 via-rose-900 to-slate-950',      accent: '#f43f5e', emoji: '🙌', label: 'TODOS A LA VEZ', textDark: false, showDrinkButtons: false },
-    picante:    { bg: 'from-rose-900 via-pink-950 to-slate-950',      accent: '#f43f5e', emoji: '🌶️', label: 'PICANTE 🔞',    textDark: false, showDrinkButtons: true },
-    norma:      { bg: 'from-amber-800 via-orange-900 to-slate-950',   accent: '#f59e0b', emoji: '📜', label: 'NUEVA NORMA',   textDark: false, showDrinkButtons: false },
-    duelo:      { bg: 'from-red-900 via-rose-950 to-slate-950',       accent: '#ef4444', emoji: '⚔️', label: 'DUELO',         textDark: false, showDrinkButtons: false },
-    espana:     { bg: 'from-red-800 via-yellow-900 to-slate-950',     accent: '#ef4444', emoji: '🇪🇸', label: 'ESPAÑA',       textDark: false, showDrinkButtons: true },
-    categorias: { bg: 'from-cyan-800 via-blue-900 to-slate-950',      accent: '#06b6d4', emoji: '🔤', label: 'CATEGORÍAS',    textDark: false, showDrinkButtons: false },
-    generic:    { bg: 'from-indigo-900 via-purple-950 to-slate-950',  accent: '#6366f1', emoji: '🎲', label: 'MEGAMIX',       textDark: false, showDrinkButtons: false },
+    yo_nunca:       { bg: 'from-emerald-900 via-teal-950 to-slate-950',   accent: '#10b981', emoji: '🙈', label: 'YO NUNCA HE...', textDark: false, showDrinkButtons: true },
+    reto:           { bg: 'from-blue-900 via-indigo-950 to-slate-950',    accent: '#3b82f6', emoji: '🎯', label: 'RETO',           textDark: false, showDrinkButtons: true },
+    votacion:       { bg: 'from-violet-800 via-purple-900 to-slate-950',  accent: '#8b5cf6', emoji: '🗳️', label: '¿QUIÉN ES?',    textDark: false, showDrinkButtons: false },
+    grupal:         { bg: 'from-pink-800 via-rose-900 to-slate-950',      accent: '#f43f5e', emoji: '🙌', label: 'TODOS A LA VEZ', textDark: false, showDrinkButtons: false },
+    verdad_o_bebe:  { bg: 'from-orange-800 via-red-900 to-slate-950',     accent: '#f97316', emoji: '🎤', label: 'VERDAD O BEBE',  textDark: false, showDrinkButtons: true },
+    cadena:         { bg: 'from-cyan-800 via-sky-900 to-slate-950',       accent: '#06b6d4', emoji: '🔗', label: 'RETO EN CADENA', textDark: false, showDrinkButtons: false },
+    trivia_express: { bg: 'from-yellow-700 via-amber-900 to-slate-950',   accent: '#eab308', emoji: '⚡', label: 'TRIVIA EXPRESS', textDark: false, showDrinkButtons: false },
+    picante:        { bg: 'from-rose-900 via-pink-950 to-slate-950',      accent: '#f43f5e', emoji: '🌶️', label: 'PICANTE 🔞',    textDark: false, showDrinkButtons: true },
+    norma:          { bg: 'from-amber-800 via-orange-900 to-slate-950',   accent: '#f59e0b', emoji: '📜', label: 'NUEVA NORMA',   textDark: false, showDrinkButtons: false },
+    duelo:          { bg: 'from-red-900 via-rose-950 to-slate-950',       accent: '#ef4444', emoji: '⚔️', label: 'DUELO',         textDark: false, showDrinkButtons: false },
+    espana:         { bg: 'from-red-800 via-yellow-900 to-slate-950',     accent: '#ef4444', emoji: '🇪🇸', label: 'ESPAÑA',       textDark: false, showDrinkButtons: true },
+    categorias:     { bg: 'from-cyan-800 via-blue-900 to-slate-950',      accent: '#06b6d4', emoji: '🔤', label: 'CATEGORÍAS',    textDark: false, showDrinkButtons: false },
+    generic:        { bg: 'from-indigo-900 via-purple-950 to-slate-950',  accent: '#6366f1', emoji: '🎲', label: 'MEGAMIX',       textDark: false, showDrinkButtons: false },
 };
 
 const RARITY_OVERRIDE: Record<string, Partial<typeof KIND_CONFIG['generic']>> = {
@@ -183,13 +189,13 @@ export const CardDisplay = React.memo(({
     const handleSuccess = (e: React.MouseEvent) => {
         e.stopPropagation();
         setResultState('success');
-        setTimeout(() => { onSuccess?.() || onClick(); }, 600);
+        setTimeout(() => { onSuccess?.() || onClick(); }, 700);
     };
 
     const handleFail = (e: React.MouseEvent) => {
         e.stopPropagation();
         setResultState('fail');
-        setTimeout(() => { onFail?.() || onClick(); }, 600);
+        setTimeout(() => { onFail?.() || onClick(); }, 700);
     };
 
     const handleMagicAI = async (e: React.MouseEvent) => {
@@ -207,6 +213,17 @@ export const CardDisplay = React.memo(({
             setIsGenerating(false);
         }
     };
+
+    // XP por tipo de carta
+    const xpOnSuccess = kind === 'verdad_o_bebe' ? 20
+        : kind === 'picante' ? 25
+        : kind === 'reto' ? 15
+        : kind === 'yo_nunca' ? 10
+        : kind === 'espana' ? 10
+        : 12;
+    const xpOnFail = kind === 'verdad_o_bebe' ? 5
+        : kind === 'picante' ? 3
+        : 2;
 
     // Detectar si hay castigo de bebida en el texto
     const hasDrinkPenalty = /bebe|trago|fondo|doble/i.test(cleanText);
@@ -349,7 +366,7 @@ export const CardDisplay = React.memo(({
                         )}
                     </motion.div>
 
-                    {/* ── DRINK BUTTONS (reto/yo_nunca/picante) ── */}
+                    {/* ── DRINK BUTTONS (reto/yo_nunca/picante/verdad_o_bebe/espana) ── */}
                     {cfg.showDrinkButtons && type !== 'virus' && resultState === 'none' && (
                         <motion.div
                             initial={{ opacity: 0, y: 8 }}
@@ -357,43 +374,49 @@ export const CardDisplay = React.memo(({
                             transition={{ delay: 0.25 }}
                             className="mx-4 mb-4 grid grid-cols-2 gap-3"
                         >
-                            {/* SUCCESS — lo hice / lo hizo */}
+                            {/* SUCCESS */}
                             <motion.button
-                                whileTap={{ scale: 0.94 }}
+                                whileTap={{ scale: 0.93 }}
                                 onClick={handleSuccess}
-                                className="flex flex-col items-center gap-1.5 py-4 rounded-[1.5rem] font-black text-sm uppercase tracking-wider text-white transition-all"
+                                className="flex flex-col items-center gap-1 py-4 rounded-[1.5rem] transition-all relative overflow-hidden"
                                 style={{
-                                    background: 'rgba(34,197,94,0.15)',
-                                    border: '2px solid rgba(34,197,94,0.4)',
+                                    background: 'rgba(34,197,94,0.12)',
+                                    border: '2px solid rgba(34,197,94,0.45)',
                                     touchAction: 'manipulation',
                                 }}
                             >
-                                <CheckCircle2 className="w-6 h-6 text-green-400" />
-                                <span className="text-[11px] text-green-300">
-                                    {kind === 'yo_nunca' ? 'Lo he hecho' : 'Lo hizo'}
+                                <CheckCircle2 className="w-7 h-7 text-green-400" />
+                                <span className="text-[11px] font-black text-green-300 uppercase tracking-wider">
+                                    {kind === 'yo_nunca' ? 'Lo he hecho' : kind === 'verdad_o_bebe' ? 'Respondo' : 'Lo hizo ✅'}
+                                </span>
+                                <span className="text-[10px] font-black text-green-400 bg-green-500/15 px-2 py-0.5 rounded-full border border-green-500/30">
+                                    +{xpOnSuccess} XP 👑
                                 </span>
                                 {hasRewardOnSuccess && (
-                                    <span className="text-[9px] text-green-400/70 font-bold">👑 Reparte</span>
+                                    <span className="text-[9px] text-green-300/60">Reparte tragos</span>
                                 )}
                             </motion.button>
 
-                            {/* FAIL — no lo hice / bebe */}
+                            {/* FAIL */}
                             <motion.button
-                                whileTap={{ scale: 0.94 }}
+                                whileTap={{ scale: 0.93 }}
                                 onClick={handleFail}
-                                className="flex flex-col items-center gap-1.5 py-4 rounded-[1.5rem] font-black text-sm uppercase tracking-wider text-white transition-all"
+                                className="flex flex-col items-center gap-1 py-4 rounded-[1.5rem] transition-all"
                                 style={{
-                                    background: 'rgba(239,68,68,0.15)',
-                                    border: '2px solid rgba(239,68,68,0.4)',
+                                    background: 'rgba(239,68,68,0.12)',
+                                    border: '2px solid rgba(239,68,68,0.45)',
                                     touchAction: 'manipulation',
                                 }}
                             >
-                                <XCircle className="w-6 h-6 text-red-400" />
-                                <span className="text-[11px] text-red-300">
-                                    {kind === 'yo_nunca' ? 'No lo he hecho' : 'No lo hizo'}
+                                <XCircle className="w-7 h-7 text-red-400" />
+                                <span className="text-[11px] font-black text-red-300 uppercase tracking-wider">
+                                    {kind === 'yo_nunca' ? 'No lo he hecho' : kind === 'verdad_o_bebe' ? 'Paso — bebo' : 'No lo hizo ❌'}
+                                </span>
+                                <span className="text-[10px] font-black text-red-400 bg-red-500/15 px-2 py-0.5 rounded-full border border-red-500/30">
+                                    +{xpOnFail} XP 🍺
                                 </span>
                                 {hasDrinkPenalty && (
-                                    <span className="text-[9px] text-red-400/70 font-bold">🍺 Bebe</span>
+                                    <span className="text-[9px] text-red-300/60">Bebe el castigo</span>
                                 )}
                             </motion.button>
                         </motion.div>
@@ -413,9 +436,9 @@ export const CardDisplay = React.memo(({
                                 }}
                             >
                                 {resultState === 'success' ? (
-                                    <><CheckCircle2 className="w-6 h-6 text-green-400" /><span className="text-green-300">¡Reparte tragos! 👑</span></>
+                                    <><CheckCircle2 className="w-6 h-6 text-green-400" /><span className="text-green-300">+{xpOnSuccess} XP — Reparte 👑</span></>
                                 ) : (
-                                    <><XCircle className="w-6 h-6 text-red-400" /><span className="text-red-300">¡A beber! 🍺</span></>
+                                    <><XCircle className="w-6 h-6 text-red-400" /><span className="text-red-300">+{xpOnFail} XP — ¡A beber! 🍺</span></>
                                 )}
                             </motion.div>
                         )}

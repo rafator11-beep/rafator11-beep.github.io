@@ -2233,13 +2233,22 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                   type={rarity}
                   onClick={() => { return; }}
                   onSuccess={() => {
-                    // Jugador hizo el reto → reparte tragos (gana XP)
-                    if (currentPlayer) addScore(currentPlayer.id, 10);
+                    // XP diferenciado por tipo de carta
+                    const kind = safeCurrentText.toLowerCase();
+                    const xp = kind.includes('verdad o bebe') ? 20
+                      : kind.includes('picante') || kind.includes('🌶️') ? 25
+                      : kind.includes('reto') || kind.includes('🎯') ? 15
+                      : 10;
+                    if (currentPlayer) addScore(currentPlayer.id, xp);
                     handleNext();
                   }}
                   onFail={() => {
-                    // Jugador no lo hizo → bebe (pierde XP)
-                    if (currentPlayer) addScore(currentPlayer.id, 2);
+                    // Bebe pero también gana algo de XP por participar
+                    const kind = safeCurrentText.toLowerCase();
+                    const xp = kind.includes('verdad o bebe') ? 5
+                      : kind.includes('picante') ? 3
+                      : 2;
+                    if (currentPlayer) addScore(currentPlayer.id, xp);
                     handleNext();
                   }}
                   gameMode={mode}

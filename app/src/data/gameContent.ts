@@ -28,6 +28,9 @@ import {
   votacionExtra11, votacionExtra11b, votacionExtra11c,
   mimicaExtra11, mimicaExtra11b, mimicaExtra11c,
   duelosExtra11,
+  verdadOBebeExtra,
+  cadenaExtra,
+  salseoExtra,
 } from './gameContentExtra11';
 import { mimicaChallenges } from './mimicaContent';
 import { bocaCerradaChallenges } from './bocaCerradaContent';
@@ -6576,11 +6579,14 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
   // --- Build content with weighted frequencies ---
 
   // Get unique samples to avoid duplicates, now using ALL available items
-  const yoNuncaPool = cleanDeckPool([...yoNunca, ...(yoNuncaExtra || []), ...(yoNuncaExtra2 || []), ...(yoNuncaExtra3 || []), ...(yoNuncaExtra4 || []), ...(yoNuncaExtra8 || []), ...(yoNuncaExtra10 || []), ...(yoNuncaExtra11 || [])]);
+  const yoNuncaPool = cleanDeckPool([...yoNunca, ...(yoNuncaExtra || []), ...(yoNuncaExtra2 || []), ...(yoNuncaExtra3 || []), ...(yoNuncaExtra4 || []), ...(yoNuncaExtra8 || []), ...(yoNuncaExtra10 || []), ...(yoNuncaExtra11 || []),
+    // Salseo real — filtramos solo los "Yo nunca" del salseoExtra
+    ...(salseoExtra || []).filter(s => s.toLowerCase().startsWith('yo nunca')),
+  ]);
   const yoNuncaItems = getRandomItems(yoNuncaPool, yoNuncaPool.length);
   const yoNuncaCards = yoNuncaItems.map(q => addDrinking(`🙈 Yo nunca... ${q}`, Math.random() < 0.4 ? 'medio' : 'leve'));
 
-  const masProbablePool = cleanDeckPool([...quienEsMasProbable, ...(masProbableExtra || []), ...(quienEsMasProbableExtra2 || []), ...(masProbableExtra3 || []), ...(quienEsMasProbableExtra5 || []), ...(quienEsMasProbableExtra6 || []), ...(quienEsMasProbableExtra10 || []), ...(votacionExtra11 || []), ...(votacionExtra11b || []), ...(votacionExtra11c || [])]);
+  const masProbablePool = cleanDeckPool([...quienEsMasProbable, ...(masProbableExtra || []), ...(quienEsMasProbableExtra2 || []), ...(masProbableExtra3 || []), ...(quienEsMasProbableExtra5 || []), ...(quienEsMasProbableExtra6 || []), ...(quienEsMasProbableExtra10 || [])]);
   const masProbableItems = getRandomItems(masProbablePool, masProbablePool.length);
   const masProbableCards = masProbableItems.map(q => addDrinking(`🗳️ ${q}`, Math.random() < 0.3 ? 'medio' : 'leve'));
 
@@ -6636,7 +6642,99 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
   const duelosItems = getRandomItems(duelosPool, duelosPool.length);
   const duelosCards = duelosItems.map(q => `⚔️ ${q}`);
 
-  // ── CARTAS GRUPALES NUEVAS — todos participan a la vez ──────────────────────
+  // ── VERDAD O BEBE — el jugador elige: confiesa o bebe ───────────────────────
+  const verdadOBebePool = cleanDeckPool([
+    "🎤 VERDAD O BEBE: {player} — ¿Cuál es la cosa más vergonzosa que has hecho borracho/a? Si no respondes, bebe 3. 🍻",
+    "🎤 VERDAD O BEBE: {player} — ¿A quién del grupo le mandarías un mensaje a las 3am? Si no respondes, bebe 3. 🍻",
+    "🎤 VERDAD O BEBE: {player} — ¿Cuál es tu mayor red flag en una relación? Si no respondes, bebe 2. 🍻",
+    "🎤 VERDAD O BEBE: {player} — ¿Has mentido hoy? ¿Sobre qué? Si no respondes, bebe 3. 🍻",
+    "🎤 VERDAD O BEBE: {player} — ¿A quién del grupo le tienes más envidia? Si no respondes, bebe 3. 🍻",
+    "🎤 VERDAD O BEBE: {player} — ¿Cuál es el secreto más gordo que guardas del grupo? Si no respondes, bebe 4. 🥃",
+    "🎤 VERDAD O BEBE: {player} — ¿Con quién del grupo no compartirías habitación nunca? Si no respondes, bebe 2. 🍻",
+    "🎤 VERDAD O BEBE: {player} — ¿Cuántas personas has besado este año? Si no respondes, bebe 2. 🍻",
+    "🎤 VERDAD O BEBE: {player} — ¿Cuál es la mentira más grande que le has dicho a alguien del grupo? Si no respondes, bebe 3. 🍻",
+    "🎤 VERDAD O BEBE: {player} — ¿A quién del grupo llamarías si estuvieras en un lío? Si no respondes, bebe 1. 🍺",
+    "🎤 VERDAD O BEBE: {player} — ¿Cuál es tu mayor obsesión que nadie sabe? Si no respondes, bebe 2. 🍻",
+    "🎤 VERDAD O BEBE: {player} — ¿Has hablado mal de alguien del grupo esta semana? Si no respondes, bebe 3. 🍻",
+    "🎤 VERDAD O BEBE: {player} — ¿Cuál es la cosa más rara que has buscado en Google? Si no respondes, bebe 2. 🍻",
+    "🎤 VERDAD O BEBE: {player} — ¿Tienes crush en alguien del grupo? Si no respondes, bebe 4. 🥃",
+    "🎤 VERDAD O BEBE: {player} — ¿Qué es lo peor que has hecho por amor? Si no respondes, bebe 3. 🍻",
+    "🎤 VERDAD O BEBE: {player} — ¿Has stalkeado a alguien del grupo en redes? Si no respondes, bebe 3. 🍻",
+    "🎤 VERDAD O BEBE: {player} — ¿Cuál es la cosa más cara que has comprado sin necesitarla? Si no respondes, bebe 2. 🍻",
+    "🎤 VERDAD O BEBE: {player} — ¿Has revisado el móvil de tu pareja o ex? Si no respondes, bebe 3. 🍻",
+    "🎤 VERDAD O BEBE: {player} — ¿Cuál es tu mayor manía en la cama que nadie sabe? Si no respondes, bebe 3. 🍻",
+    "🎤 VERDAD O BEBE: {player} — ¿Has dicho 'te quiero' sin sentirlo? Si no respondes, bebe 3. 🍻",
+    "🎤 VERDAD O BEBE: {player} — ¿Cuál es la cosa más rara que te ha atraído de alguien? Si no respondes, bebe 2. 🍻",
+    "🎤 VERDAD O BEBE: {player} — ¿Has hecho ghosting a alguien que te caía bien? Si no respondes, bebe 2. 🍻",
+    "🎤 VERDAD O BEBE: {player} — ¿Cuál es tu mayor secreto que no le has contado a nadie del grupo? Si no respondes, bebe 4. 🥃",
+    "🎤 VERDAD O BEBE: {player} — ¿Has hecho algo ilegal aunque sea pequeño? Si no respondes, bebe 3. 🍻",
+    "🎤 VERDAD O BEBE: {player} — ¿Cuál es la cosa más vergonzosa que tienes en el móvil ahora mismo? Si no respondes, bebe 3. 🍻",
+    "🎤 VERDAD O BEBE: {player} — ¿Has fingido que no tenías dinero para no pagar una ronda? Si no respondes, bebe 3. 🍻",
+    "🎤 VERDAD O BEBE: {player} — ¿Cuál es tu mayor vergüenza de una noche de fiesta? Si no respondes, bebe 3. 🍻",
+    "🎤 VERDAD O BEBE: {player} — ¿Has enviado un audio borracho que te arrepientes? Si no respondes, bebe 2. 🍻",
+    "🎤 VERDAD O BEBE: {player} — ¿Cuál es la cosa más inmadura que has hecho por celos? Si no respondes, bebe 3. 🍻",
+    "🎤 VERDAD O BEBE: {player} — ¿Has hablado mal de alguien del grupo a sus espaldas esta semana? Si no respondes, bebe 3. 🍻",
+    ...(verdadOBebeExtra || []),
+    // Salseo real — verdades comprometidas
+    ...(salseoExtra || []).filter(s => s.startsWith('🎤')),
+  ]);
+  const verdadOBebeCards = getRandomItems(verdadOBebePool, verdadOBebePool.length);
+
+  // ── RETO EN CADENA — todos hacen algo en orden ──────────────────────────────
+  const cadenaPool = cleanDeckPool([
+    "🔗 CADENA: Por turnos, cada jugador dice una cosa que NUNCA haría. El primero que repita o tarde más de 3 segundos, bebe 3. 🍻",
+    "🔗 CADENA: Por turnos, decid nombres de famosos. Sin repetir, sin dudar. El que falle bebe 2. 🍻",
+    "🔗 CADENA: Por turnos, decid marcas de cerveza. El que repita o falle bebe 3. 🍻",
+    "🔗 CADENA: Por turnos, decid países de Europa. El que falle bebe 2. 🍻",
+    "🔗 CADENA: Por turnos, decid cosas que se hacen en una fiesta. El que repita bebe 2. 🍻",
+    "🔗 CADENA: Por turnos, decid excusas para no salir. El que repita o falle bebe 2. 🍻",
+    "🔗 CADENA: Por turnos, decid insultos suaves de abuela. El que repita o falle bebe 3. 🍻",
+    "🔗 CADENA: Por turnos, decid canciones de karaoke. El que repita bebe 2. 🍻",
+    "🔗 CADENA: Por turnos, decid tipos de borracho. El que repita bebe 3. 🍻",
+    "🔗 CADENA: Por turnos, decid razones para no contestar un mensaje. El que repita bebe 2. 🍻",
+    "🔗 CADENA: Por turnos, decid frases de cuñado. El que repita bebe 3. 🍻",
+    "🔗 CADENA: Por turnos, decid cosas que se compran borracho. El que repita bebe 2. 🍻",
+    "🔗 CADENA: Por turnos, decid nombres de discotecas. El que falle bebe 2. 🍻",
+    "🔗 CADENA: Por turnos, decid tipos de resaca. El que repita bebe 3. 🍻",
+    "🔗 CADENA: Por turnos, decid cosas que se dicen al llegar a casa borracho. El que repita bebe 2. 🍻",
+    "🔗 CADENA: Por turnos, decid razones para cancelar un plan. El que repita bebe 2. 🍻",
+    "🔗 CADENA: Por turnos, decid tipos de ligue. El que repita bebe 2. 🍻",
+    "🔗 CADENA: Por turnos, decid cosas que se hacen en el baño de una discoteca. El que repita bebe 3. 🍻",
+    "🔗 CADENA: Por turnos, decid apodos de jugadores de fútbol. El que falle bebe 2. 🍻",
+    "🔗 CADENA: Por turnos, decid cosas que se pierden en una noche de fiesta. El que repita bebe 2. 🍻",
+    ...(cadenaExtra || []),
+  ]);
+  const cadenaCards = getRandomItems(cadenaPool, cadenaPool.length);
+
+  // ── TRIVIA EXPRESS — pregunta directa, sin overlay ──────────────────────────
+  const triviaExpressCards: string[] = shuffleArray([
+    "⚡ TRIVIA EXPRESS: ¿Cuántos países tiene la Unión Europea? (27) — El que falle bebe 2. El que acierte reparte 2. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿En qué año cayó el Muro de Berlín? (1989) — El que falle bebe 2. El que acierte reparte 2. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el río más largo del mundo? (Nilo o Amazonas) — El que falle bebe 2. El que acierte reparte 2. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos jugadores tiene un equipo de fútbol? (11) — El que falle bebe 3. El que acierte reparte 3. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Australia? (Canberra) — El que falle bebe 2. El que acierte reparte 2. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos huesos tiene el cuerpo humano adulto? (206) — El que falle bebe 2. El que acierte reparte 2. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿En qué año llegó el hombre a la Luna? (1969) — El que falle bebe 2. El que acierte reparte 2. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el país más grande del mundo? (Rusia) — El que falle bebe 1. El que acierte reparte 2. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos colores tiene el arcoíris? (7) — El que falle bebe 2. El que acierte reparte 2. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el planeta más cercano al Sol? (Mercurio) — El que falle bebe 2. El que acierte reparte 2. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos gramos tiene un kilogramo? (1000) — El que falle bebe 3. El que acierte reparte 3. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el animal terrestre más rápido? (Guepardo) — El que falle bebe 2. El que acierte reparte 2. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿En qué continente está Egipto? (África) — El que falle bebe 2. El que acierte reparte 2. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos lados tiene un hexágono? (6) — El que falle bebe 2. El que acierte reparte 2. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la moneda de Japón? (Yen) — El que falle bebe 2. El que acierte reparte 2. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos minutos tiene una hora? (60) — El que falle bebe 4. El que acierte reparte 4. 🥃",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el océano más grande? (Pacífico) — El que falle bebe 2. El que acierte reparte 2. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿En qué año se fundó WhatsApp? (2009) — El que falle bebe 2. El que acierte reparte 2. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos jugadores hay en un equipo de baloncesto? (5) — El que falle bebe 2. El que acierte reparte 2. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el idioma más hablado del mundo? (Mandarín) — El que falle bebe 2. El que acierte reparte 2. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos segundos tiene un minuto? (60) — El que falle bebe 4. El que acierte reparte 4. 🥃",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Canadá? (Ottawa) — El que falle bebe 2. El que acierte reparte 2. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos planetas tiene el sistema solar? (8) — El que falle bebe 2. El que acierte reparte 2. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el metal más caro del mundo? (Rodio) — El que falle bebe 2. El que acierte reparte 2. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿En qué año se inventó el iPhone? (2007) — El que falle bebe 2. El que acierte reparte 2. 🍻",
+  ]);
+
   const grupalCards: string[] = shuffleArray([
     "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más miente del grupo. El más señalado bebe 3. 🍻",
     "🙌 TODOS A LA VEZ: Pensad en un número del 1 al 5. Los que coincidan con alguien beben 2. 🍻",
@@ -6678,8 +6776,9 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     "🙌 TODOS A LA VEZ: Señalad al que más probable es que acabe siendo el más rico del grupo. Ese reparte 3. 👑",
     "🙌 TODOS A LA VEZ: Pensad en una ciudad española. Los que coincidan con alguien beben 1. 🍺",
     "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que tenga un accidente de coche. Ese bebe 2. 🍻",
+    // Salseo grupal
+    ...(salseoExtra || []).filter(s => s.startsWith('🙌')),
   ]);
-
   // Helper: repite un array N veces sin mutarlo
   function spread<T>(arr: T[], times: number): T[] {
     const result: T[] = [];
@@ -6687,28 +6786,30 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     return result;
   }
 
-  // ── PESOS DEL MEGAMIX (sin mímica, más grupales) ─────────────────────────
-  // Filosofía: cada carta debe involucrar a TODOS, no solo al jugador activo
+  // ── PESOS DEL MEGAMIX — arquitectura de deck equilibrada ────────────────
+  // Regla: máximo 25% de un mismo tipo. Variedad = diversión.
+  // Tipos: personal (yo_nunca, reto, picante) | grupal (señalar, todos) | social (duelo, cadena) | especial (norma, impostor)
   const weightedContent = shuffleArray([
-    // 6x — el núcleo del juego
-    ...spread(yoNuncaCards, 6),       // "Yo nunca" — todos levantan la mano
-    ...spread(masProbableCards, 6),   // Votaciones — todos señalan
-    ...spread(grupalCards, 5),        // Grupales nuevas — todos a la vez
-    // 4x
-    ...spread(clasicoCards, 4),       // Retos clásicos
-    ...spread(duelosCards, 4),        // Duelos 1vs1 — el grupo observa y juzga
-    // 3x
+    // PERSONAL — el jugador activo protagoniza (30% del deck)
+    ...spread(yoNuncaCards, 5),
+    ...spread(clasicoCards, 4),
+    ...spread(verdadOBebeCards, 4),   // NUEVO — confiesa o bebe
+    ...spread(picanteCards, 2),
+    ...spread(enLaCamaCards, 2),
+    // GRUPAL — todos participan a la vez (25% del deck)
+    ...spread(grupalCards, 4),
+    ...spread(masProbableCards, 3),   // REDUCIDO de 6x a 3x
+    ...spread(cadenaCards, 3),        // NUEVO — reto en cadena
+    // SOCIAL/DUELO — interacción entre jugadores (20% del deck)
+    ...spread(duelosCards, 3),
     ...spread(retosCards, 3),
-    ...spread(picanteCards, 3),
-    ...spread(enLaCamaCards, 3),
-    // 2x
+    // CONOCIMIENTO — trivia rápida (10% del deck)
+    ...spread(triviaExpressCards, 2), // NUEVO — trivia express
+    // CONTEXTO — ambiente y normas (15% del deck)
     ...spread(pacoversCards, 2),
     ...spread(espanaCards, 2),
-    // 1x — categorías solo de vez en cuando
+    ...spread(impostorCards, 2),
     ...spread(categoriasCards, 1),
-    // Especiales
-    ...spread(impostorCards, 3),
-    // MÍMICA ELIMINADA del Megamix
   ]);
 
   // --- FAIR-PLAY SCHEDULER ---
@@ -6722,17 +6823,20 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
       ...masProbableCards,
       ...grupalCards,
       ...duelosCards,
+      ...cadenaCards,
     ])),
     // Cartas donde el jugador activo confiesa / actúa
     personal: shuffleArray(cleanDeckPool([
       ...yoNuncaCards,
+      ...verdadOBebeCards,
       ...picanteCards,
       ...enLaCamaCards,
       ...clasicoCards,
     ])),
-    // Retos y categorías
+    // Retos, trivia y categorías
     reto: shuffleArray(cleanDeckPool([
       ...retosCards,
+      ...triviaExpressCards,
       ...pacoversCards,
       ...espanaCards,
       ...categoriasCards,
