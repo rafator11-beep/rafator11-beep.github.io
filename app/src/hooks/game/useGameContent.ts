@@ -45,6 +45,10 @@ import { cultureQuestions } from '@/data/cultureQuestions';
 import { cultureQuestionsNew2025 } from '@/data/cultureQuestionsNew2025';
 import { buildGodDeck } from '@/lib/godDeck';
 import { sanitizeCardText } from '../../components/game/CardDisplay';
+import {
+    megamixRetosV4, yoNuncaV4, picanteV4, votacionV4,
+    normasV4, duelosV4, cadenasV4,
+} from '@/data/gameContentExtra13';
 
 // Clean Fisher-Yates shuffle
 function shuffleArray<T>(array: T[]): T[] {
@@ -134,20 +138,27 @@ export const useGameContent = (mode: GameMode, currentIndex: number, currentPlay
                     ...espanaExtra3.map(q => `🇪🇸 ${q}`),
                     ...normasRonda.map(q => `NORMA: ${q}`),
                     ...importedCustomRetos,
+                    ...megamixRetosV4,
+                    ...yoNuncaV4.map(q => `🙈 ${q}`),
+                    ...picanteV4.map(q => `🌶️ ${q}`),
+                    ...votacionV4.map(q => `🗳️ ${q}`),
+                    ...normasV4.map(q => `NORMA: ${q.replace(/^📜\s*NORMA:\s*/i, '')}`),
+                    ...duelosV4,
+                    ...cadenasV4,
                 ]);
                 break;
             case 'yo_nunca':
             case 'yo_nunca_equipos':
-                modeContent = shuffleArray([...yoNunca, ...yoNuncaExtra, ...yoNuncaExtra2, ...yoNuncaExtra3]);
+                modeContent = shuffleArray([...yoNunca, ...yoNuncaExtra, ...yoNuncaExtra2, ...yoNuncaExtra3, ...yoNuncaV4]);
                 break;
             case 'picante':
-                modeContent = shuffleArray([...picante, ...picanteExtra, ...picanteExtra2, ...picanteExtra3]);
+                modeContent = shuffleArray([...picante, ...picanteExtra, ...picanteExtra2, ...picanteExtra3, ...picanteV4]);
                 break;
             case 'espana':
                 modeContent = shuffleArray([...nostalgia, ...pacoversExtra, ...pacoversExtra2, ...espanaExtra3]);
                 break;
             case 'votacion':
-                modeContent = shuffleArray([...quienEsMasProbable, ...masProbableExtra, ...quienEsMasProbableExtra2, ...masProbableExtra3]);
+                modeContent = shuffleArray([...quienEsMasProbable, ...masProbableExtra, ...quienEsMasProbableExtra2, ...masProbableExtra3, ...votacionV4]);
                 break;
             case 'pacovers':
                 modeContent = shuffleArray([...pacovers, ...pacoversExtra, ...pacoversExtra2, ...pacoversExtra3]);

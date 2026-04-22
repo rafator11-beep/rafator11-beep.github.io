@@ -8,6 +8,7 @@ interface PremiumEffectsContextType {
   triggerConfetti: () => void;
   triggerSuccess: () => void;
   triggerError: () => void;
+  triggerCombo: (streak: number) => void;
   playSfx: (type: 'click' | 'swoosh' | 'win') => void;
 }
 
@@ -34,8 +35,24 @@ export const PremiumEffectsProvider: React.FC<{ children: React.ReactNode }> = (
 
   const triggerError = useCallback(() => {
     hapticFeedback.error();
-    // Potential error sfx could be added here
   }, []);
+
+  const triggerCombo = useCallback((streak: number) => {
+    const colors = streak >= 5
+      ? ['#fbbf24', '#f59e0b', '#ef4444', '#ec4899']
+      : streak >= 3
+        ? ['#22d3ee', '#3b82f6', '#8b5cf6']
+        : ['#a78bfa', '#6366f1'];
+    confetti({
+      particleCount: 40 + streak * 15,
+      spread: 50 + streak * 10,
+      origin: { y: 0.7 },
+      colors,
+      scalar: 0.8,
+    });
+    if (streak >= 3) playWin();
+    hapticFeedback.success();
+  }, [playWin]);
 
   const playSfx = useCallback((type: 'click' | 'swoosh' | 'win') => {
     switch (type) {
@@ -62,7 +79,7 @@ export const PremiumEffectsProvider: React.FC<{ children: React.ReactNode }> = (
   }, [initContext]);
 
   return (
-    <PremiumEffectsContext.Provider value={{ triggerConfetti, triggerSuccess, triggerError, playSfx }}>
+    <PremiumEffectsContext.Provider value={{ triggerConfetti, triggerSuccess, triggerError, triggerCombo, playSfx }}>
       {children}
       
       {/* GLOBAL ULTRA OVERLAY */}
@@ -79,7 +96,7 @@ export const PremiumEffectsProvider: React.FC<{ children: React.ReactNode }> = (
           >
             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
             <span className="text-[10px] font-mono text-white tracking-widest uppercase">
-              BEEP ENGINE v1.0 // PREMIUM UPDATED
+              APEX ENGINE v2.0 // BEEP
             </span>
           </motion.div>
         )}

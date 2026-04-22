@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { GAME_MODES, GameMode, TAB_MAPPING, PlayMode } from '@/types/game';
 import { ArrowRight, Globe, Smartphone, Trophy, Users, Zap } from 'lucide-react';
@@ -35,7 +35,7 @@ export function JuegoTab({ onSelectMode }: JuegoTabProps) {
                 <Trophy className="mr-1.5 h-3 w-3" />
                 Modo Competitivo
               </span>
-              <h1 className="text-4xl font-black tracking-tight text-white md:text-5xl">
+              <h1 className="text-4xl font-black tracking-tight text-white md:text-5xl font-title">
                 Juega en serio.<br />
                 <span style={{
                   background: 'linear-gradient(135deg, #fff 0%, hsl(var(--neon-cyan)) 50%, hsl(var(--neon-purple)) 100%)',
@@ -111,7 +111,7 @@ export function JuegoTab({ onSelectMode }: JuegoTabProps) {
                 <div className="mode-icon-wrap">{mode.icon}</div>
                 <div className="flex flex-col items-end gap-1.5">
                   {mode.badge && (
-                    <span className="rounded-full border border-white/15 bg-white/10 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.2em] text-white/80">
+                    <span className={`rounded-full border border-white/15 bg-white/10 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.2em] text-white/80 ${mode.badge.includes('NUEVO') || mode.badge.includes('v4') ? 'badge-new' : ''}`}>
                       {mode.badge}
                     </span>
                   )}

@@ -6763,8 +6763,7 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     "🔗 CADENA: Por turnos, decid apodos de jugadores de fútbol. El que falle bebe 2. 🍻",
     "🔗 CADENA: Por turnos, decid cosas que se pierden en una noche de fiesta. El que repita bebe 2. 🍻",
     ...(cadenaExtra || []),
-    // ── MEGA EXPANSION ──
-    ...cadenaNuevo,
+    ...(cadenaExtra12 || []),
   ]);
   const cadenaCards = getRandomItems(cadenaPool, cadenaPool.length);
 

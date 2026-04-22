@@ -1,4 +1,4 @@
-﻿import { motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { ArrowRight, Zap, Users, Flame } from 'lucide-react';
 import { GAME_MODES, GameMode, TAB_MAPPING } from '@/types/game';
 
@@ -35,12 +35,12 @@ export function FiestaTab({ onSelectMode }: FiestaTabProps) {
                 En vivo
               </span>
             </div>
-            <h1 className="text-4xl font-black tracking-tight text-white md:text-6xl">
+            <h1 className="text-4xl font-black tracking-tight text-white md:text-6xl font-title">
               La fiesta<br />
               <span className="premium-title">empieza aquí</span>
             </h1>
             <p className="max-w-md text-sm leading-relaxed text-white/50 md:text-base">
-              +19.000 cartas, retos, normas y caos. Elige modo y pasa el móvil.
+              +19.000 cartas, retos, normas y caos. Ahora con Speed Round ⚡
             </p>
           </div>
 
@@ -90,7 +90,7 @@ export function FiestaTab({ onSelectMode }: FiestaTabProps) {
                 </div>
                 <div className="flex flex-col items-end gap-1.5">
                   {mode.badge && (
-                    <span className="rounded-full border border-white/15 bg-white/10 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.2em] text-white/80">
+                    <span className={`rounded-full border border-white/15 bg-white/10 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.2em] text-white/80 ${mode.badge.includes('NUEVO') || mode.badge.includes('v4') ? 'badge-new' : ''}`}>
                       {mode.badge}
                     </span>
                   )}

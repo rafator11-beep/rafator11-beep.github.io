@@ -1,4 +1,4 @@
-export type GameMode = 'futbol' | 'megamix' | 'clasico' | 'yo_nunca' | 'yo_nunca_equipos' | 'picante' | 'cultura' | 'espana' | 'votacion' | 'pacovers' | 'trivia_futbol' | 'tictactoe' | 'poker' | 'parchis' | 'megaboard';
+export type GameMode = 'futbol' | 'megamix' | 'clasico' | 'yo_nunca' | 'yo_nunca_equipos' | 'picante' | 'cultura' | 'espana' | 'votacion' | 'pacovers' | 'trivia_futbol' | 'tictactoe' | 'poker' | 'parchis' | 'megaboard' | 'speed_round';
 export type TabId = 'fiesta' | 'juego';
 export type PlayMode = 'local' | 'online';
 
@@ -20,11 +20,12 @@ export enum ModeId {
   TICTACTOE = 'tictactoe',
   POKER = 'poker',
   PARCHIS = 'parchis',
-  MEGABOARD = 'megaboard'
+  MEGABOARD = 'megaboard',
+  SPEED_ROUND = 'speed_round'
 }
 
 export const TAB_MAPPING: Record<TabId, GameMode[]> = {
-  fiesta: ['megamix', 'clasico', 'yo_nunca', 'yo_nunca_equipos', 'picante', 'espana', 'votacion', 'pacovers', 'megaboard'],
+  fiesta: ['megamix', 'speed_round', 'clasico', 'yo_nunca', 'yo_nunca_equipos', 'picante', 'espana', 'votacion', 'pacovers', 'megaboard'],
   juego: ['cultura', 'trivia_futbol', 'futbol', 'tictactoe', 'poker', 'parchis']
 };
 export type GameStatus = 'setup' | 'playing' | 'round_end' | 'finished';
@@ -237,6 +238,15 @@ export const GAME_MODES: GameModeInfo[] = [
     color: 'from-amber-500 to-rose-600',
     teamBased: false,
     badge: 'NUEVO',
+  },
+  {
+    id: 'speed_round',
+    name: 'Speed Round',
+    description: '120 preguntas relámpago con temporizador de 10s. ¿Cuántas aciertas?',
+    icon: '⚡',
+    color: 'from-cyan-400 to-blue-600',
+    teamBased: false,
+    badge: 'NUEVO v4',
   }
 ];
 

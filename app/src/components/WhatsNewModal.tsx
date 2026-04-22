@@ -1,45 +1,45 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Sparkles, Zap, Users, Dices, Shield, Flame } from 'lucide-react';
+import { X, Sparkles, Zap, Flame, Timer, Layers, Smartphone } from 'lucide-react';
 
-const CURRENT_VERSION = '2.2';
+const CURRENT_VERSION = '4.0';
 const STORAGE_KEY = 'beep_version_seen';
 
 const updates = [
   {
-    icon: <Zap className="w-5 h-5 text-yellow-400" />,
-    color: 'from-yellow-950/60 to-slate-950/60 border-yellow-500/30',
-    label: 'MEGAMIX',
-    title: 'Virus con identidad',
-    desc: 'Cuando el virus muta ves exactamente qué virus toca y cuál es su regla. Sin sorpresas.',
+    icon: <Zap className="w-5 h-5 text-cyan-400" />,
+    color: 'from-cyan-950/60 to-slate-950/60 border-cyan-500/30',
+    label: 'NUEVO MODO',
+    title: 'Speed Round ⚡',
+    desc: '120 preguntas relámpago con temporizador de 10s, combos y 6 categorías. ¿Cuántas aciertas?',
   },
   {
-    icon: <Users className="w-5 h-5 text-purple-400" />,
-    color: 'from-purple-950/60 to-slate-950/60 border-purple-500/30',
-    label: 'NUEVO',
-    title: '200 retos grupales',
-    desc: 'Cada mutación del virus trae un reto de interacción entre jugadores. Para romper el hielo y forzar la guerra.',
+    icon: <Sparkles className="w-5 h-5 text-violet-400" />,
+    color: 'from-violet-950/60 to-slate-950/60 border-violet-500/30',
+    label: 'VISUAL',
+    title: 'Motor APEX Engine',
+    desc: 'Rediseño visual completo: nuevo sistema glassmorphism, animaciones mejoradas y fuente Outfit para títulos.',
   },
   {
-    icon: <Dices className="w-5 h-5 text-green-400" />,
+    icon: <Flame className="w-5 h-5 text-orange-400" />,
+    color: 'from-orange-950/60 to-slate-950/60 border-orange-500/30',
+    label: 'CONTENIDO',
+    title: '+200 retos y preguntas',
+    desc: 'Contenido fresco: retos con TikTok, ChatGPT, Spotify. Yo nunca modernos, votaciones actuales y más.',
+  },
+  {
+    icon: <Timer className="w-5 h-5 text-green-400" />,
     color: 'from-green-950/60 to-slate-950/60 border-green-500/30',
-    label: 'MEGAMIX',
-    title: 'Game loop mejorado',
-    desc: 'Boca cerrada, confirmación de virus, poderes del capitán y frecuencias de eventos rebalanceadas.',
+    label: 'MEJORA',
+    title: 'Sistema de combos',
+    desc: 'Aciertos seguidos = multiplicador de puntos. Racha de fuego visual cuando llevas 3+.',
   },
   {
-    icon: <Shield className="w-5 h-5 text-blue-400" />,
-    color: 'from-blue-950/60 to-slate-950/60 border-blue-500/30',
-    label: 'MEJORA',
-    title: 'Poderes del capitán',
-    desc: 'El capitán ahora puede asignar el virus, elegir quién bebe o anular normas con un comando directo.',
-  },
-  {
-    icon: <Flame className="w-5 h-5 text-red-400" />,
-    color: 'from-red-950/60 to-slate-950/60 border-red-500/30',
-    label: 'MEJORA',
-    title: 'Megamix UX',
-    desc: 'Normas, virus y eventos especiales ahora fluyen sin bloquear el turno. Todo más rápido.',
+    icon: <Smartphone className="w-5 h-5 text-pink-400" />,
+    color: 'from-pink-950/60 to-slate-950/60 border-pink-500/30',
+    label: 'UX',
+    title: 'Splash Screen v2',
+    desc: 'Nuevo arranque cinematográfico con partículas, barra tricolor y branding APEX ENGINE.',
   },
 ];
 
@@ -76,7 +76,7 @@ export function WhatsNewModal() {
             className="w-full max-w-sm bg-gradient-to-b from-slate-900 to-black border border-white/10 rounded-[2rem] overflow-hidden shadow-2xl"
           >
             {/* Header */}
-            <div className="relative px-6 pt-6 pb-4 bg-gradient-to-r from-violet-950/60 to-slate-900">
+            <div className="relative px-6 pt-6 pb-4 bg-gradient-to-r from-cyan-950/60 to-slate-900">
               <button
                 onClick={handleClose}
                 className="absolute top-4 right-4 p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
@@ -84,11 +84,11 @@ export function WhatsNewModal() {
                 <X className="w-4 h-4 text-white/60" />
               </button>
               <div className="flex items-center gap-2 mb-1">
-                <Sparkles className="w-5 h-5 text-violet-400" />
-                <span className="text-[10px] font-black text-violet-400 uppercase tracking-[0.3em]">Actualización {CURRENT_VERSION}</span>
+                <Sparkles className="w-5 h-5 text-cyan-400" />
+                <span className="text-[10px] font-black text-cyan-400 uppercase tracking-[0.3em]">BEEP v{CURRENT_VERSION} · APEX</span>
               </div>
-              <h2 className="text-2xl font-black text-white tracking-tight">¿Qué hay de nuevo?</h2>
-              <p className="text-white/40 text-xs mt-0.5">Lo que llega con esta versión de BEEP</p>
+              <h2 className="text-2xl font-black text-white tracking-tight font-title">¿Qué hay de nuevo?</h2>
+              <p className="text-white/40 text-xs mt-0.5">Actualización APEX ENGINE — todo mejorado</p>
             </div>
 
             {/* Updates list */}
@@ -117,9 +117,9 @@ export function WhatsNewModal() {
             <div className="px-4 pb-5 pt-2">
               <button
                 onClick={handleClose}
-                className="w-full py-4 rounded-2xl bg-violet-600 hover:bg-violet-500 active:scale-[0.98] text-white font-black text-base uppercase tracking-widest transition-all shadow-lg shadow-violet-900/40"
+                className="w-full py-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 active:scale-[0.98] text-white font-black text-base uppercase tracking-widest transition-all shadow-lg shadow-cyan-900/40"
               >
-                Entendido — a jugar
+                ¡A jugar! ⚡
               </button>
             </div>
           </motion.div>

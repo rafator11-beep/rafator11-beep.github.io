@@ -14,6 +14,7 @@ const PartyGame = lazy(() => import('./PartyGame').then(m => ({ default: m.Party
 const PokerRoom = lazy(() => import('../poker/PokerRoom').then(m => ({ default: m.PokerRoom })));
 const ParchisGame = lazy(() => import('./ParchisGame').then(m => ({ default: m.ParchisGame })));
 const MegaBoardGame = lazy(() => import('./MegaBoardGame').then(m => ({ default: m.MegaBoardGame })));
+const SpeedRoundGame = lazy(() => import('./SpeedRoundGame').then(m => ({ default: m.SpeedRoundGame })));
 
 interface GamePlayProps {
   onExit: () => void;
@@ -116,6 +117,15 @@ export function GamePlay({ onExit, isTeamMode = false, roomId = null, isHost = f
           localPlayerName={localName}
           localPlayerAvatar={localAvatar}
         />
+      </Suspense>
+    );
+  }
+
+  // Check if this is Speed Round mode
+  if (game?.mode === 'speed_round') {
+    return (
+      <Suspense fallback={<div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white"><Loader2 className="w-8 h-8 animate-spin text-cyan-400" /> Preparando ronda relámpago...</div>}>
+        <SpeedRoundGame onExit={onExit} players={players} />
       </Suspense>
     );
   }

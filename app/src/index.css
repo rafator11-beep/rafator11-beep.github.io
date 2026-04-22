@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -555,5 +555,124 @@
     background: hsl(var(--neon-green));
     box-shadow: 0 0 8px hsl(var(--neon-green) / 0.8);
     animation: btn-pulse-ring 1.5s ease-out infinite;
+  }
+
+  /* ── v4.0 APEX ENGINE ADDITIONS ─────────────────────────────── */
+
+  /* FONT TITLE (Outfit) */
+  .font-title {
+    font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+  }
+
+  /* APEX CARD — premium glassmorphism 2.0 */
+  .apex-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 28px;
+    background: linear-gradient(160deg,
+      rgba(30, 20, 55, 0.94) 0%,
+      rgba(15, 10, 30, 0.90) 100%);
+    border: 1px solid rgba(255,255,255,0.06);
+    backdrop-filter: blur(28px) saturate(180%);
+    box-shadow:
+      0 28px 72px -28px rgba(0,0,0,0.95),
+      0 0 0 1px rgba(255,255,255,0.03) inset,
+      0 1px 0 rgba(255,255,255,0.08) inset;
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .apex-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .apex-card:hover {
+    border-color: hsl(var(--primary) / 0.35);
+    box-shadow:
+      0 32px 80px -24px hsl(var(--primary) / 0.4),
+      0 0 0 1px hsl(var(--primary) / 0.15) inset;
+    transform: translateY(-6px) scale(1.015);
+  }
+
+  /* STATUS PULSE — live activity indicator */
+  @keyframes status-pulse {
+    0%, 100% { transform: scale(1); opacity: 0.7; box-shadow: 0 0 0 0 currentColor; }
+    50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 12px 2px currentColor; }
+  }
+  .status-pulse {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    animation: status-pulse 2s ease-in-out infinite;
+  }
+
+  /* SHIMMER LINE — diagonal light sweep */
+  @keyframes shimmer-line {
+    0% { transform: translateX(-100%) skewX(-15deg); }
+    100% { transform: translateX(200%) skewX(-15deg); }
+  }
+  .shimmer-line::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+    animation: shimmer-line 3s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  /* BADGE BLINK — new badge pulsation */
+  @keyframes badge-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  .badge-new {
+    animation: badge-blink 1.8s ease-in-out infinite;
+  }
+
+  /* MESH V2 — upgraded ambient background */
+  .premium-screen::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 15% 20%, hsl(var(--primary) / 0.20) 0%, transparent 55%),
+      radial-gradient(ellipse 60% 50% at 85% 75%, hsl(var(--accent) / 0.16) 0%, transparent 50%),
+      radial-gradient(ellipse 50% 40% at 50% 50%, hsl(var(--neon-purple) / 0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 35% at 10% 85%, hsl(var(--neon-cyan) / 0.08) 0%, transparent 45%),
+      radial-gradient(ellipse 30% 30% at 70% 20%, hsl(var(--neon-blue) / 0.08) 0%, transparent 40%);
+    filter: blur(60px);
+    z-index: 0;
+    animation: mesh-float-v2 16s ease-in-out infinite alternate;
+    pointer-events: none;
+  }
+
+  @keyframes mesh-float-v2 {
+    0%   { transform: scale(1)    translate(0%,  0%); }
+    25%  { transform: scale(1.03) translate(1%,  1.5%); }
+    50%  { transform: scale(1.05) translate(-0.5%, 2%); }
+    75%  { transform: scale(1.02) translate(1.5%, -0.5%); }
+    100% { transform: scale(1.06) translate(-1%, 1%); }
+  }
+
+  /* COUNT UP animation for stats */
+  @keyframes count-reveal {
+    0% { opacity: 0; transform: translateY(8px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  .animate-count-reveal {
+    animation: count-reveal 0.5s ease-out forwards;
+  }
+
+  /* SPEED ROUND specific effects */
+  @keyframes speed-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(34,211,238,0.4); }
+    50% { box-shadow: 0 0 0 12px rgba(34,211,238,0); }
+  }
+  .speed-timer-pulse {
+    animation: speed-pulse 1s ease-out infinite;
   }
 }
