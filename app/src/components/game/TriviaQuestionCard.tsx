@@ -21,6 +21,7 @@ interface TriviaQuestionCardProps {
   canUseLifeline?: (comodin: '50:50' | 'publico' | 'llamada') => boolean;
   onUseLifeline?: (comodin: '50:50' | 'publico' | 'llamada') => void;
   getCooldownRemaining?: (comodin: '50:50' | 'publico' | 'llamada') => number;
+  onLaunchKahoot?: () => void;
 }
 
 type Comodin = '50:50' | 'publico' | 'llamada';
@@ -36,6 +37,7 @@ export function TriviaQuestionCard({
   canUseLifeline,
   onUseLifeline,
   getCooldownRemaining,
+  onLaunchKahoot,
 }: TriviaQuestionCardProps) {
   const [timeLeft, setTimeLeft] = useState(timeLimit);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
@@ -345,6 +347,15 @@ export function TriviaQuestionCard({
             <h2 className="text-xl md:text-2xl font-bold leading-snug tracking-tight text-white drop-shadow-sm">
                 {cleanGameText(question.question)}
             </h2>
+            
+            {onLaunchKahoot && !showResult && (
+              <button
+                onClick={onLaunchKahoot}
+                className="mt-4 bg-yellow-400 text-black px-4 py-1.5 rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg flex items-center gap-1.5 hover:bg-yellow-300 transition-all"
+              >
+                ⚡ Lanzar modo Kahoot
+              </button>
+            )}
         </div>
 
       {/* Comodines - Now with cooldown indicators */}

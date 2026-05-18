@@ -34,6 +34,8 @@ import { useGameMemory } from '@/hooks/game/useGameMemory';
 
 import { ChatComponent } from '@/components/multiplayer/ChatComponent';
 import { PeerBubbles } from '@/components/multiplayer/PeerBubbles';
+import { SpectatorQRPanel } from '@/components/game/SpectatorView';
+import { KahootVoteSession } from '@/components/game/KahootVoteSession';
 
 // Subcomponents (assuming they exist or are imported)
 import { ApocalypseOverlay } from '@/components/game/ApocalypseOverlay';
@@ -706,6 +708,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
   const { updateMultiplePlayers, rankings } = useRanking();
 
   const [showChromecastModal, setShowChromecastModal] = useState(false);
+  const [showKahoot, setShowKahoot] = useState(false);
 
   // Save game to history
   const hasSavedRef = useRef(false);
@@ -1281,7 +1284,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                 </div>
 
                 {/* Header */}
-                <div className="relative z-10 px-5 pt-safe pt-6 pb-4 text-center">
+                <div className="relative z-10 px-5 pt-safe pt-6 pb-4 text-center flex flex-col items-center">
                   <motion.div
                     initial={{ y: -20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
@@ -1295,6 +1298,14 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                       {sanitizeCardText(currentText || '')}
                     </p>
                   </motion.div>
+                  {isHost && isMultiplayer && roomId && (
+                    <button
+                      onClick={() => setShowKahoot(true)}
+                      className="mt-3 bg-yellow-400 text-black px-4 py-1.5 rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg flex items-center gap-1.5 hover:bg-yellow-300 transition-all"
+                    >
+                      ⚡ Lanzar modo Kahoot
+                    </button>
+                  )}
                 </div>
 
                 {/* Player grid */}
@@ -1555,18 +1566,27 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
       {
         isMultiplayer && (
-          <div
-            className="absolute top-2 left-1/2 -translate-x-1/2 bg-gradient-to-r from-slate-800/80 to-slate-700/80 px-3 py-1 rounded-full text-xs font-mono text-green-400 border border-green-500/30 flex items-center gap-2 cursor-pointer hover:bg-slate-800/90 hover:border-green-500/60 transition-all z-50"
-            onClick={() => {
-              if (roomId) {
-                const url = `${window.location.origin}?room=${roomId}`;
-                navigator.clipboard.writeText(url);
-                toast.success('Enlace de invitación copiado');
-              }
-            }}
-          >
-            <span>{isHost ? 'HOST' : 'ESPEC'} • SALA: {roomId}</span>
-            <Copy className="w-3 h-3 opacity-70" />
+          <div className="absolute top-2 left-1/2 -translate-x-1/2 flex items-center gap-2 z-50">
+            <div
+              className="bg-gradient-to-r from-slate-800/80 to-slate-700/80 px-3 py-1 rounded-full text-xs font-mono text-green-400 border border-green-500/30 flex items-center gap-2 cursor-pointer hover:bg-slate-800/90 hover:border-green-500/60 transition-all"
+              onClick={() => {
+                if (roomId) {
+                  const url = `${window.location.origin}?room=${roomId}`;
+                  navigator.clipboard.writeText(url);
+                  toast.success('Enlace de invitación copiado');
+                }
+              }}
+            >
+              <span>{isHost ? 'HOST' : 'ESPEC'} • SALA: {roomId}</span>
+              <Copy className="w-3 h-3 opacity-70" />
+            </div>
+            {isHost && roomId && (
+              <SpectatorQRPanel 
+                roomId={roomId} 
+                currentCard={safeCurrentText} 
+                currentPlayer={currentPlayer?.name || ''} 
+              />
+            )}
           </div>
         )
       }
@@ -2464,6 +2484,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
             <TriviaQuestionCard
               question={currentQuestion}
               playerName={currentPlayer?.name || "Jugador"}
+              onLaunchKahoot={isHost && isMultiplayer && roomId ? () => setShowKahoot(true) : undefined}
               onAnswer={(correct, points) => {
                 if (correct) {
                   addScore(currentPlayer.id, points);
@@ -2690,6 +2711,53 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           )}
 
         {/* Eliminado el indicador legacy CARTA {X} duplicado */}
+
+        {/* KAHOOT MODAL */}
+        <AnimatePresence>
+          {showKahoot && roomId && (
+            <KahootVoteSession
+              roomId={roomId}
+              question={
+                (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion
+                  ? currentQuestion.question
+                  : sanitizeCardText(currentText || '')
+              }
+              options={
+                (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion
+                  ? currentQuestion.options
+                  : players.map(p => p.name)
+              }
+              correctAnswer={
+                (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion
+                  ? currentQuestion.options[currentQuestion.correctIndex]
+                  : undefined
+              }
+              isHost={isHost}
+              onClose={() => setShowKahoot(false)}
+              onResult={(winner, votes) => {
+                if (!((gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion)) {
+                  const wPlayer = players.find(p => p.name === winner);
+                  if (wPlayer) handleAdjustXP(wPlayer.id, 5);
+                }
+                setGameState(prev => ({ ...prev, votingSelections: [] }));
+                setShowKahoot(false);
+                
+                // Si estamos en trivia, hay que procesar la respuesta
+                if ((gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion) {
+                  const correctOpt = currentQuestion.options[currentQuestion.correctIndex];
+                  if (winner === correctOpt) {
+                     addScore(currentPlayer?.id || '', 10);
+                     confetti();
+                  }
+                  if (mode === 'megamix') {
+                    setGameState((prev: any) => ({ ...prev, showTrivia: false }));
+                  }
+                }
+                handleNext();
+              }}
+            />
+          )}
+        </AnimatePresence>
 
       </main>
 

@@ -42,6 +42,10 @@ import {
   yoNuncaExtra14, picanteExtra14, retosExtra14, votacionExtra14,
   cadenaExtra14, verdadOBebeExtra14,
 } from './gameContentExtra14';
+import { votacionExtra15, verdadOBebeExtra15 } from './gameContentExtra15';
+import { retosExtra16, cadenaExtra16, categoriasExtra16, mimicaExtra16 } from './gameContentExtra16';
+import { salseoExtra17, clasicoExtra17, picanteExtra17 } from './gameContentExtra17';
+import { yoNuncaExtra18, votacionExtra18, verdadOBebeExtra18 } from './gameContentExtra18';
 import { mimicaChallenges } from './mimicaContent';
 import { bocaCerradaChallenges } from './bocaCerradaContent';
 import { impostorRounds } from './impostorContent';
@@ -6620,6 +6624,8 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
   // Get unique samples to avoid duplicates, now using ALL available items
   const yoNuncaPool = cleanDeckPool([...yoNunca, ...(yoNuncaExtra || []), ...(yoNuncaExtra2 || []), ...(yoNuncaExtra3 || []), ...(yoNuncaExtra4 || []), ...(yoNuncaExtra8 || []), ...(yoNuncaExtra10 || []), ...(yoNuncaExtra11 || []), ...(yoNuncaExtra12 || []), ...yoNuncaExtra14,
     ...(salseoExtra || []).filter(s => s.toLowerCase().startsWith('yo nunca')),
+    // ── EXTRA 18 ──
+    ...yoNuncaExtra18,
     // ── MEGA EXPANSION: 1000 nuevas preguntas por etapa vital ──
     ...yoNuncaInfancia, ...yoNuncaInstituto, ...yoNuncaUniversidad, ...yoNuncaCurro, ...yoNuncaFiesta,
   ]);
@@ -6627,6 +6633,9 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
   const yoNuncaCards = yoNuncaItems.map(q => addDrinking(`🙈 Yo nunca... ${q}`, Math.random() < 0.4 ? 'medio' : 'leve'));
 
   const masProbablePool = cleanDeckPool([...quienEsMasProbable, ...(masProbableExtra || []), ...(quienEsMasProbableExtra2 || []), ...(masProbableExtra3 || []), ...(quienEsMasProbableExtra5 || []), ...(quienEsMasProbableExtra6 || []), ...(quienEsMasProbableExtra10 || []), ...(votacionExtra12 || []), ...votacionExtra14,
+    // ── EXTRA 15-18 ──
+    ...votacionExtra15,
+    ...votacionExtra18,
     // ── MEGA EXPANSION ──
     ...votacionNuevo,
   ]);
@@ -6634,13 +6643,18 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
   const masProbableCards = masProbableItems.map(q => addDrinking(`🗳️ ${q}`, Math.random() < 0.3 ? 'medio' : 'leve'));
 
   const retosPool = cleanDeckPool([...categoriasReto, ...(categoriasRetoExtra || []), ...(categoriasRetoExtra2 || []), ...(categoriasRetoExtra3 || []), ...(retosExtra12 || []), ...retosExtra14,
+    // ── EXTRA 16 ──
+    ...retosExtra16,
     // ── MEGA EXPANSION ──
     ...retosNuevo,
   ]);
   const retosItems = getRandomItems(retosPool, retosPool.length);
   const retosCards = retosItems.map(q => addDrinking(`🎯 ${q}`, Math.random() < 0.5 ? 'medio' : 'reparte'));
 
-  const clasicoPool = cleanDeckPool([...clasico, ...(clasicoExtra || []), ...(clasicoExtra2 || []), ...(clasicoExtra3 || []), ...(clasicoExtra5 || []), ...(clasicoExtra9 || []), ...(clasicoExtra10 || []), ...(clasicoExtra11 || []), ...(clasicoExtra11b || []), ...(clasicoExtra11c || [])]);
+  const clasicoPool = cleanDeckPool([...clasico, ...(clasicoExtra || []), ...(clasicoExtra2 || []), ...(clasicoExtra3 || []), ...(clasicoExtra5 || []), ...(clasicoExtra9 || []), ...(clasicoExtra10 || []), ...(clasicoExtra11 || []), ...(clasicoExtra11b || []), ...(clasicoExtra11c || []),
+    // ── EXTRA 17 ──
+    ...clasicoExtra17,
+  ]);
   const clasicoItems = getRandomItems(clasicoPool, clasicoPool.length);
   const clasicoCards = clasicoItems.map(q => addDrinking(q, Math.random() < 0.5 ? 'leve' : 'grupo'));
 
@@ -6657,6 +6671,8 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
   const espanaCards = espanaItems.map(q => addDrinking(`🇪🇸 ${q}`, 'leve'));
 
   const picantePool = cleanDeckPool([...picante, ...(picanteExtra || []), ...(picanteExtra2 || []), ...(picanteExtra3 || []), ...(picanteExtra5 || []), ...(picanteExtra7 || []), ...(picanteExtra10 || []), ...(picanteExtra11 || []), ...(picanteExtra11b || []), ...(picanteExtra11c || []), ...(picanteExtra12 || []), ...picanteExtra14,
+    // ── EXTRA 17 ──
+    ...picanteExtra17,
     // ── MEGA EXPANSION ──
     ...picanteNuevo,
   ]);
@@ -6671,6 +6687,8 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
   const enLaCamaCards = enLaCamaItems.map(q => addDrinking(`🛌 ${q}`, 'medio'));
 
   const categoriasPool = cleanDeckPool([...categoriasLetras, ...(categoriasLetrasExtra || []), ...(categoriasLetrasExtra2 || []), ...(categoriasLetrasExtra3 || []), ...(categoriasExtra12 || []),
+    // ── EXTRA 16 ──
+    ...categoriasExtra16,
     // ── MEGA EXPANSION ──
     ...categoriasNuevo,
   ]);
@@ -6683,6 +6701,8 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
 
   // Specialized Pool Integration
   const mimicaPool = cleanDeckPool([...mimicaChallenges.map(m => m.text), ...(mimicaExtra11 || []), ...(mimicaExtra11b || []), ...(mimicaExtra11c || []),
+    // ── EXTRA 16 ──
+    ...mimicaExtra16,
     // ── MEGA EXPANSION ──
     ...mimicaNueva,
   ]);
@@ -6739,7 +6759,12 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     ...(verdadOBebeExtra || []),
     ...(verdadOBebeExtra12 || []),
     ...verdadOBebeExtra14,
+    // ── EXTRA 15-18 ──
+    ...verdadOBebeExtra15,
+    ...verdadOBebeExtra18,
     ...(salseoExtra || []).filter(s => s.startsWith('🎤')),
+    // ── EXTRA 17 SALSEO ──
+    ...salseoExtra17.filter(s => s.startsWith('🎤')),
     // ── MEGA EXPANSION ──
     ...verdadOBebeNuevo,
   ]);
@@ -6770,6 +6795,8 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     ...(cadenaExtra || []),
     ...(cadenaExtra12 || []),
     ...cadenaExtra14,
+    // ── EXTRA 16 ──
+    ...cadenaExtra16,
   ]);
   const cadenaCards = getRandomItems(cadenaPool, cadenaPool.length);
 
@@ -6845,6 +6872,8 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que tenga un accidente de coche. Ese bebe 2. 🍻",
     // Salseo grupal
     ...(salseoExtra || []).filter(s => s.startsWith('🙌')),
+    // ── EXTRA 17 SALSEO GRUPAL ──
+    ...salseoExtra17.filter(s => s.startsWith('🙌')),
   ]);
 
   // --- FAIR-PLAY SCHEDULER ---
