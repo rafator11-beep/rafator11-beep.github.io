@@ -2875,7 +2875,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               const winner = players.find(p => p.id === winnerId);
               const loser = players.find(p => p.id === loserId);
               if (winner) addScore(winner.id, 30);
-              if (winner) addEvent('torneo_win', winner, 'torneo', gameState.round);
+              if (winner) addEvent('torneo_win', winner, loser?.name ?? 'torneo', gameState.round);
               toast.success(`👑 ${winner?.name || 'Ganador'} gana el torneo — reparte 3 tragos!`, { duration: 3000 });
               advanceTurn(true);
             }}
