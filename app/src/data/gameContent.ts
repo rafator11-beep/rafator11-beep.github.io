@@ -6840,38 +6840,6 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     // Salseo grupal
     ...(salseoExtra || []).filter(s => s.startsWith('🙌')),
   ]);
-  // Helper: repite un array N veces sin mutarlo
-  function spread<T>(arr: T[], times: number): T[] {
-    const result: T[] = [];
-    for (let i = 0; i < times; i++) result.push(...arr);
-    return result;
-  }
-
-  // ── PESOS DEL MEGAMIX — arquitectura de deck equilibrada ────────────────
-  // Regla: máximo 25% de un mismo tipo. Variedad = diversión.
-  // Tipos: personal (yo_nunca, reto, picante) | grupal (señalar, todos) | social (duelo, cadena) | especial (norma, impostor)
-  const weightedContent = shuffleArray([
-    // PERSONAL — el jugador activo protagoniza (30% del deck)
-    ...spread(yoNuncaCards, 5),
-    ...spread(clasicoCards, 4),
-    ...spread(verdadOBebeCards, 4),   // NUEVO — confiesa o bebe
-    ...spread(picanteCards, 2),
-    ...spread(enLaCamaCards, 2),
-    // GRUPAL — todos participan a la vez (25% del deck)
-    ...spread(grupalCards, 4),
-    ...spread(masProbableCards, 3),   // REDUCIDO de 6x a 3x
-    ...spread(cadenaCards, 3),        // NUEVO — reto en cadena
-    // SOCIAL/DUELO — interacción entre jugadores (20% del deck)
-    ...spread(duelosCards, 3),
-    ...spread(retosCards, 3),
-    // CONOCIMIENTO — trivia rápida (10% del deck)
-    ...spread(triviaExpressCards, 2), // NUEVO — trivia express
-    // CONTEXTO — ambiente y normas (15% del deck)
-    ...spread(pacoversCards, 2),
-    ...spread(espanaCards, 2),
-    ...spread(impostorCards, 2),
-    ...spread(categoriasCards, 1),
-  ]);
 
   // --- FAIR-PLAY SCHEDULER ---
   // ── TURNO GARANTIZADO ─────────────────────────────────────────────────────
@@ -6927,15 +6895,18 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
       if (deck.length > 0 && deck.length % 20 === 0) {
         deck.push("TRIGGER:IMPOSTOR");
         if (deck.length >= count) break;
+        continue;
       } else if (deck.length > 0 && deck.length % 30 === 0) {
         deck.push(globalNormas[normaPtr % globalNormas.length]);
         normaPtr++;
         if (deck.length >= count) break;
+        continue;
       } else if (deck.length > 0 && deck.length % 15 === 0) {
         const filtered = specialTriggers.filter(t => t !== "TRIGGER:IMPOSTOR");
         deck.push(filtered[triggerPtr % filtered.length]);
         triggerPtr++;
         if (deck.length >= count) break;
+        continue;
       }
       deck.push(generalPool[gPtr % generalPool.length]);
       gPtr++;
