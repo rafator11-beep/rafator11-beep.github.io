@@ -709,6 +709,9 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
   const [showChromecastModal, setShowChromecastModal] = useState(false);
   const [showKahoot, setShowKahoot] = useState(false);
+  
+  // Siempre tenemos un room ID para que los espectadores puedan unirse, incluso en local
+  const spectatorRoomId = useRef<string>(roomId || Math.random().toString(36).substring(2, 8).toUpperCase()).current;
 
   // Save game to history
   const hasSavedRef = useRef(false);
@@ -1298,7 +1301,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                       {sanitizeCardText(currentText || '')}
                     </p>
                   </motion.div>
-                  {isHost && isMultiplayer && roomId && (
+                  {(isHost || !isMultiplayer) && (
                     <button
                       onClick={() => setShowKahoot(true)}
                       className="mt-3 bg-yellow-400 text-black px-4 py-1.5 rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg flex items-center gap-1.5 hover:bg-yellow-300 transition-all"
@@ -1564,31 +1567,40 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
       {/* Captain Indicator — moved to header above */}
 
+      {/* Host / Spectator Banner - SIEMPRE VISIBLE PARA EL HOST para permitir QR */}
       {
-        isMultiplayer && (
-          <div className="absolute top-2 left-1/2 -translate-x-1/2 flex items-center gap-2 z-50">
-            <div
-              className="bg-gradient-to-r from-slate-800/80 to-slate-700/80 px-3 py-1 rounded-full text-xs font-mono text-green-400 border border-green-500/30 flex items-center gap-2 cursor-pointer hover:bg-slate-800/90 hover:border-green-500/60 transition-all"
-              onClick={() => {
-                if (roomId) {
-                  const url = `${window.location.origin}?room=${roomId}`;
-                  navigator.clipboard.writeText(url);
-                  toast.success('Enlace de invitación copiado');
-                }
-              }}
-            >
-              <span>{isHost ? 'HOST' : 'ESPEC'} • SALA: {roomId}</span>
-              <Copy className="w-3 h-3 opacity-70" />
-            </div>
-            {isHost && roomId && (
-              <SpectatorQRPanel 
-                roomId={roomId} 
-                currentCard={safeCurrentText} 
-                currentPlayer={currentPlayer?.name || ''} 
-              />
-            )}
+        <div className="absolute top-2 left-1/2 -translate-x-1/2 flex items-center gap-2 z-50">
+          <div
+            className="bg-gradient-to-r from-slate-800/80 to-slate-700/80 px-3 py-1 rounded-full text-xs font-mono text-green-400 border border-green-500/30 flex items-center gap-2 cursor-pointer hover:bg-slate-800/90 hover:border-green-500/60 transition-all"
+            onClick={() => {
+              const url = `${window.location.origin}?room=${spectatorRoomId}`;
+              navigator.clipboard.writeText(url);
+              toast.success('Enlace de invitación copiado');
+            }}
+          >
+            <span>{isMultiplayer ? (isHost ? 'HOST' : 'ESPEC') : 'LOCAL'} • SALA: {spectatorRoomId}</span>
+            <Copy className="w-3 h-3 opacity-70" />
           </div>
-        )
+          {(isHost || !isMultiplayer) && (
+            <SpectatorQRPanel 
+              roomId={spectatorRoomId} 
+              currentCard={safeCurrentText} 
+              currentPlayer={currentPlayer?.name || ''} 
+              players={players.map(p => p.name)}
+              kahootConfig={showKahoot ? {
+                question: (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion
+                  ? currentQuestion.question
+                  : sanitizeCardText(currentText || ''),
+                options: (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion
+                  ? currentQuestion.options
+                  : players.map(p => p.name),
+                correctAnswer: (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion
+                  ? currentQuestion.options[currentQuestion.correctIndex]
+                  : undefined
+              } : null}
+            />
+          )}
+        </div>
       }
 
       {/* Mobile Player Indicator (only visible on small screens where sidebar is hidden) */}
@@ -2484,7 +2496,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
             <TriviaQuestionCard
               question={currentQuestion}
               playerName={currentPlayer?.name || "Jugador"}
-              onLaunchKahoot={isHost && isMultiplayer && roomId ? () => setShowKahoot(true) : undefined}
+              onLaunchKahoot={(isHost || !isMultiplayer) ? () => setShowKahoot(true) : undefined}
               onAnswer={(correct, points) => {
                 if (correct) {
                   addScore(currentPlayer.id, points);
@@ -2714,9 +2726,9 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
         {/* KAHOOT MODAL */}
         <AnimatePresence>
-          {showKahoot && roomId && (
+          {showKahoot && (
             <KahootVoteSession
-              roomId={roomId}
+              roomId={spectatorRoomId}
               question={
                 (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion
                   ? currentQuestion.question

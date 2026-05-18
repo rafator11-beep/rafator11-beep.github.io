@@ -1,8 +1,9 @@
 import { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { QRCodeSVG } from 'qrcode.react';
-import { Wifi, Eye, Smartphone, X, RefreshCw } from 'lucide-react';
+import { Wifi, Eye, Smartphone, X, RefreshCw, UserCircle2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { KahootVoteSession } from '@/components/game/KahootVoteSession';
 
 interface SpectatorViewProps {
   roomId: string;
@@ -13,15 +14,23 @@ interface SpectatorViewProps {
 interface CardState {
   text: string;
   playerName: string;
+  players?: string[];
+  kahootConfig?: {
+    question: string;
+    options: string[];
+    correctAnswer?: string;
+  };
   cardIndex: number;
   timestamp: number;
 }
 
 // ── HOST MODE: muestra el QR y emite cartas ────────────────────────────────
-export function SpectatorQRPanel({ roomId, currentCard, currentPlayer }: {
+export function SpectatorQRPanel({ roomId, currentCard, currentPlayer, players, kahootConfig }: {
   roomId: string;
   currentCard: string;
   currentPlayer: string;
+  players: string[];
+  kahootConfig?: any;
 }) {
   const spectatorUrl = `${window.location.origin}${window.location.pathname}?room=${roomId}&spectator=true`;
 
@@ -37,6 +46,8 @@ export function SpectatorQRPanel({ roomId, currentCard, currentPlayer }: {
           payload: {
             text: currentCard,
             playerName: currentPlayer,
+            players: players,
+            kahootConfig: kahootConfig,
             cardIndex: Date.now(),
             timestamp: Date.now(),
           },
@@ -44,7 +55,7 @@ export function SpectatorQRPanel({ roomId, currentCard, currentPlayer }: {
       }
     });
     return () => { supabase.removeChannel(channel); };
-  }, [roomId, currentCard, currentPlayer]);
+  }, [roomId, currentCard, currentPlayer, players, kahootConfig]);
 
   const [showQR, setShowQR] = useState(false);
 
@@ -130,6 +141,7 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
   const [cardState, setCardState] = useState<CardState | null>(null);
   const [connected, setConnected] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [myPlayerName, setMyPlayerName] = useState<string | null>(null);
 
   useEffect(() => {
     if (!roomId) return;
@@ -169,6 +181,31 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
           {connected ? 'En vivo' : 'Conectando...'}
         </div>
       </div>
+
+      {/* Identificación de jugador */}
+      {!myPlayerName && cardState?.players && cardState.players.length > 0 && (
+        <div className="mb-6 w-full max-w-md rounded-[24px] border border-white/10 bg-white/5 p-5 backdrop-blur-md">
+          <p className="mb-3 text-center text-sm font-semibold text-white/80">¿Quién eres?</p>
+          <div className="grid grid-cols-2 gap-2">
+            {cardState.players.map(p => (
+              <button
+                key={p}
+                onClick={() => setMyPlayerName(p)}
+                className="flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-sm font-medium text-white transition hover:bg-white/20 active:scale-95"
+              >
+                <UserCircle2 className="h-4 w-4 opacity-70" />
+                <span className="truncate">{p}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {myPlayerName && (
+        <div className="mb-4 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-xs font-semibold text-emerald-300">
+          Jugando como: {myPlayerName}
+        </div>
+      )}
 
       {/* Card display */}
       <AnimatePresence mode="wait">
@@ -219,6 +256,20 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
                 : 'Conectando a la sala...'}
             </p>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* KAHOOT MODAL para el espectador */}
+      <AnimatePresence>
+        {cardState?.kahootConfig && (
+          <KahootVoteSession
+            roomId={roomId}
+            question={cardState.kahootConfig.question}
+            options={cardState.kahootConfig.options}
+            correctAnswer={cardState.kahootConfig.correctAnswer}
+            isHost={false}
+            onClose={() => {}}
+          />
         )}
       </AnimatePresence>
 
