@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Player } from '@/types/game';
-import { GameEvent } from './useGameMemory';
+import { GameEvent, PlayerStats, enrichChallengeWithAI } from './useGameMemory';
+import { supabase, isSupabaseConfigured } from '@/integrations/supabase/client';
 
 export interface TorneoMatch {
   player1: Player;
@@ -15,43 +16,63 @@ export interface TorneoScore {
   losses: number;
 }
 
-const SUPABASE_URL = 'https://atswsltnjjsokouvfbut.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0c3dzbHRuampzb2tvdXZmYnV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0MDc4OTIsImV4cCI6MjA4NTk4Mzg5Mn0.nHTssvN_MarKXhO0geAsOikj9qUX0CdixQQ-e4r8nDw';
+// ─── Edge Function wrappers (using supabase client) ─────────────────────────
 
-async function fetchTorneoAnnouncement(p1: string, p2: string, reto: string): Promise<string | null> {
+async function fetchTorneoAnnouncement(
+  p1: string,
+  p2: string,
+  reto: string,
+  memorySummary: string[]
+): Promise<string | null> {
+  if (!isSupabaseConfigured) return null;
   try {
-    const res = await fetch(`${SUPABASE_URL}/functions/v1/generate-card`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON}` },
-      body: JSON.stringify({ mode: 'torneo', player1: p1, player2: p2, retoText: reto }),
+    const { data, error } = await supabase.functions.invoke('generate-card', {
+      body: {
+        mode: 'torneo',
+        player1: p1,
+        player2: p2,
+        retoText: reto,
+        memory: memorySummary.slice(-20), // últimos 20 eventos para contexto
+      },
     });
-    const data = await res.json();
-    return data.announcement || null;
+    if (error) return null;
+    return data?.announcement || null;
   } catch { return null; }
 }
 
-interface PlayerStats {
-  nombre: string;
-  tragos_bebidos: number;
-  retos_completados: number;
-  retos_fallados: number;
-  veces_votado: number;
-  torneos_ganados: number;
-  torneos_perdidos: number;
-  veces_prefirio_beber: number;
-}
-
-async function fetchRoundAnalysis(playerStats: PlayerStats[], round: number): Promise<string | null> {
+async function fetchRoundAnalysis(
+  players: string[],
+  round: number,
+  summary: string[],
+  playerStats: Record<string, PlayerStats>
+): Promise<string | null> {
+  if (!isSupabaseConfigured) return null;
   try {
-    const res = await fetch(`${SUPABASE_URL}/functions/v1/generate-card`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON}` },
-      body: JSON.stringify({ mode: 'analysis', playerStats, round }),
+    // Build stats digest for the AI
+    const statsDigest = Object.values(playerStats).map(s => {
+      const parts: string[] = [];
+      if (s.tragos > 0) parts.push(`${s.tragos}🍻`);
+      if (s.retos_fallados > 0) parts.push(`${s.retos_fallados} fallos`);
+      if (s.retos_completados > 0) parts.push(`${s.retos_completados} éxitos`);
+      if (s.torneos_ganados > 0) parts.push(`${s.torneos_ganados}🏆`);
+      return parts.length > 0 ? `${s.playerName}: ${parts.join(', ')}` : null;
+    }).filter(Boolean);
+
+    const { data, error } = await supabase.functions.invoke('generate-card', {
+      body: {
+        mode: 'analysis',
+        players,
+        round,
+        roundSummary: summary,
+        playerStatsDigest: statsDigest,
+      },
     });
-    const data = await res.json();
-    return data.comment || null;
+    if (error) return null;
+    return data?.comment || null;
   } catch { return null; }
 }
+
+// ─── Hook ───────────────────────────────────────────────────────────────────
 
 export function useTorneoManager(players: Player[]) {
   const [scores, setScores] = useState<Record<string, TorneoScore>>(() =>
@@ -61,35 +82,47 @@ export function useTorneoManager(players: Player[]) {
   const [roundComment, setRoundComment] = useState<string | null>(null);
   const [roundCommentVisible, setRoundCommentVisible] = useState(false);
 
-  // Pick 2 players for a torneo match — prefer those with most reto activity
+  // ── Build Match ─────────────────────────────────────────────────────────
+  // Solo usa retos que sean explícitamente 1v1 (Tarea 3: filtro isDuel)
   const buildMatch = useCallback(async (
     events: GameEvent[],
-    retoPool: string[]
+    retoPool: string[],
+    memorySummary: string[] = []
   ): Promise<TorneoMatch | null> => {
     if (players.length < 2 || retoPool.length === 0) return null;
 
-    // Count reto activity per player
+    // Filtro Tarea 3: solo retos head-to-head (contienen "{player2}" o "vs")
+    const duelRetos = retoPool.filter(r =>
+      r.includes('{player2}') || r.toLowerCase().includes(' vs ')
+    );
+    const pool = duelRetos.length > 0 ? duelRetos : retoPool;
+
+    // Pick 2 players — prefer those with most activity or least torneo wins
     const activity: Record<string, number> = {};
     events.forEach(e => {
-      if (e.type === 'reto_done' || e.type === 'reto_fail') {
+      if (e.type === 'reto_done' || e.type === 'reto_fail' || e.type === 'torneo_win' || e.type === 'torneo_lose') {
         activity[e.playerId] = (activity[e.playerId] || 0) + 1;
       }
     });
 
-    // Sort players by activity, pick top 2 (shuffle if tied)
-    const sorted = [...players].sort((a, b) => (activity[b.id] || 0) - (activity[a.id] || 0));
-    // If no activity yet, pick 2 random
+    // Shuffle to add randomness, then sort by activity
+    const shuffled = [...players].sort(() => Math.random() - 0.5);
+    const sorted = shuffled.sort((a, b) => (activity[b.id] || 0) - (activity[a.id] || 0));
     const p1 = sorted[0];
-    const p2 = sorted[1] ?? sorted[0];
+    const p2 = sorted.find(p => p.id !== p1.id) || sorted[1];
+    if (!p1 || !p2 || p1.id === p2.id) return null;
 
-    const reto = retoPool[Math.floor(Math.random() * retoPool.length)];
+    const reto = pool[Math.floor(Math.random() * pool.length)];
 
-    // Fetch AI announcement in background
-    const announcement = await fetchTorneoAnnouncement(p1.name, p2.name, reto);
+    // Fetch AI announcement with memory context
+    const announcement = await fetchTorneoAnnouncement(
+      p1.name, p2.name, reto, memorySummary
+    );
 
     return { player1: p1, player2: p2, retoText: reto, announcement };
   }, [players]);
 
+  // ── Record Win ──────────────────────────────────────────────────────────
   const recordWin = useCallback((winnerId: string, loserId: string) => {
     setScores(prev => ({
       ...prev,
@@ -99,51 +132,40 @@ export function useTorneoManager(players: Player[]) {
     setCurrentMatch(null);
   }, []);
 
-  const triggerRoundAnalysis = useCallback(async (round: number, roundEvents: GameEvent[]) => {
+  // ── Round Analysis (with memory + stats) ────────────────────────────────
+  const triggerRoundAnalysis = useCallback(async (
+    round: number,
+    roundEvents: GameEvent[],
+    allStats: Record<string, PlayerStats>
+  ) => {
     if (roundEvents.length === 0) return;
-
-    // Build structured per-player stats JSON
-    const statsMap: Record<string, PlayerStats> = {};
-    for (const p of players) {
-      statsMap[p.name] = {
-        nombre: p.name,
-        tragos_bebidos: 0,
-        retos_completados: 0,
-        retos_fallados: 0,
-        veces_votado: 0,
-        torneos_ganados: 0,
-        torneos_perdidos: 0,
-        veces_prefirio_beber: 0,
-      };
-    }
-    for (const e of roundEvents) {
-      const s = statsMap[e.playerName];
-      if (!s) continue;
+    const summary = roundEvents.map(e => {
       switch (e.type) {
-        case 'yo_nunca_yes':    s.tragos_bebidos++; break;
-        case 'reto_done':       s.retos_completados++; break;
-        case 'reto_fail':       s.retos_fallados++; s.tragos_bebidos += 3; break;
-        case 'voted':           s.veces_votado++; break;
-        case 'torneo_win':      s.torneos_ganados++; break;
-        case 'verdad_drink':    s.veces_prefirio_beber++; s.tragos_bebidos++; break;
-        case 'duelo_lose':      s.torneos_perdidos++; break;
+        case 'yo_nunca_yes': return `${e.playerName} bebió en yo nunca`;
+        case 'reto_done': return `${e.playerName} completó su reto`;
+        case 'reto_fail': return `${e.playerName} no completó su reto`;
+        case 'voted': return `${e.playerName} fue el más votado`;
+        case 'torneo_win': return `${e.playerName} ganó el torneo`;
+        case 'torneo_lose': return `${e.playerName} perdió el torneo`;
+        case 'duelo_win': return `${e.playerName} ganó un duelo`;
+        case 'duelo_lose': return `${e.playerName} perdió un duelo`;
+        case 'drink': return `${e.playerName} bebió`;
+        default: return null;
       }
-    }
+    }).filter(Boolean) as string[];
 
-    const playerStats = Object.values(statsMap).filter(s =>
-      s.tragos_bebidos + s.retos_completados + s.retos_fallados +
-      s.veces_votado + s.torneos_ganados + s.torneos_perdidos + s.veces_prefirio_beber > 0
+    if (summary.length === 0) return;
+    const comment = await fetchRoundAnalysis(
+      players.map(p => p.name), round, summary, allStats
     );
-    if (playerStats.length === 0) return;
-
-    const comment = await fetchRoundAnalysis(playerStats, round);
     if (comment) {
       setRoundComment(comment);
       setRoundCommentVisible(true);
-      setTimeout(() => setRoundCommentVisible(false), 5000);
+      setTimeout(() => setRoundCommentVisible(false), 6000);
     }
   }, [players]);
 
+  // ── Standings ───────────────────────────────────────────────────────────
   const getStandings = useCallback(() => {
     return [...players]
       .map(p => ({ ...p, ...scores[p.id] }))
