@@ -4,6 +4,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Wifi, Eye, Smartphone, X, RefreshCw, UserCircle2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { KahootVoteSession } from '@/components/game/KahootVoteSession';
+import { createPortal } from 'react-dom';
 
 interface SpectatorViewProps {
   roomId: string;
@@ -70,68 +71,71 @@ export function SpectatorQRPanel({ roomId, currentCard, currentPlayer, players, 
         <span className="hidden sm:inline">QR</span>
       </button>
 
-      <AnimatePresence>
-        {showQR && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[999] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
-            onClick={() => setShowQR(false)}
-          >
+      {typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {showQR && (
             <motion.div
-              initial={{ scale: 0.85, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.85, y: 20 }}
-              onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-sm rounded-[32px] border border-white/10 bg-[#0f0f1a] p-6 shadow-2xl"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[999] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+              onClick={() => setShowQR(false)}
             >
-              <button
-                onClick={() => setShowQR(false)}
-                className="absolute right-4 top-4 rounded-xl p-2 text-white/40 hover:bg-white/10 hover:text-white"
+              <motion.div
+                initial={{ scale: 0.85, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.85, y: 20 }}
+                onClick={(e) => e.stopPropagation()}
+                className="relative w-full max-w-sm rounded-[32px] border border-white/10 bg-[#0f0f1a] p-6 shadow-2xl"
               >
-                <X className="h-4 w-4" />
-              </button>
+                <button
+                  onClick={() => setShowQR(false)}
+                  className="absolute right-4 top-4 rounded-xl p-2 text-white/40 hover:bg-white/10 hover:text-white"
+                >
+                  <X className="h-4 w-4" />
+                </button>
 
-              <div className="mb-5 flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[hsl(var(--accent)/0.15)]">
-                  <Smartphone className="h-5 w-5 text-[hsl(var(--accent))]" />
+                <div className="mb-5 flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[hsl(var(--accent)/0.15)]">
+                    <Smartphone className="h-5 w-5 text-[hsl(var(--accent))]" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                      Modo Espectador
+                    </p>
+                    <h2 className="text-base font-bold text-white">Ver en tu móvil</h2>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                    Modo Espectador
-                  </p>
-                  <h2 className="text-base font-bold text-white">Ver en tu móvil</h2>
+
+                <div className="flex justify-center rounded-2xl bg-white p-4">
+                  <QRCodeSVG
+                    value={spectatorUrl}
+                    size={200}
+                    bgColor="#ffffff"
+                    fgColor="#0f0f1a"
+                    level="M"
+                  />
                 </div>
-              </div>
 
-              <div className="flex justify-center rounded-2xl bg-white p-4">
-                <QRCodeSVG
-                  value={spectatorUrl}
-                  size={200}
-                  bgColor="#ffffff"
-                  fgColor="#0f0f1a"
-                  level="M"
-                />
-              </div>
+                <p className="mt-4 text-center text-sm leading-6 text-muted-foreground">
+                  Escanea con la cámara del móvil para ver las cartas en tiempo real
+                </p>
 
-              <p className="mt-4 text-center text-sm leading-6 text-muted-foreground">
-                Escanea con la cámara del móvil para ver las cartas en tiempo real
-              </p>
+                <div className="mt-4 flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+                  <Wifi className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
+                  <p className="truncate text-xs text-muted-foreground font-mono">{spectatorUrl}</p>
+                </div>
 
-              <div className="mt-4 flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2">
-                <Wifi className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
-                <p className="truncate text-xs text-muted-foreground font-mono">{spectatorUrl}</p>
-              </div>
-
-              <div className="mt-3 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
-                <Eye className="h-3 w-3" />
-                Las cartas se sincronizan en tiempo real
-              </div>
+                <div className="mt-3 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+                  <Eye className="h-3 w-3" />
+                  Las cartas se sincronizan en tiempo real
+                </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </>
   );
 }

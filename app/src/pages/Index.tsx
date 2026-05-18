@@ -27,6 +27,7 @@ const GamePlay = lazy(() => import('@/components/game/GamePlay').then(m => ({ de
 const LobbyScreen = lazy(() => import('@/components/multiplayer/LobbyScreen').then(m => ({ default: m.LobbyScreen })));
 const PlayerSetup = lazy(() => import('@/components/game/PlayerSetup').then(m => ({ default: m.PlayerSetup })));
 const GuestSetup = lazy(() => import('@/components/game/GuestSetup').then(m => ({ default: m.GuestSetup })));
+const SpectatorView = lazy(() => import('@/components/game/SpectatorView').then(m => ({ default: m.SpectatorView })));
 
 type AppTab = 'inicio' | 'perfiles' | 'jugar' | 'historial' | 'ajustes' | 'arcade' | 'hall';
 import {
@@ -44,7 +45,7 @@ const AppSettings = lazy(() => import('@/pages/AppSettings').then(module => ({ d
 const ArcadeTab = lazy(() => import('@/components/arcade/ArcadeTab').then(module => ({ default: module.ArcadeTab })));
 const HallOfFame = lazy(() => import('@/pages/HallOfFame').then(module => ({ default: module.HallOfFame })));
 
-export type GameScreen = 'mode-select' | 'team-mode-select' | 'player-setup' | 'playing' | 'lobby' | 'guest-setup';
+export type GameScreen = 'mode-select' | 'team-mode-select' | 'player-setup' | 'playing' | 'lobby' | 'guest-setup' | 'spectator';
 
 // Modes that support team play
 const TEAM_CAPABLE_MODES: GameMode[] = ['cultura', 'trivia_futbol', 'futbol', 'yo_nunca'];
@@ -81,7 +82,12 @@ function GameAppInner() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('room')) {
-      setScreen('lobby');
+      if (params.get('spectator') === 'true') {
+        setRoomId(params.get('room'));
+        setScreen('spectator');
+      } else {
+        setScreen('lobby');
+      }
     }
   }, []);
 
@@ -428,6 +434,16 @@ function GameAppInner() {
         return (
           <Suspense fallback={<div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white font-arcade animate-pulse"><Loader2 className="w-12 h-12 animate-spin mb-4 text-primary" /> INICIANDO PARTIDA...</div>}>
             <GamePlay onExit={handleExit} isTeamMode={isTeamMode} roomId={roomId} isHost={isHost} />
+          </Suspense>
+        );
+
+      case 'spectator':
+        return (
+          <Suspense fallback={<div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white"><Loader2 className="w-8 h-8 animate-spin text-primary" /> Cargando vista...</div>}>
+            <SpectatorView roomId={roomId!} onClose={() => {
+              setScreen('mode-select');
+              setRoomId(null);
+            }} />
           </Suspense>
         );
 
