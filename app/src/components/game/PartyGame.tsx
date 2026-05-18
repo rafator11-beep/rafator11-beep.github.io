@@ -33,6 +33,7 @@ import { RetoOutcome } from '@/components/game/RetoOutcome';
 import { useGameMemory } from '@/hooks/game/useGameMemory';
 import { useTorneoManager } from '@/hooks/game/useTorneoManager';
 import { TorneoRound } from '@/components/game/TorneoRound';
+import { MegamixTournament } from '@/components/game/MegamixTournament';
 
 import { ChatComponent } from '@/components/multiplayer/ChatComponent';
 import { PeerBubbles } from '@/components/multiplayer/PeerBubbles';
@@ -549,6 +550,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     roundCommentVisible,
   } = useTorneoManager(players);
   const [showTorneoRound, setShowTorneoRound] = useState(false);
+  const [showMegamixTournament, setShowMegamixTournament] = useState(false);
   // Track whether we've shown response UI for the current card index
   const respondedCardRef = useRef<number>(-1);
   // Count cards shown to know when to inject AI card
@@ -1102,6 +1104,13 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               currentImpostorFake: round.impostorQuestion || round.hint || '',
             },
           }));
+        } else {
+          const timer = setTimeout(() => advanceTurn(true), 100);
+          return () => clearTimeout(timer);
+        }
+      } else if (triggerType === 'MEGATORNEO') {
+        if (players.length >= 2) {
+          setShowMegamixTournament(true);
         } else {
           const timer = setTimeout(() => advanceTurn(true), 100);
           return () => clearTimeout(timer);
@@ -2868,6 +2877,24 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               if (winner) addScore(winner.id, 30);
               if (winner) addEvent('torneo_win', winner, 'torneo', gameState.round);
               toast.success(`👑 ${winner?.name || 'Ganador'} gana el torneo — reparte 3 tragos!`, { duration: 3000 });
+              advanceTurn(true);
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* ── TORNEO MEGAMIX COMPLETO (bracket KO) ── */}
+      <AnimatePresence>
+        {showMegamixTournament && players.length >= 2 && (
+          <MegamixTournament
+            players={players}
+            addScore={addScore}
+            onWinner={(winner, loser) => {
+              addEvent('torneo_win', winner, 'bracket_torneo', gameState.round);
+              toast.success(`👑 ${winner.name} elimina a ${loser.name} — reparte 3 tragos!`, { duration: 2500 });
+            }}
+            onClose={() => {
+              setShowMegamixTournament(false);
               advanceTurn(true);
             }}
           />

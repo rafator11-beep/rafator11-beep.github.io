@@ -6916,6 +6916,7 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
 
   const torneoTriggers = shuffleArray([
     ...Array(3).fill("TRIGGER:TORNEO"),
+    "TRIGGER:MEGATORNEO",
   ]);
 
   const globalNormas = shuffleArray(normasRonda.map(n =>
