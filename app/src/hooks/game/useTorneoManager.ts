@@ -30,12 +30,23 @@ async function fetchTorneoAnnouncement(p1: string, p2: string, reto: string): Pr
   } catch { return null; }
 }
 
-async function fetchRoundAnalysis(players: string[], round: number, summary: string[]): Promise<string | null> {
+interface PlayerStats {
+  nombre: string;
+  tragos_bebidos: number;
+  retos_completados: number;
+  retos_fallados: number;
+  veces_votado: number;
+  torneos_ganados: number;
+  torneos_perdidos: number;
+  veces_prefirio_beber: number;
+}
+
+async function fetchRoundAnalysis(playerStats: PlayerStats[], round: number): Promise<string | null> {
   try {
     const res = await fetch(`${SUPABASE_URL}/functions/v1/generate-card`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON}` },
-      body: JSON.stringify({ mode: 'analysis', players, round, roundSummary: summary }),
+      body: JSON.stringify({ mode: 'analysis', playerStats, round }),
     });
     const data = await res.json();
     return data.comment || null;
@@ -90,19 +101,42 @@ export function useTorneoManager(players: Player[]) {
 
   const triggerRoundAnalysis = useCallback(async (round: number, roundEvents: GameEvent[]) => {
     if (roundEvents.length === 0) return;
-    const summary = roundEvents.map(e => {
-      switch (e.type) {
-        case 'yo_nunca_yes': return `${e.playerName} bebió en yo nunca`;
-        case 'reto_done': return `${e.playerName} completó su reto`;
-        case 'reto_fail': return `${e.playerName} no completó su reto`;
-        case 'voted': return `${e.playerName} fue el más votado`;
-        case 'torneo_win': return `${e.playerName} ganó el torneo`;
-        default: return null;
-      }
-    }).filter(Boolean) as string[];
 
-    if (summary.length === 0) return;
-    const comment = await fetchRoundAnalysis(players.map(p => p.name), round, summary);
+    // Build structured per-player stats JSON
+    const statsMap: Record<string, PlayerStats> = {};
+    for (const p of players) {
+      statsMap[p.name] = {
+        nombre: p.name,
+        tragos_bebidos: 0,
+        retos_completados: 0,
+        retos_fallados: 0,
+        veces_votado: 0,
+        torneos_ganados: 0,
+        torneos_perdidos: 0,
+        veces_prefirio_beber: 0,
+      };
+    }
+    for (const e of roundEvents) {
+      const s = statsMap[e.playerName];
+      if (!s) continue;
+      switch (e.type) {
+        case 'yo_nunca_yes':    s.tragos_bebidos++; break;
+        case 'reto_done':       s.retos_completados++; break;
+        case 'reto_fail':       s.retos_fallados++; s.tragos_bebidos += 3; break;
+        case 'voted':           s.veces_votado++; break;
+        case 'torneo_win':      s.torneos_ganados++; break;
+        case 'verdad_drink':    s.veces_prefirio_beber++; s.tragos_bebidos++; break;
+        case 'duelo_lose':      s.torneos_perdidos++; break;
+      }
+    }
+
+    const playerStats = Object.values(statsMap).filter(s =>
+      s.tragos_bebidos + s.retos_completados + s.retos_fallados +
+      s.veces_votado + s.torneos_ganados + s.torneos_perdidos + s.veces_prefirio_beber > 0
+    );
+    if (playerStats.length === 0) return;
+
+    const comment = await fetchRoundAnalysis(playerStats, round);
     if (comment) {
       setRoundComment(comment);
       setRoundCommentVisible(true);
