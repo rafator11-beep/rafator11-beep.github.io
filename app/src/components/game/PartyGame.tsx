@@ -27,10 +27,12 @@ import { vibe } from '@/lib/vibration';
 import { GameMode } from '@/types/game';
 import { duelos } from '@/data/duelosContent';
 import { impostorRounds } from '@/data/impostorContent';
-import { isIndividualCard } from '@/data/gameContent';
+import { isIndividualCard, torneoRetos } from '@/data/gameContent';
 import { YoNuncaResponse } from '@/components/game/YoNuncaResponse';
 import { RetoOutcome } from '@/components/game/RetoOutcome';
 import { useGameMemory } from '@/hooks/game/useGameMemory';
+import { useTorneoManager } from '@/hooks/game/useTorneoManager';
+import { TorneoRound } from '@/components/game/TorneoRound';
 
 import { ChatComponent } from '@/components/multiplayer/ChatComponent';
 import { PeerBubbles } from '@/components/multiplayer/PeerBubbles';
@@ -530,10 +532,23 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
   const [virusReceived, setVirusReceived] = useState<Record<string, number>>({});
 
   // --- AI MEMORY SYSTEM ---
-  const { addEvent, addEvents, hasAiCard, peekAiCard, consumeAiCard } = useGameMemory(players);
+  const { events: gameEvents, addEvent, addEvents, hasAiCard, peekAiCard, consumeAiCard } = useGameMemory(players);
   const [showYoNuncaResponse, setShowYoNuncaResponse] = useState(false);
   const [showRetoOutcome, setShowRetoOutcome] = useState(false);
   const [aiCardOverride, setAiCardOverride] = useState<string | null>(null);
+
+  // --- TORNEO SYSTEM ---
+  const {
+    scores: torneoScores,
+    currentMatch: torneoMatch,
+    setCurrentMatch: setTorneoMatch,
+    buildMatch: buildTorneoMatch,
+    recordWin: recordTorneoWin,
+    triggerRoundAnalysis,
+    roundComment,
+    roundCommentVisible,
+  } = useTorneoManager(players);
+  const [showTorneoRound, setShowTorneoRound] = useState(false);
   // Track whether we've shown response UI for the current card index
   const respondedCardRef = useRef<number>(-1);
   // Count cards shown to know when to inject AI card
@@ -1091,6 +1106,20 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           const timer = setTimeout(() => advanceTurn(true), 100);
           return () => clearTimeout(timer);
         }
+      } else if (triggerType === 'TORNEO') {
+        if (players.length >= 2 && !showTorneoRound) {
+          buildTorneoMatch(gameEvents, torneoRetos).then(match => {
+            if (match) {
+              setTorneoMatch(match);
+              setShowTorneoRound(true);
+            } else {
+              advanceTurn(true);
+            }
+          });
+        } else {
+          const timer = setTimeout(() => advanceTurn(true), 100);
+          return () => clearTimeout(timer);
+        }
       } else {
         // Unknown triggers - auto-skip to prevent getting stuck
         const timer = setTimeout(() => advanceTurn(true), 100);
@@ -1115,7 +1144,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       }
     }
 
-  }, [currentText, advanceTurn, applyRandomVirus, currentPlayer, players, setGameState, loadSpecificQuestion]); // Mejora 1: Correct dependencies
+  }, [currentText, advanceTurn, applyRandomVirus, currentPlayer, players, setGameState, loadSpecificQuestion, showTorneoRound, buildTorneoMatch, gameEvents, setTorneoMatch]); // Mejora 1: Correct dependencies
 
   // ── Inyección de carta IA cada 10 cartas individuales ─────────────────────
   useEffect(() => {
@@ -1127,6 +1156,13 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentIndex]);
+
+  // Show AI round analysis comment as toast
+  useEffect(() => {
+    if (roundCommentVisible && roundComment) {
+      toast(roundComment, { duration: 5000, position: 'top-center' });
+    }
+  }, [roundCommentVisible, roundComment]);
 
   // YoNunca Equipos Logic Interception
   useEffect(() => {
@@ -1229,6 +1265,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
       syncAllPlayers();
       saveGameToHistory();
+      triggerRoundAnalysis(gameState.round, gameEvents);
       setRoundSnapshot({
         round: gameState.round,
         scores: scores
@@ -2811,6 +2848,28 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           <RetoOutcome
             player={currentPlayer}
             onResult={handleRetoOutcome}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* ── TORNEO ROUND OVERLAY ── */}
+      <AnimatePresence>
+        {showTorneoRound && torneoMatch && (
+          <TorneoRound
+            match={torneoMatch}
+            torneoScores={Object.fromEntries(
+              Object.entries(torneoScores).map(([id, s]) => [id, { wins: s.wins, losses: s.losses }])
+            )}
+            onWinner={(winnerId, loserId) => {
+              recordTorneoWin(winnerId, loserId);
+              setShowTorneoRound(false);
+              const winner = players.find(p => p.id === winnerId);
+              const loser = players.find(p => p.id === loserId);
+              if (winner) addScore(winner.id, 30);
+              if (winner) addEvent('torneo_win', winner, 'torneo', gameState.round);
+              toast.success(`👑 ${winner?.name || 'Ganador'} gana el torneo — reparte 3 tragos!`, { duration: 3000 });
+              advanceTurn(true);
+            }}
           />
         )}
       </AnimatePresence>

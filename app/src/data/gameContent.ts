@@ -46,6 +46,8 @@ import { votacionExtra15, verdadOBebeExtra15 } from './gameContentExtra15';
 import { retosExtra16, cadenaExtra16, categoriasExtra16, mimicaExtra16 } from './gameContentExtra16';
 import { salseoExtra17, clasicoExtra17, picanteExtra17 } from './gameContentExtra17';
 import { yoNuncaExtra18, votacionExtra18, verdadOBebeExtra18 } from './gameContentExtra18';
+import { retosExtra19, torneoRetos } from './gameContentExtra19';
+export { torneoRetos };
 import { mimicaChallenges } from './mimicaContent';
 import { bocaCerradaChallenges } from './bocaCerradaContent';
 import { impostorRounds } from './impostorContent';
@@ -6645,6 +6647,8 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
   const retosPool = cleanDeckPool([...categoriasReto, ...(categoriasRetoExtra || []), ...(categoriasRetoExtra2 || []), ...(categoriasRetoExtra3 || []), ...(retosExtra12 || []), ...retosExtra14,
     // ── EXTRA 16 ──
     ...retosExtra16,
+    // ── EXTRA 19 ──
+    ...retosExtra19,
     // ── MEGA EXPANSION ──
     ...retosNuevo,
   ]);
@@ -6910,12 +6914,17 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     "TRIGGER:VIRUS"
   ]);
 
+  const torneoTriggers = shuffleArray([
+    ...Array(3).fill("TRIGGER:TORNEO"),
+  ]);
+
   const globalNormas = shuffleArray(normasRonda.map(n =>
     `📜 NORMA: ${n.replace(/NORMA:|NORMA: |📜 |\\\./g, '').trim()}`
   ));
 
   let triggerPtr = 0;
   let normaPtr = 0;
+  let torneoPtr = 0;
   let gPtr = 0;
   let iPtr = 0;
 
@@ -6934,6 +6943,11 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
       } else if (deck.length > 0 && deck.length % 30 === 0) {
         deck.push(globalNormas[normaPtr % globalNormas.length]);
         normaPtr++;
+        if (deck.length >= count) break;
+        continue;
+      } else if (deck.length > 0 && deck.length % 18 === 0) {
+        deck.push(torneoTriggers[torneoPtr % torneoTriggers.length]);
+        torneoPtr++;
         if (deck.length >= count) break;
         continue;
       } else if (deck.length > 0 && deck.length % 15 === 0) {

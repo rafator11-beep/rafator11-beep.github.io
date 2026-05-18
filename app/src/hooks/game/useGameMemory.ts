@@ -9,7 +9,8 @@ export type GameEventType =
   | 'verdad_drink'
   | 'verdad_told'
   | 'duelo_win'
-  | 'duelo_lose';
+  | 'duelo_lose'
+  | 'torneo_win';
 
 export interface GameEvent {
   id: string;
