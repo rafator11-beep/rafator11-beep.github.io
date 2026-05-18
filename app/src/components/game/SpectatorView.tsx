@@ -145,7 +145,18 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
   const [cardState, setCardState] = useState<CardState | null>(null);
   const [connected, setConnected] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
-  const [myPlayerName, setMyPlayerName] = useState<string | null>(null);
+  
+  const [myPlayerName, setMyPlayerName] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('beep_spectator_name') || null;
+    }
+    return null;
+  });
+
+  const handleSelectPlayer = (p: string) => {
+    setMyPlayerName(p);
+    localStorage.setItem('beep_spectator_name', p);
+  };
 
   useEffect(() => {
     if (!roomId) return;
@@ -194,7 +205,7 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
             {cardState.players.map(p => (
               <button
                 key={p}
-                onClick={() => setMyPlayerName(p)}
+                onClick={() => handleSelectPlayer(p)}
                 className="flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-sm font-medium text-white transition hover:bg-white/20 active:scale-95"
               >
                 <UserCircle2 className="h-4 w-4 opacity-70" />
@@ -206,8 +217,19 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
       )}
 
       {myPlayerName && (
-        <div className="mb-4 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-xs font-semibold text-emerald-300">
-          Jugando como: {myPlayerName}
+        <div className="mb-4 flex items-center justify-between w-full max-w-md rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5">
+          <span className="text-xs font-semibold text-emerald-300">
+            Jugando como: {myPlayerName}
+          </span>
+          <button 
+            onClick={() => {
+              setMyPlayerName(null);
+              localStorage.removeItem('beep_spectator_name');
+            }}
+            className="text-[10px] uppercase tracking-wider text-emerald-400/60 hover:text-emerald-300 transition"
+          >
+            Cambiar
+          </button>
         </div>
       )}
 

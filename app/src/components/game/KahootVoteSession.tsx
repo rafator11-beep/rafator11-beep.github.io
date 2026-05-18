@@ -11,12 +11,14 @@ interface KahootVoteSessionProps {
   isHost: boolean;
   onClose: () => void;
   onResult?: (winner: string, votes: Record<string, number>) => void;
+  mode?: 'standard' | 'fastest_finger';
 }
 
 interface VotePayload {
   voter: string;
   target: string;
   timestamp: number;
+  reactionTime?: number;
 }
 
 const VOTE_DURATION = 20; // segundos
@@ -41,14 +43,17 @@ export function KahootVoteSession({
   isHost,
   onClose,
   onResult,
+  mode = 'standard',
 }: KahootVoteSessionProps) {
   const [votes, setVotes] = useState<Record<string, number>>({});
   const [myVote, setMyVote] = useState<string | null>(null);
-  const [phase, setPhase] = useState<'voting' | 'results'>('voting');
-  const [timeLeft, setTimeLeft] = useState(VOTE_DURATION);
+  const [phase, setPhase] = useState<'countdown' | 'voting' | 'results'>(mode === 'fastest_finger' ? 'countdown' : 'voting');
+  const [timeLeft, setTimeLeft] = useState(mode === 'fastest_finger' ? 3 : VOTE_DURATION);
   const [totalVoters, setTotalVoters] = useState(0);
+  const [fastestWinner, setFastestWinner] = useState<{ name: string, time: number } | null>(null);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const startTimeRef = useRef<number>(0);
 
   // Initialize votes map
   useEffect(() => {
@@ -63,16 +68,32 @@ export function KahootVoteSession({
 
     const channel = supabase.channel(`kahoot:${roomId}`)
       .on('broadcast', { event: 'vote_cast' }, (payload) => {
-        const { target } = payload.payload as VotePayload;
-        setVotes(prev => ({
-          ...prev,
-          [target]: (prev[target] || 0) + 1,
-        }));
-        setTotalVoters(prev => prev + 1);
+        const { target, voter, reactionTime } = payload.payload as VotePayload;
+        
+        if (mode === 'fastest_finger') {
+          if (target === correctAnswer) {
+            setFastestWinner({ name: voter, time: reactionTime || 0 });
+            setPhase('results');
+            if (timerRef.current) clearInterval(timerRef.current);
+            if (isHost && onResult) onResult(voter, { [target]: 1 });
+          }
+        } else {
+          setVotes(prev => ({
+            ...prev,
+            [target]: (prev[target] || 0) + 1,
+          }));
+          setTotalVoters(prev => prev + 1);
+        }
       })
       .on('broadcast', { event: 'show_results' }, () => {
         setPhase('results');
         if (timerRef.current) clearInterval(timerRef.current);
+      })
+      .on('broadcast', { event: 'start_voting' }, () => {
+        if (!isHost) {
+          setPhase('voting');
+          startTimeRef.current = Date.now();
+        }
       })
       .subscribe();
 
@@ -81,36 +102,56 @@ export function KahootVoteSession({
       supabase.removeChannel(channel);
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [roomId]);
+  }, [roomId, mode, correctAnswer, isHost, onResult]);
 
   // Countdown timer (host only)
   useEffect(() => {
-    if (!isHost || phase !== 'voting') return;
+    if (!isHost) return;
 
-    timerRef.current = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) {
-          clearInterval(timerRef.current!);
-          revealResults();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+    if (phase === 'countdown') {
+      timerRef.current = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 1) {
+            clearInterval(timerRef.current!);
+            setPhase('voting');
+            setTimeLeft(mode === 'fastest_finger' ? 30 : VOTE_DURATION);
+            startTimeRef.current = Date.now();
+            channelRef.current?.send({ type: 'broadcast', event: 'start_voting', payload: {} });
+            return mode === 'fastest_finger' ? 30 : VOTE_DURATION;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else if (phase === 'voting') {
+      timerRef.current = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 1) {
+            clearInterval(timerRef.current!);
+            revealResults();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
 
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [isHost, phase]);
+  }, [isHost, phase, mode]);
 
   const castVote = useCallback(async (target: string) => {
-    if (myVote || !channelRef.current) return;
+    if (myVote || phase !== 'voting' || !channelRef.current) return;
     setMyVote(target);
+
+    // In fastest finger, wrong answer locks you out but doesn't end the session
+    const reactionTime = mode === 'fastest_finger' ? (Date.now() - startTimeRef.current) / 1000 : 0;
+    const voterName = localStorage.getItem('beep_spectator_name') || 'Jugador Anónimo';
 
     await channelRef.current.send({
       type: 'broadcast',
       event: 'vote_cast',
-      payload: { voter: 'player', target, timestamp: Date.now() } as VotePayload,
+      payload: { voter: voterName, target, timestamp: Date.now(), reactionTime } as VotePayload,
     });
-  }, [myVote]);
+  }, [myVote, phase, mode]);
 
   const revealResults = useCallback(async () => {
     setPhase('results');
@@ -136,14 +177,14 @@ export function KahootVoteSession({
       {/* Header */}
       <div className="mb-4 flex w-full max-w-2xl items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-yellow-400/15">
-            <Zap className="h-5 w-5 text-yellow-300" />
+          <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${mode === 'fastest_finger' ? 'bg-red-500/20' : 'bg-yellow-400/15'}`}>
+            <Zap className={`h-5 w-5 ${mode === 'fastest_finger' ? 'text-red-400' : 'text-yellow-300'}`} />
           </div>
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-              Modo Kahoot
+              {mode === 'fastest_finger' ? 'El Más Rápido' : 'Modo Kahoot'}
             </p>
-            <p className="text-sm font-bold text-white">¿Quién es más probable?</p>
+            <p className="text-sm font-bold text-white">{mode === 'fastest_finger' ? 'Bomba Cultural' : '¿Quién es más probable?'}</p>
           </div>
         </div>
 
@@ -165,31 +206,70 @@ export function KahootVoteSession({
         </div>
       </div>
 
-      {/* Question */}
-      <div className="mb-6 w-full max-w-2xl rounded-[24px] border border-yellow-400/20 bg-yellow-400/8 p-5">
-        <p className="text-center text-base font-semibold leading-relaxed text-white sm:text-lg">
-          {question}
-        </p>
-      </div>
+      <AnimatePresence mode="wait">
+        {phase === 'countdown' ? (
+          <motion.div
+            key="countdown"
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 1.5, opacity: 0 }}
+            className="flex flex-col items-center justify-center flex-1 w-full"
+          >
+            <p className="text-2xl font-bold text-red-400 mb-4 tracking-widest uppercase">¡ATENTOS!</p>
+            <p className="text-8xl font-black text-white drop-shadow-[0_0_20px_rgba(239,68,68,0.6)]">
+              {timeLeft}
+            </p>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="voting"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="w-full flex flex-col items-center"
+          >
+            {/* Question */}
+            <div className={`mb-6 w-full max-w-2xl rounded-[24px] border ${mode === 'fastest_finger' ? 'border-red-500/30 bg-red-500/10' : 'border-yellow-400/20 bg-yellow-400/8'} p-5`}>
+              <p className="text-center text-base font-semibold leading-relaxed text-white sm:text-lg">
+                {question}
+              </p>
+            </div>
 
-      {/* Vote stats */}
-      <div className="mb-4 flex items-center gap-4 text-sm text-muted-foreground">
-        <div className="flex items-center gap-1.5">
-          <Users className="h-3.5 w-3.5" />
-          <span>{totalVoters} voto{totalVoters !== 1 ? 's' : ''}</span>
-        </div>
-        {phase === 'voting' && !myVote && !isHost && (
-          <span className="text-yellow-300 font-semibold animate-pulse">¡Vota ahora!</span>
-        )}
-        {myVote && phase === 'voting' && (
-          <span className="text-emerald-300 font-semibold flex items-center gap-1">
-            <Check className="h-3.5 w-3.5" /> Votado: {myVote}
-          </span>
-        )}
-      </div>
+            {/* Vote stats */}
+            {mode !== 'fastest_finger' && (
+              <div className="mb-4 flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1.5">
+                  <Users className="h-3.5 w-3.5" />
+                  <span>{totalVoters} voto{totalVoters !== 1 ? 's' : ''}</span>
+                </div>
+                {phase === 'voting' && !myVote && !isHost && (
+                  <span className="text-yellow-300 font-semibold animate-pulse">¡Vota ahora!</span>
+                )}
+                {myVote && phase === 'voting' && (
+                  <span className="text-emerald-300 font-semibold flex items-center gap-1">
+                    <Check className="h-3.5 w-3.5" /> Votado: {myVote}
+                  </span>
+                )}
+              </div>
+            )}
 
-      {/* Options buttons / Results */}
-      <div className="w-full max-w-2xl grid grid-cols-2 gap-3 sm:grid-cols-2">
+            {mode === 'fastest_finger' && phase === 'results' && fastestWinner && (
+              <div className="mb-6 w-full max-w-2xl rounded-2xl bg-emerald-500/20 border border-emerald-500/40 p-4 text-center">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Crown className="w-6 h-6 text-yellow-400" />
+                  <p className="text-xl font-bold text-white uppercase">{fastestWinner.name}</p>
+                </div>
+                <p className="text-emerald-300 text-sm">¡Correcto en {fastestWinner.time.toFixed(2)} segundos!</p>
+              </div>
+            )}
+            
+            {mode === 'fastest_finger' && phase === 'results' && !fastestWinner && (
+              <div className="mb-6 w-full max-w-2xl rounded-2xl bg-red-500/20 border border-red-500/40 p-4 text-center">
+                <p className="text-lg font-bold text-white uppercase">¡Nadie acertó a tiempo!</p>
+              </div>
+            )}
+
+            {/* Options buttons / Results */}
+            <div className="w-full max-w-2xl grid grid-cols-2 gap-3 sm:grid-cols-2">
         {options.map((option, idx) => {
           const color = PLAYER_COLORS[idx % PLAYER_COLORS.length];
           const optionVotes = votes[option] || 0;
@@ -246,7 +326,7 @@ export function KahootVoteSession({
       </div>
 
       {/* Host controls */}
-      {isHost && phase === 'voting' && (
+      {isHost && phase === 'voting' && mode !== 'fastest_finger' && (
         <div className="mt-6 flex gap-3">
           <button
             onClick={revealResults}
@@ -259,7 +339,7 @@ export function KahootVoteSession({
 
       {/* Results panel */}
       <AnimatePresence>
-        {phase === 'results' && (correctAnswer || winner) && (
+        {phase === 'results' && mode !== 'fastest_finger' && (correctAnswer || winner) && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -298,6 +378,21 @@ export function KahootVoteSession({
           Esperando a que el anfitrión revele los resultados...
         </p>
       )}
+
+      {/* Button to continue for fastest finger host */}
+      {isHost && phase === 'results' && mode === 'fastest_finger' && (
+        <div className="mt-6">
+          <button
+              onClick={() => { onResult?.(fastestWinner?.name || '', { [correctAnswer || '']: 1 }); onClose(); }}
+              className="rounded-2xl bg-emerald-400 px-6 py-3 text-sm font-bold text-black hover:bg-emerald-300 transition"
+            >
+              Continuar
+            </button>
+        </div>
+      )}
+      </motion.div>
+      )}
+      </AnimatePresence>
     </motion.div>
   );
 }

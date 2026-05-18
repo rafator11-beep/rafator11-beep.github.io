@@ -21,7 +21,7 @@ interface TriviaQuestionCardProps {
   canUseLifeline?: (comodin: '50:50' | 'publico' | 'llamada') => boolean;
   onUseLifeline?: (comodin: '50:50' | 'publico' | 'llamada') => void;
   getCooldownRemaining?: (comodin: '50:50' | 'publico' | 'llamada') => number;
-  onLaunchKahoot?: () => void;
+  onLaunchKahoot?: (mode: 'standard' | 'fastest_finger') => void;
 }
 
 type Comodin = '50:50' | 'publico' | 'llamada';
@@ -348,14 +348,17 @@ export function TriviaQuestionCard({
                 {cleanGameText(question.question)}
             </h2>
             
-            {onLaunchKahoot && !showResult && (
-              <button
-                onClick={onLaunchKahoot}
-                className="mt-4 bg-yellow-400 text-black px-4 py-1.5 rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg flex items-center gap-1.5 hover:bg-yellow-300 transition-all"
-              >
-                ⚡ Lanzar modo Kahoot
-              </button>
-            )}
+            {onLaunchKahoot && !showResult && (() => {
+              const isBomba = (question.description?.toUpperCase() || '').includes('BOMBA CULTURAL') || (question.question.toUpperCase().includes('BOMBA CULTURAL'));
+              return (
+                <button
+                  onClick={() => onLaunchKahoot(isBomba ? 'fastest_finger' : 'standard')}
+                  className={`mt-4 ${isBomba ? 'bg-red-500 hover:bg-red-400 text-white shadow-[0_0_15px_rgba(239,68,68,0.5)]' : 'bg-yellow-400 hover:bg-yellow-300 text-black'} px-4 py-1.5 rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg flex items-center gap-1.5 transition-all`}
+                >
+                  {isBomba ? '💣 LANZAR BOMBA (El más rápido)' : '⚡ Lanzar modo Kahoot'}
+                </button>
+              );
+            })()}
         </div>
 
       {/* Comodines - Now with cooldown indicators */}

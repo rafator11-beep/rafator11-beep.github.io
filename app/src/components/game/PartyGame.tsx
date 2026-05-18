@@ -708,7 +708,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
   const { updateMultiplePlayers, rankings } = useRanking();
 
   const [showChromecastModal, setShowChromecastModal] = useState(false);
-  const [showKahoot, setShowKahoot] = useState(false);
+  const [showKahoot, setShowKahoot] = useState<{ active: boolean; mode: 'standard' | 'fastest_finger' }>({ active: false, mode: 'standard' });
   
   // Siempre tenemos un room ID para que los espectadores puedan unirse, incluso en local
   const spectatorRoomId = useRef<string>(roomId || Math.random().toString(36).substring(2, 8).toUpperCase()).current;
@@ -1303,7 +1303,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                   </motion.div>
                   {(isHost || !isMultiplayer) && (
                     <button
-                      onClick={() => setShowKahoot(true)}
+                      onClick={() => setShowKahoot({ active: true, mode: 'standard' })}
                       className="mt-3 bg-yellow-400 text-black px-4 py-1.5 rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg flex items-center gap-1.5 hover:bg-yellow-300 transition-all"
                     >
                       ⚡ Lanzar modo Kahoot
@@ -1587,7 +1587,8 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               currentCard={safeCurrentText} 
               currentPlayer={currentPlayer?.name || ''} 
               players={players.map(p => p.name)}
-              kahootConfig={showKahoot ? {
+              kahootConfig={showKahoot.active ? {
+                mode: showKahoot.mode,
                 question: (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion
                   ? currentQuestion.question
                   : sanitizeCardText(currentText || ''),
@@ -2491,12 +2492,12 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           )}
 
         {/* Render other game components (Trivia, Drinking, etc) overlaying or replacing card */}
-        {((gameState.showTrivia) || (mode === 'cultura') || (mode === 'trivia_futbol')) && currentQuestion && (
+        {!gameState.showVirusAlert && ((gameState.showTrivia) || (mode === 'cultura') || (mode === 'trivia_futbol')) && currentQuestion && (
           <div className="absolute inset-0 z-20 bg-gradient-to-r from-slate-900/80 to-slate-800/80 backdrop-blur-xl p-4 flex items-center justify-center">
             <TriviaQuestionCard
               question={currentQuestion}
               playerName={currentPlayer?.name || "Jugador"}
-              onLaunchKahoot={(isHost || !isMultiplayer) ? () => setShowKahoot(true) : undefined}
+              onLaunchKahoot={(isHost || !isMultiplayer) ? (mode) => setShowKahoot({ active: true, mode }) : undefined}
               onAnswer={(correct, points) => {
                 if (correct) {
                   addScore(currentPlayer.id, points);
@@ -2726,9 +2727,10 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
         {/* KAHOOT MODAL */}
         <AnimatePresence>
-          {showKahoot && (
+          {showKahoot.active && (
             <KahootVoteSession
               roomId={spectatorRoomId}
+              mode={showKahoot.mode}
               question={
                 (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion
                   ? currentQuestion.question
@@ -2745,7 +2747,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                   : undefined
               }
               isHost={isHost}
-              onClose={() => setShowKahoot(false)}
+              onClose={() => setShowKahoot({ active: false, mode: 'standard' })}
               onResult={(winner, votes) => {
                 if (!((gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion)) {
                   const wPlayer = players.find(p => p.name === winner);
