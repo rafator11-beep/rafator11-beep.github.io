@@ -28,6 +28,9 @@ import { GameMode } from '@/types/game';
 import { duelos } from '@/data/duelosContent';
 import { impostorRounds } from '@/data/impostorContent';
 import { isIndividualCard } from '@/data/gameContent';
+import { YoNuncaResponse } from '@/components/game/YoNuncaResponse';
+import { RetoOutcome } from '@/components/game/RetoOutcome';
+import { useGameMemory } from '@/hooks/game/useGameMemory';
 
 import { ChatComponent } from '@/components/multiplayer/ChatComponent';
 import { PeerBubbles } from '@/components/multiplayer/PeerBubbles';
@@ -524,6 +527,16 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
   const [skipCounts, setSkipCounts] = useState<Record<string, number>>({});
   const [virusReceived, setVirusReceived] = useState<Record<string, number>>({});
 
+  // --- AI MEMORY SYSTEM ---
+  const { addEvent, addEvents, hasAiCard, peekAiCard, consumeAiCard } = useGameMemory(players);
+  const [showYoNuncaResponse, setShowYoNuncaResponse] = useState(false);
+  const [showRetoOutcome, setShowRetoOutcome] = useState(false);
+  const [aiCardOverride, setAiCardOverride] = useState<string | null>(null);
+  // Track whether we've shown response UI for the current card index
+  const respondedCardRef = useRef<number>(-1);
+  // Count cards shown to know when to inject AI card
+  const aiCardInjectCountRef = useRef(0);
+
   // Helper: track a vote for a player
   const trackVote = (playerId: string) => {
     setVoteCounts(prev => ({ ...prev, [playerId]: (prev[playerId] || 0) + 1 }));
@@ -809,6 +822,37 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
   const lastTapRef = useRef<number>(0);
   const isProcessingRef = useRef<boolean>(false);
 
+  // ── HANDLER: YO NUNCA response confirmed ──────────────────────────────────
+  const handleYoNuncaConfirm = useCallback((didItIds: string[]) => {
+    setShowYoNuncaResponse(false);
+    const cardText = getCurrentContent();
+    // Track each player who said yes
+    if (didItIds.length > 0) {
+      addEvents('yo_nunca_yes', didItIds, typeof cardText === 'string' ? cardText : '', gameState.round);
+      didItIds.forEach(id => {
+        const p = players.find(pl => pl.id === id);
+        if (p) addScore(p.id, 2); // bonus XP for honesty
+      });
+    }
+    performTurnAdvance(true); // global card → no player advance
+  }, [getCurrentContent, addEvents, gameState.round, players, addScore, performTurnAdvance]);
+
+  // ── HANDLER: Reto outcome ───────────────────────────────────────────────
+  const handleRetoOutcome = useCallback((completed: boolean) => {
+    setShowRetoOutcome(false);
+    const cardText = getCurrentContent();
+    if (currentPlayer) {
+      addEvent(completed ? 'reto_done' : 'reto_fail', currentPlayer, typeof cardText === 'string' ? cardText : '', gameState.round);
+      if (completed) {
+        addScore(currentPlayer.id, 15);
+        toast.success(`✓ ${currentPlayer.name} lo ha completado — reparte 2 tragos 👑`, { duration: 2000 });
+      } else {
+        toast(`✗ ${currentPlayer.name} no lo ha completado — bebe 3 🍻`, { duration: 2000 });
+      }
+    }
+    performTurnAdvance(false); // individual card → advance player
+  }, [getCurrentContent, addEvent, gameState.round, currentPlayer, addScore, performTurnAdvance]);
+
   const handleNext = () => {
     // Debounce: ignora taps en menos de 400ms
     const now = Date.now();
@@ -821,17 +865,40 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     sfx.click();
     vibe(10);
 
+    // ── Si hay carta IA activa, limpiarla y avanzar ──────────────────────
+    if (aiCardOverride) {
+      setAiCardOverride(null);
+      performTurnAdvance(true); // AI cards son globales
+      return;
+    }
+
     // Detect if current card is Global so we don't pass the turn
     const cardText = getCurrentContent();
     let isGlobal: boolean;
     if (mode === 'megamix') {
-      // En megamix usamos clasificación por prefijo emoji: solo las cartas INDIVIDUALES avanzan turno
       isGlobal = !isIndividualCard(typeof cardText === 'string' ? cardText : '');
     } else {
       isGlobal =
         currentQuestion?.type === 'yo_nunca' ||
         (typeof cardText === 'string' && (cardText.toUpperCase().includes('NORMA:') || cardText.toUpperCase().includes('NUEVA NORMA:') || cardText.startsWith('TRIGGER:')));
     }
+
+    // ── Intercepción de Yo Nunca en megamix: mostrar UI de respuesta ─────
+    if (mode === 'megamix' && respondedCardRef.current !== currentIndex) {
+      const txt = typeof cardText === 'string' ? cardText : '';
+      if (txt.startsWith('🙈')) {
+        respondedCardRef.current = currentIndex;
+        setShowYoNuncaResponse(true);
+        return;
+      }
+      if (txt.startsWith('🎯') && players.length > 0) {
+        respondedCardRef.current = currentIndex;
+        setShowRetoOutcome(true);
+        return;
+      }
+    }
+
+    respondedCardRef.current = -1; // reset for next card
 
     // Global Reset of all potential "active overlay" flags to prevent ghost states
     setGameState(prev => ({
@@ -951,11 +1018,11 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
   gameState.showImpostorWord, mode, handleNext]);
 
   // Rarity calculation for CardDisplay
-  const currentText = getCurrentContent();
+  const currentText = aiCardOverride || getCurrentContent();
   const safeCurrentText = (currentText && currentText !== 'Siguiente carta' && currentText !== 'Cargando pregunta...')
     ? currentText
     : '';
-  const rarity = detectRarity(currentText);
+  const rarity = aiCardOverride ? 'legendary' : detectRarity(currentText);
 
   // Trigger / Content Detection System
   useEffect(() => {
@@ -1043,6 +1110,17 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     }
 
   }, [currentText, advanceTurn, applyRandomVirus, currentPlayer, players, setGameState, loadSpecificQuestion]); // Mejora 1: Correct dependencies
+
+  // ── Inyección de carta IA cada 10 cartas individuales ─────────────────────
+  useEffect(() => {
+    if (mode !== 'megamix') return;
+    aiCardInjectCountRef.current += 1;
+    if (aiCardInjectCountRef.current % 10 === 0 && hasAiCard && peekAiCard && !aiCardOverride) {
+      setAiCardOverride(peekAiCard);
+      consumeAiCard();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentIndex]);
 
   // YoNunca Equipos Logic Interception
   useEffect(() => {
@@ -2633,6 +2711,27 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           </div>
         )
       }
+
+      {/* ── YO NUNCA RESPONSE OVERLAY ── */}
+      <AnimatePresence>
+        {showYoNuncaResponse && (
+          <YoNuncaResponse
+            players={players}
+            cardText={currentText}
+            onConfirm={handleYoNuncaConfirm}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* ── RETO OUTCOME OVERLAY ── */}
+      <AnimatePresence>
+        {showRetoOutcome && currentPlayer && (
+          <RetoOutcome
+            player={currentPlayer}
+            onResult={handleRetoOutcome}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Podium Screen Overlay */}
       {showPodium && (

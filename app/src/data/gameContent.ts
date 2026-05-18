@@ -38,6 +38,10 @@ import {
 import {
   verdadOBebeExtra12, categoriasExtra12, cadenaExtra12, pacoversExtra12, duelosExtra12,
 } from './gameContentExtra12b';
+import {
+  yoNuncaExtra14, picanteExtra14, retosExtra14, votacionExtra14,
+  cadenaExtra14, verdadOBebeExtra14,
+} from './gameContentExtra14';
 import { mimicaChallenges } from './mimicaContent';
 import { bocaCerradaChallenges } from './bocaCerradaContent';
 import { impostorRounds } from './impostorContent';
@@ -6614,7 +6618,7 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
   // --- Build content with weighted frequencies ---
 
   // Get unique samples to avoid duplicates, now using ALL available items
-  const yoNuncaPool = cleanDeckPool([...yoNunca, ...(yoNuncaExtra || []), ...(yoNuncaExtra2 || []), ...(yoNuncaExtra3 || []), ...(yoNuncaExtra4 || []), ...(yoNuncaExtra8 || []), ...(yoNuncaExtra10 || []), ...(yoNuncaExtra11 || []), ...(yoNuncaExtra12 || []),
+  const yoNuncaPool = cleanDeckPool([...yoNunca, ...(yoNuncaExtra || []), ...(yoNuncaExtra2 || []), ...(yoNuncaExtra3 || []), ...(yoNuncaExtra4 || []), ...(yoNuncaExtra8 || []), ...(yoNuncaExtra10 || []), ...(yoNuncaExtra11 || []), ...(yoNuncaExtra12 || []), ...yoNuncaExtra14,
     ...(salseoExtra || []).filter(s => s.toLowerCase().startsWith('yo nunca')),
     // ── MEGA EXPANSION: 1000 nuevas preguntas por etapa vital ──
     ...yoNuncaInfancia, ...yoNuncaInstituto, ...yoNuncaUniversidad, ...yoNuncaCurro, ...yoNuncaFiesta,
@@ -6622,14 +6626,14 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
   const yoNuncaItems = getRandomItems(yoNuncaPool, yoNuncaPool.length);
   const yoNuncaCards = yoNuncaItems.map(q => addDrinking(`🙈 Yo nunca... ${q}`, Math.random() < 0.4 ? 'medio' : 'leve'));
 
-  const masProbablePool = cleanDeckPool([...quienEsMasProbable, ...(masProbableExtra || []), ...(quienEsMasProbableExtra2 || []), ...(masProbableExtra3 || []), ...(quienEsMasProbableExtra5 || []), ...(quienEsMasProbableExtra6 || []), ...(quienEsMasProbableExtra10 || []), ...(votacionExtra12 || []),
+  const masProbablePool = cleanDeckPool([...quienEsMasProbable, ...(masProbableExtra || []), ...(quienEsMasProbableExtra2 || []), ...(masProbableExtra3 || []), ...(quienEsMasProbableExtra5 || []), ...(quienEsMasProbableExtra6 || []), ...(quienEsMasProbableExtra10 || []), ...(votacionExtra12 || []), ...votacionExtra14,
     // ── MEGA EXPANSION ──
     ...votacionNuevo,
   ]);
   const masProbableItems = getRandomItems(masProbablePool, masProbablePool.length);
   const masProbableCards = masProbableItems.map(q => addDrinking(`🗳️ ${q}`, Math.random() < 0.3 ? 'medio' : 'leve'));
 
-  const retosPool = cleanDeckPool([...categoriasReto, ...(categoriasRetoExtra || []), ...(categoriasRetoExtra2 || []), ...(categoriasRetoExtra3 || []), ...(retosExtra12 || []),
+  const retosPool = cleanDeckPool([...categoriasReto, ...(categoriasRetoExtra || []), ...(categoriasRetoExtra2 || []), ...(categoriasRetoExtra3 || []), ...(retosExtra12 || []), ...retosExtra14,
     // ── MEGA EXPANSION ──
     ...retosNuevo,
   ]);
@@ -6652,7 +6656,7 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
   const espanaItems = getRandomItems(espanaPool, espanaPool.length);
   const espanaCards = espanaItems.map(q => addDrinking(`🇪🇸 ${q}`, 'leve'));
 
-  const picantePool = cleanDeckPool([...picante, ...(picanteExtra || []), ...(picanteExtra2 || []), ...(picanteExtra3 || []), ...(picanteExtra5 || []), ...(picanteExtra7 || []), ...(picanteExtra10 || []), ...(picanteExtra11 || []), ...(picanteExtra11b || []), ...(picanteExtra11c || []), ...(picanteExtra12 || []),
+  const picantePool = cleanDeckPool([...picante, ...(picanteExtra || []), ...(picanteExtra2 || []), ...(picanteExtra3 || []), ...(picanteExtra5 || []), ...(picanteExtra7 || []), ...(picanteExtra10 || []), ...(picanteExtra11 || []), ...(picanteExtra11b || []), ...(picanteExtra11c || []), ...(picanteExtra12 || []), ...picanteExtra14,
     // ── MEGA EXPANSION ──
     ...picanteNuevo,
   ]);
@@ -6734,6 +6738,7 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     "🎤 VERDAD O BEBE: {player} — ¿Has hablado mal de alguien del grupo a sus espaldas esta semana? Si no respondes, bebe 3. 🍻",
     ...(verdadOBebeExtra || []),
     ...(verdadOBebeExtra12 || []),
+    ...verdadOBebeExtra14,
     ...(salseoExtra || []).filter(s => s.startsWith('🎤')),
     // ── MEGA EXPANSION ──
     ...verdadOBebeNuevo,
@@ -6764,6 +6769,7 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     "🔗 CADENA: Por turnos, decid cosas que se pierden en una noche de fiesta. El que repita bebe 2. 🍻",
     ...(cadenaExtra || []),
     ...(cadenaExtra12 || []),
+    ...cadenaExtra14,
   ]);
   const cadenaCards = getRandomItems(cadenaPool, cadenaPool.length);
 
