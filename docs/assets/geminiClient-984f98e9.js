@@ -1,4 +1,4 @@
-const v="gemini-1.5-flash";function g(){return{VITE_SUPABASE_URL:"https://atswsltnjjsokouvfbut.supabase.co",VITE_SUPABASE_ANON_KEY:"sb_publishable_7uCsMmM6xhL7O9psmckrQw_Y4hjYk10",VITE_GEMINI_API_KEY:"AIzaSyBBf2ttcyeMR27Sq22n_NtIyHBufs3tzmE",BASE_URL:"./",MODE:"production",DEV:!1,PROD:!0,SSR:!1}.VITE_GEMINI_API_KEY}function y(){const o=g();return typeof o=="string"&&o.trim().length>0&&!o.includes("placeholder")}function c(){return localStorage.getItem("fiesta_party_theme")||""}async function i(o){var a,n,s,t,p;const e=g(),r=`https://generativelanguage.googleapis.com/v1beta/models/${v}:generateContent?key=${e}`;try{const l=await fetch(r,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contents:[{parts:[{text:o}]}],generationConfig:{responseMimeType:"application/json"}})});if(!l.ok){const b=await l.text();return console.error(`Gemini Client: API error (${l.status}):`,b),null}const u=await l.json(),m=(p=(t=(s=(n=(a=u==null?void 0:u.candidates)==null?void 0:a[0])==null?void 0:n.content)==null?void 0:s.parts)==null?void 0:t[0])==null?void 0:p.text;if(!m)return console.warn("Gemini Client: Empty response"),null;let d=m.trim();return d.startsWith("```json")?d=d.replace(/^```json/,"").replace(/```$/,"").trim():d.startsWith("```")&&(d=d.replace(/^```/,"").replace(/```$/,"").trim()),JSON.parse(d)}catch(l){return console.error("Gemini Client: Execution error:",l),null}}async function f(o,e){const r=c(),a=r?`
+const y="gemini-1.5-flash";function g(){return{VITE_SUPABASE_URL:"https://atswsltnjjsokouvfbut.supabase.co",VITE_SUPABASE_ANON_KEY:"sb_publishable_7uCsMmM6xhL7O9psmckrQw_Y4hjYk10",VITE_GEMINI_API_KEY:"AIzaSyBBf2ttcyeMR27Sq22n_NtIyHBufs3tzmE",BASE_URL:"./",MODE:"production",DEV:!1,PROD:!0,SSR:!1}.VITE_GEMINI_API_KEY}function f(){const o=g();return typeof o=="string"&&o.trim().length>0&&!o.includes("placeholder")}function u(){return localStorage.getItem("fiesta_party_theme")||""}async function i(o){var a,n,s,d,c;const e=g(),r=`https://generativelanguage.googleapis.com/v1beta/models/${y}:generateContent?key=${e}`;try{const t=await fetch(r,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contents:[{parts:[{text:o}]}],generationConfig:{responseMimeType:"application/json"}})});if(!t.ok){const b=await t.text();return console.error(`Gemini Client: API error (${t.status}):`,b),null}const p=await t.json(),m=(c=(d=(s=(n=(a=p==null?void 0:p.candidates)==null?void 0:a[0])==null?void 0:n.content)==null?void 0:s.parts)==null?void 0:d[0])==null?void 0:c.text;if(!m)return console.warn("Gemini Client: Empty response"),null;let l=m.trim();return l.startsWith("```json")?l=l.replace(/^```json/,"").replace(/```$/,"").trim():l.startsWith("```")&&(l=l.replace(/^```/,"").replace(/```$/,"").trim()),JSON.parse(l)}catch(t){return console.error("Gemini Client: Execution error:",t),null}}async function v(o,e){const r=u(),a=r?`
 - El grupo ha establecido que la fiesta de hoy tiene este tema especial: "${r}". ES OBLIGATORIO que el reto esté fuertemente inspirado en este tema, haciendo chistes, referencias, o dinámicas relacionadas.`:"",n=`
 Eres el motor de IA de un juego de fiesta interactivo y atrevido llamado BEEP.
 Genera un reto de fiesta divertido, picante y personalizado para los siguientes jugadores activos: ${e.join(", ")}.${a}
@@ -9,7 +9,7 @@ Instrucciones de generación:
 - Crea una carta con un reto único. Puede ser del tipo "Yo nunca", "Reto individual", "Verdad", "Duelo 1v1", "Castigo" o del tipo "🛌 Cosas que puedes decir en la cama y...".
 - Ocasionalmente, puedes generar una carta del tipo "🛌 En la cama y..." siguiendo un patrón de comparación de doble sentido: "Cosas que puedes decir en la cama y... [en otro lugar/situación]. Por turnos, cada jugador dice una frase de doble sentido que sirva para ambos contextos. Quien repita o falle, bebe X tragos. (Ej: '¡Está muy caliente!', '¡Cabe otro!')".
 - Sé muy divertido, sarcástico, irónico y ligeramente atrevido (apto para mayores de 18 años jugando de fiesta en un bar o casa).
-- Involucra a los jugadores activos y haz referencia a su historial de eventos si es gracioso (ej. si alguien lleva muchos tragos, se niega a confesar, o va invicto).
+- IMPORTANTE: Involucra obligatoriamente a uno o varios de los jugadores activos (${e.join(", ")}) llamándolos por sus nombres reales en el texto del reto (ej: "Rafa tiene que..." o "España y Asdased compiten..."). NO utilices marcadores genéricos como '{player}' o '{player1}'. Usa sus nombres reales de la lista proporcionada.
 - IMPORTANTE: La salida debe ser un objeto JSON válido con la propiedad "card".
 - El texto de la carta debe estar en español y redactado con un tono dinámico y juvenil.
 
@@ -18,20 +18,23 @@ Formato JSON esperado:
   "card": "El texto del reto personalizado en español"
 }
 No devuelvas nada más que el objeto JSON.
-`,s=await i(n);return(s==null?void 0:s.card)||null}async function E(o,e,r){const a=c(),n=a?`
-- Tema especial de la fiesta de hoy: "${a}". Intenta reescribir el reto para integrar sutilmente este tema o palabras clave de forma hilarante.`:"",s=`
-Eres el motor de IA del juego de fiesta BEEP. Tu misión es añadir salseo, ironía y dinamismo a un reto existente utilizando la memoria real de los jugadores involucrados.
+`,s=await i(n);return(s==null?void 0:s.card)||null}async function E(o,e,r,a){const n=u(),s=n?`
+- Tema especial de la fiesta de hoy: "${n}". Intenta reescribir el reto para integrar sutilmente este tema o palabras clave de forma hilarante.`:"",d=`
+Eres el motor de IA del juego de fiesta BEEP. Tu misión es añadir salseo, ironía y dinamismo a un reto existente utilizando la memoria real y nombres de los jugadores del grupo.
 Reto original: "${o}"
-Jugadores implicados en este reto: ${r.join(", ")}
-Estadísticas de estos jugadores (¡úsalas de forma sarcástica para picarlos o justificar el reto!):
-${e}${n}
+El jugador que tiene el turno actual (el protagonista del reto) es: "${a}".
+Todos los jugadores del grupo son: ${r.join(", ")}
+Estadísticas de los jugadores (¡úsalas de forma sarcástica para picarlos, retarlos o justificar el reto!):
+${e}${s}
 
 Instrucciones:
-- Reescribe el reto original de forma ingeniosa para integrar sus estadísticas de forma orgánica.
+- Reescribe el reto original de forma ingeniosa para integrar sus nombres y estadísticas de forma orgánica.
+- El reto DEBE ir dirigido principalmente a "${a}" o tenerle como protagonista del turno.
+- DEBES involucrar a otros jugadores del grupo (como ${r.filter(t=>t!==a).join(", ")||"alguien del grupo"}) por sus nombres reales en la reescritura del reto para crear preguntas graciosas, retos de complicidad, piques o duelos de beber.
 - IMPORTANTE: Si el reto original contiene el emoji "🛌" o menciona "En la cama y..." o "Cosas que puedes decir en la cama y...", la reescritura DEBE seguir el formato de una ronda por turnos de doble sentido: "Cosas que puedes decir en la cama y... [en otro lugar/situación]. Por turnos, cada jugador dice una frase que sirva en ambos contextos. El primero que repita o falle, bebe X tragos". Además, incluye al final de la carta 2 ejemplos extremadamente graciosos, pícaros y con doble sentido para inspirar a los jugadores (ej: "(Ej: '¡Está saliendo líquido!', '¡Qué estrecho está esto!')").
 - Haz chistes o pullas divertidas sobre quién va ganando, quién lleva más tragos 🍻, o quién no da pie con bola.
 - Mantén la esencia del reto original (si es un duelo, que siga siendo un duelo; si es beber, que siga siendo beber) pero haz que parezca personalizado en vivo por un presentador de televisión gamberro.
-- Si el reto original requiere beber tragos, puedes adaptarlos un poco según las estadísticas (ej. "Rafa que lleva 0 tragos bebe el doble para compensar").
+- Si el reto original requiere beber tragos, puedes adaptarlos un poco según las estadísticas (ej. "${a} que lleva 0 tragos bebe el doble para compensar").
 - La salida debe ser un objeto JSON válido con la propiedad "enriched".
 - Escribe en español.
 
@@ -40,7 +43,7 @@ Formato JSON esperado:
   "enriched": "El texto del reto reescrito con salseo en español"
 }
 No devuelvas nada más que el objeto JSON.
-`,t=await i(s);return(t==null?void 0:t.enriched)||null}async function j(o,e,r,a){const n=`
+`,c=await i(d);return(c==null?void 0:c.enriched)||null}async function j(o,e,r,a){const n=`
 Eres el narrador estrella y maestro de ceremonias teatral del juego de fiesta BEEP.
 Se va a disputar un duelo decisivo de torneo 1v1 entre ${o} y ${e}.
 El reto del duelo es: "${r}"
@@ -81,12 +84,12 @@ Formato JSON esperado:
   "comment": "Tu comentario sarcástico y divertido sobre la ronda en español"
 }
 No devuelvas nada más que el objeto JSON.
-`,s=await i(n);return(s==null?void 0:s.comment)||null}async function N(o,e){const r=c(),n=`
+`,s=await i(n);return(s==null?void 0:s.comment)||null}async function N(o,e){const r=u(),n=`
 Eres el cronista del corazón y reportero más cotilla del juego de fiesta BEEP.
 Ha terminado la partida. Aquí tienes los resultados finales, XP y estadísticas globales de los jugadores:${r?`
 - El tema de la noche era: "${r}".`:""}
 - Jugadores y su XP final:
-${o.map(t=>`- ${t.name}: ${t.score} XP`).join(`
+${o.map(d=>`- ${d.name}: ${d.score} XP`).join(`
 `)}
 - Tragos totales acumulados:
 ${JSON.stringify((e==null?void 0:e.drinkCounts)||{})}
@@ -110,7 +113,7 @@ Formato JSON esperado:
   "chronicle": "El texto humorístico completo de la crónica en español"
 }
 No devuelvas nada más que el objeto JSON.
-`,s=await i(n);return(s==null?void 0:s.chronicle)||null}async function S(o,e){const r=`
+`,s=await i(n);return(s==null?void 0:s.chronicle)||null}async function q(o,e){const r=`
 Eres el "Juez de la Barra", un árbitro de bar de copas legendario, sabio, sarcástico y sumamente divertido.
 Varios amigos jugando al juego de fiesta BEEP tienen una disputa acalorada y requieren que dictes sentencia.
 Jugadores involucrados: ${o.join(", ")}
@@ -128,7 +131,7 @@ Formato JSON esperado:
   "ruling": "Tu divertida y firme sentencia arbitral en español"
 }
 No devuelvas nada más que el objeto JSON.
-`,a=await i(r);return(a==null?void 0:a.ruling)||null}async function q(o,e){const r=c(),a=r?` El castigo debe estar inspirado en el tema especial de la fiesta: "${r}".`:"",n=`
+`,a=await i(r);return(a==null?void 0:a.ruling)||null}async function S(o,e){const r=u(),a=r?` El castigo debe estar inspirado en el tema especial de la fiesta: "${r}".`:"",n=`
 Eres el motor de tortura divertida y gamberra del juego de fiesta BEEP.
 El jugador "${o}" ha decidido no beber tragos y en su lugar quiere someterse a la Ruleta de Castigos de la IA.
 Estadísticas del jugador: ${e}.${a}
@@ -146,7 +149,7 @@ Formato JSON esperado:
   "punishment": "La descripción del castigo a realizar en español"
 }
 No devuelvas nada más que el objeto JSON.
-`,s=await i(n);return(s==null?void 0:s.punishment)||null}async function O(){const o=c(),r=`
+`,s=await i(n);return(s==null?void 0:s.punishment)||null}async function O(){const o=u(),r=`
 Eres el motor de IA del juego de fiesta BEEP. Tu misión es generar una ronda del juego del "Impostor".
 En este juego, la mayoría de los jugadores recibe la palabra real ("word"), mientras que el Impostor recibe la palabra falsa ("fakeWord") o una pista ligeramente descolorida. También hay un tema general o categoría ("category") y una pista general común ("hint").
 
@@ -197,7 +200,7 @@ Formato JSON esperado:
   "coachAnalysis": "El texto del diagnóstico en español con formato Markdown y emojis"
 }
 No devuelvas nada más que el objeto JSON.
-`,a=await i(r);return(a==null?void 0:a.coachAnalysis)||null}async function P(o){const e=`
+`,a=await i(r);return(a==null?void 0:a.coachAnalysis)||null}async function $(o){const e=`
 Eres el motor de IA del juego de fiesta BEEP.
 Aquí tienes una lista de confesiones y secretos anónimos introducidos por los propios jugadores en el lobby:
 ${JSON.stringify(o)}
@@ -226,4 +229,4 @@ Formato JSON esperado:
   }
 ]
 No devuelvas nada más que el array JSON.
-`;return await i(e)||null}export{E as geminiEnrichChallenge,f as geminiGenerateCard,q as geminiGenerateCustomPunishment,O as geminiGenerateImpostorRound,N as geminiGeneratePartyChronicle,I as geminiGenerateProfileCoach,h as geminiGenerateRoundAnalysis,P as geminiGenerateSecretsTrivia,j as geminiGenerateTorneoAnnouncement,S as geminiResolveDispute,g as getGeminiApiKey,c as getPartyTheme,y as isGeminiConfigured};
+`;return await i(e)||null}export{E as geminiEnrichChallenge,v as geminiGenerateCard,S as geminiGenerateCustomPunishment,O as geminiGenerateImpostorRound,N as geminiGeneratePartyChronicle,I as geminiGenerateProfileCoach,h as geminiGenerateRoundAnalysis,$ as geminiGenerateSecretsTrivia,j as geminiGenerateTorneoAnnouncement,q as geminiResolveDispute,g as getGeminiApiKey,u as getPartyTheme,f as isGeminiConfigured};

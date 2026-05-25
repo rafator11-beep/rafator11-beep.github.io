@@ -79,13 +79,14 @@ async function callGenerateCard(
 // ─── Enrich Challenge with AI (Salseo Middleware) ───────────────────────────
 export async function enrichChallengeWithAI(
   challengeText: string,
-  involvedPlayers: Player[],
+  currentPlayer: Player,
+  allPlayers: Player[],
   allStats: Record<string, PlayerStats>
 ): Promise<string> {
-  // Build concise stats summary for the prompt
-  const statsSummary = involvedPlayers.map(p => {
+  // Build concise stats summary for all players to provide complete group context
+  const statsSummary = allPlayers.map(p => {
     const s = allStats[p.id];
-    if (!s) return `${p.name}: sin datos aún`;
+    if (!s) return `${p.name}: recién empezando`;
     const parts: string[] = [];
     if (s.tragos > 0) parts.push(`${s.tragos} tragos bebidos`);
     if (s.retos_fallados > 0) parts.push(`${s.retos_fallados} retos fallados`);
@@ -103,7 +104,8 @@ export async function enrichChallengeWithAI(
       const enriched = await geminiEnrichChallenge(
         challengeText, 
         statsSummary, 
-        involvedPlayers.map(p => p.name)
+        allPlayers.map(p => p.name),
+        currentPlayer.name
       );
       if (enriched) return enriched;
     } catch (e) {
@@ -119,7 +121,8 @@ export async function enrichChallengeWithAI(
         mode: 'enrich',
         originalChallenge: challengeText,
         playerStats: statsSummary,
-        playerNames: involvedPlayers.map(p => p.name),
+        playerNames: allPlayers.map(p => p.name),
+        activePlayerName: currentPlayer.name,
       },
     });
     if (error || !data?.enriched) return challengeText;

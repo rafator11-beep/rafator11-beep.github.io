@@ -103,7 +103,7 @@ Instrucciones de generación:
 - Crea una carta con un reto único. Puede ser del tipo "Yo nunca", "Reto individual", "Verdad", "Duelo 1v1", "Castigo" o del tipo "🛌 Cosas que puedes decir en la cama y...".
 - Ocasionalmente, puedes generar una carta del tipo "🛌 En la cama y..." siguiendo un patrón de comparación de doble sentido: "Cosas que puedes decir en la cama y... [en otro lugar/situación]. Por turnos, cada jugador dice una frase de doble sentido que sirva para ambos contextos. Quien repita o falle, bebe X tragos. (Ej: '¡Está muy caliente!', '¡Cabe otro!')".
 - Sé muy divertido, sarcástico, irónico y ligeramente atrevido (apto para mayores de 18 años jugando de fiesta en un bar o casa).
-- Involucra a los jugadores activos y haz referencia a su historial de eventos si es gracioso (ej. si alguien lleva muchos tragos, se niega a confesar, o va invicto).
+- IMPORTANTE: Involucra obligatoriamente a uno o varios de los jugadores activos (${players.join(', ')}) llamándolos por sus nombres reales en el texto del reto (ej: "Rafa tiene que..." o "España y Asdased compiten..."). NO utilices marcadores genéricos como '{player}' o '{player1}'. Usa sus nombres reales de la lista proporcionada.
 - IMPORTANTE: La salida debe ser un objeto JSON válido con la propiedad "card".
 - El texto de la carta debe estar en español y redactado con un tono dinámico y juvenil.
 
@@ -124,7 +124,8 @@ No devuelvas nada más que el objeto JSON.
 export async function geminiEnrichChallenge(
   challengeText: string,
   playerStats: string,
-  playerNames: string[]
+  playerNames: string[],
+  activePlayerName: string
 ): Promise<string | null> {
   const theme = getPartyTheme();
   const themePrompt = theme 
@@ -132,18 +133,21 @@ export async function geminiEnrichChallenge(
     : '';
 
   const prompt = `
-Eres el motor de IA del juego de fiesta BEEP. Tu misión es añadir salseo, ironía y dinamismo a un reto existente utilizando la memoria real de los jugadores involucrados.
+Eres el motor de IA del juego de fiesta BEEP. Tu misión es añadir salseo, ironía y dinamismo a un reto existente utilizando la memoria real y nombres de los jugadores del grupo.
 Reto original: "${challengeText}"
-Jugadores implicados en este reto: ${playerNames.join(', ')}
-Estadísticas de estos jugadores (¡úsalas de forma sarcástica para picarlos o justificar el reto!):
+El jugador que tiene el turno actual (el protagonista del reto) es: "${activePlayerName}".
+Todos los jugadores del grupo son: ${playerNames.join(', ')}
+Estadísticas de los jugadores (¡úsalas de forma sarcástica para picarlos, retarlos o justificar el reto!):
 ${playerStats}${themePrompt}
 
 Instrucciones:
-- Reescribe el reto original de forma ingeniosa para integrar sus estadísticas de forma orgánica.
+- Reescribe el reto original de forma ingeniosa para integrar sus nombres y estadísticas de forma orgánica.
+- El reto DEBE ir dirigido principalmente a "${activePlayerName}" o tenerle como protagonista del turno.
+- DEBES involucrar a otros jugadores del grupo (como ${playerNames.filter(n => n !== activePlayerName).join(', ') || 'alguien del grupo'}) por sus nombres reales en la reescritura del reto para crear preguntas graciosas, retos de complicidad, piques o duelos de beber.
 - IMPORTANTE: Si el reto original contiene el emoji "🛌" o menciona "En la cama y..." o "Cosas que puedes decir en la cama y...", la reescritura DEBE seguir el formato de una ronda por turnos de doble sentido: "Cosas que puedes decir en la cama y... [en otro lugar/situación]. Por turnos, cada jugador dice una frase que sirva en ambos contextos. El primero que repita o falle, bebe X tragos". Además, incluye al final de la carta 2 ejemplos extremadamente graciosos, pícaros y con doble sentido para inspirar a los jugadores (ej: "(Ej: '¡Está saliendo líquido!', '¡Qué estrecho está esto!')").
 - Haz chistes o pullas divertidas sobre quién va ganando, quién lleva más tragos 🍻, o quién no da pie con bola.
 - Mantén la esencia del reto original (si es un duelo, que siga siendo un duelo; si es beber, que siga siendo beber) pero haz que parezca personalizado en vivo por un presentador de televisión gamberro.
-- Si el reto original requiere beber tragos, puedes adaptarlos un poco según las estadísticas (ej. "Rafa que lleva 0 tragos bebe el doble para compensar").
+- Si el reto original requiere beber tragos, puedes adaptarlos un poco según las estadísticas (ej. "${activePlayerName} que lleva 0 tragos bebe el doble para compensar").
 - La salida debe ser un objeto JSON válido con la propiedad "enriched".
 - Escribe en español.
 

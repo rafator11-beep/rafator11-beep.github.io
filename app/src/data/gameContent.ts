@@ -6613,12 +6613,35 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
 
   function addDrinking(card: string, intensity: 'leve' | 'medio' | 'fuerte' | 'grupo' | 'reparte'): string {
     if (card.startsWith('TRIGGER:') || card.startsWith('NORMA:')) return card;
+    
+    let processedCard = card;
+    if (processedCard.startsWith('Cultura Chupística:') || processedCard.startsWith('Cultura Chupistica:')) {
+      const topic = processedCard.replace(/^Cultura Chupíst(i|í)ca:\s*/i, '').trim();
+      if (!topic.toLowerCase().includes('bebe') && !topic.toLowerCase().includes('falle')) {
+        const cleanTopic = topic.endsWith('.') ? topic.slice(0, -1) : topic;
+        processedCard = `🍻 CULTURA CHUPÍSTICA — "${cleanTopic}": Por turnos, cada jugador dice uno. El primero que repita o falle, ¡bebe!`;
+      } else {
+        processedCard = `🍻 CULTURA CHUPÍSTICA — ${topic}`;
+      }
+    }
+
+    const lowerCard = processedCard.toLowerCase();
+    const alreadyHasDrinking = lowerCard.includes('bebe') || 
+                               lowerCard.includes('beben') || 
+                               lowerCard.includes('beba') || 
+                               lowerCard.includes('toma') || 
+                               lowerCard.includes('trago') || 
+                               lowerCard.includes('reparte');
+    if (alreadyHasDrinking) {
+      return processedCard;
+    }
+
     const pool = intensity === 'leve' ? tragosLeves
       : intensity === 'medio' ? tragosMedios
         : intensity === 'fuerte' ? tragosFuertes
           : intensity === 'grupo' ? tragosGrupo
             : tragosReparte;
-    return card + pool[Math.floor(Math.random() * pool.length)];
+    return processedCard + pool[Math.floor(Math.random() * pool.length)];
   }
 
   // --- Build content with weighted frequencies ---

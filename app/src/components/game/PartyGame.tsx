@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Trophy, AlertCircle, Video, VideoOff, Copy, Crown, Plus, Minus, EyeOff, Cast, TrendingUp, Music } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -924,7 +924,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         if (!txt.startsWith('⚔️')) {
           setShowRetoOutcome(true);
         }
-        enrichChallengeWithAI(txt, [currentPlayer], playerStats).then(enriched => {
+        enrichChallengeWithAI(txt, currentPlayer, players, playerStats).then(enriched => {
           if (enriched && enriched !== txt) setEnrichedCardText(enriched);
         });
         return;
@@ -1051,7 +1051,35 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
   gameState.showImpostorWord, mode, handleNext]);
 
   // Rarity calculation for CardDisplay
-  const currentText = enrichedCardText || aiCardOverride || getCurrentContent();
+  const rawText = enrichedCardText || aiCardOverride || getCurrentContent();
+  const currentText = useMemo(() => {
+    if (!rawText || typeof rawText !== 'string') return rawText;
+    if (!currentPlayer || players.length === 0) return rawText;
+    let result = rawText;
+    
+    // Replace {player} and {player1} with current player's name
+    result = result.replace(/{player}/g, currentPlayer.name);
+    result = result.replace(/{player1}/g, currentPlayer.name);
+    
+    // Filter out the current player to get other players for random selections
+    const otherPlayers = players.filter(p => p.id !== currentPlayer.id);
+    if (otherPlayers.length > 0) {
+      // Reemplazo secuencial: {player2}, {player3}, etc. con los otros jugadores
+      otherPlayers.forEach((other, index) => {
+        const placeholder = new RegExp(`\\{player${index + 2}\\}`, 'g');
+        result = result.replace(placeholder, other.name);
+      });
+      // Fallback para {player2} si se usó y no se reemplazó
+      const randomOther = otherPlayers[Math.floor(Math.random() * otherPlayers.length)];
+      result = result.replace(/{player2}/g, randomOther.name);
+    } else {
+      // Si no hay otros jugadores, usar un fallback descriptivo
+      result = result.replace(/{player2}/g, 'otro jugador');
+      result = result.replace(/{player3}/g, 'un tercer jugador');
+    }
+    return result;
+  }, [rawText, currentPlayer, players]);
+
   const safeCurrentText = (currentText && currentText !== 'Siguiente carta' && currentText !== 'Cargando pregunta...')
     ? currentText
     : '';

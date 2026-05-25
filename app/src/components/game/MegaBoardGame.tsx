@@ -746,7 +746,7 @@ export function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }: Me
         if (isGeminiConfigured()) {
           try {
             const standingsSummary = sortedPlayers.map(p => `${p.name}: Casilla ${p.position}, ${p.score} XP`).join('\n');
-            const enriched = await geminiEnrichChallenge(text, standingsSummary, [currentPlayer.name]);
+            const enriched = await geminiEnrichChallenge(text, standingsSummary, sortedPlayers.map(p => p.name), currentPlayer.name);
             if (enriched) text = `🤖 IA EVENTO:\n${enriched}`;
           } catch (e) {
             console.warn("Gemini enrich failed for board challenge:", e);
@@ -784,9 +784,7 @@ export function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }: Me
         if (isGeminiConfigured()) {
           try {
             const standingsSummary = sortedPlayers.map(p => `${p.name}: Casilla ${p.position}, ${p.score} XP`).join('\n');
-            const others = players.filter(p => p.id !== currentPlayer.id);
-            const rival = others[Math.floor(Math.random() * others.length)]?.name || 'Rival';
-            const enriched = await geminiEnrichChallenge(text, standingsSummary, [currentPlayer.name, rival]);
+            const enriched = await geminiEnrichChallenge(text, standingsSummary, sortedPlayers.map(p => p.name), currentPlayer.name);
             if (enriched) text = `🤖 IA DUELO:\n${enriched}`;
           } catch (e) {
             console.warn("Gemini enrich failed for board duel:", e);
@@ -829,7 +827,7 @@ export function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }: Me
         if (isGeminiConfigured()) {
           try {
             const standingsSummary = sortedPlayers.map(p => `${p.name}: Casilla ${p.position}, ${p.score} XP`).join('\n');
-            const enriched = await geminiEnrichChallenge(`Reto de Mímica: ${text}`, standingsSummary, [currentPlayer.name]);
+            const enriched = await geminiEnrichChallenge(`Reto de Mímica: ${text}`, standingsSummary, sortedPlayers.map(p => p.name), currentPlayer.name);
             if (enriched) text = enriched;
           } catch (e) {
             console.warn("Gemini enrich failed for board mimica:", e);
