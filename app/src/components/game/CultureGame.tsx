@@ -371,7 +371,7 @@ export default function CultureGame() {
                   className={buttonClass}
                 >
                   <div className="flex items-center gap-3">
-                    <span className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold">
+                    <span className="w-8 h-8 rounded-full bg-primary/20 flex-shrink-0 flex items-center justify-center font-bold">
                       {String.fromCharCode(65 + index)}
                     </span>
                     <span className="flex-1">{cleanGameText(option)}</span>

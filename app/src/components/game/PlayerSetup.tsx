@@ -577,9 +577,9 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
                           className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary/10 hover:bg-primary/20 border border-primary/30 text-sm font-black uppercase shadow-sm transition-colors active:scale-95"
                         >
                           {p.avatar_url ? (
-                            <img src={p.avatar_url} className="w-5 h-5 rounded-full object-cover" alt={p.name} />
+                            <img src={p.avatar_url} className="w-5 h-5 rounded-full object-cover flex-shrink-0" alt={p.name} />
                           ) : (
-                            <span className="w-5 h-5 rounded-full bg-slate-600 flex items-center justify-center text-[10px] text-white">{p.name.substring(0, 2)}</span>
+                            <span className="w-5 h-5 rounded-full bg-slate-600 flex-shrink-0 flex items-center justify-center text-[10px] text-white">{p.name.substring(0, 2)}</span>
                           )}
                           <span className="text-white">{p.name}</span>
                         </button>
