@@ -468,6 +468,49 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
               </motion.div>
             )}
 
+            {isGeminiConfigured() && players.length >= 2 && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="bg-card/85 backdrop-blur-sm rounded-2xl p-4 md:p-5 shadow-lg border border-pink-500/20 shadow-pink-500/5 relative overflow-hidden mt-3 text-left"
+              >
+                <div className="absolute top-0 right-0 w-24 h-24 bg-pink-500/5 rounded-full blur-2xl pointer-events-none" />
+                <div className="flex items-center gap-2 mb-2">
+                  <Sparkles className="h-4.5 w-4.5 text-pink-400 animate-pulse" />
+                  <h3 className="text-sm font-black uppercase tracking-wider text-white">Confesiones Anónimas (IA)</h3>
+                </div>
+                <p className="text-[11px] text-muted-foreground text-left mb-3">
+                  Escribe un chisme o secreto de cada jugador. En el modo Cultura General, la IA creará un Quiz de Chismes personalizado para adivinar de quién es cada uno 🤫
+                </p>
+                <div className="space-y-2 max-h-[180px] overflow-y-auto pr-1 slim-scroll">
+                  {players.map(p => {
+                    const secretKey = `secret_${p.id}`;
+                    const currentSecret = localStorage.getItem(secretKey) || '';
+                    return (
+                      <div key={p.id} className="flex flex-col gap-1 bg-black/25 p-2 rounded-xl border border-white/5">
+                        <span className="text-[9px] font-black text-pink-400 uppercase tracking-widest">{p.name}</span>
+                        <Input
+                          placeholder={`Escribe un secreto de ${p.name}...`}
+                          defaultValue={currentSecret}
+                          onChange={(e) => {
+                            const val = e.target.value.trim();
+                            localStorage.setItem(secretKey, val);
+                            const rawSecrets = localStorage.getItem('fiesta_player_secrets') || '{}';
+                            try {
+                              const parsed = JSON.parse(rawSecrets);
+                              parsed[p.id] = val;
+                              localStorage.setItem('fiesta_player_secrets', JSON.stringify(parsed));
+                            } catch {}
+                          }}
+                          className="bg-black/30 border-white/10 text-white placeholder-white/20 text-xs h-8 rounded-lg focus-visible:ring-pink-500/50"
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
+
             {isTeamMode && (
             <motion.div
               initial={{ opacity: 0, x: 20 }}

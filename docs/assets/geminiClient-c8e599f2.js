@@ -1,103 +1,9 @@
-/**
- * Cliente de integración directa con Google Gemini 1.5 Flash.
- * Realiza peticiones HTTP directas (sin dependencias de SDKs grandes)
- * y devuelve respuestas estructuradas forzando formato JSON.
- */
-
-const GEMINI_MODEL = 'gemini-1.5-flash';
-
-// Obtener la API Key desde las variables de entorno o desde localStorage (ajustes en caliente)
-export function getGeminiApiKey(): string {
-  const env = import.meta.env as Record<string, string | undefined>;
-  return env.VITE_GEMINI_API_KEY || localStorage.getItem('fiesta_gemini_key') || '';
-}
-
-export function isGeminiConfigured(): boolean {
-  const key = getGeminiApiKey();
-  return typeof key === 'string' && key.trim().length > 0 && !key.includes('placeholder');
-}
-
-export function getPartyTheme(): string {
-  return localStorage.getItem('fiesta_party_theme') || '';
-}
-
-/**
- * Función genérica de llamada a Gemini con salida JSON forzada
- */
-async function callGemini(prompt: string): Promise<any | null> {
-  const apiKey = getGeminiApiKey();
-  if (!apiKey) {
-    console.warn('Gemini Client: No API Key configured');
-    return null;
-  }
-
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
-
-  try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              {
-                text: prompt
-              }
-            ]
-          }
-        ],
-        generationConfig: {
-          responseMimeType: 'application/json'
-        }
-      })
-    });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error(`Gemini Client: API error (${response.status}):`, errText);
-      return null;
-    }
-
-    const json = await response.json();
-    const textContent = json?.candidates?.[0]?.content?.parts?.[0]?.text;
-    
-    if (!textContent) {
-      console.warn('Gemini Client: Empty response');
-      return null;
-    }
-
-    // Limpiar posibles bloques markdown si Gemini los añade a pesar de forzar JSON
-    let cleanJsonStr = textContent.trim();
-    if (cleanJsonStr.startsWith('```json')) {
-      cleanJsonStr = cleanJsonStr.replace(/^```json/, '').replace(/```$/, '').trim();
-    } else if (cleanJsonStr.startsWith('```')) {
-      cleanJsonStr = cleanJsonStr.replace(/^```/, '').replace(/```$/, '').trim();
-    }
-
-    return JSON.parse(cleanJsonStr);
-  } catch (error) {
-    console.error('Gemini Client: Execution error:', error);
-    return null;
-  }
-}
-
-/**
- * 1. Generar una nueva carta/reto personalizada (con soporte de tema)
- */
-export async function geminiGenerateCard(events: any[], players: string[]): Promise<string | null> {
-  const theme = getPartyTheme();
-  const themePrompt = theme 
-    ? `\n- El grupo ha establecido que la fiesta de hoy tiene este tema especial: "${theme}". ES OBLIGATORIO que el reto esté fuertemente inspirado en este tema, haciendo chistes, referencias, o dinámicas relacionadas.` 
-    : '';
-
-  const prompt = `
+const v="gemini-1.5-flash";function g(){return{VITE_SUPABASE_URL:"https://atswsltnjjsokouvfbut.supabase.co",VITE_SUPABASE_ANON_KEY:"sb_publishable_7uCsMmM6xhL7O9psmckrQw_Y4hjYk10",VITE_GEMINI_API_KEY:"AIzaSyBBf2ttcyeMR27Sq22n_NtIyHBufs3tzmE",BASE_URL:"./",MODE:"production",DEV:!1,PROD:!0,SSR:!1}.VITE_GEMINI_API_KEY}function y(){const o=g();return typeof o=="string"&&o.trim().length>0&&!o.includes("placeholder")}function c(){return localStorage.getItem("fiesta_party_theme")||""}async function i(o){var a,n,s,t,p;const e=g(),r=`https://generativelanguage.googleapis.com/v1beta/models/${v}:generateContent?key=${e}`;try{const l=await fetch(r,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contents:[{parts:[{text:o}]}],generationConfig:{responseMimeType:"application/json"}})});if(!l.ok){const b=await l.text();return console.error(`Gemini Client: API error (${l.status}):`,b),null}const u=await l.json(),m=(p=(t=(s=(n=(a=u==null?void 0:u.candidates)==null?void 0:a[0])==null?void 0:n.content)==null?void 0:s.parts)==null?void 0:t[0])==null?void 0:p.text;if(!m)return console.warn("Gemini Client: Empty response"),null;let d=m.trim();return d.startsWith("```json")?d=d.replace(/^```json/,"").replace(/```$/,"").trim():d.startsWith("```")&&(d=d.replace(/^```/,"").replace(/```$/,"").trim()),JSON.parse(d)}catch(l){return console.error("Gemini Client: Execution error:",l),null}}async function f(o,e){const r=c(),a=r?`
+- El grupo ha establecido que la fiesta de hoy tiene este tema especial: "${r}". ES OBLIGATORIO que el reto esté fuertemente inspirado en este tema, haciendo chistes, referencias, o dinámicas relacionadas.`:"",n=`
 Eres el motor de IA de un juego de fiesta interactivo y atrevido llamado BEEP.
-Genera un reto de fiesta divertido, picante y personalizado para los siguientes jugadores activos: ${players.join(', ')}.${themePrompt}
+Genera un reto de fiesta divertido, picante y personalizado para los siguientes jugadores activos: ${e.join(", ")}.${a}
 Aquí tienes el historial reciente de eventos del juego para darte contexto y poder crear rivalidades o piques divertidos:
-${JSON.stringify(events.slice(-15))}
+${JSON.stringify(o.slice(-15))}
 
 Instrucciones de generación:
 - Crea una carta con un reto único. Puede ser del tipo "Yo nunca", "Reto individual", "Verdad", "Duelo 1v1", "Castigo" o del tipo "🛌 Cosas que puedes decir en la cama y...".
@@ -112,31 +18,13 @@ Formato JSON esperado:
   "card": "El texto del reto personalizado en español"
 }
 No devuelvas nada más que el objeto JSON.
-`;
-
-  const result = await callGemini(prompt);
-  return result?.card || null;
-}
-
-/**
- * 2. Enriquecer un reto existente con estadísticas y salseo (con soporte de tema)
- */
-export async function geminiEnrichChallenge(
-  challengeText: string,
-  playerStats: string,
-  playerNames: string[]
-): Promise<string | null> {
-  const theme = getPartyTheme();
-  const themePrompt = theme 
-    ? `\n- Tema especial de la fiesta de hoy: "${theme}". Intenta reescribir el reto para integrar sutilmente este tema o palabras clave de forma hilarante.` 
-    : '';
-
-  const prompt = `
+`,s=await i(n);return(s==null?void 0:s.card)||null}async function E(o,e,r){const a=c(),n=a?`
+- Tema especial de la fiesta de hoy: "${a}". Intenta reescribir el reto para integrar sutilmente este tema o palabras clave de forma hilarante.`:"",s=`
 Eres el motor de IA del juego de fiesta BEEP. Tu misión es añadir salseo, ironía y dinamismo a un reto existente utilizando la memoria real de los jugadores involucrados.
-Reto original: "${challengeText}"
-Jugadores implicados en este reto: ${playerNames.join(', ')}
+Reto original: "${o}"
+Jugadores implicados en este reto: ${r.join(", ")}
 Estadísticas de estos jugadores (¡úsalas de forma sarcástica para picarlos o justificar el reto!):
-${playerStats}${themePrompt}
+${e}${n}
 
 Instrucciones:
 - Reescribe el reto original de forma ingeniosa para integrar sus estadísticas de forma orgánica.
@@ -152,27 +40,12 @@ Formato JSON esperado:
   "enriched": "El texto del reto reescrito con salseo en español"
 }
 No devuelvas nada más que el objeto JSON.
-`;
-
-  const result = await callGemini(prompt);
-  return result?.enriched || null;
-}
-
-/**
- * 3. Narrar el anuncio de un Duelo de Torneo 1v1
- */
-export async function geminiGenerateTorneoAnnouncement(
-  player1: string,
-  player2: string,
-  retoText: string,
-  memory: string[]
-): Promise<string | null> {
-  const prompt = `
+`,t=await i(s);return(t==null?void 0:t.enriched)||null}async function j(o,e,r,a){const n=`
 Eres el narrador estrella y maestro de ceremonias teatral del juego de fiesta BEEP.
-Se va a disputar un duelo decisivo de torneo 1v1 entre ${player1} y ${player2}.
-El reto del duelo es: "${retoText}"
+Se va a disputar un duelo decisivo de torneo 1v1 entre ${o} y ${e}.
+El reto del duelo es: "${r}"
 Historial de eventos recientes de la partida para dar contexto:
-${JSON.stringify(memory)}
+${JSON.stringify(a)}
 
 Instrucciones:
 - Escribe una presentación súper emocionante, divertida, dramática e irónica.
@@ -187,29 +60,14 @@ Formato JSON esperado:
   "announcement": "El espectacular anuncio del duelo en español"
 }
 No devuelvas nada más que el objeto JSON.
-`;
-
-  const result = await callGemini(prompt);
-  return result?.announcement || null;
-}
-
-/**
- * 4. Generar el comentario de análisis al final de la ronda
- */
-export async function geminiGenerateRoundAnalysis(
-  players: string[],
-  round: number,
-  summary: string[],
-  playerStatsDigest: string[]
-): Promise<string | null> {
-  const prompt = `
+`,s=await i(n);return(s==null?void 0:s.announcement)||null}async function h(o,e,r,a){const n=`
 Eres el analista oficial y comentarista irónico de la barra del bar en el juego de fiesta BEEP.
-Ha terminado la ronda número ${round} de la partida.
-Jugadores activos: ${players.join(', ')}
+Ha terminado la ronda número ${e} de la partida.
+Jugadores activos: ${o.join(", ")}
 Eventos que han ocurrido en esta ronda:
-${JSON.stringify(summary)}
+${JSON.stringify(r)}
 Resumen de estadísticas de toda la partida:
-${JSON.stringify(playerStatsDigest)}
+${JSON.stringify(a)}
 
 Instrucciones:
 - Escribe un comentario humorístico, irónico y muy divertido resumiendo lo que ha pasado en esta ronda y cómo va la partida en general.
@@ -223,35 +81,21 @@ Formato JSON esperado:
   "comment": "Tu comentario sarcástico y divertido sobre la ronda en español"
 }
 No devuelvas nada más que el objeto JSON.
-`;
-
-  const result = await callGemini(prompt);
-  return result?.comment || null;
-}
-
-/**
- * 5. Generar la crónica final humorística para la pantalla de Podio
- */
-export async function geminiGeneratePartyChronicle(
-  players: { name: string; score: number }[],
-  trackingData: any
-): Promise<string | null> {
-  const theme = getPartyTheme();
-  const themePrompt = theme ? `\n- El tema de la noche era: "${theme}".` : '';
-
-  const prompt = `
+`,s=await i(n);return(s==null?void 0:s.comment)||null}async function N(o,e){const r=c(),n=`
 Eres el cronista del corazón y reportero más cotilla del juego de fiesta BEEP.
-Ha terminado la partida. Aquí tienes los resultados finales, XP y estadísticas globales de los jugadores:${themePrompt}
+Ha terminado la partida. Aquí tienes los resultados finales, XP y estadísticas globales de los jugadores:${r?`
+- El tema de la noche era: "${r}".`:""}
 - Jugadores y su XP final:
-${players.map(p => `- ${p.name}: ${p.score} XP`).join('\n')}
+${o.map(t=>`- ${t.name}: ${t.score} XP`).join(`
+`)}
 - Tragos totales acumulados:
-${JSON.stringify(trackingData?.drinkCounts || {})}
+${JSON.stringify((e==null?void 0:e.drinkCounts)||{})}
 - Votos recibidos en dinámicas de grupo:
-${JSON.stringify(trackingData?.voteCounts || {})}
+${JSON.stringify((e==null?void 0:e.voteCounts)||{})}
 - Veces que pasaron/hicieron skip:
-${JSON.stringify(trackingData?.skipCounts || {})}
+${JSON.stringify((e==null?void 0:e.skipCounts)||{})}
 - Virus totales recibidos:
-${JSON.stringify(trackingData?.virusReceived || {})}
+${JSON.stringify((e==null?void 0:e.virusReceived)||{})}
 
 Instrucciones:
 - Redacta una crónica de la partida súper divertida, irónica, gamberra y muy picante.
@@ -266,24 +110,11 @@ Formato JSON esperado:
   "chronicle": "El texto humorístico completo de la crónica en español"
 }
 No devuelvas nada más que el objeto JSON.
-`;
-
-  const result = await callGemini(prompt);
-  return result?.chronicle || null;
-}
-
-/**
- * 6. Actuar como Juez del Bar resolviendo una disputa en caliente
- */
-export async function geminiResolveDispute(
-  players: string[],
-  disputeText: string
-): Promise<string | null> {
-  const prompt = `
+`,s=await i(n);return(s==null?void 0:s.chronicle)||null}async function S(o,e){const r=`
 Eres el "Juez de la Barra", un árbitro de bar de copas legendario, sabio, sarcástico y sumamente divertido.
 Varios amigos jugando al juego de fiesta BEEP tienen una disputa acalorada y requieren que dictes sentencia.
-Jugadores involucrados: ${players.join(', ')}
-Descripción de la disputa: "${disputeText}"
+Jugadores involucrados: ${o.join(", ")}
+Descripción de la disputa: "${e}"
 
 Instrucciones:
 - Analiza la disputa con mucha ironía y humor.
@@ -297,26 +128,10 @@ Formato JSON esperado:
   "ruling": "Tu divertida y firme sentencia arbitral en español"
 }
 No devuelvas nada más que el objeto JSON.
-`;
-
-  const result = await callGemini(prompt);
-  return result?.ruling || null;
-}
-
-/**
- * 7. Generar un castigo en vivo personalizado (Ruleta de Castigos)
- */
-export async function geminiGenerateCustomPunishment(
-  playerName: string,
-  statsSummary: string
-): Promise<string | null> {
-  const theme = getPartyTheme();
-  const themePrompt = theme ? ` El castigo debe estar inspirado en el tema especial de la fiesta: "${theme}".` : '';
-
-  const prompt = `
+`,a=await i(r);return(a==null?void 0:a.ruling)||null}async function q(o,e){const r=c(),a=r?` El castigo debe estar inspirado en el tema especial de la fiesta: "${r}".`:"",n=`
 Eres el motor de tortura divertida y gamberra del juego de fiesta BEEP.
-El jugador "${playerName}" ha decidido no beber tragos y en su lugar quiere someterse a la Ruleta de Castigos de la IA.
-Estadísticas del jugador: ${statsSummary}.${themePrompt}
+El jugador "${o}" ha decidido no beber tragos y en su lugar quiere someterse a la Ruleta de Castigos de la IA.
+Estadísticas del jugador: ${e}.${a}
 
 Instrucciones:
 - Genera un castigo único, atrevido, físico o social, que tenga que realizar el jugador en vivo frente al grupo.
@@ -331,26 +146,12 @@ Formato JSON esperado:
   "punishment": "La descripción del castigo a realizar en español"
 }
 No devuelvas nada más que el objeto JSON.
-`;
-
-  const result = await callGemini(prompt);
-  return result?.punishment || null;
-}
-
-/**
- * 8. Generar una ronda del Impostor personalizada con IA (con soporte de tema)
- */
-export async function geminiGenerateImpostorRound(): Promise<{ category: string; word: string; fakeWord: string; hint: string } | null> {
-  const theme = getPartyTheme();
-  const themePrompt = theme 
-    ? `\n- Tema especial de la fiesta de hoy: "${theme}". ES OBLIGATORIO que los términos generados encajen de forma divertidísima con este tema.` 
-    : '';
-
-  const prompt = `
+`,s=await i(n);return(s==null?void 0:s.punishment)||null}async function O(){const o=c(),r=`
 Eres el motor de IA del juego de fiesta BEEP. Tu misión es generar una ronda del juego del "Impostor".
 En este juego, la mayoría de los jugadores recibe la palabra real ("word"), mientras que el Impostor recibe la palabra falsa ("fakeWord") o una pista ligeramente descolorida. También hay un tema general o categoría ("category") y una pista general común ("hint").
 
-Genera una ronda súper divertida, picante o ingeniosa.${themePrompt}
+Genera una ronda súper divertida, picante o ingeniosa.${o?`
+- Tema especial de la fiesta de hoy: "${o}". ES OBLIGATORIO que los términos generados encajen de forma divertidísima con este tema.`:""}
 
 Instrucciones:
 - "category": El tema general o categoría (ej. "Comida rápida", "Posturas de yoga", "Cosas de resaca").
@@ -368,45 +169,19 @@ Formato JSON esperado:
   "hint": "La pista general"
 }
 No devuelvas nada más que el objeto JSON.
-`;
-
-  const result = await callGemini(prompt);
-  if (result && result.category && result.word && result.fakeWord && result.hint) {
-    return result;
-  }
-  return null;
-}
-
-/**
- * 9. Generar análisis de perfil hilarante (Entrenador IA)
- */
-export async function geminiGenerateProfileCoach(
-  playerName: string,
-  stats: {
-    level: number;
-    xp: number;
-    gamesPlayed: number;
-    gamesWon: number;
-    megamixWins: number;
-    clasicoWins: number;
-    picanteWins: number;
-    pokerChips: number;
-    parchisWins: number;
-  }
-): Promise<string | null> {
-  const prompt = `
+`,a=await i(r);return a&&a.category&&a.word&&a.fakeWord&&a.hint?a:null}async function I(o,e){const r=`
 Eres el "AI Party Coach", un entrenador de fiesta legendario, sarcástico, exagerado y sumamente divertido.
-Analiza el perfil histórico del jugador "${playerName}" a partir de sus estadísticas acumuladas de juego y redacta un informe/diagnóstico hilarante sobre su personalidad fiestera:
+Analiza el perfil histórico del jugador "${o}" a partir de sus estadísticas acumuladas de juego y redacta un informe/diagnóstico hilarante sobre su personalidad fiestera:
 Estadísticas históricas:
-- Nivel de jugador: ${stats.level}
-- XP total: ${stats.xp}
-- Partidas totales jugadas: ${stats.gamesPlayed}
-- Partidas ganadas: ${stats.gamesWon}
-- Victorias en Megamix: ${stats.megamixWins}
-- Victorias en Clásico: ${stats.clasicoWins}
-- Victorias en Picante: ${stats.picanteWins}
-- Fichas ganadas en Poker: ${stats.pokerChips}
-- Victorias en Parchís: ${stats.parchisWins}
+- Nivel de jugador: ${e.level}
+- XP total: ${e.xp}
+- Partidas totales jugadas: ${e.gamesPlayed}
+- Partidas ganadas: ${e.gamesWon}
+- Victorias en Megamix: ${e.megamixWins}
+- Victorias en Clásico: ${e.clasicoWins}
+- Victorias en Picante: ${e.picanteWins}
+- Fichas ganadas en Poker: ${e.pokerChips}
+- Victorias en Parchís: ${e.parchisWins}
 
 Instrucciones:
 - Crea un informe/diagnóstico canalla, sarcástico y muy divertido sobre su estilo de juego.
@@ -422,22 +197,10 @@ Formato JSON esperado:
   "coachAnalysis": "El texto del diagnóstico en español con formato Markdown y emojis"
 }
 No devuelvas nada más que el objeto JSON.
-`;
-
-  const result = await callGemini(prompt);
-  return result?.coachAnalysis || null;
-}
-
-/**
- * 10. Generar preguntas de cultura/trivia a partir de las confesiones del lobby
- */
-export async function geminiGenerateSecretsTrivia(
-  secrets: { playerName: string; secret: string }[]
-): Promise<any[] | null> {
-  const prompt = `
+`,a=await i(r);return(a==null?void 0:a.coachAnalysis)||null}async function P(o){const e=`
 Eres el motor de IA del juego de fiesta BEEP.
 Aquí tienes una lista de confesiones y secretos anónimos introducidos por los propios jugadores en el lobby:
-${JSON.stringify(secrets)}
+${JSON.stringify(o)}
 
 Tu misión es crear preguntas de opción múltiple divertidísimas (tipo trivia/quiz de chismes) para adivinar de quién es cada confesión.
 Instrucciones:
@@ -463,8 +226,4 @@ Formato JSON esperado:
   }
 ]
 No devuelvas nada más que el array JSON.
-`;
-
-  const result = await callGemini(prompt);
-  return result || null;
-}
+`;return await i(e)||null}export{E as geminiEnrichChallenge,f as geminiGenerateCard,q as geminiGenerateCustomPunishment,O as geminiGenerateImpostorRound,N as geminiGeneratePartyChronicle,I as geminiGenerateProfileCoach,h as geminiGenerateRoundAnalysis,P as geminiGenerateSecretsTrivia,j as geminiGenerateTorneoAnnouncement,S as geminiResolveDispute,g as getGeminiApiKey,c as getPartyTheme,y as isGeminiConfigured};

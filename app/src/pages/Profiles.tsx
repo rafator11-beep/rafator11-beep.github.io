@@ -24,6 +24,7 @@ import { buildPremiumSummaryFromRanking, getPremiumBadgeCatalog, getPremiumOverv
 import { CoinShop } from '@/components/game/CoinShop';
 import { getXPProgress } from '@/lib/playerEconomy';
 import { useAuth } from '@/contexts/AuthContext';
+import { isGeminiConfigured } from '@/services/geminiClient';
 
 type ModeKey = 'global' | 'fiesta' | 'juego' | 'poker' | 'megamix' | 'clasico' | 'picante' | 'parchis';
 
@@ -202,6 +203,38 @@ export default function Profiles() {
   const [previewAvatar, setPreviewAvatar] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const { profile, syncEconomy } = useAuth();
+
+  const [coachAnalysis, setCoachAnalysis] = useState<string>(() => localStorage.getItem('fiesta_ai_coach_analysis') || '');
+  const [isCallingCoach, setIsCallingCoach] = useState(false);
+
+  const handleConsultCoach = async () => {
+    if (!myProfile) return;
+    setIsCallingCoach(true);
+    try {
+      const stats = {
+        level: Math.floor((myProfile.xp || 0) / 1000) + 1,
+        xp: myProfile.xp || 0,
+        gamesPlayed: myProfile.games_played || 0,
+        gamesWon: myProfile.games_won || 0,
+        megamixWins: myProfile.megamix_games_won || 0,
+        clasicoWins: myProfile.clasico_games_won || 0,
+        picanteWins: myProfile.picante_games_won || 0,
+        pokerChips: myProfile.poker_chips_won || 0,
+        parchisWins: myProfile.parchis_games_won || 0,
+      };
+      
+      const { geminiGenerateProfileCoach } = await import('@/services/geminiClient');
+      const analysis = await geminiGenerateProfileCoach(myProfile.name, stats);
+      if (analysis) {
+        setCoachAnalysis(analysis);
+        localStorage.setItem('fiesta_ai_coach_analysis', analysis);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsCallingCoach(false);
+    }
+  };
 
   React.useEffect(() => {
     setLocalPlayerName(localStorage.getItem('fiesta_player_name') || '');
@@ -426,6 +459,42 @@ export default function Profiles() {
                       </div>
                     </div>
                   ) : null}
+                  {isGeminiConfigured() && myProfile && (
+                    <div className="premium-panel-soft rounded-[30px] p-5 sm:p-6 border border-fuchsia-500/20 shadow-fuchsia-500/5 relative overflow-hidden mt-5">
+                      <div className="absolute top-0 right-0 w-24 h-24 bg-fuchsia-500/5 rounded-full blur-2xl pointer-events-none" />
+                      <div className="flex items-center justify-between gap-3 mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-fuchsia-400/10">
+                            <Sparkles className="h-5 w-5 text-fuchsia-300 animate-pulse" />
+                          </div>
+                          <div className="text-left">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Entrenador IA</p>
+                            <h2 className="text-xl font-bold text-white font-arcade uppercase tracking-tight">Análisis de Rendimiento</h2>
+                          </div>
+                        </div>
+                        <Button
+                          onClick={handleConsultCoach}
+                          disabled={isCallingCoach}
+                          className="h-10 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 border-none hover:opacity-90 font-black text-xs tracking-wider uppercase"
+                        >
+                          {isCallingCoach ? 'Analizando...' : '🤖 Consultar Coach'}
+                        </Button>
+                      </div>
+                      {coachAnalysis ? (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="bg-black/35 rounded-2xl p-4 border border-white/5 text-left text-xs sm:text-sm text-slate-200 leading-relaxed font-arcade whitespace-pre-line"
+                        >
+                          {coachAnalysis}
+                        </motion.div>
+                      ) : (
+                        <p className="text-xs text-muted-foreground text-left font-arcade uppercase tracking-wider leading-relaxed">
+                          ¿Quieres saber qué piensa la IA de tus habilidades fiesteras y competitivas? Pulsa el botón para recibir un diagnóstico hilarante y 100% personalizado.
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </motion.section>
               ) : null}
 

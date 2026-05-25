@@ -17,6 +17,7 @@ import { duelos } from '@/data/duelosContent';
 import { mimicaChallenges } from '@/data/mimicaContent';
 import { cultureQuestionsNew2025 } from '@/data/cultureQuestionsNew2025';
 import { useRanking } from '@/hooks/useRanking';
+import { isGeminiConfigured, geminiEnrichChallenge } from '@/services/geminiClient';
 
 // ─── Tile Types & Content ─────────────────────────────────────────────────────
 type TileType = 'start' | 'challenge' | 'trivia' | 'duel' | 'drink' | 'bonus' | 'trap' | 'mimica' | 'random' | 'norma' | 'finish' | 'oca' | 'puente' | 'posada' | 'pozo' | 'laberinto' | 'carcel' | 'calavera' | 'skip' | 'reset';
@@ -736,11 +737,22 @@ export function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }: Me
     setTimeout(() => triggerTileEvent(tile, newPos), 400);
   };
 
-  const triggerTileEvent = (tile: BoardTile, pos: number) => {
+  const triggerTileEvent = async (tile: BoardTile, pos: number) => {
     switch (tile.type) {
       case 'challenge': {
         const challenge = getRandomWithoutRepeat('megaboard_challenge', clasico);
-        const text = challenge.replace(/{player}/g, currentPlayer.name);
+        let text = challenge.replace(/{player}/g, currentPlayer.name);
+        
+        if (isGeminiConfigured()) {
+          try {
+            const standingsSummary = sortedPlayers.map(p => `${p.name}: Casilla ${p.position}, ${p.score} XP`).join('\n');
+            const enriched = await geminiEnrichChallenge(text, standingsSummary, [currentPlayer.name]);
+            if (enriched) text = `🤖 IA EVENTO:\n${enriched}`;
+          } catch (e) {
+            console.warn("Gemini enrich failed for board challenge:", e);
+          }
+        }
+
         setEventEmoji('🎯');
         setEventText(text);
         setEventType('challenge');
@@ -767,8 +779,22 @@ export function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }: Me
       }
       case 'duel': {
         const duel = getRandomWithoutRepeat('megaboard_duel', duelos);
+        let text = `${duel.name}: ${duel.description}`;
+        
+        if (isGeminiConfigured()) {
+          try {
+            const standingsSummary = sortedPlayers.map(p => `${p.name}: Casilla ${p.position}, ${p.score} XP`).join('\n');
+            const others = players.filter(p => p.id !== currentPlayer.id);
+            const rival = others[Math.floor(Math.random() * others.length)]?.name || 'Rival';
+            const enriched = await geminiEnrichChallenge(text, standingsSummary, [currentPlayer.name, rival]);
+            if (enriched) text = `🤖 IA DUELO:\n${enriched}`;
+          } catch (e) {
+            console.warn("Gemini enrich failed for board duel:", e);
+          }
+        }
+
         setEventEmoji('⚔️');
-        setEventText(`${duel.name}: ${duel.description}`);
+        setEventText(text);
         setEventType('duel');
         setGamePhase('event');
         break;
@@ -798,8 +824,20 @@ export function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }: Me
       }
       case 'mimica': {
         const mimica = getRandomWithoutRepeat('megaboard_mimica', mimicaChallenges);
+        let text = mimica.text;
+        
+        if (isGeminiConfigured()) {
+          try {
+            const standingsSummary = sortedPlayers.map(p => `${p.name}: Casilla ${p.position}, ${p.score} XP`).join('\n');
+            const enriched = await geminiEnrichChallenge(`Reto de Mímica: ${text}`, standingsSummary, [currentPlayer.name]);
+            if (enriched) text = enriched;
+          } catch (e) {
+            console.warn("Gemini enrich failed for board mimica:", e);
+          }
+        }
+
         setEventEmoji('🎭');
-        setEventText(mimica.text); // Just the text, card will handle formatting
+        setEventText(text); // Just the text, card will handle formatting
         setEventType('mimica');
         setGamePhase('event');
         break;

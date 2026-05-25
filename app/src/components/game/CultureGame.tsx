@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Lightbulb, Phone, RefreshCw, Check, X, Trophy, Users } from 'lucide-react';
+import { ArrowLeft, Lightbulb, Phone, RefreshCw, Check, X, Trophy, Users, Loader2 } from 'lucide-react';
 import { useGameContext } from '@/contexts/GameContext';
 import { Player } from '@/types/game';
 import { Button } from '@/components/ui/button';
 import { cleanGameText } from '@/utils/sanitize';
 import { cultureQuestions, CultureQuestion, getRandomCultureQuestions } from '@/data/cultureQuestions';
+import { isGeminiConfigured } from '@/services/geminiClient';
 
 interface Lifeline {
   id: 'fifty' | 'hint' | 'change';
@@ -34,6 +35,8 @@ export default function CultureGame() {
   const currentPlayer = currentPlayers[currentPlayerIndex];
   const currentQuestion = questions[currentQuestionIndex];
 
+  const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
+
   useEffect(() => {
     if (currentPlayers.length < 2) {
       navigate('/');
@@ -41,7 +44,6 @@ export default function CultureGame() {
     }
 
     const shuffledQuestions = getRandomCultureQuestions(30);
-    setQuestions(shuffledQuestions);
 
     const initialScores: Record<string, number> = {};
     const initialLifelines: Record<string, Lifeline[]> = {};
@@ -57,6 +59,47 @@ export default function CultureGame() {
     
     setScores(initialScores);
     setLifelines(initialLifelines);
+
+    // Cargar secretos de chismes si existen y Gemini está activo
+    const rawSecrets = localStorage.getItem('fiesta_player_secrets');
+    let lobbySecrets: { playerName: string; secret: string }[] = [];
+    if (rawSecrets) {
+      try {
+        const parsed = JSON.parse(rawSecrets);
+        lobbySecrets = Object.entries(parsed)
+          .map(([pId, secretText]) => {
+            const p = currentPlayers.find(pl => pl.id === pId);
+            return {
+              playerName: p ? p.name : pId,
+              secret: String(secretText)
+            };
+          })
+          .filter(item => item.secret.trim().length > 0);
+      } catch (e) {
+        console.error("Error parsing secrets:", e);
+      }
+    }
+
+    if (lobbySecrets.length >= 1 && isGeminiConfigured()) {
+      setIsLoadingQuestions(true);
+      import('@/services/geminiClient').then(async ({ geminiGenerateSecretsTrivia }) => {
+        try {
+          const generated = await geminiGenerateSecretsTrivia(lobbySecrets);
+          if (generated && generated.length > 0) {
+            setQuestions([...generated, ...shuffledQuestions]);
+          } else {
+            setQuestions(shuffledQuestions);
+          }
+        } catch (err) {
+          console.error("Gemini secrets generation failed:", err);
+          setQuestions(shuffledQuestions);
+        } finally {
+          setIsLoadingQuestions(false);
+        }
+      });
+    } else {
+      setQuestions(shuffledQuestions);
+    }
   }, [currentPlayers, navigate]);
 
   const useLifeline = useCallback((lifelineId: 'fifty' | 'hint' | 'change') => {
@@ -207,6 +250,18 @@ export default function CultureGame() {
             Volver al Menú
           </Button>
         </div>
+      </div>
+    );
+  }
+
+  if (isLoadingQuestions) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-white text-center">
+        <Loader2 className="w-12 h-12 text-pink-500 animate-spin mb-4" />
+        <h2 className="text-2xl font-black uppercase tracking-widest text-pink-400">Compilando Secretos... 🤫</h2>
+        <p className="text-xs text-white/50 uppercase tracking-widest mt-2 max-w-xs leading-relaxed">
+          Gemini está leyendo las confesiones anónimas y preparando el Quiz de Chismes personalizado para el grupo.
+        </p>
       </div>
     );
   }

@@ -3,6 +3,7 @@ import { GameMode, PlayerVirus, Player } from '@/types/game';
 import { virusEffects, normasRonda } from '@/data/gameContent';
 import { impostorRounds } from '@/data/impostorContent';
 import { duelos } from '@/data/duelosContent';
+import { isGeminiConfigured, geminiGenerateImpostorRound } from '@/services/geminiClient';
 import { footballQuestions } from '@/data/footballQuestionsNew';
 import { cultureQuestions } from '@/data/cultureQuestions';
 import { getRandomMimica } from '@/data/mimicaContent';
@@ -365,17 +366,69 @@ export const useGameEffects = (mode: GameMode, players: Player[]) => {
         // Force Impostor every 40 cards
         if (currentIndex - lastImpostorIndexRef.current >= 40 && players.length >= 3) {
             lastImpostorIndexRef.current = currentIndex;
-            const randomImpostor = impostorRounds[Math.floor(Math.random() * impostorRounds.length)];
             const impostorPlayer = players[Math.floor(Math.random() * players.length)];
+            
+            // Set loading state first
             setGameState((prev: any) => ({
                 ...prev,
                 showImpostorWarning: true,
                 impostorData: {
-                    currentImpostorReal: randomImpostor.normalQuestion || randomImpostor.category || '',
-                    currentImpostorFake: randomImpostor.impostorQuestion || randomImpostor.hint || '',
                     impostorPlayerId: impostorPlayer.id,
+                    currentImpostorReal: 'Cargando palabra secreta...',
+                    currentImpostorFake: 'Cargando pista...',
+                    isLoading: true,
                 }
             }));
+
+            if (isGeminiConfigured()) {
+                geminiGenerateImpostorRound().then(result => {
+                    if (result) {
+                        setGameState((prev: any) => ({
+                            ...prev,
+                            impostorData: {
+                                ...prev.impostorData,
+                                currentImpostorReal: `${result.category}: ${result.word}`,
+                                currentImpostorFake: `${result.category}: ${result.fakeWord} (${result.hint})`,
+                                isLoading: false,
+                            }
+                        }));
+                    } else {
+                        // Fallback static
+                        const randomImpostor = impostorRounds[Math.floor(Math.random() * impostorRounds.length)];
+                        setGameState((prev: any) => ({
+                            ...prev,
+                            impostorData: {
+                                ...prev.impostorData,
+                                currentImpostorReal: randomImpostor.normalQuestion || randomImpostor.category || '',
+                                currentImpostorFake: randomImpostor.impostorQuestion || randomImpostor.hint || '',
+                                isLoading: false,
+                            }
+                        }));
+                    }
+                }).catch(() => {
+                    const randomImpostor = impostorRounds[Math.floor(Math.random() * impostorRounds.length)];
+                    setGameState((prev: any) => ({
+                        ...prev,
+                        impostorData: {
+                            ...prev.impostorData,
+                            currentImpostorReal: randomImpostor.normalQuestion || randomImpostor.category || '',
+                            currentImpostorFake: randomImpostor.impostorQuestion || randomImpostor.hint || '',
+                            isLoading: false,
+                        }
+                    }));
+                });
+            } else {
+                const randomImpostor = impostorRounds[Math.floor(Math.random() * impostorRounds.length)];
+                setGameState((prev: any) => ({
+                    ...prev,
+                    impostorData: {
+                        ...prev.impostorData,
+                        currentImpostorReal: randomImpostor.normalQuestion || randomImpostor.category || '',
+                        currentImpostorFake: randomImpostor.impostorQuestion || randomImpostor.hint || '',
+                        isLoading: false,
+                    }
+                }));
+            }
             return true;
         }
 
@@ -394,17 +447,68 @@ export const useGameEffects = (mode: GameMode, players: Player[]) => {
                 // Impostor
                 if (impostorRounds.length === 0) return false;
                 lastImpostorIndexRef.current = currentIndex; // Reset manual counter when cycle hits
-                const randomImpostor = impostorRounds[Math.floor(Math.random() * impostorRounds.length)];
                 const impostorPlayer = players[Math.floor(Math.random() * players.length)];
+                
+                // Set loading state first
                 setGameState((prev: any) => ({
                     ...prev,
                     showImpostorWarning: true, // Use warning screen for privacy
                     impostorData: {
-                        currentImpostorReal: randomImpostor.normalQuestion || randomImpostor.category || '',
-                        currentImpostorFake: randomImpostor.impostorQuestion || randomImpostor.hint || '',
                         impostorPlayerId: impostorPlayer.id,
+                        currentImpostorReal: 'Cargando palabra secreta...',
+                        currentImpostorFake: 'Cargando pista...',
+                        isLoading: true,
                     }
                 }));
+
+                if (isGeminiConfigured()) {
+                    geminiGenerateImpostorRound().then(result => {
+                        if (result) {
+                            setGameState((prev: any) => ({
+                                ...prev,
+                                impostorData: {
+                                    ...prev.impostorData,
+                                    currentImpostorReal: `${result.category}: ${result.word}`,
+                                    currentImpostorFake: `${result.category}: ${result.fakeWord} (${result.hint})`,
+                                    isLoading: false,
+                                }
+                            }));
+                        } else {
+                            const randomImpostor = impostorRounds[Math.floor(Math.random() * impostorRounds.length)];
+                            setGameState((prev: any) => ({
+                                ...prev,
+                                impostorData: {
+                                    ...prev.impostorData,
+                                    currentImpostorReal: randomImpostor.normalQuestion || randomImpostor.category || '',
+                                    currentImpostorFake: randomImpostor.impostorQuestion || randomImpostor.hint || '',
+                                    isLoading: false,
+                                }
+                            }));
+                        }
+                    }).catch(() => {
+                        const randomImpostor = impostorRounds[Math.floor(Math.random() * impostorRounds.length)];
+                        setGameState((prev: any) => ({
+                            ...prev,
+                            impostorData: {
+                                ...prev.impostorData,
+                                currentImpostorReal: randomImpostor.normalQuestion || randomImpostor.category || '',
+                                currentImpostorFake: randomImpostor.impostorQuestion || randomImpostor.hint || '',
+                                isLoading: false,
+                            }
+                        }));
+                    });
+                } else {
+                    const randomImpostor = impostorRounds[Math.floor(Math.random() * impostorRounds.length)];
+                    setGameState((prev: any) => ({
+                        ...prev,
+                        impostorData: {
+                            ...prev.impostorData,
+                            currentImpostorReal: randomImpostor.normalQuestion || randomImpostor.category || '',
+                            currentImpostorFake: randomImpostor.impostorQuestion || randomImpostor.hint || '',
+                            isLoading: false,
+                        }
+                    }));
+                }
             } else {
                 // Mimica
                 const randomMimica = getRandomMimica();

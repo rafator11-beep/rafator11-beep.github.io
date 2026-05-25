@@ -112,7 +112,9 @@ export function TorneoRound({ match, torneoScores, onWinner }: Props) {
               <p className="text-white font-bold text-base leading-snug">
                 {retoText
                   .replace(/^🎯\s*/,'')
-                  .replace(/\{player\}/gi, `${player1.name} y ${player2.name}`)
+                  .replace(/\{player1\}/gi, player1.name)
+                  .replace(/\{player\}/gi, player1.name)
+                  .replace(/\{player2\}/gi, player2.name)
                   .replace(/bebe \d[^.]*[.!]?/gi,'')
                   .replace(/reparte \d[^.]*[.!]?/gi,'')
                   .trim()}

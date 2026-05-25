@@ -1102,18 +1102,67 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         }
       } else if (triggerType === 'IMPOSTOR') {
         // Handle IMPOSTOR triggers from deck cards
-        if (players.length >= 3 && impostorRounds.length > 0) {
-          const round = impostorRounds[Math.floor(Math.random() * impostorRounds.length)];
+        if (players.length >= 3) {
           const impostorPlayer = players[Math.floor(Math.random() * players.length)];
           setGameState(prev => ({
             ...prev,
             showImpostorWarning: true,
             impostorData: {
               impostorPlayerId: impostorPlayer.id,
-              currentImpostorReal: round.normalQuestion || round.category || '',
-              currentImpostorFake: round.impostorQuestion || round.hint || '',
+              currentImpostorReal: 'Cargando palabra secreta...',
+              currentImpostorFake: 'Cargando pista...',
+              isLoading: true,
             },
           }));
+
+          if (isGeminiConfigured()) {
+            geminiGenerateImpostorRound().then(result => {
+              if (result) {
+                setGameState(prev => ({
+                  ...prev,
+                  impostorData: {
+                    ...prev.impostorData,
+                    currentImpostorReal: `${result.category}: ${result.word}`,
+                    currentImpostorFake: `${result.category}: ${result.fakeWord} (${result.hint})`,
+                    isLoading: false,
+                  }
+                }));
+              } else {
+                const round = impostorRounds[Math.floor(Math.random() * impostorRounds.length)];
+                setGameState(prev => ({
+                  ...prev,
+                  impostorData: {
+                    ...prev.impostorData,
+                    currentImpostorReal: round.normalQuestion || round.category || '',
+                    currentImpostorFake: round.impostorQuestion || round.hint || '',
+                    isLoading: false,
+                  }
+                }));
+              }
+            }).catch(() => {
+              const round = impostorRounds[Math.floor(Math.random() * impostorRounds.length)];
+              setGameState(prev => ({
+                ...prev,
+                impostorData: {
+                  ...prev.impostorData,
+                  currentImpostorReal: round.normalQuestion || round.category || '',
+                  currentImpostorFake: round.impostorQuestion || round.hint || '',
+                  isLoading: false,
+                }
+              }));
+            });
+          } else {
+            const round = impostorRounds[Math.floor(Math.random() * impostorRounds.length)];
+            setGameState(prev => ({
+              ...prev,
+              impostorData: {
+                ...prev.impostorData,
+                currentImpostorReal: round.normalQuestion || round.category || '',
+                currentImpostorFake: round.impostorQuestion || round.hint || '',
+                isLoading: false,
+              }
+            }));
+          }
         } else {
           const timer = setTimeout(() => advanceTurn(true), 100);
           return () => clearTimeout(timer);
