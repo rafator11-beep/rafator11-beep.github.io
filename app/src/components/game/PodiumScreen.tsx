@@ -1,7 +1,8 @@
 import { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, RotateCcw, Crown, ChevronRight, BarChart2, Share2 } from 'lucide-react';
+import { Home, RotateCcw, Crown, ChevronRight, BarChart2, Share2, Sparkles, Loader2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { geminiGeneratePartyChronicle, isGeminiConfigured } from '@/services/geminiClient';
 
 // ── SHARE IMAGE ───────────────────────────────────────────────────────────────
 async function shareAwardsImage(
@@ -142,10 +143,29 @@ const AnimatedCounter = ({ value }: { value: number }) => {
 };
 
 export const PodiumScreen = ({ players, onRestart, onHome, trackingData }: PodiumScreenProps) => {
-  const [phase, setPhase] = useState<'podium' | 'bigdata'>('podium');
+  const [phase, setPhase] = useState<'podium' | 'bigdata' | 'cronica'>('podium');
+  const [chronicle, setChronicle] = useState<string | null>(null);
+  const [loadingChronicle, setLoadingChronicle] = useState(false);
 
   const sortedPlayers = useMemo(() => [...players].sort((a, b) => b.score - a.score), [players]);
   const podiumOrder = [sortedPlayers[1], sortedPlayers[0], sortedPlayers[2]].filter(Boolean);
+
+  // Cargar crónica IA al cambiar de fase
+  useEffect(() => {
+    if (phase === 'cronica' && !chronicle && isGeminiConfigured()) {
+      setLoadingChronicle(true);
+      geminiGeneratePartyChronicle(
+        players.map(p => ({ name: p.name, score: p.score })),
+        trackingData
+      ).then(res => {
+        setChronicle(res || "¡Vaya noche! Los datos son tan extremos que la IA se ha quedado sin palabras.");
+        setLoadingChronicle(false);
+      }).catch(() => {
+        setChronicle("Error al conectar con el cronista del bar. ¡Sigue bebiendo!");
+        setLoadingChronicle(false);
+      });
+    }
+  }, [phase, chronicle, players, trackingData]);
 
   useEffect(() => {
     const duration = 4000;
@@ -317,14 +337,33 @@ export const PodiumScreen = ({ players, onRestart, onHome, trackingData }: Podiu
 
             {/* Actions */}
             <motion.div initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 1.2 }} className="w-full max-w-sm flex flex-col gap-3 relative z-10 pb-4">
-              <button
-                onClick={() => setPhase('bigdata')}
-                className="w-full h-14 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 text-white font-black text-sm tracking-wider shadow-[0_4px_24px_rgba(139,92,246,0.4)] active:scale-95 transition-transform"
-              >
-                <BarChart2 className="w-5 h-5" />
-                VER ESTADÍSTICAS
-                <ChevronRight className="w-4 h-4" />
-              </button>
+              {isGeminiConfigured() ? (
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setPhase('bigdata')}
+                    className="flex-1 h-14 flex items-center justify-center gap-1.5 rounded-2xl bg-white/5 border border-white/10 text-white font-black text-xs tracking-wider active:scale-95 transition-transform"
+                  >
+                    <BarChart2 className="w-4 h-4 text-violet-400" />
+                    ESTADÍSTICAS
+                  </button>
+                  <button
+                    onClick={() => setPhase('cronica')}
+                    className="flex-1 h-14 flex items-center justify-center gap-1.5 rounded-2xl bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-600 text-white font-black text-xs tracking-wider shadow-[0_4px_20px_rgba(6,182,212,0.3)] active:scale-95 transition-transform"
+                  >
+                    <Sparkles className="w-4 h-4 text-cyan-200 animate-pulse" />
+                    CRÓNICA IA
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setPhase('bigdata')}
+                  className="w-full h-14 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 text-white font-black text-sm tracking-wider shadow-[0_4px_24px_rgba(139,92,246,0.4)] active:scale-95 transition-transform"
+                >
+                  <BarChart2 className="w-5 h-5" />
+                  VER ESTADÍSTICAS
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              )}
               <div className="flex gap-3">
                 <button
                   onClick={onRestart}
@@ -341,7 +380,7 @@ export const PodiumScreen = ({ players, onRestart, onHome, trackingData }: Podiu
               </div>
             </motion.div>
           </motion.div>
-        ) : (
+        ) : phase === 'bigdata' ? (
           <motion.div
             key="bigdata"
             initial={{ opacity: 0, x: 80 }}
@@ -419,6 +458,66 @@ export const PodiumScreen = ({ players, onRestart, onHome, trackingData }: Podiu
                 title="Compartir"
               >
                 <Share2 className="w-5 h-5" />
+              </button>
+              <button
+                onClick={onHome}
+                className="h-14 px-4 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-white active:scale-95 transition-transform"
+              >
+                <Home className="w-5 h-5" />
+              </button>
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="cronica"
+            initial={{ opacity: 0, x: 80 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 80 }}
+            transition={{ duration: 0.4 }}
+            className="absolute inset-0 bg-[#080810] flex flex-col overflow-hidden"
+          >
+            {/* Header */}
+            <div className="flex items-center gap-3 px-5 pt-safe pt-6 pb-4 border-b border-white/5">
+              <button onClick={() => setPhase('podium')} className="w-8 h-8 flex items-center justify-center rounded-xl bg-white/5 text-white">
+                <ChevronRight className="w-5 h-5 rotate-180" />
+              </button>
+              <div>
+                <p className="text-white/40 font-mono text-[10px] uppercase tracking-widest">Post-Game</p>
+                <h2 className="text-white font-black text-lg leading-none">CRÓNICA IA</h2>
+              </div>
+              <Sparkles className="ml-auto w-5 h-5 text-cyan-400" />
+            </div>
+
+            {/* Chronicle text */}
+            <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-6 flex flex-col justify-start items-center">
+              {loadingChronicle ? (
+                <div className="flex flex-col items-center justify-center my-auto gap-4">
+                  <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
+                  <p className="text-white/60 font-medium text-sm text-center">
+                    El cronista de BEEP está redactando los cotilleos de la noche...
+                  </p>
+                </div>
+              ) : (
+                <motion.div 
+                  initial={{ opacity: 0, y: 15 }} 
+                  animate={{ opacity: 1, y: 0 }}
+                  className="w-full max-w-md rounded-3xl border border-cyan-500/20 bg-gradient-to-b from-cyan-500/5 to-transparent p-6 backdrop-blur-md shadow-xl"
+                >
+                  <p className="text-xs font-mono uppercase tracking-[0.22em] text-cyan-400 mb-3">✨ EDICIÓN ESPECIAL FIESTA</p>
+                  <div className="text-white/90 text-sm leading-7 space-y-4 font-normal whitespace-pre-line">
+                    {chronicle}
+                  </div>
+                </motion.div>
+              )}
+            </div>
+
+            {/* Bottom actions */}
+            <div className="px-4 pb-safe pb-6 pt-3 border-t border-white/5 flex gap-3">
+              <button
+                onClick={onRestart}
+                className="flex-1 h-14 flex items-center justify-center gap-2 rounded-2xl bg-white text-black font-black text-sm tracking-wider shadow-lg border-b-4 border-slate-300 active:border-b-0 active:translate-y-0.5 transition-all"
+              >
+                <RotateCcw className="w-5 h-5" /> NUEVA PARTIDA
               </button>
               <button
                 onClick={onHome}

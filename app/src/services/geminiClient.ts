@@ -81,12 +81,17 @@ async function callGemini(prompt: string): Promise<any | null> {
 }
 
 /**
- * 1. Generar una nueva carta/reto personalizada
+ * 1. Generar una nueva carta/reto personalizada (con soporte de tema)
  */
 export async function geminiGenerateCard(events: any[], players: string[]): Promise<string | null> {
+  const theme = getPartyTheme();
+  const themePrompt = theme 
+    ? `\n- El grupo ha establecido que la fiesta de hoy tiene este tema especial: "${theme}". ES OBLIGATORIO que el reto esté fuertemente inspirado en este tema, haciendo chistes, referencias, o dinámicas relacionadas.` 
+    : '';
+
   const prompt = `
 Eres el motor de IA de un juego de fiesta interactivo y atrevido llamado BEEP.
-Genera un reto de fiesta divertido, picante y personalizado para los siguientes jugadores activos: ${players.join(', ')}.
+Genera un reto de fiesta divertido, picante y personalizado para los siguientes jugadores activos: ${players.join(', ')}.${themePrompt}
 Aquí tienes el historial reciente de eventos del juego para darte contexto y poder crear rivalidades o piques divertidos:
 ${JSON.stringify(events.slice(-15))}
 
@@ -109,19 +114,24 @@ No devuelvas nada más que el objeto JSON.
 }
 
 /**
- * 2. Enriquecer un reto existente con estadísticas y salseo
+ * 2. Enriquecer un reto existente con estadísticas y salseo (con soporte de tema)
  */
 export async function geminiEnrichChallenge(
   challengeText: string,
   playerStats: string,
   playerNames: string[]
 ): Promise<string | null> {
+  const theme = getPartyTheme();
+  const themePrompt = theme 
+    ? `\n- Tema especial de la fiesta de hoy: "${theme}". Intenta reescribir el reto para integrar sutilmente este tema o palabras clave de forma hilarante.` 
+    : '';
+
   const prompt = `
 Eres el motor de IA del juego de fiesta BEEP. Tu misión es añadir salseo, ironía y dinamismo a un reto existente utilizando la memoria real de los jugadores involucrados.
 Reto original: "${challengeText}"
 Jugadores implicados en este reto: ${playerNames.join(', ')}
 Estadísticas de estos jugadores (¡úsalas de forma sarcástica para picarlos o justificar el reto!):
-${playerStats}
+${playerStats}${themePrompt}
 
 Instrucciones:
 - Reescribe el reto original de forma ingeniosa para integrar sus estadísticas de forma orgánica.
@@ -211,4 +221,112 @@ No devuelvas nada más que el objeto JSON.
 
   const result = await callGemini(prompt);
   return result?.comment || null;
+}
+
+/**
+ * 5. Generar la crónica final humorística para la pantalla de Podio
+ */
+export async function geminiGeneratePartyChronicle(
+  players: { name: string; score: number }[],
+  trackingData: any
+): Promise<string | null> {
+  const theme = getPartyTheme();
+  const themePrompt = theme ? `\n- El tema de la noche era: "${theme}".` : '';
+
+  const prompt = `
+Eres el cronista del corazón y reportero más cotilla del juego de fiesta BEEP.
+Ha terminado la partida. Aquí tienes los resultados finales, XP y estadísticas globales de los jugadores:${themePrompt}
+- Jugadores y su XP final:
+${players.map(p => `- ${p.name}: ${p.score} XP`).join('\n')}
+- Tragos totales acumulados:
+${JSON.stringify(trackingData?.drinkCounts || {})}
+- Votos recibidos en dinámicas de grupo:
+${JSON.stringify(trackingData?.voteCounts || {})}
+- Veces que pasaron/hicieron skip:
+${JSON.stringify(trackingData?.skipCounts || {})}
+- Virus totales recibidos:
+${JSON.stringify(trackingData?.virusReceived || {})}
+
+Instrucciones:
+- Redacta una crónica de la partida súper divertida, irónica, gamberra y muy picante.
+- Asigna un "Rol o Título de Fiesta" ingenioso a cada jugador según sus estadísticas (ej. "Rafa: Hígado de Adamantio por sus 15 tragos", "Ana: La Cobardica Mayor por pasar de 3 retos").
+- Describe con humor la transcurso del juego y los piques.
+- Estructura el texto en párrafos cortos, desenfadados y con emojis festivos. Máximo 150 palabras.
+- IMPORTANTE: Devuelve un objeto JSON válido con la propiedad "chronicle".
+- Escribe en español.
+
+Formato JSON esperado:
+{
+  "chronicle": "El texto humorístico completo de la crónica en español"
+}
+No devuelvas nada más que el objeto JSON.
+`;
+
+  const result = await callGemini(prompt);
+  return result?.chronicle || null;
+}
+
+/**
+ * 6. Actuar como Juez del Bar resolviendo una disputa en caliente
+ */
+export async function geminiResolveDispute(
+  players: string[],
+  disputeText: string
+): Promise<string | null> {
+  const prompt = `
+Eres el "Juez de la Barra", un árbitro de bar de copas legendario, sabio, sarcástico y sumamente divertido.
+Varios amigos jugando al juego de fiesta BEEP tienen una disputa acalorada y requieren que dictes sentencia.
+Jugadores involucrados: ${players.join(', ')}
+Descripción de la disputa: "${disputeText}"
+
+Instrucciones:
+- Analiza la disputa con mucha ironía y humor.
+- Dicta una sentencia firme y graciosa de quién tiene la razón y quién tiene que ser castigado o beber.
+- Sé contundente, no te andes con rodeos. Sé canalla pero amigable. Máximo 2-3 frases.
+- IMPORTANTE: Devuelve un objeto JSON válido con la propiedad "ruling".
+- Escribe en español.
+
+Formato JSON esperado:
+{
+  "ruling": "Tu divertida y firme sentencia arbitral en español"
+}
+No devuelvas nada más que el objeto JSON.
+`;
+
+  const result = await callGemini(prompt);
+  return result?.ruling || null;
+}
+
+/**
+ * 7. Generar un castigo en vivo personalizado (Ruleta de Castigos)
+ */
+export async function geminiGenerateCustomPunishment(
+  playerName: string,
+  statsSummary: string
+): Promise<string | null> {
+  const theme = getPartyTheme();
+  const themePrompt = theme ? ` El castigo debe estar inspirado en el tema especial de la fiesta: "${theme}".` : '';
+
+  const prompt = `
+Eres el motor de tortura divertida y gamberra del juego de fiesta BEEP.
+El jugador "${playerName}" ha decidido no beber tragos y en su lugar quiere someterse a la Ruleta de Castigos de la IA.
+Estadísticas del jugador: ${statsSummary}.${themePrompt}
+
+Instrucciones:
+- Genera un castigo único, atrevido, físico o social, que tenga que realizar el jugador en vivo frente al grupo.
+- Ejemplos: Hacer una llamada a alguien y decirle algo loco, dejar que otro jugador le envíe un mensaje en WhatsApp, actuar de forma graciosa durante un turno, etc.
+- El castigo debe ser realizable, seguro pero muy divertido y ligeramente vergonzoso para generar risas en el grupo.
+- Mantén el texto corto (máximo 1-2 frases).
+- IMPORTANTE: Devuelve un objeto JSON válido con la propiedad "punishment".
+- Escribe en español.
+
+Formato JSON esperado:
+{
+  "punishment": "La descripción del castigo a realizar en español"
+}
+No devuelvas nada más que el objeto JSON.
+`;
+
+  const result = await callGemini(prompt);
+  return result?.punishment || null;
 }

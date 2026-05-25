@@ -3,8 +3,9 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { safeLower, asString } from '@/utils/safeText';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+import { isGeminiConfigured } from '@/services/geminiClient';
 
-import { Plus, X, Users, Play, ArrowLeft, UserPlus, Globe } from 'lucide-react';
+import { Plus, X, Users, Play, ArrowLeft, UserPlus, Globe, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -47,6 +48,11 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  const [partyTheme, setPartyTheme] = useState(() => localStorage.getItem('fiesta_party_theme') || '');
+
+  useEffect(() => {
+    localStorage.setItem('fiesta_party_theme', partyTheme.trim());
+  }, [partyTheme]);
 
   const modeInfo = GAME_MODES.find(m => m.id === game?.mode);
   const isTeamMode = forceTeamMode !== undefined ? forceTeamMode : (modeInfo?.teamBased || false);
@@ -437,8 +443,32 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
             )}
           </motion.div>
 
-          {/* Teams Section (for team-based modes) */}
-          {isTeamMode && (
+          {/* Columna derecha: Configuración de IA y Lobby */}
+          <div className="space-y-4 md:space-y-6">
+            {isGeminiConfigured() && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="bg-card/85 backdrop-blur-sm rounded-2xl p-4 md:p-5 shadow-lg border border-cyan-500/20 shadow-cyan-500/5 relative overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/5 rounded-full blur-2xl pointer-events-none" />
+                <div className="flex items-center gap-2 mb-3">
+                  <Sparkles className="h-4.5 w-4.5 text-cyan-400 animate-pulse" />
+                  <h3 className="text-sm font-black uppercase tracking-wider text-white">Tema de la Fiesta (IA)</h3>
+                </div>
+                <p className="text-[11px] text-muted-foreground text-left mb-3">
+                  Escribe un tema (ej: "Boda de Rafa", "Cumpleaños", "Cotilleos de oficina") y Gemini adaptará los retos de salseo.
+                </p>
+                <Input
+                  placeholder="Escribe el tema de la fiesta aquí... 🎭"
+                  value={partyTheme}
+                  onChange={(e) => setPartyTheme(e.target.value)}
+                  className="bg-black/40 border-white/10 text-white placeholder-white/30 text-xs h-10 rounded-xl focus-visible:ring-cyan-500/50"
+                />
+              </motion.div>
+            )}
+
+            {isTeamMode && (
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -666,6 +696,7 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
               )}
             </motion.div>
           )}
+          </div>
         </div>
 
         {/* Floating Start Button for mobile (sticky-like behavior) */}

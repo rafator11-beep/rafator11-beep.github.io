@@ -1,8 +1,13 @@
-﻿import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Loader2, Volume2, VolumeX, CheckCircle2, XCircle } from 'lucide-react';
 import { generateAIChallenge } from '@/lib/aiService';
 import { toast } from 'sonner';
+import { 
+    isGeminiConfigured, 
+    geminiResolveDispute, 
+    geminiGenerateCustomPunishment 
+} from '@/services/geminiClient';
 
 // ── TTS ───────────────────────────────────────────────────────────────────────
 function useTTS(text: string) {
@@ -173,15 +178,61 @@ export const CardDisplay = React.memo(({
     const [resultState, setResultState] = useState<'none' | 'success' | 'fail'>('none');
     const { speaking, speak, cancel } = useTTS(cleanText);
 
+    const [showJudgePanel, setShowJudgePanel] = useState(false);
+    const [disputeText, setDisputeText] = useState('');
+    const [judgeRuling, setJudgeRuling] = useState<string | null>(null);
+    const [loadingRuling, setLoadingRuling] = useState(false);
+
+    const [customPunishment, setCustomPunishment] = useState<string | null>(null);
+    const [loadingPunishment, setLoadingPunishment] = useState(false);
+
     useEffect(() => {
         setIsRevealed(false);
         setResultState('none');
         setCanClickVirus(false);
+        setShowJudgePanel(false);
+        setDisputeText('');
+        setJudgeRuling(null);
+        setCustomPunishment(null);
         if (type === 'virus') {
             const t = setTimeout(() => setCanClickVirus(true), 600);
             return () => clearTimeout(t);
         }
     }, [content, type]);
+
+    const handleResolveDispute = async (e: React.FormEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!disputeText.trim() || loadingRuling) return;
+        setLoadingRuling(true);
+        setJudgeRuling(null);
+        try {
+            const playerNames = players?.map(p => p.name) || [currentPlayer?.name || 'Jugador'];
+            const res = await geminiResolveDispute(playerNames, disputeText);
+            setJudgeRuling(res || "El juez está confuso. Bebed todos para solucionar las dudas.");
+        } catch {
+            setJudgeRuling("Error al llamar al tribunal de bar. Bebed un trago de paz.");
+        } finally {
+            setLoadingRuling(false);
+        }
+    };
+
+    const handleGeneratePunishment = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (loadingPunishment) return;
+        setLoadingPunishment(true);
+        setCustomPunishment(null);
+        try {
+            const pName = displayPlayer?.name || 'Jugador';
+            const statsSummary = `${pName} falló el reto y no quiere beber.`;
+            const punishment = await geminiGenerateCustomPunishment(pName, statsSummary);
+            setCustomPunishment(punishment || "Haz 10 flexiones o bebe 3 tragos.");
+        } catch {
+            setCustomPunishment("Error de la ruleta. Haz una imitación graciosa de tu artista favorito.");
+        } finally {
+            setLoadingPunishment(false);
+        }
+    };
 
     const mentionedPlayer = players?.find(p => p.name && cleanText.toLowerCase().includes(p.name.toLowerCase())) || null;
     const displayPlayer = mentionedPlayer || currentPlayer || null;
@@ -328,7 +379,7 @@ export const CardDisplay = React.memo(({
                         initial={{ opacity: 0, y: 12 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.12 }}
-                        className="mx-4 mb-4 rounded-[1.5rem] p-5 relative overflow-hidden"
+                        className="mx-4 mb-4 rounded-[1.5rem] p-5 relative overflow-hidden min-h-[140px] flex items-center justify-center"
                         style={{
                             background: 'rgba(0,0,0,0.45)',
                             border: '1px solid rgba(255,255,255,0.10)',
@@ -337,21 +388,75 @@ export const CardDisplay = React.memo(({
                     >
                         <div className="absolute top-0 inset-x-0 h-px bg-white/15" />
 
-                        {/* Rarity badge */}
-                        {type !== 'common' && (
-                            <div className="flex justify-center mb-3">
-                                <span className="text-[9px] font-black uppercase tracking-[0.3em] px-3 py-0.5 rounded-full"
-                                    style={{ background: `${cfg.accent}25`, color: cfg.accent, border: `1px solid ${cfg.accent}40` }}>
-                                    {type === 'legendary' ? '👑 LEGENDARIA' : type === 'chaos' ? '💥 CAOS' : type === 'rare' ? '⭐ RARA' : '🦠 VIRUS'}
-                                </span>
+                        {showJudgePanel ? (
+                            <form onSubmit={handleResolveDispute} onClick={e => e.stopPropagation()} className="w-full flex flex-col gap-2">
+                                <p className="text-[10px] font-black text-cyan-400 uppercase tracking-widest text-center">⚖️ Tribunal de BEEP</p>
+                                <textarea
+                                    placeholder="Escribe el pique... (ej: Rafa no ha tocado el suelo en la flexión)"
+                                    value={disputeText}
+                                    onChange={e => setDisputeText(e.target.value)}
+                                    className="w-full h-16 p-2.5 bg-black/60 border border-white/10 rounded-xl text-xs text-white placeholder-white/30 focus:outline-none focus:border-cyan-500/50 resize-none font-medium"
+                                />
+                                <div className="flex gap-2">
+                                    <button
+                                        type="submit"
+                                        disabled={loadingRuling}
+                                        className="flex-1 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-[10px] uppercase tracking-wider transition-all"
+                                    >
+                                        {loadingRuling ? 'JUZGANDO...' : 'DICTAR SENTENCIA'}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => { setShowJudgePanel(false); setDisputeText(''); setJudgeRuling(null); }}
+                                        className="px-3 py-2 rounded-xl bg-white/10 text-white font-bold text-xs uppercase"
+                                    >
+                                        X
+                                    </button>
+                                </div>
+                            </form>
+                        ) : (
+                            <div className="w-full flex flex-col justify-center">
+                                {/* Rarity badge */}
+                                {type !== 'common' && (
+                                    <div className="flex justify-center mb-3">
+                                        <span className="text-[9px] font-black uppercase tracking-[0.3em] px-3 py-0.5 rounded-full"
+                                            style={{ background: `${cfg.accent}25`, color: cfg.accent, border: `1px solid ${cfg.accent}40` }}>
+                                            {type === 'legendary' ? '👑 LEGENDARIA' : type === 'chaos' ? '💥 CAOS' : type === 'rare' ? '⭐ RARA' : '🦠 VIRUS'}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {/* Text */}
+                                <p className={`text-base md:text-lg font-semibold text-center leading-relaxed text-white`}
+                                    style={{ maxHeight: '35vh', overflowY: 'auto' }}>
+                                    {processDrinkingMultiplier(cleanText, round)}
+                                </p>
+
+                                {/* Sentencia del Juez */}
+                                {judgeRuling && (
+                                    <motion.div 
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        className="mt-4 p-3.5 rounded-xl border border-cyan-500/30 bg-cyan-950/20 text-[11px] text-cyan-300 font-mono leading-relaxed"
+                                    >
+                                        <span className="font-black text-cyan-400 block mb-1">⚖️ SENTENCIA DEL JUEZ:</span>
+                                        {judgeRuling}
+                                    </motion.div>
+                                )}
+
+                                {/* Castigo de la ruleta */}
+                                {customPunishment && (
+                                    <motion.div 
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        className="mt-4 p-3.5 rounded-xl border border-pink-500/30 bg-pink-950/20 text-xs text-pink-300 leading-relaxed font-semibold animate-pulse"
+                                    >
+                                        <span className="font-black text-pink-400 block mb-1 text-[11px] uppercase tracking-wider">🎲 CASTIGO IA PERSONALIZADO:</span>
+                                        {customPunishment}
+                                    </motion.div>
+                                )}
                             </div>
                         )}
-
-                        {/* Text */}
-                        <p className={`text-base md:text-lg font-semibold text-center leading-relaxed text-white ${isRevealed === false && kind === 'generic' ? '' : ''}`}
-                            style={{ maxHeight: '35vh', overflowY: 'auto' }}>
-                            {processDrinkingMultiplier(cleanText, round)}
-                        </p>
 
                         {/* Virus accept button */}
                         {type === 'virus' && (
@@ -365,6 +470,31 @@ export const CardDisplay = React.memo(({
                             </motion.button>
                         )}
                     </motion.div>
+
+                    {/* ── BOTONES EXTRAS DE IA ── */}
+                    {isGeminiConfigured() && type !== 'virus' && resultState === 'none' && !showJudgePanel && (
+                        <div className="mx-4 mb-3 grid grid-cols-2 gap-2">
+                            <motion.button
+                                whileTap={{ scale: 0.95 }}
+                                onClick={(e) => { e.stopPropagation(); setShowJudgePanel(true); }}
+                                className="h-9 flex items-center justify-center gap-1.5 rounded-xl bg-cyan-600/10 border border-cyan-500/30 text-cyan-300 font-black text-[10px] uppercase tracking-wider active:scale-95 transition-transform"
+                            >
+                                <span>⚖️ JUEZ IA</span>
+                            </motion.button>
+                            <motion.button
+                                whileTap={{ scale: 0.95 }}
+                                onClick={handleGeneratePunishment}
+                                disabled={loadingPunishment}
+                                className="h-9 flex items-center justify-center gap-1.5 rounded-xl bg-pink-600/10 border border-pink-500/30 text-pink-300 font-black text-[10px] uppercase tracking-wider active:scale-95 transition-transform"
+                            >
+                                {loadingPunishment ? (
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin text-pink-400" />
+                                ) : (
+                                    <span>🎲 CASTIGO IA</span>
+                                )}
+                            </motion.button>
+                        </div>
+                    )}
 
                     {/* ── DRINK BUTTONS (reto/yo_nunca/picante/verdad_o_bebe/espana) ── */}
                     {cfg.showDrinkButtons && type !== 'virus' && resultState === 'none' && (
