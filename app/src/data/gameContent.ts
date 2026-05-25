@@ -6428,16 +6428,16 @@ export const nostalgia: string[] = pacovers;
 
 // "En la cama y..." phrases for clasico mode
 export const enLaCamaY: string[] = [
-  "En la cama y... 'Dame más mantas'",
-  "En la cama y... 'Apaga la luz que no veo el móvil'",
-  "En la cama y... '¿Has puesto la alarma?'",
-  "En la cama y... 'Quita, que me estás quitando la sábana'",
-  "En la cama y... 'Mañana sin falta madrugo'",
-  "En la cama y... 'Espera, que estoy viendo un vídeo'",
-  "En la cama y... '¿Has cerrado la puerta con llave?'",
-  "En la cama y... 'No ronques, por favor'",
-  "En la cama y... '¿Por qué huele raro?'",
-  "En la cama y... 'Déjame ver tu móvil un momento'",
+  "Cosas que puedes decir en la cama y... en la mesa de Navidad. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+  "Cosas que puedes decir en la cama y... en un taller de coches. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+  "Cosas que puedes decir en la cama y... en un funeral. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 3.",
+  "Cosas que puedes decir en la cama y... en un buffet libre. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+  "Cosas que puedes decir en la cama y... en una entrevista de trabajo. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+  "Cosas que puedes decir en la cama y... jugando al parchís. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+  "Cosas que puedes decir en la cama y... en un examen de la universidad. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 3.",
+  "Cosas que puedes decir en la cama y... en la peluquería. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+  "Cosas que puedes decir en la cama y... haciendo ejercicio. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+  "Cosas que puedes decir en la cama y... en la cola del supermercado. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
 ];
 
 // Categorías de letras for clasico mode

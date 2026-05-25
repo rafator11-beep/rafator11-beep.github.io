@@ -1,4 +1,4 @@
-﻿export const quienEsMasProbableExtra2: string[] = [
+export const quienEsMasProbableExtra2: string[] = [
     "¿Qué dos jugadores son más probables de enamorarse de la misma persona y arruinar su amistad?",
     "¿Qué tres jugadores tienen más pinta de cometer un crimen juntos y que los pillen el primer día?",
     "¿Qué dos jugadores serían más probables de ganar un concurso de baile estando borrachísimos?",
@@ -519,26 +519,26 @@ export const impostorExtra2: string[] = [
 ];
 
 export const enLaCamaYExtra2: string[] = [
-    "Me gusta la fruta prohibida porque / En la cama prefiero el plátano...",
-    "No puedo dejar de llorar cuando / En la cama derramo lágrimas si...",
-    "Cuando el albañil saca el taladro / En la cama las herramientas son para...",
-    "Cuando cocinas con mucho picante / En la cama el fuego se apaga con...",
-    "El semáforo en rojo no me asusta / En la cama no me importan los días de...",
-    "La crema pastelera siempre sobra / En la cama prefiero empaparme de...",
-    "Cuando vas a pescar sacas peces muy finos / En la cama prefiero una anguila de buen tamaño porque...",
-    "El mecánico usa grasa para engranar / En la cama uso saliva extra para...",
-    "Cuando vas al súper pillas dos por uno / En la cama prefiero los tríos si...",
-    "Un sastre siempre toma bien las medidas / En la cama 15 centímetros no bastan si...",
-    "El panadero amasa el pan con fuerza / En la cama me gusta que me amasen...",
-    "Cuando llueve mucho hay goteras en el techo / En la cama termino empapado/a cuando...",
-    "El profesor manda muchos deberes a casa / En la cama me gusta hacer horas extra si...",
-    "En rebajas todo el mundo se vuelve loco / En la cama pierdo los papeles cuando...",
-    "El bombero usa la manguera a presión / En la cama necesito que me apaguen el fuego con...",
-    "El veterinario sabe tratar a los animales / En la cama a veces me comporto como un salvaje porque...",
-    "La comida picante te hace sudar / En la cama acabo sudando la gota gorda si...",
-    "Los astronautas exploran agujeros negros / En la cama me gusta explorar zonas oscuras si...",
-    "En el gimnasio levanto mucho peso / En la cama aguanto horas en posiciones raras porque...",
-    "El fontanero desatasca las tuberías / En la cama me gusta que me desatasquen..."
+    "Cosas que puedes decir en la cama y... en el salón de tatuajes. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+    "Cosas que puedes decir en la cama y... al cartero. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+    "Cosas que puedes decir en la cama y... en una papelería. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+    "Cosas que puedes decir en la cama y... al socorrista. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+    "Cosas que puedes decir en la cama y... en una bolera. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+    "Cosas que puedes decir en la cama y... al payaso de una fiesta. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 3.",
+    "Cosas que puedes decir en la cama y... en el sastre. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+    "Cosas que puedes decir en la cama y... en una fábrica de colchones. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+    "Cosas que puedes decir en la cama y... al tapicero. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+    "Cosas que puedes decir en la cama y... en una tienda de videojuegos. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+    "Cosas que puedes decir en la cama y... en una subasta. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+    "Cosas que puedes decir en la cama y... en un autocine. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+    "Cosas que puedes decir en la cama y... en un parque infantil. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 3.",
+    "Cosas que puedes decir en la cama y... en un vivero de plantas. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+    "Cosas que puedes decir en la cama y... al paseador de perros. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+    "Cosas que puedes decir en la cama y... en una pescadería de barrio. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+    "Cosas que puedes decir en la cama y... en una perfumería. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+    "Cosas que puedes decir en la cama y... en el taller de chapa y pintura. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+    "Cosas que puedes decir en la cama y... en el cajero automático. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+    "Cosas que puedes decir en la cama y... en la mercería. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2."
 ];
 
 export const categoriasLetrasExtra2: string[] = [

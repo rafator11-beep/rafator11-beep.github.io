@@ -1,4 +1,4 @@
-const v="gemini-1.5-flash";function p(){return{VITE_SUPABASE_URL:"https://atswsltnjjsokouvfbut.supabase.co",VITE_SUPABASE_ANON_KEY:"sb_publishable_7uCsMmM6xhL7O9psmckrQw_Y4hjYk10",VITE_GEMINI_API_KEY:"AIzaSyBBf2ttcyeMR27Sq22n_NtIyHBufs3tzmE",BASE_URL:"./",MODE:"production",DEV:!1,PROD:!0,SSR:!1}.VITE_GEMINI_API_KEY}function b(){const o=p();return typeof o=="string"&&o.trim().length>0&&!o.includes("placeholder")}async function d(o){var n,r,a,i,u;const e=p(),s=`https://generativelanguage.googleapis.com/v1beta/models/${v}:generateContent?key=${e}`;try{const l=await fetch(s,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contents:[{parts:[{text:o}]}],generationConfig:{responseMimeType:"application/json"}})});if(!l.ok){const g=await l.text();return console.error(`Gemini Client: API error (${l.status}):`,g),null}const c=await l.json(),m=(u=(i=(a=(r=(n=c==null?void 0:c.candidates)==null?void 0:n[0])==null?void 0:r.content)==null?void 0:a.parts)==null?void 0:i[0])==null?void 0:u.text;if(!m)return console.warn("Gemini Client: Empty response"),null;let t=m.trim();return t.startsWith("```json")?t=t.replace(/^```json/,"").replace(/```$/,"").trim():t.startsWith("```")&&(t=t.replace(/^```/,"").replace(/```$/,"").trim()),JSON.parse(t)}catch(l){return console.error("Gemini Client: Execution error:",l),null}}async function y(o,e){const s=getPartyTheme(),n=s?`
+const b="gemini-1.5-flash";function p(){return{VITE_SUPABASE_URL:"https://atswsltnjjsokouvfbut.supabase.co",VITE_SUPABASE_ANON_KEY:"sb_publishable_7uCsMmM6xhL7O9psmckrQw_Y4hjYk10",VITE_GEMINI_API_KEY:"AIzaSyBBf2ttcyeMR27Sq22n_NtIyHBufs3tzmE",BASE_URL:"./",MODE:"production",DEV:!1,PROD:!0,SSR:!1}.VITE_GEMINI_API_KEY}function v(){const o=p();return typeof o=="string"&&o.trim().length>0&&!o.includes("placeholder")}async function d(o){var n,r,a,i,u;const e=p(),s=`https://generativelanguage.googleapis.com/v1beta/models/${b}:generateContent?key=${e}`;try{const l=await fetch(s,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contents:[{parts:[{text:o}]}],generationConfig:{responseMimeType:"application/json"}})});if(!l.ok){const g=await l.text();return console.error(`Gemini Client: API error (${l.status}):`,g),null}const c=await l.json(),m=(u=(i=(a=(r=(n=c==null?void 0:c.candidates)==null?void 0:n[0])==null?void 0:r.content)==null?void 0:a.parts)==null?void 0:i[0])==null?void 0:u.text;if(!m)return console.warn("Gemini Client: Empty response"),null;let t=m.trim();return t.startsWith("```json")?t=t.replace(/^```json/,"").replace(/```$/,"").trim():t.startsWith("```")&&(t=t.replace(/^```/,"").replace(/```$/,"").trim()),JSON.parse(t)}catch(l){return console.error("Gemini Client: Execution error:",l),null}}async function y(o,e){const s=getPartyTheme(),n=s?`
 - El grupo ha establecido que la fiesta de hoy tiene este tema especial: "${s}". ES OBLIGATORIO que el reto esté fuertemente inspirado en este tema, haciendo chistes, referencias, o dinámicas relacionadas.`:"",r=`
 Eres el motor de IA de un juego de fiesta interactivo y atrevido llamado BEEP.
 Genera un reto de fiesta divertido, picante y personalizado para los siguientes jugadores activos: ${e.join(", ")}.${n}
@@ -6,7 +6,8 @@ Aquí tienes el historial reciente de eventos del juego para darte contexto y po
 ${JSON.stringify(o.slice(-15))}
 
 Instrucciones de generación:
-- Crea una carta con un reto único. Puede ser del tipo "Yo nunca", "Reto individual", "Verdad", "Duelo 1v1" o "Castigo".
+- Crea una carta con un reto único. Puede ser del tipo "Yo nunca", "Reto individual", "Verdad", "Duelo 1v1", "Castigo" o del tipo "🛌 Cosas que puedes decir en la cama y...".
+- Ocasionalmente, puedes generar una carta del tipo "🛌 En la cama y..." siguiendo un patrón de comparación de doble sentido: "Cosas que puedes decir en la cama y... [en otro lugar/situación]. Por turnos, cada jugador dice una frase de doble sentido que sirva para ambos contextos. Quien repita o falle, bebe X tragos. (Ej: '¡Está muy caliente!', '¡Cabe otro!')".
 - Sé muy divertido, sarcástico, irónico y ligeramente atrevido (apto para mayores de 18 años jugando de fiesta en un bar o casa).
 - Involucra a los jugadores activos y haz referencia a su historial de eventos si es gracioso (ej. si alguien lleva muchos tragos, se niega a confesar, o va invicto).
 - IMPORTANTE: La salida debe ser un objeto JSON válido con la propiedad "card".
@@ -17,7 +18,7 @@ Formato JSON esperado:
   "card": "El texto del reto personalizado en español"
 }
 No devuelvas nada más que el objeto JSON.
-`,a=await d(r);return(a==null?void 0:a.card)||null}async function f(o,e,s){const n=getPartyTheme(),r=n?`
+`,a=await d(r);return(a==null?void 0:a.card)||null}async function E(o,e,s){const n=getPartyTheme(),r=n?`
 - Tema especial de la fiesta de hoy: "${n}". Intenta reescribir el reto para integrar sutilmente este tema o palabras clave de forma hilarante.`:"",a=`
 Eres el motor de IA del juego de fiesta BEEP. Tu misión es añadir salseo, ironía y dinamismo a un reto existente utilizando la memoria real de los jugadores involucrados.
 Reto original: "${o}"
@@ -27,6 +28,7 @@ ${e}${r}
 
 Instrucciones:
 - Reescribe el reto original de forma ingeniosa para integrar sus estadísticas de forma orgánica.
+- IMPORTANTE: Si el reto original contiene el emoji "🛌" o menciona "En la cama y..." o "Cosas que puedes decir en la cama y...", la reescritura DEBE seguir el formato de una ronda por turnos de doble sentido: "Cosas que puedes decir en la cama y... [en otro lugar/situación]. Por turnos, cada jugador dice una frase que sirva en ambos contextos. El primero que repita o falle, bebe X tragos". Además, incluye al final de la carta 2 ejemplos extremadamente graciosos, pícaros y con doble sentido para inspirar a los jugadores (ej: "(Ej: '¡Está saliendo líquido!', '¡Qué estrecho está esto!')").
 - Haz chistes o pullas divertidas sobre quién va ganando, quién lleva más tragos 🍻, o quién no da pie con bola.
 - Mantén la esencia del reto original (si es un duelo, que siga siendo un duelo; si es beber, que siga siendo beber) pero haz que parezca personalizado en vivo por un presentador de televisión gamberro.
 - Si el reto original requiere beber tragos, puedes adaptarlos un poco según las estadísticas (ej. "Rafa que lleva 0 tragos bebe el doble para compensar").
@@ -38,7 +40,7 @@ Formato JSON esperado:
   "enriched": "El texto del reto reescrito con salseo en español"
 }
 No devuelvas nada más que el objeto JSON.
-`,i=await d(a);return(i==null?void 0:i.enriched)||null}async function E(o,e,s,n){const r=`
+`,i=await d(a);return(i==null?void 0:i.enriched)||null}async function f(o,e,s,n){const r=`
 Eres el narrador estrella y maestro de ceremonias teatral del juego de fiesta BEEP.
 Se va a disputar un duelo decisivo de torneo 1v1 entre ${o} y ${e}.
 El reto del duelo es: "${s}"
@@ -144,4 +146,4 @@ Formato JSON esperado:
   "punishment": "La descripción del castigo a realizar en español"
 }
 No devuelvas nada más que el objeto JSON.
-`,a=await d(r);return(a==null?void 0:a.punishment)||null}export{N as a,y as b,f as c,E as d,h as e,j as f,S as g,b as i};
+`,a=await d(r);return(a==null?void 0:a.punishment)||null}export{N as a,y as b,E as c,f as d,h as e,j as f,S as g,v as i};

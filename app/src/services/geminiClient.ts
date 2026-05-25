@@ -96,7 +96,8 @@ Aquí tienes el historial reciente de eventos del juego para darte contexto y po
 ${JSON.stringify(events.slice(-15))}
 
 Instrucciones de generación:
-- Crea una carta con un reto único. Puede ser del tipo "Yo nunca", "Reto individual", "Verdad", "Duelo 1v1" o "Castigo".
+- Crea una carta con un reto único. Puede ser del tipo "Yo nunca", "Reto individual", "Verdad", "Duelo 1v1", "Castigo" o del tipo "🛌 Cosas que puedes decir en la cama y...".
+- Ocasionalmente, puedes generar una carta del tipo "🛌 En la cama y..." siguiendo un patrón de comparación de doble sentido: "Cosas que puedes decir en la cama y... [en otro lugar/situación]. Por turnos, cada jugador dice una frase de doble sentido que sirva para ambos contextos. Quien repita o falle, bebe X tragos. (Ej: '¡Está muy caliente!', '¡Cabe otro!')".
 - Sé muy divertido, sarcástico, irónico y ligeramente atrevido (apto para mayores de 18 años jugando de fiesta en un bar o casa).
 - Involucra a los jugadores activos y haz referencia a su historial de eventos si es gracioso (ej. si alguien lleva muchos tragos, se niega a confesar, o va invicto).
 - IMPORTANTE: La salida debe ser un objeto JSON válido con la propiedad "card".
@@ -135,6 +136,7 @@ ${playerStats}${themePrompt}
 
 Instrucciones:
 - Reescribe el reto original de forma ingeniosa para integrar sus estadísticas de forma orgánica.
+- IMPORTANTE: Si el reto original contiene el emoji "🛌" o menciona "En la cama y..." o "Cosas que puedes decir en la cama y...", la reescritura DEBE seguir el formato de una ronda por turnos de doble sentido: "Cosas que puedes decir en la cama y... [en otro lugar/situación]. Por turnos, cada jugador dice una frase que sirva en ambos contextos. El primero que repita o falle, bebe X tragos". Además, incluye al final de la carta 2 ejemplos extremadamente graciosos, pícaros y con doble sentido para inspirar a los jugadores (ej: "(Ej: '¡Está saliendo líquido!', '¡Qué estrecho está esto!')").
 - Haz chistes o pullas divertidas sobre quién va ganando, quién lleva más tragos 🍻, o quién no da pie con bola.
 - Mantén la esencia del reto original (si es un duelo, que siga siendo un duelo; si es beber, que siga siendo beber) pero haz que parezca personalizado en vivo por un presentador de televisión gamberro.
 - Si el reto original requiere beber tragos, puedes adaptarlos un poco según las estadísticas (ej. "Rafa que lleva 0 tragos bebe el doble para compensar").

@@ -1,4 +1,4 @@
-﻿// gameContentExtra3.ts — Contenido nuevo 2024-2025 para todos los modos de fiesta
+// gameContentExtra3.ts — Contenido nuevo 2024-2025 para todos los modos de fiesta
 
 // ─── CLÁSICO (Retos, Categorías, Acciones, Si...) ─────────────────────────────
 export const clasicoExtra3: string[] = [
@@ -239,16 +239,16 @@ export const espanaExtra3: string[] = [
 
 // ─── EN LA CAMA (para Clásico/Megamix) ────────────────────────────────────────
 export const enLaCamaYExtra3: string[] = [
-  "En la cama y... dices '¡Se lo voy a contar a ChatGPT!'. Bebe 2.",
-  "En la cama y... te suena una alarma que olvidaste quitar. Bebe.",
-  "En la cama y... recibes un bizum de 1€. ¿De quién? Bebe.",
-  "En la cama y... tu gato decide que es el mejor momento para jugar. Bebe.",
-  "En la cama y... empiezas a ver TikToks. Bebe por cada 15 min que pases.",
-  "En la cama y... te da un calambre en la pierna. Quien haya tenido uno, bebe.",
-  "En la cama y... tu vecino pone reguetón a las 3AM. Bebe con rabia.",
-  "En la cama y... dices el nombre equivocado. Bebe el vaso.",
-  "En la cama y... tu Apple Watch dice que no has cerrado los anillos. Bebe.",
-  "En la cama y... se te cae el móvil en la cara. Bebe por torpe.",
+  "Cosas que puedes decir en la cama y... en el estanco. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+  "Cosas que puedes decir en la cama y... en un torneo de dardos. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+  "Cosas que puedes decir en la cama y... en la lavandería. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+  "Cosas que puedes decir en la cama y... al repartidor de Telepizza. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+  "Cosas que puedes decir en la cama y... en una clase de zumba. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+  "Cosas que puedes decir en la cama y... en la sala de espera del dentista. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+  "Cosas que puedes decir en la cama y... al profesor de autoescuela. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 3.",
+  "Cosas que puedes decir en la cama y... en un puesto de castañas asadas. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+  "Cosas que puedes decir en la cama y... al vendedor de melones en la carretera. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+  "Cosas que puedes decir en la cama y... en una mercería de pueblo. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
 ];
 
 // ─── CATEGORÍAS CON LETRAS EXTRA ──────────────────────────────────────────────

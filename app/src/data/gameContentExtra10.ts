@@ -1,4 +1,4 @@
-﻿// gameContentExtra10.ts — Bloque 5: 100 cartas nuevas, todos los modos menos Impostor
+// gameContentExtra10.ts — Bloque 5: 100 cartas nuevas, todos los modos menos Impostor
 // Asequibles para todos. Sin referencias muy específicas. UTF-8 puro.
 
 // ─── YO NUNCA (20 cartas) ────────────────────────────────────────────────────
@@ -113,14 +113,14 @@ export const pacoversExtra10: string[] = [
 
 // ─── EN LA CAMA Y... (10 cartas) ─────────────────────────────────────────────
 export const enLaCamaYExtra10: string[] = [
-  "En la cama y... no encuentras la posición cómoda después de media hora.",
-  "En la cama y... el teléfono se te cae en la cara mientras lo miras tumbado.",
-  "En la cama y... empiezas a pensar en algo que dijiste hace cinco años.",
-  "En la cama y... el vecino de arriba decide empezar a reorganizar los muebles.",
-  "En la cama y... te acuerdas de que no has apagado la luz de la cocina.",
-  "En la cama y... alguien del otro lado de la cama se lleva toda la manta.",
-  "En la cama y... te entra una sed que no te entra nunca durante el día.",
-  "En la cama y... el móvil vibra con una notificación que no puedes ignorar.",
-  "En la cama y... empiezas a planificar toda la semana siguiente con lujo de detalles.",
-  "En la cama y... te acuerdas de que mañana tienes algo importante y ya es muy tarde.",
+  "Cosas que puedes decir en la cama y... en la churrería. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+  "Cosas que puedes decir en la cama y... en un puesto de la feria. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+  "Cosas que puedes decir en la cama y... al fotógrafo de bodas. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+  "Cosas que puedes decir en la cama y... en una sesión de acupuntura. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 3.",
+  "Cosas que puedes decir en la cama y... al revisor del autobús. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+  "Cosas que puedes decir en la cama y... en una tienda de antigüedades. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+  "Cosas que puedes decir en la cama y... en un invernadero. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+  "Cosas que puedes decir en la cama y... en un túnel de lavado. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
+  "Cosas que puedes decir en la cama y... al cerrajero de guardia. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 3.",
+  "Cosas que puedes decir en la cama y... en una tienda de campaña de montaña. Por turnos, decid frases de doble sentido. Quien falle o repita, bebe 2.",
 ];
