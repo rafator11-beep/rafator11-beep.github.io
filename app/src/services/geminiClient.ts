@@ -4,7 +4,13 @@
  * y devuelve respuestas estructuradas forzando formato JSON.
  */
 
-const GEMINI_MODEL = 'gemini-1.5-flash';
+// Obtener modelo activo de Gemini con fallback dinámico inteligente
+function getActiveModel(): string {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('fiesta_gemini_active_model') || 'gemini-1.5-flash';
+  }
+  return 'gemini-1.5-flash';
+}
 
 // Obtener la API Key desde las variables de entorno o desde localStorage (ajustes en caliente)
 export function getGeminiApiKey(): string {
@@ -22,16 +28,17 @@ export function getPartyTheme(): string {
 }
 
 /**
- * Función genérica de llamada a Gemini con salida JSON forzada
+ * Función genérica de llamada a Gemini con salida JSON forzada e inteligente de fallbacks
  */
-async function callGemini(prompt: string): Promise<any | null> {
+async function callGemini(prompt: string, overrideModel?: string): Promise<any | null> {
   const apiKey = getGeminiApiKey();
   if (!apiKey) {
     console.warn('Gemini Client: No API Key configured');
     return null;
   }
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
+  const activeModel = overrideModel || getActiveModel();
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${activeModel}:generateContent?key=${apiKey}`;
 
   try {
     const response = await fetch(url, {
@@ -57,7 +64,24 @@ async function callGemini(prompt: string): Promise<any | null> {
 
     if (!response.ok) {
       const errText = await response.text();
-      console.error(`Gemini Client: API error (${response.status}):`, errText);
+      console.error(`Gemini Client: API error (${response.status}) for model ${activeModel}:`, errText);
+      
+      // Si recibimos un 404 (modelo no encontrado o no soportado en esta versión), intentamos fallbacks
+      if (response.status === 404 && !overrideModel) {
+        const fallbackModels = ['gemini-1.5-flash-latest', 'gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+        for (const nextModel of fallbackModels) {
+          if (nextModel === activeModel) continue; // No repetir el fallido
+          console.log(`Gemini Client: Attempting fallback to model "${nextModel}"...`);
+          const fallbackResult = await callGemini(prompt, nextModel);
+          if (fallbackResult) {
+            console.log(`Gemini Client: Fallback model "${nextModel}" was successful! Saving to cache.`);
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('fiesta_gemini_active_model', nextModel);
+            }
+            return fallbackResult;
+          }
+        }
+      }
       return null;
     }
 
