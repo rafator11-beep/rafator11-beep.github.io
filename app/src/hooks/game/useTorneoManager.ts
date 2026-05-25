@@ -2,6 +2,11 @@ import { useState, useCallback } from 'react';
 import { Player } from '@/types/game';
 import { GameEvent, PlayerStats, enrichChallengeWithAI } from './useGameMemory';
 import { supabase, isSupabaseConfigured } from '@/integrations/supabase/client';
+import { 
+  geminiGenerateTorneoAnnouncement, 
+  geminiGenerateRoundAnalysis, 
+  isGeminiConfigured 
+} from '@/services/geminiClient';
 
 export interface TorneoMatch {
   player1: Player;
@@ -16,7 +21,7 @@ export interface TorneoScore {
   losses: number;
 }
 
-// ─── Edge Function wrappers (using supabase client) ─────────────────────────
+// ─── Edge Function / Gemini wrappers ─────────────────────────────────────────
 
 async function fetchTorneoAnnouncement(
   p1: string,
@@ -24,6 +29,17 @@ async function fetchTorneoAnnouncement(
   reto: string,
   memorySummary: string[]
 ): Promise<string | null> {
+  // 1. Intentar con Gemini Directo primero
+  if (isGeminiConfigured()) {
+    try {
+      const announcement = await geminiGenerateTorneoAnnouncement(p1, p2, reto, memorySummary);
+      if (announcement) return announcement;
+    } catch (e) {
+      console.warn("Gemini direct torneo announcement failed, trying fallback:", e);
+    }
+  }
+
+  // 2. Fallback a Supabase
   if (!isSupabaseConfigured) return null;
   try {
     const { data, error } = await supabase.functions.invoke('generate-card', {
@@ -46,18 +62,29 @@ async function fetchRoundAnalysis(
   summary: string[],
   playerStats: Record<string, PlayerStats>
 ): Promise<string | null> {
+  // Build stats digest for the AI
+  const statsDigest = Object.values(playerStats).map(s => {
+    const parts: string[] = [];
+    if (s.tragos > 0) parts.push(`${s.tragos}🍻`);
+    if (s.retos_fallados > 0) parts.push(`${s.retos_fallados} fallos`);
+    if (s.retos_completados > 0) parts.push(`${s.retos_completados} éxitos`);
+    if (s.torneos_ganados > 0) parts.push(`${s.torneos_ganados}🏆`);
+    return parts.length > 0 ? `${s.playerName}: ${parts.join(', ')}` : null;
+  }).filter(Boolean) as string[];
+
+  // 1. Intentar con Gemini Directo primero
+  if (isGeminiConfigured()) {
+    try {
+      const comment = await geminiGenerateRoundAnalysis(players, round, summary, statsDigest);
+      if (comment) return comment;
+    } catch (e) {
+      console.warn("Gemini direct round analysis failed, trying fallback:", e);
+    }
+  }
+
+  // 2. Fallback a Supabase
   if (!isSupabaseConfigured) return null;
   try {
-    // Build stats digest for the AI
-    const statsDigest = Object.values(playerStats).map(s => {
-      const parts: string[] = [];
-      if (s.tragos > 0) parts.push(`${s.tragos}🍻`);
-      if (s.retos_fallados > 0) parts.push(`${s.retos_fallados} fallos`);
-      if (s.retos_completados > 0) parts.push(`${s.retos_completados} éxitos`);
-      if (s.torneos_ganados > 0) parts.push(`${s.torneos_ganados}🏆`);
-      return parts.length > 0 ? `${s.playerName}: ${parts.join(', ')}` : null;
-    }).filter(Boolean);
-
     const { data, error } = await supabase.functions.invoke('generate-card', {
       body: {
         mode: 'analysis',

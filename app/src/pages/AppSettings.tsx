@@ -119,6 +119,7 @@ export function AppSettings() {
 
   const [supabaseUrl, setSupabaseUrl] = useState(() => localStorage.getItem('fiesta_supabase_url') || '');
   const [supabaseKey, setSupabaseKey] = useState(() => localStorage.getItem('fiesta_supabase_key') || '');
+  const [geminiKey, setGeminiKey] = useState(() => localStorage.getItem('fiesta_gemini_key') || '');
 
   const saveSupabaseConfig = () => {
     if (supabaseUrl) localStorage.setItem('fiesta_supabase_url', supabaseUrl.trim());
@@ -127,7 +128,15 @@ export function AppSettings() {
     if (supabaseKey) localStorage.setItem('fiesta_supabase_key', supabaseKey.trim());
     else localStorage.removeItem('fiesta_supabase_key');
 
-    toast.success('Configuración guardada. Recargando para aplicar...');
+    toast.success('Conexión de Supabase actualizada. Recargando...');
+    setTimeout(() => window.location.reload(), 1500);
+  };
+
+  const saveGeminiConfig = () => {
+    if (geminiKey) localStorage.setItem('fiesta_gemini_key', geminiKey.trim());
+    else localStorage.removeItem('fiesta_gemini_key');
+
+    toast.success('Motor de IA (Gemini) actualizado. Recargando...');
     setTimeout(() => window.location.reload(), 1500);
   };
 
@@ -136,7 +145,7 @@ export function AppSettings() {
     localStorage.removeItem('fiesta_supabase_key');
     setSupabaseUrl('');
     setSupabaseKey('');
-    toast.success('Configuración reseteada a valores por defecto.');
+    toast.success('Configuración de Supabase restablecida.');
     setTimeout(() => window.location.reload(), 1500);
   };
 
@@ -148,9 +157,9 @@ export function AppSettings() {
     } catch (e) {
       console.warn("Sign out error:", e);
     }
-    // Remove all Supabase related local storage
+    // Remove all Supabase and Gemini related local storage
     Object.keys(localStorage).forEach(key => {
-      if (key.includes('supabase') || key.includes('sb-') || key.includes('fiesta_auth')) {
+      if (key.includes('supabase') || key.includes('sb-') || key.includes('fiesta_auth') || key.includes('fiesta_gemini')) {
         localStorage.removeItem(key);
       }
     });
@@ -450,7 +459,7 @@ export function AppSettings() {
                     <div className="space-y-1.5">
                       <Label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Anon Key / Publishable Key</Label>
                       <Input 
-                        placeholder="sb_publishable_..."
+                        placeholder="eyJ... (Clave Anon de Supabase)"
                         type="password"
                         value={supabaseKey}
                         onChange={(e) => setSupabaseKey(e.target.value)}
@@ -493,6 +502,56 @@ export function AppSettings() {
                     >
                       <RotateCcw className="mr-1.5 h-3 w-3" />
                       Restablecimiento de fábrica (Borrador total)
+                    </Button>
+                  </div>
+                </div>
+              </motion.section>
+
+              <motion.section
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.22 }}
+                className="premium-panel-soft rounded-[30px] p-5 sm:p-6 border border-cyan-500/20 shadow-lg shadow-cyan-500/5"
+              >
+                <div className="mb-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${geminiKey ? 'bg-cyan-400/10' : 'bg-amber-400/10'}`}>
+                      <Sparkles className="h-5 w-5 text-cyan-300" />
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Inteligencia Artificial</p>
+                      <h2 className="text-xl font-bold text-white">Google Gemini</h2>
+                    </div>
+                  </div>
+                  <div className={`flex h-2.5 w-2.5 rounded-full ${geminiKey ? 'bg-cyan-500 animate-pulse shadow-[0_0_8px_rgba(6,182,212,0.8)]' : 'bg-amber-500'}`} />
+                </div>
+
+                <div className="space-y-4">
+                  <div className="rounded-[24px] border border-white/8 bg-white/[0.04] p-4 text-sm text-white/80 leading-relaxed">
+                    {geminiKey 
+                      ? "Motor de IA Gemini 1.5 Flash activado. Las cartas de salseo se generarán localmente de forma ultra rápida."
+                      : "No hay una clave de Gemini configurada. El juego usará el salseo por defecto o Supabase si está disponible."}
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Gemini API Key (Google AI Studio)</Label>
+                      <Input 
+                        placeholder="AIzaSy... (API Key de Gemini)"
+                        type="password"
+                        value={geminiKey}
+                        onChange={(e) => setGeminiKey(e.target.value)}
+                        className="bg-black/40 border-white/10 text-white text-xs h-11"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 pt-2">
+                    <Button 
+                      onClick={saveGeminiConfig}
+                      className="flex-1 h-11 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold"
+                    >
+                      Guardar Clave IA
                     </Button>
                   </div>
                 </div>

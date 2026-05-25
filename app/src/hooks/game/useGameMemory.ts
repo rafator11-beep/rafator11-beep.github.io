@@ -1,6 +1,11 @@
 import { useState, useCallback, useRef, useMemo } from 'react';
 import { Player } from '@/types/game';
 import { supabase, isSupabaseConfigured } from '@/integrations/supabase/client';
+import { 
+  geminiGenerateCard, 
+  geminiEnrichChallenge, 
+  isGeminiConfigured 
+} from '@/services/geminiClient';
 
 // ─── Event Types ────────────────────────────────────────────────────────────
 export type GameEventType =
@@ -42,12 +47,23 @@ export interface PlayerStats {
   torneos_perdidos: number;
 }
 
-// ─── Edge Function Caller ───────────────────────────────────────────────────
+// ─── Edge Function / Gemini Caller ──────────────────────────────────────────
 async function callGenerateCard(
   events: GameEvent[],
   playerNames: string[],
   mode: string = 'card'
 ): Promise<string | null> {
+  // 1. Intentar con Gemini Directo primero
+  if (isGeminiConfigured()) {
+    try {
+      const card = await geminiGenerateCard(events, playerNames);
+      if (card) return card;
+    } catch (e) {
+      console.warn("Gemini direct generate-card failed, trying fallback:", e);
+    }
+  }
+
+  // 2. Fallback a Supabase
   if (!isSupabaseConfigured) return null;
   try {
     const { data, error } = await supabase.functions.invoke('generate-card', {
@@ -66,8 +82,6 @@ export async function enrichChallengeWithAI(
   involvedPlayers: Player[],
   allStats: Record<string, PlayerStats>
 ): Promise<string> {
-  if (!isSupabaseConfigured) return challengeText;
-
   // Build concise stats summary for the prompt
   const statsSummary = involvedPlayers.map(p => {
     const s = allStats[p.id];
@@ -83,6 +97,22 @@ export async function enrichChallengeWithAI(
     return `${p.name}: ${parts.length > 0 ? parts.join(', ') : 'recién empezando'}`;
   }).join(' | ');
 
+  // 1. Intentar con Gemini Directo primero
+  if (isGeminiConfigured()) {
+    try {
+      const enriched = await geminiEnrichChallenge(
+        challengeText, 
+        statsSummary, 
+        involvedPlayers.map(p => p.name)
+      );
+      if (enriched) return enriched;
+    } catch (e) {
+      console.warn("Gemini direct enrich failed, trying fallback:", e);
+    }
+  }
+
+  // 2. Fallback a Supabase
+  if (!isSupabaseConfigured) return challengeText;
   try {
     const { data, error } = await supabase.functions.invoke('generate-card', {
       body: {
