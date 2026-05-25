@@ -911,7 +911,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         (typeof cardText === 'string' && (cardText.toUpperCase().includes('NORMA:') || cardText.toUpperCase().includes('NUEVA NORMA:') || cardText.startsWith('TRIGGER:')));
     }
 
-    // ── Intercepción de Yo Nunca en megamix: mostrar UI de respuesta ─────
+    // ── Intercepción de IA en Megamix para cartas individuales ────────────
     if (mode === 'megamix' && respondedCardRef.current !== currentIndex) {
       const txt = typeof cardText === 'string' ? cardText : '';
       if (txt.startsWith('🙈')) {
@@ -919,11 +919,13 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         setShowYoNuncaResponse(true);
         return;
       }
-      if (txt.startsWith('🎯') && players.length > 0 && currentPlayer) {
+      if (isIndividualCard(txt) && players.length > 0 && currentPlayer) {
         respondedCardRef.current = currentIndex;
-        setShowRetoOutcome(true);
+        if (!txt.startsWith('⚔️')) {
+          setShowRetoOutcome(true);
+        }
         enrichChallengeWithAI(txt, [currentPlayer], playerStats).then(enriched => {
-          if (enriched !== txt) setEnrichedCardText(enriched);
+          if (enriched && enriched !== txt) setEnrichedCardText(enriched);
         });
         return;
       }
