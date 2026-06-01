@@ -954,12 +954,12 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     // Check specific game modes first
     if ((mode === 'trivia_futbol' || mode === 'cultura') && loadNextQuestion) {
       loadNextQuestion();
-      advanceTurn(isGlobal);
+      performTurnAdvance(isGlobal);
       return;
     }
 
     if (checkDrinkingGame(currentIndex, currentPlayer?.name || 'Jugador', setGameState)) {
-      advanceTurn(isGlobal);
+      performTurnAdvance(isGlobal);
       return;
     }
 
@@ -1019,7 +1019,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         setGameState,
         lastMiniTurnRef
       )) {
-        advanceTurn(isGlobal);
+        performTurnAdvance(isGlobal);
         return;
       }
     }

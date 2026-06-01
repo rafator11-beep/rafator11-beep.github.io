@@ -20,11 +20,38 @@ export default defineConfig({
   },
   plugins: [
     react(),
-    // VitePWA temporarily disabled due to SW template error
-    // VitePWA({
-    //   registerType: 'autoUpdate',
-    //   ... (config preserved for re-enablement)
-    // })
+    VitePWA({
+      registerType: 'autoUpdate',
+      injectRegister: 'auto',
+      strategies: 'generateSW',
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,jpg,svg,webp,woff2}'],
+        navigateFallback: 'index.html',
+        navigateFallbackDenylist: [/^\/api\//],
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: { cacheName: 'google-fonts-cache', expiration: { maxEntries: 10, maxAgeSeconds: 31536000 } },
+          },
+        ],
+      },
+      manifest: {
+        name: 'BEEP – Juego de Fiesta',
+        short_name: 'BEEP',
+        description: 'El mejor juego de fiesta para jugar con amigos',
+        theme_color: '#0a0a0a',
+        background_color: '#0a0a0a',
+        display: 'standalone',
+        orientation: 'portrait',
+        start_url: '/',
+        icons: [
+          { src: 'favicon.ico', sizes: '48x48', type: 'image/x-icon' },
+          { src: 'favicon.ico', sizes: '192x192', type: 'image/x-icon', purpose: 'maskable' },
+          { src: 'favicon.ico', sizes: '512x512', type: 'image/x-icon', purpose: 'maskable' },
+        ],
+      },
+    }),
   ],
   resolve: {
     alias: {

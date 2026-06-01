@@ -6537,12 +6537,13 @@ export function getMegamixContent(count: number): string[] {
 export function isIndividualCard(cardText: string): boolean {
   if (!cardText || typeof cardText !== 'string') return false;
   const t = cardText.trim();
+  const tl = t.toLowerCase();
   // NORMA y TRIGGER nunca son individuales
   if (t.toUpperCase().startsWith('NORMA:') || t.toUpperCase().startsWith('NUEVA NORMA:') || t.startsWith('TRIGGER:') || t.startsWith('📜')) return false;
   // Prefijos individuales
   if (t.startsWith('🎯') || t.startsWith('🎤') || t.startsWith('⚡') || t.startsWith('🔤') || t.startsWith('⚔️')) return true;
-  // Patrones de texto individuales (clasico cards)
-  if (t.includes('Reto:') || t.toLowerCase().includes('cultura chupística')) return true;
+  // Patrones de texto individuales
+  if (tl.includes('reto:') || tl.includes('verdad o bebe') || tl.includes('trivia express') || tl.includes('categorías') || tl.includes('duelo') || tl.includes('cultura chupística')) return true;
   // Cartas personalizadas con nombre de jugador
   if (t.includes('{player}')) return true;
   return false;
