@@ -117,25 +117,32 @@ export async function geminiGenerateCard(events: any[], players: string[]): Prom
     ? `\n- El grupo ha establecido que la fiesta de hoy tiene este tema especial: "${theme}". ES OBLIGATORIO que el reto esté fuertemente inspirado en este tema, haciendo chistes, referencias, o dinámicas relacionadas.` 
     : '';
 
+  const TRENDS_2025 = `Referencias y tendencias actuales (2025) que puedes usar para hacer los retos más frescos y virales:
+- Series/pelis: La Casa de Papel (nueva temporada), Stranger Things final, Squid Game S2, La Mesías, Sé quién eres, Un lugar tranquilo
+- Música: Bad Bunny, Karol G, Bizarrap sessions, Quevedo, Aitana, C. Tangana, Rosalía virales, reggaeton nuevo
+- Memes/viral: "Sí señor", "Bro realmente pensó", "Que me quiten lo bailao", el baile de Saltburn, trends TikTok España 2025
+- Tecnología: ChatGPT en la vida diaria, deepfakes, vídeollamadas de trabajo, influencers, OnlyFans cultura
+- Deportes: Eurovisión España, Rafa Nadal retirada, Real Madrid, Barça, La Roja, nuevo escándalo fútbol
+- Cultura pop española: Operación Triunfo, programas de TV, memes de Twitter/X España`;
+
   const prompt = `
-Eres el motor de IA de un juego de fiesta interactivo y atrevido llamado BEEP.
+Eres el motor de IA de un juego de fiesta interactivo y atrevido llamado BEEP. Año: 2025.
 Genera un reto de fiesta divertido, picante y personalizado para los siguientes jugadores activos: ${players.join(', ')}.${themePrompt}
-Aquí tienes el historial reciente de eventos del juego para darte contexto y poder crear rivalidades o piques divertidos:
+
+Historial reciente de la partida (úsalo para crear piques y rivalidades entre jugadores):
 ${JSON.stringify(events.slice(-15))}
 
-Instrucciones de generación:
-- Crea una carta con un reto único. Puede ser del tipo "Yo nunca", "Reto individual", "Verdad", "Duelo 1v1", "Castigo" o del tipo "🛌 Cosas que puedes decir en la cama y...".
-- Ocasionalmente, puedes generar una carta del tipo "🛌 En la cama y..." siguiendo un patrón de comparación de doble sentido: "Cosas que puedes decir en la cama y... [en otro lugar/situación]. Por turnos, cada jugador dice una frase de doble sentido que sirva para ambos contextos. Quien repita o falle, bebe X tragos. (Ej: '¡Está muy caliente!', '¡Cabe otro!')".
-- Sé muy divertido, sarcástico, irónico y ligeramente atrevido (apto para mayores de 18 años jugando de fiesta en un bar o casa).
-- IMPORTANTE: Involucra obligatoriamente a uno o varios de los jugadores activos (${players.join(', ')}) llamándolos por sus nombres reales en el texto del reto (ej: "Rafa tiene que..." o "España y Asdased compiten..."). NO utilices marcadores genéricos como '{player}' o '{player1}'. Usa sus nombres reales de la lista proporcionada.
-- IMPORTANTE: La salida debe ser un objeto JSON válido con la propiedad "card".
-- El texto de la carta debe estar en español y redactado con un tono dinámico y juvenil.
+${TRENDS_2025}
 
-Formato JSON esperado:
-{
-  "card": "El texto del reto personalizado en español"
-}
-No devuelvas nada más que el objeto JSON.
+Instrucciones:
+- Crea una carta con un reto único. Puede ser: "Yo nunca", "Reto individual", "Verdad", "Duelo 1v1", "Castigo" o "🛌 En la cama y...".
+- OBLIGATORIO: usa referencias de tendencias 2025 de la lista de arriba para hacer el reto más actual y gracioso.
+- Ocasionalmente genera "🛌 En la cama y..." con doble sentido por turnos (Ej: '¡Está muy caliente!', '¡Cabe otro!').
+- Sé muy divertido, sarcástico, irónico y atrevido (mayores de 18, fiesta en bar o casa).
+- OBLIGATORIO: menciona a uno o varios jugadores por su nombre real (${players.join(', ')}). NUNCA uses '{player}'.
+- La salida es un JSON con la propiedad "card". Solo JSON, nada más.
+
+{"card": "texto del reto en español"}
 `;
 
   const result = await callGemini(prompt);
@@ -156,30 +163,23 @@ export async function geminiEnrichChallenge(
     ? `\n- Tema especial de la fiesta de hoy: "${theme}". Intenta reescribir el reto para integrar sutilmente este tema o palabras clave de forma hilarante.` 
     : '';
 
+  const TRENDS_2025 = `Tendencias 2025 que puedes citar para hacer el salseo más viral: Bad Bunny, Karol G, Bizarrap, La Mesías, Squid Game S2, memes TikTok España, ChatGPT en el trabajo, Saltburn baile, Rafa Nadal retirada, Eurovisión, operación triunfo, "Bro realmente pensó", streamers españoles.`;
+
   const prompt = `
-Eres el motor de IA del juego de fiesta BEEP. Tu misión es añadir salseo, ironía y dinamismo a un reto existente utilizando la memoria real y nombres de los jugadores del grupo.
+Eres el motor de salseo del juego de fiesta BEEP (2025). Añades ironía, dinamismo y referencias actuales a los retos usando los nombres y stats de los jugadores.
 Reto original: "${challengeText}"
-El jugador que tiene el turno actual (el protagonista del reto) es: "${activePlayerName}".
-Todos los jugadores del grupo son: ${playerNames.join(', ')}
-Estadísticas de los jugadores (¡úsalas de forma sarcástica para picarlos, retarlos o justificar el reto!):
-${playerStats}${themePrompt}
+Protagonista del turno: "${activePlayerName}"
+Jugadores: ${playerNames.join(', ')}
+Stats (úsalos de forma sarcástica): ${playerStats}${themePrompt}
+${TRENDS_2025}
 
 Instrucciones:
-- Reescribe el reto original de forma ingeniosa para integrar sus nombres y estadísticas de forma orgánica.
-- El reto DEBE ir dirigido principalmente a "${activePlayerName}" o tenerle como protagonista del turno.
-- DEBES involucrar a otros jugadores del grupo (como ${playerNames.filter(n => n !== activePlayerName).join(', ') || 'alguien del grupo'}) por sus nombres reales en la reescritura del reto para crear preguntas graciosas, retos de complicidad, piques o duelos de beber.
-- IMPORTANTE: Si el reto original contiene el emoji "🛌" o menciona "En la cama y..." o "Cosas que puedes decir en la cama y...", la reescritura DEBE seguir el formato de una ronda por turnos de doble sentido: "Cosas que puedes decir en la cama y... [en otro lugar/situación]. Por turnos, cada jugador dice una frase que sirva en ambos contextos. El primero que repita o falle, bebe X tragos". Además, incluye al final de la carta 2 ejemplos extremadamente graciosos, pícaros y con doble sentido para inspirar a los jugadores (ej: "(Ej: '¡Está saliendo líquido!', '¡Qué estrecho está esto!')").
-- Haz chistes o pullas divertidas sobre quién va ganando, quién lleva más tragos 🍻, o quién no da pie con bola.
-- Mantén la esencia del reto original (si es un duelo, que siga siendo un duelo; si es beber, que siga siendo beber) pero haz que parezca personalizado en vivo por un presentador de televisión gamberro.
-- Si el reto original requiere beber tragos, puedes adaptarlos un poco según las estadísticas (ej. "${activePlayerName} que lleva 0 tragos bebe el doble para compensar").
-- La salida debe ser un objeto JSON válido con la propiedad "enriched".
-- Escribe en español.
-
-Formato JSON esperado:
-{
-  "enriched": "El texto del reto reescrito con salseo en español"
-}
-No devuelvas nada más que el objeto JSON.
+- Reescribe el reto integrando nombres, stats y alguna referencia de tendencia 2025 de forma natural y graciosa.
+- El protagonista es "${activePlayerName}". Involucra a ${playerNames.filter(n => n !== activePlayerName).join(', ') || 'los demás'} por nombre.
+- Si hay "🛌" o "En la cama y...", mantén el formato de ronda de doble sentido con 2 ejemplos pícaros al final.
+- Pulla divertida sobre quién lleva más tragos 🍻 o quién está fallando.
+- Mantén la esencia del reto (duelo→duelo, beber→beber).
+- Solo JSON: {"enriched": "texto reescrito en español"}
 `;
 
   const result = await callGemini(prompt);

@@ -56,6 +56,26 @@ import { PodiumScreen } from './PodiumScreen';
 import confetti from 'canvas-confetti';
 
 
+// ─── XP Rewards (fuente única de verdad) ─────────────────────────────────────
+export const XP = {
+  RETO_DONE:        30,   // completar un reto individual
+  RETO_FAIL:         0,   // fallar reto (penalización es beber, no perder XP)
+  VERDAD_TOLD:      20,   // contar la verdad en "verdad o bebe"
+  VERDAD_DRINK:      5,   // pasar y beber (valentía al menos)
+  YO_NUNCA_YES:     12,   // haber hecho el yo nunca (honestidad)
+  YO_NUNCA_NO:       3,   // no haberlo hecho
+  VOTED_MOST:       15,   // ser señalado en votación (popularidad)
+  DUELO_WIN:        45,   // ganar un duelo
+  DUELO_LOSE:        8,   // perder duelo (consolación)
+  TORNEO_WIN:       80,   // ganar torneo
+  TORNEO_LOSE:      10,   // participar en torneo
+  IMPOSTOR_CAUGHT:  25,   // grupo detecta al impostor
+  IMPOSTOR_WIN:     60,   // impostor sobrevive sin ser detectado
+  NORMA_CUMPLIDA:   10,   // respetar norma activa hasta el final
+  CAPITAN_ACTION:   15,   // el capitán ejerce un comando
+  DRINK_BRAVE:       5,   // beber voluntariamente (valentía)
+} as const;
+
 // ─── Visual Improvements Sub-components ──────────────────────────────────────
 
 const RARITY_CONFIG = {
@@ -855,13 +875,19 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     setShowYoNuncaResponse(false);
     const cardText = getCurrentContent();
     // Track each player who said yes
+    const allIds = players.map(p => p.id);
+    const noIds = allIds.filter(id => !didItIds.includes(id));
     if (didItIds.length > 0) {
       addEvents('yo_nunca_yes', didItIds, typeof cardText === 'string' ? cardText : '', gameState.round);
       didItIds.forEach(id => {
         const p = players.find(pl => pl.id === id);
-        if (p) addScore(p.id, 2); // bonus XP for honesty
+        if (p) addScore(p.id, XP.YO_NUNCA_YES);
       });
     }
+    noIds.forEach(id => {
+      const p = players.find(pl => pl.id === id);
+      if (p) addScore(p.id, XP.YO_NUNCA_NO);
+    });
     performTurnAdvance(true); // global card → no player advance
   }, [getCurrentContent, addEvents, gameState.round, players, addScore, performTurnAdvance]);
 
@@ -873,9 +899,10 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     if (currentPlayer) {
       addEvent(completed ? 'reto_done' : 'reto_fail', currentPlayer, typeof cardText === 'string' ? cardText : '', gameState.round);
       if (completed) {
-        addScore(currentPlayer.id, 15);
-        toast.success(`✓ ${currentPlayer.name} lo ha completado — reparte 2 tragos 👑`, { duration: 2000 });
+        addScore(currentPlayer.id, XP.RETO_DONE);
+        toast.success(`✓ ${currentPlayer.name} lo ha completado — +${XP.RETO_DONE} XP · reparte 2 tragos 👑`, { duration: 2000 });
       } else {
+        addScore(currentPlayer.id, XP.RETO_FAIL);
         toast(`✗ ${currentPlayer.name} no lo ha completado — bebe 3 🍻`, { duration: 2000 });
       }
     }
@@ -974,7 +1001,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       if (mode === 'megamix') {
         // 1. Auto-XP for current player (Megamix scaling) - Always runs
         if (currentPlayer) {
-          const autoXp = Math.min(20, 3 + Math.floor(gameState.round / 2));
+          const autoXp = Math.min(25, 5 + gameState.round * 2); // escala con la ronda
           addScore(currentPlayer.id, autoXp);
         }
 
@@ -2131,10 +2158,10 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                         onComplete={(impostorCaught, votedPlayerId) => {
                           if (impostorCaught) {
                             players.forEach(p => {
-                              if (p.id !== gameState.impostorData?.impostorPlayerId) addScore(p.id, 20);
+                              if (p.id !== gameState.impostorData?.impostorPlayerId) addScore(p.id, XP.IMPOSTOR_CAUGHT);
                             });
                           } else if (gameState.impostorData?.impostorPlayerId) {
-                            addScore(gameState.impostorData.impostorPlayerId, 50);
+                            addScore(gameState.impostorData.impostorPlayerId, XP.IMPOSTOR_WIN);
                           }
                           setGameState(prev => ({ ...prev, showImpostorWarning: false, showImpostorWord: false }));
                           handleNext();
@@ -2235,7 +2262,9 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
             onDrink={(playerId, name) => {
               sfx.click();
               trackDrink(playerId);
-              addScore(playerId, 5);
+              addScore(playerId, XP.DRINK_BRAVE);
+              const captain = players.find(p => p.id === gameState.captainId);
+              if (captain) addScore(captain.id, XP.CAPITAN_ACTION);
               toast(`🍺 ${name} bebe por orden del Capitán!`, { duration: 3000 });
               setGameState(prev => ({ ...prev, showCaptainDecision: false }));
               performTurnAdvance(true);
@@ -2263,7 +2292,9 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               sfx.click();
               trackDrink(playerId);
               trackDrink(playerId);
-              addScore(playerId, -10);
+              addScore(playerId, XP.DRINK_BRAVE);
+              const captainDouble = players.find(p => p.id === gameState.captainId);
+              if (captainDouble) addScore(captainDouble.id, XP.CAPITAN_ACTION);
               toast(`⚡ ¡Doble o nada! ${name} bebe el doble.`, { duration: 3000 });
               setGameState(prev => ({ ...prev, showCaptainDecision: false }));
               performTurnAdvance(true);
@@ -2400,10 +2431,8 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                     whileTap={{ scale: 0.85 }}
                     onClick={async () => {
                       trackDrink(p.id);
-                      // Award EXP for drinking (brave soul!)
-                      const drinkXp = 5;
-                      addScore(p.id, drinkXp);
-                      toast(`🍺 ${p.name} ha bebido! +${drinkXp} XP (Total: ${(drinkCounts[p.id] || 0) + 1})`, { duration: 1500, position: 'top-center' });
+                      addScore(p.id, XP.DRINK_BRAVE);
+                      toast(`🍺 ${p.name} ha bebido! +${XP.DRINK_BRAVE} XP (Total: ${(drinkCounts[p.id] || 0) + 1})`, { duration: 1500, position: 'top-center' });
                       // Sync EXP to Supabase profile if player has a linked account
                       try {
                         const pid = (p as any).supabase_id;
@@ -2475,21 +2504,15 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                   type={rarity}
                   onClick={() => { return; }}
                   onSuccess={() => {
-                    // XP diferenciado por tipo de carta
                     const kind = safeCurrentText.toLowerCase();
-                    const xp = kind.includes('verdad o bebe') ? 20
-                      : kind.includes('picante') || kind.includes('🌶️') ? 25
-                      : kind.includes('reto') || kind.includes('🎯') ? 15
-                      : 10;
+                    const xp = kind.includes('verdad o bebe') ? XP.VERDAD_TOLD
+                      : XP.RETO_DONE;
                     if (currentPlayer) addScore(currentPlayer.id, xp);
                     handleNext();
                   }}
                   onFail={() => {
-                    // Bebe pero también gana algo de XP por participar
                     const kind = safeCurrentText.toLowerCase();
-                    const xp = kind.includes('verdad o bebe') ? 5
-                      : kind.includes('picante') ? 3
-                      : 2;
+                    const xp = kind.includes('verdad o bebe') ? XP.VERDAD_DRINK : XP.RETO_FAIL;
                     if (currentPlayer) addScore(currentPlayer.id, xp);
                     handleNext();
                   }}
@@ -2673,10 +2696,10 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                 // Simple score logic for now
                 if (caught) {
                   players.forEach(p => {
-                    if (p.id && p.id !== gameState.impostorPlayerId) addScore(p.id, 20);
+                    if (p.id && p.id !== gameState.impostorPlayerId) addScore(p.id, XP.IMPOSTOR_CAUGHT);
                   });
                 } else if (gameState.impostorPlayerId) {
-                  addScore(gameState.impostorPlayerId, 50);
+                  addScore(gameState.impostorPlayerId, XP.IMPOSTOR_WIN);
                 }
                 setGameState((prev: any) => ({ ...prev, showImpostor: false }));
                 handleNext();
@@ -2697,7 +2720,9 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               player2={gameState.duelPlayers[1]}
               onWinner={(winner) => {
                 addWin(winner.id);
-                addScore(winner.id, 50);
+                addScore(winner.id, XP.DUELO_WIN);
+                const loser = gameState.duelPlayers.find((p: any) => p.id !== winner.id);
+                if (loser) addScore(loser.id, XP.DUELO_LOSE);
                 setGameState((prev: any) => ({ ...prev, showDuel: false }));
                 handleNext();
               }}
@@ -2874,7 +2899,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                 if ((gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion) {
                   const correctOpt = currentQuestion.options[currentQuestion.correctIndex];
                   if (winner === correctOpt) {
-                     addScore(currentPlayer?.id || '', 10);
+                     addScore(currentPlayer?.id || '', XP.RETO_DONE);
                      confetti();
                   }
                   if (mode === 'megamix') {
@@ -2942,10 +2967,11 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               setShowTorneoRound(false);
               const winner = players.find(p => p.id === winnerId);
               const loser = players.find(p => p.id === loserId);
-              if (winner) addScore(winner.id, 30);
+              if (winner) addScore(winner.id, XP.TORNEO_WIN);
+              if (loser) addScore(loser.id, XP.TORNEO_LOSE);
               if (winner) addEvent('torneo_win', winner, loser?.name ?? 'torneo', gameState.round);
               if (loser) addEvent('torneo_lose', loser, winner?.name ?? 'torneo', gameState.round);
-              toast.success(`👑 ${winner?.name || 'Ganador'} gana el torneo — reparte 3 tragos!`, { duration: 3000 });
+              toast.success(`👑 ${winner?.name || 'Ganador'} gana el torneo — +${XP.TORNEO_WIN} XP · reparte 3 tragos!`, { duration: 3000 });
               advanceTurn(true);
             }}
           />

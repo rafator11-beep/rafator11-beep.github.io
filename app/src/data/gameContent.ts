@@ -6993,27 +6993,27 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
 
   const deck: string[] = [];
 
-  // Construir deck con patrón [G, G, G, I] garantizando turno individual por jugador
-  const GENERALS_PER_TURN = 3;
+  // Patrón [G, I]: 1 general (toda la mesa) + 1 individual (jugador activo) por ciclo
+  // Inyecciones: TORNEO cada 15 cartas, IMPOSTOR cada 20, NORMA cada 25, ESPECIAL cada 10
+  const GENERALS_PER_TURN = 1;
   while (deck.length < count) {
-    // 3 cartas GENERALES (toda la mesa participa, NO avanza jugador)
+    // 1 carta GENERAL (toda la mesa participa, NO avanza jugador)
     for (let g = 0; g < GENERALS_PER_TURN && deck.length < count; g++) {
-      // Inyecciones periódicas (antes de añadir la carta normal)
       if (deck.length > 0 && deck.length % 20 === 0) {
         deck.push("TRIGGER:IMPOSTOR");
         if (deck.length >= count) break;
         continue;
-      } else if (deck.length > 0 && deck.length % 30 === 0) {
-        deck.push(globalNormas[normaPtr % globalNormas.length]);
-        normaPtr++;
-        if (deck.length >= count) break;
-        continue;
-      } else if (deck.length > 0 && deck.length % 18 === 0) {
+      } else if (deck.length > 0 && deck.length % 15 === 0) {
         deck.push(torneoTriggers[torneoPtr % torneoTriggers.length]);
         torneoPtr++;
         if (deck.length >= count) break;
         continue;
-      } else if (deck.length > 0 && deck.length % 15 === 0) {
+      } else if (deck.length > 0 && deck.length % 25 === 0) {
+        deck.push(globalNormas[normaPtr % globalNormas.length]);
+        normaPtr++;
+        if (deck.length >= count) break;
+        continue;
+      } else if (deck.length > 0 && deck.length % 10 === 0) {
         const filtered = specialTriggers.filter(t => t !== "TRIGGER:IMPOSTOR");
         deck.push(filtered[triggerPtr % filtered.length]);
         triggerPtr++;
