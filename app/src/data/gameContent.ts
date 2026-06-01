@@ -60,6 +60,14 @@ import { yoNuncaCurro } from './gameContentMega4';
 import { yoNuncaFiesta, picanteNuevo } from './gameContentMega5';
 import { votacionNuevo, verdadOBebeNuevo } from './gameContentMega6';
 import { retosNuevo, cadenaNuevo, categoriasNuevo, normasNuevas, mimicaNueva, enLaCamaNuevo, pacoversEspanaNuevo } from './gameContentMega7';
+import {
+  yoNuncaInfanciaExtra, yoNuncaInstitutoExtra, yoNuncaUniversidadExtra,
+  yoNuncaCurroExtra, yoNuncaFiestaExtra,
+  picanteExtra8b, votacionExtra8b, verdadOBebeExtra8b,
+  retosExtra8b, cadenaExtra8b, categoriasExtra8b,
+  normasExtra8b, mimicaExtra8b, enLaCamaExtra8b, pacoversExtra8b,
+  salseoNuevo, duelosExtra8b, impostorExtra8b,
+} from './gameContentMega8';
 export interface GameQuestion {
   text: string;
   type: 'reto' | 'yo_nunca' | 'pregunta' | 'votacion' | 'accion';
@@ -6654,6 +6662,10 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     ...yoNuncaExtra18,
     // ── MEGA EXPANSION: 1000 nuevas preguntas por etapa vital ──
     ...yoNuncaInfancia, ...yoNuncaInstituto, ...yoNuncaUniversidad, ...yoNuncaCurro, ...yoNuncaFiesta,
+    // ── MEGA8 EXPANSION ──
+    ...yoNuncaInfanciaExtra, ...yoNuncaInstitutoExtra, ...yoNuncaUniversidadExtra,
+    ...yoNuncaCurroExtra, ...yoNuncaFiestaExtra,
+    ...salseoNuevo.filter(s => s.toLowerCase().startsWith('yo nunca')),
   ]);
   const yoNuncaItems = getRandomItems(yoNuncaPool, yoNuncaPool.length);
   const yoNuncaCards = yoNuncaItems.map(q => addDrinking(`🙈 Yo nunca... ${q}`, Math.random() < 0.4 ? 'medio' : 'leve'));
@@ -6664,6 +6676,8 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     ...votacionExtra18,
     // ── MEGA EXPANSION ──
     ...votacionNuevo,
+    // ── MEGA8 ──
+    ...votacionExtra8b,
   ]);
   const masProbableItems = getRandomItems(masProbablePool, masProbablePool.length);
   const masProbableCards = masProbableItems.map(q => addDrinking(`🗳️ ${q}`, Math.random() < 0.3 ? 'medio' : 'leve'));
@@ -6675,6 +6689,8 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     ...retosExtra19,
     // ── MEGA EXPANSION ──
     ...retosNuevo,
+    // ── MEGA8 ──
+    ...retosExtra8b,
   ]);
   const retosItems = getRandomItems(retosPool, retosPool.length);
   const retosCards = retosItems.map(q => addDrinking(`🎯 ${q}`, Math.random() < 0.5 ? 'medio' : 'reparte'));
@@ -6686,7 +6702,10 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
   const clasicoItems = getRandomItems(clasicoPool, clasicoPool.length);
   const clasicoCards = clasicoItems.map(q => addDrinking(q, Math.random() < 0.5 ? 'leve' : 'grupo'));
 
-  const pacoversPool = cleanDeckPool([...pacovers, ...(pacoversExtra || []), ...(pacoversExtra2 || []), ...(pacoversExtra3 || []), ...(pacoversExtra6 || []), ...(pacoversExtra10 || []), ...(pacoversExtra11 || []), ...(pacoversExtra11b || []), ...(pacoversExtra11c || []), ...(pacoversExtra12 || [])]);
+  const pacoversPool = cleanDeckPool([...pacovers, ...(pacoversExtra || []), ...(pacoversExtra2 || []), ...(pacoversExtra3 || []), ...(pacoversExtra6 || []), ...(pacoversExtra10 || []), ...(pacoversExtra11 || []), ...(pacoversExtra11b || []), ...(pacoversExtra11c || []), ...(pacoversExtra12 || []),
+    // ── MEGA8 ──
+    ...pacoversExtra8b,
+  ]);
   const pacoversItems = getRandomItems(pacoversPool, pacoversPool.length);
   const pacoversCards = pacoversItems.map(q => addDrinking(`🇪🇸 ${q}`, 'leve'));
 
@@ -6703,6 +6722,8 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     ...picanteExtra17,
     // ── MEGA EXPANSION ──
     ...picanteNuevo,
+    // ── MEGA8 ──
+    ...picanteExtra8b,
   ]);
   const picanteItems = getRandomItems(picantePool, picantePool.length);
   const picanteCards = picanteItems.map(q => addDrinking(`🌶️ ${q}`, Math.random() < 0.5 ? 'medio' : 'fuerte'));
@@ -6710,6 +6731,8 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
   const enLaCamaPool = cleanDeckPool([...enLaCamaY, ...(enLaCamaYExtra || []), ...(enLaCamaYExtra2 || []), ...(enLaCamaYExtra3 || []), ...(enLaCamaYExtra10 || []),
     // ── MEGA EXPANSION ──
     ...enLaCamaNuevo,
+    // ── MEGA8 ──
+    ...enLaCamaExtra8b,
   ]);
   const enLaCamaItems = getRandomItems(enLaCamaPool, enLaCamaPool.length);
   const enLaCamaCards = enLaCamaItems.map(q => addDrinking(`🛌 ${q}`, 'medio'));
@@ -6719,6 +6742,8 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     ...categoriasExtra16,
     // ── MEGA EXPANSION ──
     ...categoriasNuevo,
+    // ── MEGA8 ──
+    ...categoriasExtra8b,
   ]);
   const categoriasItems = getRandomItems(categoriasPool, categoriasPool.length);
   const categoriasCards = categoriasItems.map(q => {
@@ -6733,6 +6758,8 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     ...mimicaExtra16,
     // ── MEGA EXPANSION ──
     ...mimicaNueva,
+    // ── MEGA8 ──
+    ...mimicaExtra8b,
   ]);
   const mimicaItems = getRandomItems(mimicaPool, mimicaPool.length);
   const mimicaCards = mimicaItems.map(q => {
@@ -6748,6 +6775,8 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     ...duelos.map(d => `${d.name}: ${d.description}`),
     ...(duelosExtra11 || []).map(d => `${d.name}: ${d.description}`),
     ...(duelosExtra12 || []).map(d => `${d.name}: ${d.description}`),
+    // ── MEGA8 ──
+    ...duelosExtra8b.map(d => `${d.name}: ${d.description}`),
   ]);
   const duelosItems = getRandomItems(duelosPool, duelosPool.length);
   const duelosCards = duelosItems.map(q => `⚔️ ${q}`);
@@ -6795,6 +6824,9 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     ...salseoExtra17.filter(s => s.startsWith('🎤')),
     // ── MEGA EXPANSION ──
     ...verdadOBebeNuevo,
+    // ── MEGA8 ──
+    ...verdadOBebeExtra8b,
+    ...salseoNuevo.filter(s => s.startsWith('🎤')),
   ]);
   const verdadOBebeCards = getRandomItems(verdadOBebePool, verdadOBebePool.length);
 
@@ -6825,6 +6857,10 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     ...cadenaExtra14,
     // ── EXTRA 16 ──
     ...cadenaExtra16,
+    // ── MEGA EXPANSION ──
+    ...cadenaNuevo,
+    // ── MEGA8 ──
+    ...cadenaExtra8b,
   ]);
   const cadenaCards = getRandomItems(cadenaPool, cadenaPool.length);
 
@@ -6943,9 +6979,11 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     "TRIGGER:MEGATORNEO",
   ]);
 
-  const globalNormas = shuffleArray(normasRonda.map(n =>
-    `📜 NORMA: ${n.replace(/NORMA:|NORMA: |📜 |\\\./g, '').trim()}`
-  ));
+  const globalNormas = shuffleArray([
+    ...normasRonda,
+    // ── MEGA8 ──
+    ...normasExtra8b,
+  ].map(n => `📜 NORMA: ${n.replace(/NORMA:|NORMA: |📜 |\\\./g, '').trim()}`));
 
   let triggerPtr = 0;
   let normaPtr = 0;

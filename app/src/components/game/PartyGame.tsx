@@ -47,6 +47,8 @@ import { TriviaQuestionCard } from './TriviaQuestionCard';
 import { ImpostorRound } from './ImpostorRound';
 import { DueloComponent } from './DueloComponent';
 import { CaptainPassScreen } from './CaptainPassScreen';
+import { CaptainDecisionPanel } from './CaptainDecisionPanel';
+import { TurnFlash } from './TurnFlash';
 import { SuggestionBox } from './SuggestionBox';
 import { QuestionVote } from './QuestionVote';
 import { YoNuncaEquiposFlow } from './YoNuncaEquiposFlow';
@@ -267,7 +269,7 @@ interface PartyGameProps {
 }
 
 // New Bottom Profiles Component with Virus Support and Captain XP Controls
-const PlayerProfilesBottom = ({ players, currentPlayer, scores, playerViruses = [], mode, remoteStreams = [], captainId, onAdjustXP }: { players: any[], currentPlayer: any, scores: any, playerViruses?: any[], mode: GameMode, remoteStreams?: any[], captainId?: string | null, onAdjustXP?: (pid: string, delta: number) => void }) => {
+const PlayerProfilesBottom = ({ players, currentPlayer, scores, playerViruses = [], mode, remoteStreams = [], captainId, onAdjustXP, drinkCounts = {} }: { players: any[], currentPlayer: any, scores: any, playerViruses?: any[], mode: GameMode, remoteStreams?: any[], captainId?: string | null, onAdjustXP?: (pid: string, delta: number) => void, drinkCounts?: Record<string, number> }) => {
   const [editMode, setEditMode] = useState(false); // Mejora 10: Edit mode for mobile
 
   return (
@@ -354,6 +356,9 @@ const PlayerProfilesBottom = ({ players, currentPlayer, scores, playerViruses = 
                   {p.name}
                 </span>
                 <AnimatedXP value={scores[p.id] || 0} playerId={p.id} />
+                {(drinkCounts[p.id] || 0) > 0 && (
+                  <span className="text-[9px] text-amber-400/80 font-black mt-0.5">🍺{drinkCounts[p.id]}</span>
+                )}
               </div>
             </div>
           );
@@ -433,8 +438,6 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       prevPlayerNameRef.current !== currentPlayer.name &&
       players.length > 1) {
       setShowTurnBanner(true);
-      const t = setTimeout(() => setShowTurnBanner(false), 2500);
-      return () => clearTimeout(t);
     }
     prevPlayerNameRef.current = currentPlayer.name;
   }, [currentPlayer?.name, players.length]);
@@ -1402,6 +1405,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         remoteStreams={[]}
         captainId={gameState.captainId}
         onAdjustXP={handleAdjustXP}
+        drinkCounts={drinkCounts}
       />
 
       {/* ── VOTING OVERLAY — inmersivo ── */}
@@ -2221,93 +2225,53 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         </DialogContent>
       </Dialog>
 
-      {/* Captain Decision Overlay — Mandato del Capitán */}
-      {gameState.showCaptainDecision && (() => {
-        const captainCommands = [
-          { id: 'drink', icon: '🍺', label: 'Elige quién bebe ahora' },
-          { id: 'virus', icon: '🦠', label: 'Asigna el Virus a alguien' },
-          { id: 'norma', icon: '📜', label: 'Anula norma si alguien cumple castigo' },
-        ];
-        const [captainCmd, setCaptainCmd] = React.useState<string | null>(null);
-        return (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[90] bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
-          >
-            <motion.div
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              className="w-full max-w-sm bg-gradient-to-b from-amber-950 to-slate-950 border-2 border-amber-500/50 rounded-[2.5rem] p-6 shadow-[0_0_80px_rgba(251,191,36,0.2)]"
-            >
-              <div className="flex flex-col items-center gap-2 mb-5">
-                <div className="p-3 bg-amber-500/15 rounded-2xl border border-amber-500/30">
-                  <Crown className="w-10 h-10 text-amber-400 fill-amber-400" />
-                </div>
-                <h2 className="text-2xl font-black text-amber-400 uppercase tracking-tighter">Mandato del Capitán</h2>
-                <p className="text-xs text-white/50 text-center">{players.find(p => p.id === gameState.captainId)?.name} tiene el mando</p>
-              </div>
-
-              {/* Selector de comando */}
-              <div className="grid grid-cols-3 gap-2 mb-5">
-                {captainCommands.map(cmd => (
-                  <button
-                    key={cmd.id}
-                    onClick={() => setCaptainCmd(cmd.id)}
-                    className={`flex flex-col items-center gap-1 p-3 rounded-2xl border transition-all text-center ${captainCmd === cmd.id ? 'bg-amber-500/30 border-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.3)]' : 'bg-white/5 border-white/10 hover:border-amber-500/50'}`}
-                  >
-                    <span className="text-2xl">{cmd.icon}</span>
-                    <span className="text-[9px] font-black uppercase tracking-wide text-white/70 leading-tight">{cmd.label}</span>
-                  </button>
-                ))}
-              </div>
-
-              {/* Selector de jugador (visible cuando hay comando elegido) */}
-              {captainCmd && (
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-4">
-                  <p className="text-[9px] text-amber-400 font-black uppercase tracking-widest mb-2 text-center">Elige al jugador</p>
-                  <div className="grid grid-cols-2 gap-2 max-h-[30vh] overflow-y-auto no-scrollbar">
-                    {players.filter(p => p.id !== gameState.captainId).map(p => (
-                      <button
-                        key={`capt-cmd-${p.id}`}
-                        onClick={() => {
-                          sfx.click();
-                          if (captainCmd === 'virus') {
-                            applyRandomVirus(true, p.id);
-                            toast(`🦠 Capitán asignó el virus a ${p.name}!`, { duration: 3000 });
-                          } else if (captainCmd === 'drink') {
-                            trackDrink(p.id);
-                            addScore(p.id, 5);
-                            toast(`🍺 ${p.name} debe beber por orden del Capitán!`, { duration: 3000 });
-                          } else if (captainCmd === 'norma') {
-                            toast(`📜 Norma anulada si ${p.name} cumple el castigo.`, { duration: 3000 });
-                          }
-                          setGameState(prev => ({ ...prev, showCaptainDecision: false }));
-                          performTurnAdvance(true);
-                        }}
-                        className="h-20 flex flex-col items-center justify-center gap-1 bg-white/5 hover:bg-amber-500/20 border border-white/10 hover:border-amber-400 rounded-2xl transition-all"
-                      >
-                        <div className="w-9 h-9 rounded-full bg-slate-800 overflow-hidden border border-white/20 flex items-center justify-center text-xs font-black">
-                          {p.avatar_url ? <img src={p.avatar_url} className="w-full h-full object-cover" /> : p.name.substring(0, 2).toUpperCase()}
-                        </div>
-                        <span className="text-[10px] font-bold text-white/80 truncate px-1">{p.name}</span>
-                      </button>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-
-              <button
-                onClick={() => setGameState(prev => ({ ...prev, showCaptainDecision: false }))}
-                className="w-full py-3 rounded-2xl bg-white/5 border border-white/10 text-white/40 text-xs font-bold uppercase tracking-widest hover:text-white transition-colors"
-              >
-                Cancelar
-              </button>
-            </motion.div>
-          </motion.div>
-        );
-      })()}
+      {/* Captain Decision Panel — Mandato del Capitán */}
+      <AnimatePresence>
+        {gameState.showCaptainDecision && (
+          <CaptainDecisionPanel
+            captainName={players.find(p => p.id === gameState.captainId)?.name || 'Capitán'}
+            players={players.filter(p => p.id !== gameState.captainId)}
+            drinkCounts={drinkCounts}
+            onDrink={(playerId, name) => {
+              sfx.click();
+              trackDrink(playerId);
+              addScore(playerId, 5);
+              toast(`🍺 ${name} bebe por orden del Capitán!`, { duration: 3000 });
+              setGameState(prev => ({ ...prev, showCaptainDecision: false }));
+              performTurnAdvance(true);
+            }}
+            onVirus={(playerId, name) => {
+              sfx.click();
+              applyRandomVirus(true, playerId);
+              toast(`🦠 Capitán asignó el virus a ${name}!`, { duration: 3000 });
+              setGameState(prev => ({ ...prev, showCaptainDecision: false }));
+              performTurnAdvance(true);
+            }}
+            onNormaCancel={(_playerId, name) => {
+              sfx.click();
+              toast(`📜 Norma anulada si ${name} cumple el castigo.`, { duration: 3000 });
+              setGameState(prev => ({ ...prev, showCaptainDecision: false }));
+            }}
+            onAllDrink={() => {
+              sfx.click();
+              players.forEach(p => trackDrink(p.id));
+              toast(`🥂 ¡El Capitán ordena que TODOS beban!`, { duration: 3000 });
+              setGameState(prev => ({ ...prev, showCaptainDecision: false }));
+              performTurnAdvance(true);
+            }}
+            onDouble={(playerId, name) => {
+              sfx.click();
+              trackDrink(playerId);
+              trackDrink(playerId);
+              addScore(playerId, -10);
+              toast(`⚡ ¡Doble o nada! ${name} bebe el doble.`, { duration: 3000 });
+              setGameState(prev => ({ ...prev, showCaptainDecision: false }));
+              performTurnAdvance(true);
+            }}
+            onClose={() => setGameState(prev => ({ ...prev, showCaptainDecision: false }))}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Main Content Area */}
       <main className={`flex-1 flex flex-col items-center justify-center p-4 relative transition-opacity duration-300 ${isMultiplayer && !isHost && (currentPlayer?.id !== localPlayerId) ? 'opacity-80 pointer-events-none' : ''}`}>
@@ -2321,15 +2285,14 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           </div>
         )}
 
-        {/* Turn Banner Overlay */}
-        <AnimatePresence>
-          {showTurnBanner && currentPlayer && (
-            <TurnBanner
-              playerName={currentPlayer.name}
-              isCaptain={currentPlayer.id === gameState.captainId}
-            />
-          )}
-        </AnimatePresence>
+        {/* Turn Flash Overlay */}
+        <TurnFlash
+          playerName={currentPlayer?.name || ''}
+          avatarUrl={currentPlayer?.avatar_url}
+          playerIndex={players.findIndex(p => p.id === currentPlayer?.id)}
+          visible={showTurnBanner}
+          onDismiss={() => setShowTurnBanner(false)}
+        />
 
         {/* Banner de norma activa */}
         {gameState.currentNorma && (

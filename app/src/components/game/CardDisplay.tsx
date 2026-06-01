@@ -281,16 +281,16 @@ export const CardDisplay = React.memo(({
     const hasRewardOnSuccess = /reparte|elige.*beba|ganador/i.test(cleanText);
 
     return (
-        <div className="w-full max-w-sm mx-auto relative select-none">
+        <div className="w-full max-w-sm mx-auto relative select-none" style={{ perspective: '1200px' }}>
             <AnimatePresence mode="wait">
                 <motion.div
                     key={content}
-                    initial={{ y: 60, scale: 0.92, opacity: 0 }}
-                    animate={{ y: 0, scale: 1, opacity: 1 }}
-                    exit={{ y: -40, scale: 0.95, opacity: 0 }}
-                    transition={{ type: 'spring', stiffness: 420, damping: 26 }}
-                    className={`w-full rounded-[2rem] overflow-hidden shadow-2xl bg-gradient-to-b ${cfg.bg} flex flex-col relative border-2`}
+                    initial={{ rotateY: -80, scale: 0.9, opacity: 0 }}
+                    animate={{ rotateY: 0, scale: 1, opacity: 1 }}
+                    exit={{ rotateY: 80, scale: 0.9, opacity: 0 }}
+                    transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
                     style={{
+                        transformStyle: 'preserve-3d',
                         borderColor: resultState === 'success' ? '#22c55e'
                             : resultState === 'fail' ? '#ef4444'
                             : `${cfg.accent}40`,
@@ -298,6 +298,7 @@ export const CardDisplay = React.memo(({
                             : resultState === 'fail' ? '0 0 40px rgba(239,68,68,0.4)'
                             : `0 20px 60px -20px ${cfg.accent}50`,
                     }}
+                    className={`w-full rounded-[2rem] overflow-hidden shadow-2xl bg-gradient-to-b ${cfg.bg} flex flex-col relative border-2`}
                 >
                     {/* Particles for legendary/chaos */}
                     {(type === 'legendary' || type === 'chaos') && (
