@@ -5,7 +5,7 @@ import {
   geminiGenerateCard, 
   geminiEnrichChallenge, 
   isGeminiConfigured 
-} from '@/services/claudeClient';
+} from '@/services/geminiClient';
 
 // ─── Event Types ────────────────────────────────────────────────────────────
 export type GameEventType =

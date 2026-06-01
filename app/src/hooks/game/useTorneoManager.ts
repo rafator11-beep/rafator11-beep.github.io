@@ -6,7 +6,7 @@ import {
   geminiGenerateTorneoAnnouncement, 
   geminiGenerateRoundAnalysis, 
   isGeminiConfigured 
-} from '@/services/claudeClient';
+} from '@/services/geminiClient';
 
 export interface TorneoMatch {
   player1: Player;

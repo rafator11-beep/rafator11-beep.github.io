@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Home, RotateCcw, Crown, ChevronRight, BarChart2, Share2, Sparkles, Loader2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { geminiGeneratePartyChronicle, isGeminiConfigured } from '@/services/claudeClient';
+import { geminiGeneratePartyChronicle, isGeminiConfigured } from '@/services/geminiClient';
 
 // ── SHARE IMAGE ───────────────────────────────────────────────────────────────
 async function shareAwardsImage(

@@ -119,7 +119,7 @@ export function AppSettings() {
 
   const [supabaseUrl, setSupabaseUrl] = useState(() => localStorage.getItem('fiesta_supabase_url') || '');
   const [supabaseKey, setSupabaseKey] = useState(() => localStorage.getItem('fiesta_supabase_key') || '');
-  const [geminiKey, setGeminiKey] = useState(() => localStorage.getItem('fiesta_claude_key') || '');
+  const [geminiKey, setGeminiKey] = useState(() => localStorage.getItem('fiesta_gemini_key') || '');
 
   const saveSupabaseConfig = () => {
     if (supabaseUrl) localStorage.setItem('fiesta_supabase_url', supabaseUrl.trim());
@@ -133,10 +133,10 @@ export function AppSettings() {
   };
 
   const saveGeminiConfig = () => {
-    if (geminiKey) localStorage.setItem('fiesta_claude_key', geminiKey.trim());
-    else localStorage.removeItem('fiesta_claude_key');
+    if (geminiKey) localStorage.setItem('fiesta_gemini_key', geminiKey.trim());
+    else localStorage.removeItem('fiesta_gemini_key');
 
-    toast.success('Motor de IA (Claude) actualizado. Recargando...');
+    toast.success('Motor de IA (Gemini) actualizado. Recargando...');
     setTimeout(() => window.location.reload(), 1500);
   };
 
@@ -159,7 +159,7 @@ export function AppSettings() {
     }
     // Remove all Supabase and Gemini related local storage
     Object.keys(localStorage).forEach(key => {
-      if (key.includes('supabase') || key.includes('sb-') || key.includes('fiesta_auth') || key.includes('fiesta_gemini') || key.includes('fiesta_claude')) {
+      if (key.includes('supabase') || key.includes('sb-') || key.includes('fiesta_auth') || key.includes('fiesta_gemini')) {
         localStorage.removeItem(key);
       }
     });
@@ -520,7 +520,7 @@ export function AppSettings() {
                     </div>
                     <div>
                       <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Inteligencia Artificial</p>
-                      <h2 className="text-xl font-bold text-white">Claude (Anthropic)</h2>
+                      <h2 className="text-xl font-bold text-white">Google Gemini</h2>
                     </div>
                   </div>
                   <div className={`flex h-2.5 w-2.5 rounded-full ${geminiKey ? 'bg-cyan-500 animate-pulse shadow-[0_0_8px_rgba(6,182,212,0.8)]' : 'bg-amber-500'}`} />
@@ -529,15 +529,15 @@ export function AppSettings() {
                 <div className="space-y-4">
                   <div className="rounded-[24px] border border-white/8 bg-white/[0.04] p-4 text-sm text-white/80 leading-relaxed">
                     {geminiKey
-                      ? "Motor de IA Claude (Haiku) activado. Las cartas de salseo se generarán de forma ultra rápida."
-                      : "No hay una clave de Claude configurada. El juego usará el salseo por defecto."}
+                      ? "Motor de IA Gemini Flash activado. Las cartas de salseo se generarán de forma ultra rápida."
+                      : "No hay una clave de Gemini configurada. El juego usará el salseo por defecto."}
                   </div>
 
                   <div className="space-y-3">
                     <div className="space-y-1.5">
-                      <Label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Anthropic API Key (console.anthropic.com)</Label>
+                      <Label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Gemini API Key (Google AI Studio)</Label>
                       <Input
-                        placeholder="sk-ant-... (API Key de Claude)"
+                        placeholder="AIzaSy... (API Key de Gemini)"
                         type="password"
                         value={geminiKey}
                         onChange={(e) => setGeminiKey(e.target.value)}
