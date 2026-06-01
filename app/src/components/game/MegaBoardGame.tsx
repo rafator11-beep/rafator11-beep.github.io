@@ -17,7 +17,7 @@ import { duelos } from '@/data/duelosContent';
 import { mimicaChallenges } from '@/data/mimicaContent';
 import { cultureQuestionsNew2025 } from '@/data/cultureQuestionsNew2025';
 import { useRanking } from '@/hooks/useRanking';
-import { isGeminiConfigured, geminiEnrichChallenge } from '@/services/geminiClient';
+import { isGeminiConfigured, geminiEnrichChallenge } from '@/services/claudeClient';
 
 // ─── Tile Types & Content ─────────────────────────────────────────────────────
 type TileType = 'start' | 'challenge' | 'trivia' | 'duel' | 'drink' | 'bonus' | 'trap' | 'mimica' | 'random' | 'norma' | 'finish' | 'oca' | 'puente' | 'posada' | 'pozo' | 'laberinto' | 'carcel' | 'calavera' | 'skip' | 'reset';

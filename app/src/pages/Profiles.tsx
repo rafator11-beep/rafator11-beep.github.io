@@ -24,7 +24,7 @@ import { buildPremiumSummaryFromRanking, getPremiumBadgeCatalog, getPremiumOverv
 import { CoinShop } from '@/components/game/CoinShop';
 import { getXPProgress } from '@/lib/playerEconomy';
 import { useAuth } from '@/contexts/AuthContext';
-import { isGeminiConfigured } from '@/services/geminiClient';
+import { isGeminiConfigured } from '@/services/claudeClient';
 
 type ModeKey = 'global' | 'fiesta' | 'juego' | 'poker' | 'megamix' | 'clasico' | 'picante' | 'parchis';
 

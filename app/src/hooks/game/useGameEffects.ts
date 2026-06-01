@@ -3,7 +3,7 @@ import { GameMode, PlayerVirus, Player } from '@/types/game';
 import { virusEffects, normasRonda } from '@/data/gameContent';
 import { impostorRounds } from '@/data/impostorContent';
 import { duelos } from '@/data/duelosContent';
-import { isGeminiConfigured, geminiGenerateImpostorRound } from '@/services/geminiClient';
+import { isGeminiConfigured, geminiGenerateImpostorRound } from '@/services/claudeClient';
 import { footballQuestions } from '@/data/footballQuestionsNew';
 import { cultureQuestions } from '@/data/cultureQuestions';
 import { getRandomMimica } from '@/data/mimicaContent';

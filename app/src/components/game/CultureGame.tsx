@@ -6,7 +6,7 @@ import { Player } from '@/types/game';
 import { Button } from '@/components/ui/button';
 import { cleanGameText } from '@/utils/sanitize';
 import { cultureQuestions, CultureQuestion, getRandomCultureQuestions } from '@/data/cultureQuestions';
-import { isGeminiConfigured } from '@/services/geminiClient';
+import { isGeminiConfigured } from '@/services/claudeClient';
 
 interface Lifeline {
   id: 'fifty' | 'hint' | 'change';

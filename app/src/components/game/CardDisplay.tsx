@@ -7,7 +7,7 @@ import {
     isGeminiConfigured, 
     geminiResolveDispute, 
     geminiGenerateCustomPunishment 
-} from '@/services/geminiClient';
+} from '@/services/claudeClient';
 
 // ── TTS ───────────────────────────────────────────────────────────────────────
 function useTTS(text: string) {

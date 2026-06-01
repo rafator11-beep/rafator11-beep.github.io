@@ -3,7 +3,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { safeLower, asString } from '@/utils/safeText';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
-import { isGeminiConfigured } from '@/services/geminiClient';
+import { isGeminiConfigured } from '@/services/claudeClient';
 
 import { Plus, X, Users, Play, ArrowLeft, UserPlus, Globe, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
