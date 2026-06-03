@@ -1,45 +1,59 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Sparkles, Zap, Flame, Timer, Layers, Smartphone } from 'lucide-react';
+import { X, Sparkles, Zap, Flame, Brain, Trophy, Star, Layers, Shuffle } from 'lucide-react';
 
-const CURRENT_VERSION = '4.0';
+const CURRENT_VERSION = '5.0';
 const STORAGE_KEY = 'beep_version_seen';
 
 const updates = [
   {
-    icon: <Zap className="w-5 h-5 text-cyan-400" />,
-    color: 'from-cyan-950/60 to-slate-950/60 border-cyan-500/30',
-    label: 'NUEVO MODO',
-    title: 'Speed Round ⚡',
-    desc: '120 preguntas relámpago con temporizador de 10s, combos y 6 categorías. ¿Cuántas aciertas?',
-  },
-  {
-    icon: <Sparkles className="w-5 h-5 text-violet-400" />,
+    icon: <Brain className="w-5 h-5 text-violet-400" />,
     color: 'from-violet-950/60 to-slate-950/60 border-violet-500/30',
-    label: 'VISUAL',
-    title: 'Motor APEX Engine',
-    desc: 'Rediseño visual completo: nuevo sistema glassmorphism, animaciones mejoradas y fuente Outfit para títulos.',
+    label: 'INTELIGENCIA ARTIFICIAL',
+    title: 'IA Gemini activa 🤖',
+    desc: 'Cartas personalizadas con vuestros nombres, piques del historial de partida y referencias a tendencias 2025: Bizarrap, Bad Bunny, memes TikTok, series virales...',
   },
   {
-    icon: <Flame className="w-5 h-5 text-orange-400" />,
-    color: 'from-orange-950/60 to-slate-950/60 border-orange-500/30',
+    icon: <Layers className="w-5 h-5 text-cyan-400" />,
+    color: 'from-cyan-950/60 to-slate-950/60 border-cyan-500/30',
+    label: 'CAPITÁN',
+    title: 'Panel Capitán rediseñado 👑',
+    desc: 'Nuevo panel deslizante con 5 comandos (Hacer beber, Virus, Anular norma, Doble o nada, Todos beben) y selector de jugador con contadores de tragos en tiempo real.',
+  },
+  {
+    icon: <Shuffle className="w-5 h-5 text-emerald-400" />,
+    color: 'from-emerald-950/60 to-slate-950/60 border-emerald-500/30',
+    label: 'MEGAMIX',
+    title: 'Megamix más activo ⚡',
+    desc: 'Nuevo patrón [GRUPAL + INDIVIDUAL] por turno. Torneos cada 15 cartas. Yo Nunca siempre grupal — todos votan a la vez. Más dinamismo en cada ronda.',
+  },
+  {
+    icon: <Trophy className="w-5 h-5 text-amber-400" />,
+    color: 'from-amber-950/60 to-slate-950/60 border-amber-500/30',
+    label: 'PUNTUACIÓN',
+    title: 'XP realista y estadísticas 🏆',
+    desc: 'Sistema de XP reequilibrado: reto=30, duelo ganado=45, torneo ganado=80, impostor se escapa=60. Contadores de tragos visibles en los avatares durante la partida.',
+  },
+  {
+    icon: <Flame className="w-5 h-5 text-rose-400" />,
+    color: 'from-rose-950/60 to-slate-950/60 border-rose-500/30',
     label: 'CONTENIDO',
-    title: '+200 retos y preguntas',
-    desc: 'Contenido fresco: retos con TikTok, ChatGPT, Spotify. Yo nunca modernos, votaciones actuales y más.',
+    title: '+1.300 cartas nuevas 🃏',
+    desc: 'Más de 1.300 cartas nuevas en todos los modos: Yo Nunca por etapa vital (infancia, instituto, uni, curro, fiesta), Picante, Votación, Retos, Salseo, En la Cama y más.',
   },
   {
-    icon: <Timer className="w-5 h-5 text-green-400" />,
-    color: 'from-green-950/60 to-slate-950/60 border-green-500/30',
-    label: 'MEJORA',
-    title: 'Sistema de combos',
-    desc: 'Aciertos seguidos = multiplicador de puntos. Racha de fuego visual cuando llevas 3+.',
+    icon: <Zap className="w-5 h-5 text-yellow-400" />,
+    color: 'from-yellow-950/60 to-slate-950/60 border-yellow-500/30',
+    label: 'VISUAL',
+    title: 'Animaciones mejoradas ✨',
+    desc: 'Flip 3D en las cartas al pasar. Flash de turno con avatar del jugador y glow de color. Badges de bebidas 🍺 en tiempo real sobre los avatares.',
   },
   {
-    icon: <Smartphone className="w-5 h-5 text-pink-400" />,
+    icon: <Star className="w-5 h-5 text-pink-400" />,
     color: 'from-pink-950/60 to-slate-950/60 border-pink-500/30',
-    label: 'UX',
-    title: 'Splash Screen v2',
-    desc: 'Nuevo arranque cinematográfico con partículas, barra tricolor y branding APEX ENGINE.',
+    label: 'IMPOSTOR',
+    title: 'Impostor con IA 🕵️',
+    desc: 'La ronda del Impostor ahora puede ser generada por la IA con categorías y palabras únicas. El impostor que se escapa gana 60 XP.',
   },
 ];
 
@@ -76,7 +90,7 @@ export function WhatsNewModal() {
             className="w-full max-w-sm bg-gradient-to-b from-slate-900 to-black border border-white/10 rounded-[2rem] overflow-hidden shadow-2xl"
           >
             {/* Header */}
-            <div className="relative px-6 pt-6 pb-4 bg-gradient-to-r from-cyan-950/60 to-slate-900">
+            <div className="relative px-6 pt-6 pb-4 bg-gradient-to-r from-violet-950/60 to-slate-900">
               <button
                 onClick={handleClose}
                 className="absolute top-4 right-4 p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
@@ -84,11 +98,11 @@ export function WhatsNewModal() {
                 <X className="w-4 h-4 text-white/60" />
               </button>
               <div className="flex items-center gap-2 mb-1">
-                <Sparkles className="w-5 h-5 text-cyan-400" />
-                <span className="text-[10px] font-black text-cyan-400 uppercase tracking-[0.3em]">BEEP v{CURRENT_VERSION} · APEX</span>
+                <Sparkles className="w-5 h-5 text-violet-400" />
+                <span className="text-[10px] font-black text-violet-400 uppercase tracking-[0.3em]">BEEP v{CURRENT_VERSION} · IA EDITION</span>
               </div>
-              <h2 className="text-2xl font-black text-white tracking-tight font-title">¿Qué hay de nuevo?</h2>
-              <p className="text-white/40 text-xs mt-0.5">Actualización APEX ENGINE — todo mejorado</p>
+              <h2 className="text-2xl font-black text-white tracking-tight">¿Qué hay de nuevo?</h2>
+              <p className="text-white/40 text-xs mt-0.5">Actualización mayor — IA, 1.300+ cartas y más</p>
             </div>
 
             {/* Updates list */}
@@ -98,7 +112,7 @@ export function WhatsNewModal() {
                   key={i}
                   initial={{ opacity: 0, x: -12 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.08 * i }}
+                  transition={{ delay: 0.07 * i }}
                   className={`flex gap-3 items-start bg-gradient-to-r ${u.color} border rounded-2xl p-3`}
                 >
                   <div className="mt-0.5 shrink-0">{u.icon}</div>
@@ -117,9 +131,9 @@ export function WhatsNewModal() {
             <div className="px-4 pb-5 pt-2">
               <button
                 onClick={handleClose}
-                className="w-full py-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 active:scale-[0.98] text-white font-black text-base uppercase tracking-widest transition-all shadow-lg shadow-cyan-900/40"
+                className="w-full py-4 rounded-2xl bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-400 hover:to-purple-500 active:scale-[0.98] text-white font-black text-base uppercase tracking-widest transition-all shadow-lg shadow-violet-900/40"
               >
-                ¡A jugar! ⚡
+                ¡A jugar! 🤖🎉
               </button>
             </div>
           </motion.div>
