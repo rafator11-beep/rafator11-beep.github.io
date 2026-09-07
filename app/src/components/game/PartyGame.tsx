@@ -2438,7 +2438,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                       try {
                         const pid = (p as any).supabase_id;
                         if (pid) {
-                          await supabase.rpc('increment_player_exp', { player_id: pid, exp_amount: drinkXp }).catch(() => { });
+                          await supabase.rpc('increment_player_exp', { player_id: pid, exp_amount: XP.DRINK_BRAVE }).catch(() => { });
                         }
                       } catch { /* silent fail */ }
                     }}
@@ -2894,7 +2894,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                   if (wPlayer) handleAdjustXP(wPlayer.id, 5);
                 }
                 setGameState(prev => ({ ...prev, votingSelections: [] }));
-                setShowKahoot(false);
+                setShowKahoot({ active: false, mode: 'standard' });
                 
                 // Si estamos en trivia, hay que procesar la respuesta
                 if ((gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion) {

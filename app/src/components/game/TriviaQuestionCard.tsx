@@ -349,7 +349,7 @@ export function TriviaQuestionCard({
             </h2>
             
             {onLaunchKahoot && !showResult && (() => {
-              const isBomba = (question.description?.toUpperCase() || '').includes('BOMBA CULTURAL') || (question.question.toUpperCase().includes('BOMBA CULTURAL'));
+              const isBomba = ((question as { description?: string }).description?.toUpperCase() || '').includes('BOMBA CULTURAL') || (question.question.toUpperCase().includes('BOMBA CULTURAL'));
               return (
                 <button
                   onClick={() => onLaunchKahoot(isBomba ? 'fastest_finger' : 'standard')}

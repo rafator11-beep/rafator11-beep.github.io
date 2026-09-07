@@ -49,6 +49,14 @@ import {
     megamixRetosV4, yoNuncaV4, picanteV4, votacionV4,
     normasV4, duelosV4, cadenasV4,
 } from '@/data/gameContentExtra13';
+import {
+    yoNuncaV5, retosV5, picanteV5, votacionV5, clasicoV5,
+    enLaCamaV5, espanaV5, normasV5, duelosV5,
+} from '@/data/updatePostVerano2026';
+import {
+    moreYoNunca, morePicante, moreVotacion, moreClasico, moreEspana,
+    moreEnLaCama, moreNormas, moreMimica, moreSalseo, moreTorneoRetos,
+} from '@/data/extraContentIndex';
 
 // Clean Fisher-Yates shuffle
 function shuffleArray<T>(array: T[]): T[] {
@@ -137,7 +145,29 @@ export const useGameContent = (mode: GameMode, currentIndex: number, currentPlay
 
         switch (mode) {
             case 'megamix':
-                modeContent = getStructuredMegamix(500, playersCount);
+                modeContent = [
+                    ...getStructuredMegamix(500, playersCount),
+                    // Actualización post-verano 2026 + contenido que estaba sin conectar
+                    ...retosV5,
+                    ...duelosV5,
+                    ...moreTorneoRetos,
+                    ...yoNuncaV5.map(q => `🙈 ${q}`),
+                    ...moreYoNunca.map(q => `🙈 ${q}`),
+                    ...picanteV5.map(q => `🌶️ ${q}`),
+                    ...morePicante.map(q => `🌶️ ${q}`),
+                    ...votacionV5.map(q => `🗳️ ${q}`),
+                    ...moreVotacion.map(q => `🗳️ ${q}`),
+                    ...clasicoV5,
+                    ...moreClasico,
+                    ...enLaCamaV5.map(q => `🛌 ${q}`),
+                    ...moreEnLaCama.map(q => `🛌 ${q}`),
+                    ...espanaV5.map(q => `🇪🇸 ${q}`),
+                    ...moreEspana.map(q => `🇪🇸 ${q}`),
+                    ...moreMimica.map(q => `🎭 ${q}`),
+                    ...normasV5.map(q => `NORMA: ${q.replace(/^NORMA:\s*/i, '')}`),
+                    ...moreNormas.map(q => `NORMA: ${q.replace(/^NORMA:\s*/i, '')}`),
+                    ...moreSalseo,
+                ];
                 break;
             case 'clasico':
                 modeContent = shuffleArray([
@@ -183,23 +213,30 @@ export const useGameContent = (mode: GameMode, currentIndex: number, currentPlay
                     ...normasV4.map(q => `NORMA: ${q.replace(/^📜\s*NORMA:\s*/i, '')}`),
                     ...duelosV4,
                     ...cadenasV4,
+                    ...clasicoV5,
+                    ...moreClasico,
+                    ...retosV5,
+                    ...normasV5.map(q => `NORMA: ${q.replace(/^NORMA:\s*/i, '')}`),
+                    ...moreNormas.map(q => `NORMA: ${q.replace(/^NORMA:\s*/i, '')}`),
+                    ...enLaCamaV5.map(q => `🛌 ${q}`),
+                    ...moreEnLaCama.map(q => `🛌 ${q}`),
                 ]);
                 break;
             case 'yo_nunca':
             case 'yo_nunca_equipos':
-                modeContent = shuffleArray([...yoNunca, ...yoNuncaExtra, ...yoNuncaExtra2, ...yoNuncaExtra3, ...yoNuncaV4]);
+                modeContent = shuffleArray([...yoNunca, ...yoNuncaExtra, ...yoNuncaExtra2, ...yoNuncaExtra3, ...yoNuncaV4, ...yoNuncaV5, ...moreYoNunca]);
                 break;
             case 'picante':
-                modeContent = shuffleArray([...picante, ...picanteExtra, ...picanteExtra2, ...picanteExtra3, ...picanteV4]);
+                modeContent = shuffleArray([...picante, ...picanteExtra, ...picanteExtra2, ...picanteExtra3, ...picanteV4, ...picanteV5, ...morePicante]);
                 break;
             case 'espana':
-                modeContent = shuffleArray([...nostalgia, ...pacoversExtra, ...pacoversExtra2, ...espanaExtra3]);
+                modeContent = shuffleArray([...nostalgia, ...pacoversExtra, ...pacoversExtra2, ...espanaExtra3, ...espanaV5, ...moreEspana]);
                 break;
             case 'votacion':
-                modeContent = shuffleArray([...quienEsMasProbable, ...masProbableExtra, ...quienEsMasProbableExtra2, ...masProbableExtra3, ...votacionV4]);
+                modeContent = shuffleArray([...quienEsMasProbable, ...masProbableExtra, ...quienEsMasProbableExtra2, ...masProbableExtra3, ...votacionV4, ...votacionV5, ...moreVotacion]);
                 break;
             case 'pacovers':
-                modeContent = shuffleArray([...pacovers, ...pacoversExtra, ...pacoversExtra2, ...pacoversExtra3]);
+                modeContent = shuffleArray([...pacovers, ...pacoversExtra, ...pacoversExtra2, ...pacoversExtra3, ...espanaV5, ...moreEspana]);
                 break;
             default:
                 modeContent = getMegamixContent(200);

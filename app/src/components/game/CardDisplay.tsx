@@ -240,13 +240,13 @@ export const CardDisplay = React.memo(({
     const handleSuccess = (e: React.MouseEvent) => {
         e.stopPropagation();
         setResultState('success');
-        setTimeout(() => { onSuccess?.() || onClick(); }, 700);
+        setTimeout(() => { if (onSuccess) onSuccess(); else onClick(); }, 700);
     };
 
     const handleFail = (e: React.MouseEvent) => {
         e.stopPropagation();
         setResultState('fail');
-        setTimeout(() => { onFail?.() || onClick(); }, 700);
+        setTimeout(() => { if (onFail) onFail(); else onClick(); }, 700);
     };
 
     const handleMagicAI = async (e: React.MouseEvent) => {

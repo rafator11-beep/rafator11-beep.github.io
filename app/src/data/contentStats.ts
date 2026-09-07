@@ -9,7 +9,6 @@ import {
   enLaCamaY,
   categoriasLetras,
   categoriasReto,
-  getMegamixWithTrivia,
 } from '@/data/gameContent';
 
 import {
@@ -56,9 +55,10 @@ export function getTotalContentCount(mode: string): number {
       return pacovers.length + pacoversExtra.length;
 
     case 'megamix': {
-      // Deck is mixed: party prompts + trivia. We estimate using your current generator.
-      const partyAndTrivia = getMegamixWithTrivia(500, [...cultureQuestions, ...allExtraCultureQuestions], footballQuestions);
-      return partyAndTrivia.length;
+      // Deck is mixed: party prompts + trivia. Estimate = sum of every pool it can draw from.
+      return clasico.length + yoNunca.length + picante.length + quienEsMasProbable.length
+        + categoriasLetras.length + categoriasReto.length + enLaCamaY.length
+        + cultureQuestions.length + allExtraCultureQuestions.length + footballQuestions.length;
     }
 
     case 'trivia_futbol':
