@@ -231,6 +231,16 @@ export const PodiumScreen = ({ players, onRestart, onHome, trackingData }: Podiu
       list.push({ emoji: '💨', title: 'EL ESQUIVO', subtitle: 'Pasó más veces', playerId: mostSkip, accent: '#a78bfa', stat: `${sc[mostSkip] || 0} skips` });
     }
 
+    // El gran engranaje: liga de duelos (bracket continuo de Megamix)
+    try {
+      const bw = JSON.parse(localStorage.getItem('beep_bracket_wins') || '{}');
+      let kingId = ''; let kingWins = 0;
+      for (const id of ids) { const w = Number(bw[id]) || 0; if (w > kingWins) { kingWins = w; kingId = id; } }
+      if (kingId && kingWins > 0) {
+        list.push({ emoji: '👑', title: 'REY DE LOS DUELOS', subtitle: 'Dominó el bracket', playerId: kingId, accent: '#fbbf24', stat: `${kingWins} ${kingWins === 1 ? 'llave' : 'llaves'}` });
+      }
+    } catch { /* ignore */ }
+
     // Random fun titles — assigned deterministically (not random each render)
     const funPool: { emoji: string; title: string; subtitle: string; accent: string }[] = [
       { emoji: '👑', title: 'REY DEL DRAMA', subtitle: 'Actor/actriz de la noche', accent: '#c084fc' },
@@ -342,18 +352,21 @@ export const PodiumScreen = ({ players, onRestart, onHome, trackingData }: Podiu
               transition={{ delay: 1.0 }}
               className="w-full max-w-sm relative z-10 mb-3 rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden"
             >
-              <div className="grid grid-cols-[1.6rem_1fr_2.4rem_2.4rem] gap-1 px-3 py-2 text-[9px] font-black uppercase tracking-wider text-white/40 border-b border-white/5">
-                <span>#</span><span>Jugador</span><span className="text-right">XP</span><span className="text-right">🍺</span>
+              <div className="grid grid-cols-[1.6rem_1fr_2.4rem_2.4rem_2.4rem] gap-1 px-3 py-2 text-[9px] font-black uppercase tracking-wider text-white/40 border-b border-white/5">
+                <span>#</span><span>Jugador</span><span className="text-right">XP</span><span className="text-right">🍺</span><span className="text-right">🏆</span>
               </div>
               {sortedPlayers.map((p, i) => {
                 const dc = trackingData?.drinkCounts || {};
                 const drinks = (dc as Record<string, number>)[p.id] ?? (dc as Record<string, number>)[p.name] ?? 0;
+                let llaves = 0;
+                try { llaves = Number(JSON.parse(localStorage.getItem('beep_bracket_wins') || '{}')[p.id]) || 0; } catch { llaves = 0; }
                 return (
-                  <div key={p.id} className={`grid grid-cols-[1.6rem_1fr_2.4rem_2.4rem] gap-1 px-3 py-1.5 text-xs items-center ${i === 0 ? 'bg-yellow-400/10' : ''}`}>
+                  <div key={p.id} className={`grid grid-cols-[1.6rem_1fr_2.4rem_2.4rem_2.4rem] gap-1 px-3 py-1.5 text-xs items-center ${i === 0 ? 'bg-yellow-400/10' : ''}`}>
                     <span className="font-black text-white/50">{['🥇', '🥈', '🥉'][i] ?? i + 1}</span>
                     <span className="font-bold text-white truncate">{p.name}</span>
                     <span className="text-right font-mono font-black text-cyan-300">{p.score}</span>
                     <span className="text-right font-mono text-amber-300">{drinks}</span>
+                    <span className="text-right font-mono text-yellow-400">{llaves || '·'}</span>
                   </div>
                 );
               })}

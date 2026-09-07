@@ -35,6 +35,59 @@ export function getPartyTheme(): string {
   return (localStorage.getItem('fiesta_party_theme') || '').trim();
 }
 
+// ─── EL GRAN ENGRANAJE ─────────────────────────────────────────────────────
+// El Director lee TODO el estado de la sesión (norma activa, liga de duelos,
+// tema...) y lo teje en cada carta para que la partida de Megamix se sienta
+// como una tela de araña donde todo está conectado.
+
+function readActiveNorma(): string {
+  if (typeof localStorage === 'undefined') return '';
+  const n = (localStorage.getItem('beep_active_norma') || '').trim();
+  return n.replace(/^(📜\s*)?NORMA:\s*/i, '').trim();
+}
+
+function readDuelKing(): { name: string; wins: number } | null {
+  if (typeof localStorage === 'undefined') return null;
+  try {
+    const raw = JSON.parse(localStorage.getItem('beep_bracket_wins') || '{}');
+    const names = JSON.parse(localStorage.getItem('beep_bracket_win_names') || '{}');
+    let best: { name: string; wins: number } | null = null;
+    for (const id of Object.keys(raw)) {
+      const wins = Number(raw[id]) || 0;
+      const name = names[id] || '';
+      if (wins > 0 && name && (!best || wins > best.wins)) best = { name, wins };
+    }
+    return best;
+  } catch {
+    return null;
+  }
+}
+
+/** Frases-remate opcionales que enganchan la carta con el resto de la partida. */
+function weaveExtras(activeName: string, playerNames: string[]): string[] {
+  const out: string[] = [];
+  const norma = readActiveNorma();
+  if (norma && chance(0.28)) {
+    out.push(pick([
+      `(y sin saltarse la norma: ${norma.toLowerCase()})`,
+      `— ojo, que sigue la norma: ${norma.toLowerCase()}`,
+      `(la norma sigue en pie: ${norma.toLowerCase()})`,
+    ]));
+  }
+  const king = readDuelKing();
+  if (king && king.name !== activeName && chance(0.22)) {
+    out.push(pick([
+      `Y que ${king.name}, con ${king.wins} ${king.wins === 1 ? 'llave' : 'llaves'} de duelos, no se relaje.`,
+      `${king.name} manda en la liga de duelos, a ver si dura.`,
+    ]));
+  }
+  const theme = getPartyTheme();
+  if (theme && chance(0.25) && !out.some(x => x.toLowerCase().includes(theme.toLowerCase()))) {
+    out.push(`Rollo "${theme}" 😏`);
+  }
+  return out.slice(0, 2); // máx 2 remates para no hacer un tocho
+}
+
 // Compat: antes decían si había clave de IA. Ahora el motor es local y siempre
 // está disponible.
 export function isGeminiConfigured(): boolean {
@@ -180,10 +233,9 @@ export async function geminiEnrichChallenge(
     const p = pique(cast, activePlayerName, others);
     if (p) out = p + out;
   }
-  // Guiño al tema de la noche (~30 %).
-  if (theme && chance(0.3) && !out.toLowerCase().includes(theme.toLowerCase())) {
-    out += ` ${pick(['Modo', 'Rollo', 'Temática:'])} "${theme}" 😏`;
-  }
+  // El gran engranaje: engancha la carta con norma activa, liga de duelos y tema.
+  const extras = weaveExtras(activePlayerName, playerNames || []);
+  if (extras.length) out += ' ' + extras.join(' ');
   return out;
 }
 
@@ -209,6 +261,20 @@ export async function geminiGenerateCard(
   const names = (playerNames || []).filter(Boolean);
   if (names.length < 2) return null;
   const [a, b, c] = shuffle(names);
+
+  // El gran engranaje: a veces la carta inventada nace de la norma o de la
+  // liga de duelos, para que todo esté conectado.
+  const king = readDuelKing();
+  const norma = readActiveNorma();
+  if (king && king.name !== a && chance(0.3)) {
+    return pick([
+      `🏆 REVANCHA: ${a} reta a ${king.name} (líder de duelos con ${king.wins}). Piedra-papel-tijera al mejor de 3. El que pierda bebe 3.`,
+      `👑 ${king.name} lleva ${king.wins} ${king.wins === 1 ? 'llave' : 'llaves'} ganadas. ${a}, tu misión: hacerle fallar el próximo reto o bebes tú.`,
+    ]);
+  }
+  if (norma && chance(0.25)) {
+    return `📜 CONTROL DE NORMA: durante esta ronda ${a} vigila que nadie se salte "${norma.toLowerCase()}". Cada pillado, un trago. Si ${a} no pilla a nadie, bebe ${a}.`;
+  }
   return pick(SYNTH_TEMPLATES)(a, b ?? a, c ?? a);
 }
 
@@ -277,6 +343,11 @@ export async function geminiGeneratePartyChronicle(
     };
     lines.push(`• ${p.name}: ${partyTitle(st)}.`);
   });
+  // El gran engranaje: la crónica cierra el círculo con la liga de duelos y la norma.
+  const king = readDuelKing();
+  if (king) lines.push(`⚔️ Rey de los duelos: ${king.name}, con ${king.wins} ${king.wins === 1 ? 'llave' : 'llaves'} en el bolsillo.`);
+  const norma = readActiveNorma();
+  if (norma) lines.push(`📜 Y hasta el final aguantó la norma: ${norma.toLowerCase()}.`);
   lines.push(pick([
     `Nos vemos en la próxima, con más sed y menos vergüenza. 🍻`,
     `La resaca de mañana os la habéis ganado a pulso. 💀`,

@@ -93,6 +93,13 @@ Nuevo `src/lib/recentContent.ts` (`pickFreshQuiz` / `rememberQuizIds`): memoria 
 - **Cultura** standalone (`beep_culture_seen`): idem, sobre el pool completo (`cultureQuestions` + `cultureQuestionsNew2025`).
 - **Trivia por cartas** en `useGameContent` (`beep_trivia_seen_<cat>`): filtra por vistas de sesiones anteriores además del `usedQuestionIds` de la partida.
 
+### F. El gran engranaje (Megamix como tela de araña)  ✅ HECHO
+Todo el estado de la partida se lee y se teje en el resto:
+- **Norma activa** → se espeja a `localStorage['beep_active_norma']` ([PartyGame](src/components/game/PartyGame.tsx)). El PartyDirector la cita en las cartas (~28 %), inventa "controles de norma" (`geminiGenerateCard`) y la nombra en la crónica final.
+- **Liga de duelos** (`beep_bracket_wins` + `beep_bracket_win_names`) → el "rey de los duelos" aparece en las cartas (~22 %), en revanchas inventadas, en la **columna 🏆 de la clasificación final** y en un premio propio ("👑 REY DE LOS DUELOS") en el Podio, y en la crónica.
+- **Rivalidades reales** → `buildMatch` ([useTorneoManager](src/hooks/game/useTorneoManager.ts)) ya no cruza al azar: puntúa cada pareja por historia compartida (uno nombra al otro, duelos previos, actividad) y enfrenta a los que más "tensión" acumulan.
+- **Callbacks literales** (D anterior) + **estadísticas/tragos** (rivalry pique) siguen alimentando el enriquecimiento, ahora apilados con un tope de 2 remates para no hacer un tocho.
+
 ### E. Segunda oleada de contenido  ✅ HECHO (wave 2)
 `src/data/updatePostVerano2026_v2.ts` — ~280 frases nuevas más, misma guía de tono, sin repetir la oleada 1: `yoNuncaV5b`, `retosV5b`, `picanteV5b`, `votacionV5b`, `clasicoV5b`, `enLaCamaV5b`, `espanaV5b`, `normasV5b`, `duelosV5b`. Conectadas a sus modos y a Megamix.
 _(Pendiente wave 3+ para llegar a los 500+/modo que pediste — es trabajo incremental; la identidad ya está fijada.)_

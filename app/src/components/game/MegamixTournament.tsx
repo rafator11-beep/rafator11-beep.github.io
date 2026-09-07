@@ -502,7 +502,13 @@ export function MegamixTournament({ players, onWinner, onClose, addScore }: Prop
           recordTournament(winner.name, runnerUp?.name || 'Subcampeón', players.length);
           setBracketWins(prev => {
             const upd = { ...prev, [winner.id]: (prev[winner.id] || 0) + 1 };
-            try { localStorage.setItem('beep_bracket_wins', JSON.stringify(upd)); } catch { /* ignore */ }
+            try {
+              localStorage.setItem('beep_bracket_wins', JSON.stringify(upd));
+              // Mapa id→nombre para que el PartyDirector pueda citar al rey de duelos.
+              const names = JSON.parse(localStorage.getItem('beep_bracket_win_names') || '{}');
+              players.forEach(p => { names[p.id] = p.name; });
+              localStorage.setItem('beep_bracket_win_names', JSON.stringify(names));
+            } catch { /* ignore */ }
             return upd;
           });
           return next;

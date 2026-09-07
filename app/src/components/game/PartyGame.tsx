@@ -1064,6 +1064,19 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     performTurnAdvance(isGlobal);
   };
 
+  // El gran engranaje: espeja la norma activa para que el PartyDirector la teja
+  // en las cartas, cartas inventadas y la crónica final.
+  useEffect(() => {
+    try {
+      const n = gameState.currentNorma;
+      if (n) localStorage.setItem('beep_active_norma', n);
+      else localStorage.removeItem('beep_active_norma');
+    } catch { /* ignore */ }
+  }, [gameState.currentNorma]);
+
+  // Al desmontar la partida, limpia el rastro de norma.
+  useEffect(() => () => { try { localStorage.removeItem('beep_active_norma'); } catch { /* ignore */ } }, []);
+
   // Bug 6/8: NORMA - Auto turn advance logic (Megamix)
   // Moved here to avoid 'handleNext' hoisting issues
   useEffect(() => {

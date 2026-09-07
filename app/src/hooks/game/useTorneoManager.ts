@@ -124,19 +124,35 @@ export function useTorneoManager(players: Player[]) {
     );
     const pool = duelRetos.length > 0 ? duelRetos : retoPool;
 
-    // Pick 2 players — prefer those with most activity or least torneo wins
+    // El gran engranaje: elige el cruce por RIVALIDAD real, no al azar.
+    // Puntúa cada pareja por historia compartida (uno nombra al otro en una
+    // carta, duelos previos entre ellos, ambos muy activos).
     const activity: Record<string, number> = {};
     events.forEach(e => {
-      if (e.type === 'reto_done' || e.type === 'reto_fail' || e.type === 'torneo_win' || e.type === 'torneo_lose') {
+      if (['reto_done', 'reto_fail', 'torneo_win', 'torneo_lose', 'duelo_win', 'duelo_lose', 'voted'].includes(e.type)) {
         activity[e.playerId] = (activity[e.playerId] || 0) + 1;
       }
     });
 
-    // Shuffle to add randomness, then sort by activity
-    const shuffled = [...players].sort(() => Math.random() - 0.5);
-    const sorted = shuffled.sort((a, b) => (activity[b.id] || 0) - (activity[a.id] || 0));
-    const p1 = sorted[0];
-    const p2 = sorted.find(p => p.id !== p1.id) || sorted[1];
+    const tension = (a: Player, b: Player): number => {
+      let t = (activity[a.id] || 0) + (activity[b.id] || 0);
+      for (const e of events) {
+        const txt = (e.cardText || '').toLowerCase();
+        if (e.playerId === a.id && txt.includes(b.name.toLowerCase())) t += 4;
+        if (e.playerId === b.id && txt.includes(a.name.toLowerCase())) t += 4;
+        if ((e.type === 'duelo_win' || e.type === 'duelo_lose' || e.type === 'torneo_win' || e.type === 'torneo_lose')
+          && (e.playerName === a.name || e.playerName === b.name)) t += 2;
+      }
+      return t + Math.random() * 3; // pizca de azar para que no sea siempre igual
+    };
+
+    let p1 = players[0], p2 = players[1], bestT = -1;
+    for (let i = 0; i < players.length; i++) {
+      for (let j = i + 1; j < players.length; j++) {
+        const t = tension(players[i], players[j]);
+        if (t > bestT) { bestT = t; p1 = players[i]; p2 = players[j]; }
+      }
+    }
     if (!p1 || !p2 || p1.id === p2.id) return null;
 
     const reto = pool[Math.floor(Math.random() * pool.length)];
