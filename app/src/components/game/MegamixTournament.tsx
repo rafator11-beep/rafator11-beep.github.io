@@ -3,6 +3,21 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Award, Calendar, Users, Layers, List, Play, X, Star } from 'lucide-react';
 import { Player } from '@/types/game';
 import { torneoRetos } from '@/data/gameContent';
+import { duelosV5 } from '@/data/updatePostVerano2026';
+import { moreTorneoRetos } from '@/data/extraContentIndex';
+
+// Pool ampliado de retos de duelo, sin repeticiones dentro de la sesión.
+const DUEL_POOL: string[] = Array.from(new Set([...torneoRetos, ...duelosV5, ...moreTorneoRetos]))
+  .map(s => s.trim())
+  .filter(Boolean);
+
+const SEEN_KEY = 'beep_duel_retos_seen';
+function loadSeen(): Set<string> {
+  try { return new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || '[]')); } catch { return new Set(); }
+}
+function saveSeen(set: Set<string>) {
+  try { localStorage.setItem(SEEN_KEY, JSON.stringify([...set].slice(-400))); } catch { /* ignore */ }
+}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -38,11 +53,16 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 function pickReto(p1: Player, p2: Player): string {
-  const r = torneoRetos[Math.floor(Math.random() * torneoRetos.length)];
+  const seen = loadSeen();
+  let pool = DUEL_POOL.filter(r => !seen.has(r));
+  if (pool.length === 0) { seen.clear(); pool = DUEL_POOL; }
+  const r = pool[Math.floor(Math.random() * pool.length)] || DUEL_POOL[0] || 'DUELO: {player} vs {player2}. Pulso de miradas, el que parpadee bebe 2.';
+  seen.add(r);
+  saveSeen(seen);
   return r
-    .replace(/\{player\}/g, p1.name)
-    .replace(/\{player2\}/g, p2.name)
-    .replace(/vs \{player2\}:/g, `vs ${p2.name}:`);
+    .replace(/\{player2\}|\{jugador2\}|\{rival\}/gi, p2.name)
+    .replace(/\{player\}|\{jugador\}|\{nombre\}/gi, p1.name)
+    .replace(/vs \{player2\}:/gi, `vs ${p2.name}:`);
 }
 
 function buildRound(players: (Player | null)[], roundIdx: number): Match[] {
@@ -272,7 +292,15 @@ const DuelScreen = ({
   );
 };
 
-const ChampionScreen = ({ winner, onClose }: { winner: Player; onClose: () => void }) => {
+const ChampionScreen = ({
+  winner, onNewBracket, onFinish, standings, bracketNumber,
+}: {
+  winner: Player;
+  onNewBracket: () => void;
+  onFinish: () => void;
+  standings: { name: string; wins: number }[];
+  bracketNumber: number;
+}) => {
   // Sparkle stars array for visual excellence animation
   const sparkles = useMemo(() => Array.from({ length: 15 }, (_, i) => ({
     id: i,
@@ -331,13 +359,13 @@ const ChampionScreen = ({ winner, onClose }: { winner: Player; onClose: () => vo
       </motion.div>
 
       <div className="text-center z-10">
-        <motion.p 
+        <motion.p
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
           className="text-amber-400 font-black text-xs uppercase tracking-[0.4em] mb-2"
         >
-          🏆 Campeón del Torneo 🏆
+          🏆 Campeón de la llave {bracketNumber} 🏆
         </motion.p>
         <motion.p 
           initial={{ opacity: 0, y: 15 }}
@@ -349,23 +377,54 @@ const ChampionScreen = ({ winner, onClose }: { winner: Player; onClose: () => vo
         </motion.p>
       </div>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.4 }}
         className="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-center max-w-xs shadow-xl"
       >
         <p className="text-amber-400 font-bold text-xs uppercase tracking-wider mb-1">🎁 Recompensa Real</p>
-        <p className="text-white font-bold text-sm">Reparte 5 tragos a quien tú quieras en este grupo 👑</p>
+        <p className="text-white font-bold text-sm">{winner.name} reparte 5 tragos a quien quiera 👑</p>
       </motion.div>
 
-      <motion.button
-        whileTap={{ scale: 0.95 }}
-        onClick={onClose}
-        className="mt-6 px-10 py-4.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 border-2 border-amber-400 text-black font-black text-sm uppercase tracking-widest shadow-lg shadow-amber-500/20 active:scale-95 transition-all z-10"
-      >
-        Continuar partida →
-      </motion.button>
+      {/* Liga de duelos — clasificación continua entre llaves */}
+      {standings.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="bg-slate-900/70 border border-white/10 rounded-2xl px-5 py-4 w-full max-w-xs z-10"
+        >
+          <p className="text-white/40 font-black text-[10px] uppercase tracking-[0.25em] mb-2 text-center">Liga de duelos</p>
+          <div className="flex flex-col gap-1.5">
+            {standings.slice(0, 6).map((s, i) => (
+              <div key={s.name} className="flex items-center justify-between text-sm">
+                <span className="text-white/80 font-bold truncate">
+                  {['🥇', '🥈', '🥉'][i] ?? `${i + 1}.`} {s.name}
+                </span>
+                <span className="text-amber-400 font-black">{s.wins} {s.wins === 1 ? 'llave' : 'llaves'}</span>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      )}
+
+      <div className="mt-4 flex flex-col gap-3 w-full max-w-xs z-10">
+        <motion.button
+          whileTap={{ scale: 0.95 }}
+          onClick={onNewBracket}
+          className="px-10 py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 border-2 border-amber-400 text-black font-black text-sm uppercase tracking-widest shadow-lg shadow-amber-500/20 active:scale-95 transition-all"
+        >
+          🔁 Nueva llave (barajar cruces)
+        </motion.button>
+        <motion.button
+          whileTap={{ scale: 0.95 }}
+          onClick={onFinish}
+          className="px-10 py-3.5 rounded-2xl bg-white/5 border border-white/15 text-white/70 font-black text-xs uppercase tracking-widest active:scale-95 transition-all"
+        >
+          Terminar y seguir la partida →
+        </motion.button>
+      </div>
     </motion.div>
   );
 };
@@ -378,6 +437,10 @@ export function MegamixTournament({ players, onWinner, onClose, addScore }: Prop
   const [currentMatchIdx, setCurrentMatchIdx] = useState(0);
   const [showDuel, setShowDuel] = useState(false);
   const [champion, setChampion] = useState<Player | null>(null);
+  const [bracketNumber, setBracketNumber] = useState(1);
+  const [bracketWins, setBracketWins] = useState<Record<string, number>>(() => {
+    try { return JSON.parse(localStorage.getItem('beep_bracket_wins') || '{}'); } catch { return {}; }
+  });
   const [viewRound, setViewRound] = useState(0);
   const [viewTab, setViewTab] = useState<'bracket' | 'list' | 'history'>('bracket');
   
@@ -436,6 +499,11 @@ export function MegamixTournament({ players, onWinner, onClose, addScore }: Prop
           
           setChampion(winner);
           recordTournament(winner.name, runnerUp?.name || 'Subcampeón', players.length);
+          setBracketWins(prev => {
+            const upd = { ...prev, [winner.id]: (prev[winner.id] || 0) + 1 };
+            try { localStorage.setItem('beep_bracket_wins', JSON.stringify(upd)); } catch { /* ignore */ }
+            return upd;
+          });
           return next;
         }
         if (rIdx + 1 >= next.length) {
@@ -476,11 +544,42 @@ export function MegamixTournament({ players, onWinner, onClose, addScore }: Prop
     });
   }, [rounds, currentRoundIdx, currentMatchIdx, advanceWinner]);
 
+  const handleNewBracket = useCallback(() => {
+    const fresh = buildBracket(players);
+    setRounds(fresh);
+    setCurrentRoundIdx(0);
+    setCurrentMatchIdx(0);
+    setViewRound(0);
+    setViewTab('bracket');
+    setChampion(null);
+    setShowDuel(false);
+    setBracketNumber(n => n + 1);
+    setTimeout(() => {
+      const firstActive = fresh[0]?.findIndex(m => !m.winner && !m.isBye) ?? -1;
+      if (firstActive >= 0) {
+        setCurrentMatchIdx(firstActive);
+        setShowDuel(true);
+      }
+    }, 400);
+  }, [players]);
+
   const activeMatch = rounds[currentRoundIdx]?.[currentMatchIdx];
   const voters = players.filter(p => p.id !== activeMatch?.player1?.id && p.id !== activeMatch?.player2?.id);
 
   if (champion) {
-    return <ChampionScreen winner={champion} onClose={onClose} />;
+    const standings = Object.entries(bracketWins)
+      .map(([id, wins]) => ({ name: players.find(p => p.id === id)?.name ?? '¿?', wins: wins as number }))
+      .filter(s => s.wins > 0)
+      .sort((a, b) => b.wins - a.wins);
+    return (
+      <ChampionScreen
+        winner={champion}
+        standings={standings}
+        bracketNumber={bracketNumber}
+        onNewBracket={handleNewBracket}
+        onFinish={onClose}
+      />
+    );
   }
 
   return (
@@ -498,7 +597,7 @@ export function MegamixTournament({ players, onWinner, onClose, addScore }: Prop
               <Trophy className="w-5 h-5 text-amber-400 animate-pulse fill-current" />
               <p className="text-amber-400 font-black text-sm uppercase tracking-[0.2em] shadow-sm">Torneo Megamix</p>
             </div>
-            <p className="text-white/40 text-[10px] uppercase font-bold tracking-wider">{players.length} Jugadores · Eliminatoria Directa</p>
+            <p className="text-white/40 text-[10px] uppercase font-bold tracking-wider">Llave {bracketNumber} · {players.length} Jugadores · Eliminatoria Directa</p>
           </div>
           <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors">
             <X className="w-4 h-4 text-white/60" />

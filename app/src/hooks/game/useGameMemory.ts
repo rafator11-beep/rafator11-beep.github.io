@@ -76,12 +76,46 @@ async function callGenerateCard(
   }
 }
 
+// ─── Callback literal: cita algo que se respondió en una carta anterior ─────
+const CB_SHORT = (t: string) =>
+  t.replace(/^[^\wÁÉÍÓÚÑáéíóúñ]+/, '')
+    .replace(/^yo nunca\s+/i, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 55);
+
+export function formatCallback(events: GameEvent[] | undefined, excludePlayerId?: string): string {
+  if (!events || events.length < 3) return '';
+  // Eventos "jugosos" de hace al menos 2 turnos (no el inmediatamente anterior).
+  const juicy = events
+    .slice(0, -1)
+    .filter(e =>
+      ['yo_nunca_yes', 'reto_fail', 'reto_done', 'voted', 'verdad_told', 'duelo_lose', 'torneo_lose'].includes(e.type)
+      && e.playerId !== excludePlayerId
+      && e.cardText && e.cardText.length > 6
+    );
+  if (juicy.length === 0) return '';
+  const e = juicy[Math.floor(Math.random() * juicy.length)];
+  const card = CB_SHORT(e.cardText);
+  switch (e.type) {
+    case 'yo_nunca_yes':  return `🔁 Recordad que ${e.playerName} confesó que SÍ a «${card}»...`;
+    case 'reto_fail':     return `🔁 ${e.playerName} ya rajó en «${card}», a ver ahora.`;
+    case 'reto_done':     return `🔁 ${e.playerName} se atrevió con «${card}», que no se le suba.`;
+    case 'voted':         return `🔁 ${e.playerName} fue el más señalado en «${card}».`;
+    case 'verdad_told':   return `🔁 Con lo que soltó ${e.playerName} en «${card}»...`;
+    case 'duelo_lose':
+    case 'torneo_lose':   return `🔁 ${e.playerName} viene de perder el duelo «${card}».`;
+    default:              return '';
+  }
+}
+
 // ─── Enrich Challenge with AI (Salseo Middleware) ───────────────────────────
 export async function enrichChallengeWithAI(
   challengeText: string,
   currentPlayer: Player,
   allPlayers: Player[],
-  allStats: Record<string, PlayerStats>
+  allStats: Record<string, PlayerStats>,
+  events?: GameEvent[]
 ): Promise<string> {
   // Build concise stats summary for all players to provide complete group context
   const statsSummary = allPlayers.map(p => {
@@ -98,18 +132,20 @@ export async function enrichChallengeWithAI(
     return `${p.name}: ${parts.length > 0 ? parts.join(', ') : 'recién empezando'}`;
   }).join(' | ');
 
-  // 1. Intentar con Gemini Directo primero
+  // 1. Motor local (PartyDirector): rellena huecos + callback literal + salseo
   if (isGeminiConfigured()) {
     try {
+      const callback = formatCallback(events, currentPlayer.id);
       const enriched = await geminiEnrichChallenge(
-        challengeText, 
-        statsSummary, 
+        challengeText,
+        statsSummary,
         allPlayers.map(p => p.name),
-        currentPlayer.name
+        currentPlayer.name,
+        callback,
       );
       if (enriched) return enriched;
     } catch (e) {
-      console.warn("Gemini direct enrich failed, trying fallback:", e);
+      console.warn("Local enrich failed, trying fallback:", e);
     }
   }
 

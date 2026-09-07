@@ -164,6 +164,7 @@ export async function geminiEnrichChallenge(
   playerStats: string,
   playerNames: string[],
   activePlayerName: string,
+  callback?: string,
 ): Promise<string> {
   const theme = getPartyTheme();
   const cast = readCast(parseStatsSummary(playerStats));
@@ -171,8 +172,11 @@ export async function geminiEnrichChallenge(
 
   let out = fillSlots(challengeText, activePlayerName, playerNames || [], theme);
 
-  // Prefijo de salseo (~55 %) que relaciona la ronda con lo que ha pasado.
-  if (chance(0.55)) {
+  // Callback literal a algo que se respondió antes (~65 % si lo hay).
+  if (callback && chance(0.65)) {
+    out = `${callback} ${out}`;
+  } else if (chance(0.55)) {
+    // Si no, prefijo de salseo por estadísticas/rivalidades.
     const p = pique(cast, activePlayerName, others);
     if (p) out = p + out;
   }

@@ -75,19 +75,20 @@ No hay pantalla final de **resumen + clasificación** consistente en todos los m
 
 ---
 
-## 5. Roadmap — lo que falta (por prioridad)
+## 5. Roadmap
 
-### A. Bracket de duelos en Megamix  ⬅️ siguiente
-Torneo continuo tipo cuadro: se cruzan 2 jugadores, el ganador espera al ganador de otro cruce, y cuando acaba una llave empieza otra. Todos juegan siempre. Munición ya lista: `duelosV5`, `moreTorneoRetos`, `duelosV4`. Hay base en `useTorneoManager.ts` y `MegamixTournament.tsx` para partir de ahí.
+### A. Bracket de duelos en Megamix  ✅ HECHO
+`MegamixTournament.tsx` ahora es un **cuadro continuo**: al coronar campeón de una llave, botón **"🔁 Nueva llave"** que rebaraja los cruces y arranca otra eliminatoria; **"Terminar"** vuelve a la partida. Mantiene una **"Liga de duelos"** persistente (`beep_bracket_wins`) que se muestra en la pantalla de campeón. Retos de duelo desde pool ampliado (`torneoRetos` + `duelosV5` + `moreTorneoRetos`) **sin repetir** dentro de la sesión (`beep_duel_retos_seen`). Los duelos sueltos cada 10 turnos también tiran de ese pool.
 
-### B. Coherencia por respuesta (callbacks literales)
-Guardar qué respondió cada uno a cada carta y que rondas posteriores lo citen: _"antes {player} dijo que SÍ a 'yo nunca he vuelto con un ex'… pues eso"_. Requiere ampliar `useGameMemory` para almacenar respuestas por carta.
+### B. Coherencia por respuesta (callbacks literales)  ✅ HECHO
+`useGameMemory.formatCallback()` coge un evento jugoso de hace ≥2 turnos (yo-nunca=sí, reto fallado, más votado, verdad, duelo perdido) y lo cita textualmente. `enrichChallengeWithAI` lo pasa al PartyDirector, que lo antepone al reto (~65 %): _"🔁 Recordad que Ana confesó que SÍ a «he vuelto con un ex»..."_.
 
-### C. Sin repeticiones en pantalla + resumen final
-Auditar dónde se repiten cartas dentro de una misma partida y añadir pantalla de cierre unificada (resumen de la noche + clasificación con datos: tragos, retos, duelos, títulos) para todos los modos, no solo Podio.
+### C. Sin repeticiones + clasificación final  ✅ HECHO
+- El mazo ya no se repetía igual al agotarse: ahora se **re-baraja con otra semilla en cada vuelta** (`seededShuffle` por lap) en `useGameContent`.
+- **Podio** con **tabla de clasificación final** de todos los jugadores (puesto · XP · 🍺 tragos), además de los títulos que ya había.
 
 ### D. Ampliar Cultura / Fútbol / Speed
-Buen pool pero se repite en sesiones largas. Aplicar la misma rotación `beep_recent_cards`.
+Buen pool pero se repite en sesiones largas. Aplicar la misma rotación `beep_recent_cards` / `seededShuffle`.
 
 ### E. Segunda oleada de contenido
 Con la identidad de la tabla 2 fijada, escribir 500+ frases más por modo siguiendo la guía de tono.

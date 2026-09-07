@@ -68,6 +68,24 @@ function shuffleArray<T>(array: T[]): T[] {
     return shuffled;
 }
 
+// Barajado determinista por semilla (para re-barajar el mazo en cada "vuelta"
+// sin repetir el mismo orden exacto cuando se agota el contenido).
+function seededShuffle<T>(array: T[], seed: number): T[] {
+    let s = seed >>> 0;
+    const rand = () => {
+        s |= 0; s = (s + 0x6D2B79F5) | 0;
+        let t = Math.imul(s ^ (s >>> 15), 1 | s);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+    const a = [...array];
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(rand() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
 function normalizeDeckEntries(items: any[]): string[] {
     return items
         .map(item => typeof item === 'string' ? item : String(item ?? ''))
@@ -328,13 +346,15 @@ export const useGameContent = (mode: GameMode, currentIndex: number, currentPlay
         if (mode === 'trivia_futbol' || mode === 'cultura') {
             return currentQuestion?.question || 'Cargando pregunta...';
         }
-        const validContent = content.length > 0
-            ? content.find((item, idx) => 
-                idx >= (currentIndex % content.length) && 
-                typeof item === 'string' && 
-                item.trim().length > 0)
-              || content.find(item => typeof item === 'string' && item.trim().length > 0)
-            : undefined;
+        if (content.length === 0) return 'Siguiente carta';
+        // Al agotar el mazo se re-baraja con otra semilla en cada vuelta, para
+        // no repetir el mismo orden exacto (evita repeticiones en pantalla).
+        const lap = Math.floor(currentIndex / content.length);
+        const deck = lap === 0 ? content : seededShuffle(content, lap * 2654435761);
+        const pos = currentIndex % content.length;
+        const validContent =
+            deck.slice(pos).find(item => typeof item === 'string' && item.trim().length > 0)
+            || deck.find(item => typeof item === 'string' && item.trim().length > 0);
         return validContent?.replace(/{player}/g, currentPlayerName) || 'Siguiente carta';
     }, [content, currentIndex, currentPlayerName, mode, currentQuestion]);
 
@@ -342,7 +362,10 @@ export const useGameContent = (mode: GameMode, currentIndex: number, currentPlay
 
     const getNextPreview = () => {
         if (!content || content.length === 0) return "Cargando...";
-        const nextBase = content[(currentIndex + 1) % content.length];
+        const next = currentIndex + 1;
+        const lap = Math.floor(next / content.length);
+        const deck = lap === 0 ? content : seededShuffle(content, lap * 2654435761);
+        const nextBase = deck[next % content.length];
         return sanitizeCardText(nextBase).replace(/\{.*?\}/g, '___');
     };
 

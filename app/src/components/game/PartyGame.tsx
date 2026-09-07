@@ -29,6 +29,11 @@ import { GameMode } from '@/types/game';
 import { duelos } from '@/data/duelosContent';
 import { impostorRounds } from '@/data/impostorContent';
 import { isIndividualCard, torneoRetos } from '@/data/gameContent';
+import { duelosV5 } from '@/data/updatePostVerano2026';
+import { moreTorneoRetos } from '@/data/extraContentIndex';
+
+// Pool de retos de duelo ampliado (base + post-verano + contenido reconectado)
+const DUEL_POOL: string[] = Array.from(new Set([...torneoRetos, ...duelosV5, ...moreTorneoRetos]));
 import { YoNuncaResponse } from '@/components/game/YoNuncaResponse';
 import { RetoOutcome } from '@/components/game/RetoOutcome';
 import { useGameMemory, enrichChallengeWithAI } from '@/hooks/game/useGameMemory';
@@ -955,7 +960,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         if (!txt.startsWith('⚔️')) {
           setShowRetoOutcome(true);
         }
-        enrichChallengeWithAI(txt, currentPlayer, players, playerStats).then(enriched => {
+        enrichChallengeWithAI(txt, currentPlayer, players, playerStats, gameEvents).then(enriched => {
           if (enriched && enriched !== txt) setEnrichedCardText(enriched);
         });
         return;
@@ -1235,7 +1240,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         }
       } else if (triggerType === 'TORNEO') {
         if (players.length >= 2 && !showTorneoRound) {
-          buildTorneoMatch(gameEvents, torneoRetos, getMemorySummary()).then(match => {
+          buildTorneoMatch(gameEvents, DUEL_POOL, getMemorySummary()).then(match => {
             if (match) {
               setTorneoMatch(match);
               setShowTorneoRound(true);
@@ -1287,7 +1292,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
     // Auto-trigger torneo cada 10 turnos (offset de 5 para no coincidir con la carta IA)
     if (count % 10 === 5 && players.length >= 2 && !showTorneoRound) {
-      buildTorneoMatch(gameEvents, torneoRetos, getMemorySummary()).then(match => {
+      buildTorneoMatch(gameEvents, DUEL_POOL, getMemorySummary()).then(match => {
         if (match) {
           setTorneoMatch(match);
           setShowTorneoRound(true);

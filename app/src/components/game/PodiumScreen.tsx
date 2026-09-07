@@ -335,6 +335,30 @@ export const PodiumScreen = ({ players, onRestart, onHome, trackingData }: Podiu
               })}
             </div>
 
+            {/* Clasificación final — todos los jugadores con sus números */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.0 }}
+              className="w-full max-w-sm relative z-10 mb-3 rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden"
+            >
+              <div className="grid grid-cols-[1.6rem_1fr_2.4rem_2.4rem] gap-1 px-3 py-2 text-[9px] font-black uppercase tracking-wider text-white/40 border-b border-white/5">
+                <span>#</span><span>Jugador</span><span className="text-right">XP</span><span className="text-right">🍺</span>
+              </div>
+              {sortedPlayers.map((p, i) => {
+                const dc = trackingData?.drinkCounts || {};
+                const drinks = (dc as Record<string, number>)[p.id] ?? (dc as Record<string, number>)[p.name] ?? 0;
+                return (
+                  <div key={p.id} className={`grid grid-cols-[1.6rem_1fr_2.4rem_2.4rem] gap-1 px-3 py-1.5 text-xs items-center ${i === 0 ? 'bg-yellow-400/10' : ''}`}>
+                    <span className="font-black text-white/50">{['🥇', '🥈', '🥉'][i] ?? i + 1}</span>
+                    <span className="font-bold text-white truncate">{p.name}</span>
+                    <span className="text-right font-mono font-black text-cyan-300">{p.score}</span>
+                    <span className="text-right font-mono text-amber-300">{drinks}</span>
+                  </div>
+                );
+              })}
+            </motion.div>
+
             {/* Actions */}
             <motion.div initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 1.2 }} className="w-full max-w-sm flex flex-col gap-3 relative z-10 pb-4">
               {isGeminiConfigured() ? (
