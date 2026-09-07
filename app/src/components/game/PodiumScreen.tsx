@@ -158,7 +158,7 @@ export const PodiumScreen = ({ players, onRestart, onHome, trackingData }: Podiu
         players.map(p => ({ name: p.name, score: p.score })),
         trackingData
       ).then(res => {
-        setChronicle(res || "¡Vaya noche! Los datos son tan extremos que la IA se ha quedado sin palabras.");
+        setChronicle(res || "¡Vaya noche! Los datos son tan extremos que no hay palabras.");
         setLoadingChronicle(false);
       }).catch(() => {
         setChronicle("Error al conectar con el cronista del bar. ¡Sigue bebiendo!");

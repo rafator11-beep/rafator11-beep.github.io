@@ -9,9 +9,9 @@ const updates = [
   {
     icon: <Brain className="w-5 h-5 text-violet-400" />,
     color: 'from-violet-950/60 to-slate-950/60 border-violet-500/30',
-    label: 'INTELIGENCIA ARTIFICIAL',
-    title: 'IA Gemini activa 🤖',
-    desc: 'Cartas personalizadas con vuestros nombres, piques del historial de partida y referencias a tendencias 2025: Bizarrap, Bad Bunny, memes TikTok, series virales...',
+    label: 'MOTOR DE SALSEO',
+    title: 'El gran engranaje ⚙️',
+    desc: 'Cartas personalizadas con vuestros nombres, piques del historial de partida, callbacks a lo que respondisteis, la norma activa y la liga de duelos. Todo conectado, 100% offline.',
   },
   {
     icon: <Layers className="w-5 h-5 text-cyan-400" />,
@@ -52,8 +52,8 @@ const updates = [
     icon: <Star className="w-5 h-5 text-pink-400" />,
     color: 'from-pink-950/60 to-slate-950/60 border-pink-500/30',
     label: 'IMPOSTOR',
-    title: 'Impostor con IA 🕵️',
-    desc: 'La ronda del Impostor ahora puede ser generada por la IA con categorías y palabras únicas. El impostor que se escapa gana 60 XP.',
+    title: 'Ronda del Impostor 🕵️',
+    desc: 'Categorías y palabras del banco del juego, con pista para la mesa. El impostor que se escapa gana 60 XP.',
   },
 ];
 
@@ -99,10 +99,10 @@ export function WhatsNewModal() {
               </button>
               <div className="flex items-center gap-2 mb-1">
                 <Sparkles className="w-5 h-5 text-violet-400" />
-                <span className="text-[10px] font-black text-violet-400 uppercase tracking-[0.3em]">BEEP v{CURRENT_VERSION} · IA EDITION</span>
+                <span className="text-[10px] font-black text-violet-400 uppercase tracking-[0.3em]">BEEP v{CURRENT_VERSION} · POST-VERANO 2026</span>
               </div>
               <h2 className="text-2xl font-black text-white tracking-tight">¿Qué hay de nuevo?</h2>
-              <p className="text-white/40 text-xs mt-0.5">Actualización mayor — IA, 1.300+ cartas y más</p>
+              <p className="text-white/40 text-xs mt-0.5">Motor de salseo local, miles de cartas nuevas, bracket continuo</p>
             </div>
 
             {/* Updates list */}
@@ -133,7 +133,7 @@ export function WhatsNewModal() {
                 onClick={handleClose}
                 className="w-full py-4 rounded-2xl bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-400 hover:to-purple-500 active:scale-[0.98] text-white font-black text-base uppercase tracking-widest transition-all shadow-lg shadow-violet-900/40"
               >
-                ¡A jugar! 🤖🎉
+                ¡A jugar! 🎉
               </button>
             </div>
           </motion.div>

@@ -264,7 +264,7 @@ export default function CultureGame() {
         <Loader2 className="w-12 h-12 text-pink-500 animate-spin mb-4" />
         <h2 className="text-2xl font-black uppercase tracking-widest text-pink-400">Compilando Secretos... 🤫</h2>
         <p className="text-xs text-white/50 uppercase tracking-widest mt-2 max-w-xs leading-relaxed">
-          Gemini está leyendo las confesiones anónimas y preparando el Quiz de Chismes personalizado para el grupo.
+          BEEP está preparando el Quiz de Chismes con las confesiones anónimas del grupo.
         </p>
       </div>
     );

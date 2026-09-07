@@ -443,7 +443,7 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
             )}
           </motion.div>
 
-          {/* Columna derecha: Configuración de IA y Lobby */}
+          {/* Columna derecha: Tema, confesiones y Lobby */}
           <div className="space-y-4 md:space-y-6">
             {isGeminiConfigured() && (
               <motion.div
@@ -454,7 +454,7 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
                 <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/5 rounded-full blur-2xl pointer-events-none" />
                 <div className="flex items-center gap-2 mb-3">
                   <Sparkles className="h-4.5 w-4.5 text-cyan-400 animate-pulse" />
-                  <h3 className="text-sm font-black uppercase tracking-wider text-white">Tema de la Fiesta (IA)</h3>
+                  <h3 className="text-sm font-black uppercase tracking-wider text-white">Tema de la Fiesta</h3>
                 </div>
                 <p className="text-[11px] text-muted-foreground text-left mb-3">
                   Escribe un tema (ej: "Boda de Rafa", "Cumpleaños", "Cotilleos de oficina") y BEEP mezclará los retos usando ese tema.
@@ -477,7 +477,7 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
                 <div className="absolute top-0 right-0 w-24 h-24 bg-pink-500/5 rounded-full blur-2xl pointer-events-none" />
                 <div className="flex items-center gap-2 mb-2">
                   <Sparkles className="h-4.5 w-4.5 text-pink-400 animate-pulse" />
-                  <h3 className="text-sm font-black uppercase tracking-wider text-white">Confesiones Anónimas (IA)</h3>
+                  <h3 className="text-sm font-black uppercase tracking-wider text-white">Confesiones Anónimas</h3>
                 </div>
                 <p className="text-[11px] text-muted-foreground text-left mb-3">
                   Escribe un chisme o secreto de cada jugador. En el modo Cultura General, BEEP creará un Quiz de Chismes para adivinar de quién es cada uno 🤫
