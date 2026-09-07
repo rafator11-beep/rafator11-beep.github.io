@@ -64,6 +64,11 @@ import {
     yoNuncaV5c, picanteV5c, votacionV5c, retosV5c, cadenaV5c, enLaCamaV5c,
 } from '@/data/updatePostVerano2026_v3';
 import {
+    genYoNunca, genCadena, genCategorias, genCulturaChupistica, genDiezSegundos,
+    genVotacion, genManosArriba, genTodosALaVez, genRanking, genEnLaCama,
+    genRetos, genVerdadOBebe, genEscena, genMovil, genDosVerdades,
+} from '@/data/generatedParty';
+import {
     moreYoNunca, morePicante, moreVotacion, moreClasico, moreEspana,
     moreEnLaCama, moreNormas, moreMimica, moreSalseo, moreTorneoRetos,
 } from '@/data/extraContentIndex';
@@ -195,6 +200,13 @@ export const useGameContent = (mode: GameMode, currentIndex: number, currentPlay
                     ...retosV5c,
                     ...cadenaV5c,
                     ...enLaCamaV5c.map(q => `🛌 ${q}`),
+                    // OLEADA 4 — cartas generadas por plantilla (miles)
+                    ...genYoNunca.map(q => `🙈 ${q}`),
+                    ...genCadena, ...genCategorias,
+                    ...genCulturaChupistica, ...genDiezSegundos,
+                    ...genVotacion, ...genManosArriba, ...genTodosALaVez, ...genRanking,
+                    ...genEnLaCama, ...genRetos, ...genVerdadOBebe,
+                    ...genEscena, ...genMovil, ...genDosVerdades,
                     ...clasicoV5, ...clasicoV5b,
                     ...moreClasico,
                     ...[...enLaCamaV5, ...enLaCamaV5b].map(q => `🛌 ${q}`),
@@ -255,6 +267,7 @@ export const useGameContent = (mode: GameMode, currentIndex: number, currentPlay
                     ...moreClasico,
                     ...retosV5, ...retosV5b, ...retosV5c, ...cadenaV5c,
                     ...diezSegundosV5, ...dosVerdadesV5,
+                    ...genCadena, ...genCategorias, ...genCulturaChupistica, ...genDiezSegundos, ...genRetos,
                     ...[...normasV5, ...normasV5b].map(q => `NORMA: ${q.replace(/^NORMA:\s*/i, '')}`),
                     ...moreNormas.map(q => `NORMA: ${q.replace(/^NORMA:\s*/i, '')}`),
                     ...[...enLaCamaV5, ...enLaCamaV5b].map(q => `🛌 ${q}`),
@@ -263,7 +276,7 @@ export const useGameContent = (mode: GameMode, currentIndex: number, currentPlay
                 break;
             case 'yo_nunca':
             case 'yo_nunca_equipos':
-                modeContent = shuffleArray([...yoNunca, ...yoNuncaExtra, ...yoNuncaExtra2, ...yoNuncaExtra3, ...yoNuncaV4, ...yoNuncaV5, ...yoNuncaV5b, ...yoNuncaV5c, ...moreYoNunca]);
+                modeContent = shuffleArray([...yoNunca, ...yoNuncaExtra, ...yoNuncaExtra2, ...yoNuncaExtra3, ...yoNuncaV4, ...yoNuncaV5, ...yoNuncaV5b, ...yoNuncaV5c, ...moreYoNunca, ...genYoNunca]);
                 break;
             case 'picante':
                 modeContent = shuffleArray([...picante, ...picanteExtra, ...picanteExtra2, ...picanteExtra3, ...picanteV4, ...picanteV5, ...picanteV5b, ...picanteV5c, ...morePicante]);
@@ -272,7 +285,7 @@ export const useGameContent = (mode: GameMode, currentIndex: number, currentPlay
                 modeContent = shuffleArray([...nostalgia, ...pacoversExtra, ...pacoversExtra2, ...espanaExtra3, ...espanaV5, ...espanaV5b, ...moreEspana]);
                 break;
             case 'votacion':
-                modeContent = shuffleArray([...quienEsMasProbable, ...masProbableExtra, ...quienEsMasProbableExtra2, ...masProbableExtra3, ...votacionV4, ...votacionV5, ...votacionV5b, ...votacionV5c, ...moreVotacion, ...manosArribaV5, ...elRankingV5]);
+                modeContent = shuffleArray([...quienEsMasProbable, ...masProbableExtra, ...quienEsMasProbableExtra2, ...masProbableExtra3, ...votacionV4, ...votacionV5, ...votacionV5b, ...votacionV5c, ...moreVotacion, ...manosArribaV5, ...elRankingV5, ...genVotacion, ...genManosArriba, ...genTodosALaVez, ...genRanking]);
                 break;
             case 'pacovers':
                 modeContent = shuffleArray([...pacovers, ...pacoversExtra, ...pacoversExtra2, ...pacoversExtra3, ...espanaV5, ...espanaV5b, ...moreEspana]);
