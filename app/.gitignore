@@ -17,3 +17,6 @@ dist-ssr
 .DS_Store
 *.zip
 codebase_for_claude.txt
+
+# El build va a ../docs (raíz del repo), no aquí
+docs/

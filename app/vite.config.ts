@@ -9,7 +9,10 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const OUT_DIR = "docs"; // GitHub Pages serves this repo from main → /docs
+// OJO: el repo real es la carpeta PADRE (beep/). El código fuente vive en
+// beep/app/ y GitHub Pages publica SOLO beep/docs/ (rama main, carpeta /docs).
+// Por eso el build tiene que escribir en ../docs, no en app/docs.
+const OUT_DIR = path.resolve(__dirname, "../docs");
 
 /**
  * GitHub Pages is static + has no SPA rewrite. Serve a copy of index.html as
@@ -21,7 +24,7 @@ function githubPagesSpaFallback(): Plugin {
     name: "github-pages-spa-fallback",
     apply: "build",
     closeBundle() {
-      const dir = path.resolve(__dirname, OUT_DIR);
+      const dir = OUT_DIR;
       const indexHtml = path.join(dir, "index.html");
       if (fs.existsSync(indexHtml)) {
         fs.copyFileSync(indexHtml, path.join(dir, "404.html"));

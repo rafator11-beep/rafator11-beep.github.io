@@ -6,30 +6,26 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="theme-color" content="#0a0a0a" />
-    <link rel="icon" type="image/x-icon" href="./assets/favicon-dd821076.ico" />
-    <link rel="manifest" href="./manifest.json" />
-    <meta name="description" content="BEEP - El mejor juego de fiesta para jugar con amigos." />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
     <title>BEEP</title>
-    <meta name="description" content="Lovable Generated Project" />
-    <meta name="author" content="Lovable" />
+    <meta name="description" content="BEEP – El mejor juego de fiesta para jugar con amigos." />
 
     <!-- Social Metadata -->
-    <meta property="og:title" content="Lovable App" />
-    <meta property="og:description" content="Lovable Generated Project" />
+    <meta property="og:title" content="BEEP – Juego de Fiesta" />
+    <meta property="og:description" content="El mejor juego de fiesta para jugar con amigos." />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta property="og:image" content="/beep-icon.svg" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@Lovable" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
-    <script type="module" crossorigin src="./assets/index-2de07995.js"></script>
-    <link rel="modulepreload" crossorigin href="./assets/react-vendor-09673b0a.js">
-    <link rel="modulepreload" crossorigin href="./assets/ui-vendor-fb99d703.js">
-    <link rel="stylesheet" href="./assets/index-7f08c87b.css">
-  <link rel="manifest" href="./manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="./registerSW.js"></script></head>
+    <meta name="twitter:image" content="/beep-icon.svg" />
+    <script type="module" crossorigin src="/assets/index-f0db21e7.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/react-vendor-42938d74.js">
+    <link rel="modulepreload" crossorigin href="/assets/ui-vendor-f5cd3051.js">
+    <link rel="stylesheet" href="/assets/index-55a18413.css">
+  <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
 
   <body>
     <!-- PWA Native Splash Screen -->
@@ -48,12 +44,6 @@
     
     <div id="root"></div>
     
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').catch(() => {});
-        });
-      }
-    </script>
+    <!-- Service worker registration is injected by vite-plugin-pwa (injectRegister: 'auto') -->
   </body>
 </html>
