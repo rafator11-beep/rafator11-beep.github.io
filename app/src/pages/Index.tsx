@@ -18,7 +18,6 @@ import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { AuthOverlay } from '@/components/auth/AuthOverlay';
 import { GlobalPresence } from '@/components/auth/GlobalPresence';
-import { WelcomeScreen } from '@/components/auth/WelcomeScreen';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { ChatComponent } from '@/components/multiplayer/ChatComponent';
 import { DailyVideoProvider } from '@/components/multiplayer/DailyVideoProvider';
@@ -687,13 +686,10 @@ function GameAppInner() {
     }
   };
 
-  const { isAuthOverlayOpen } = useAuth();
-
   return (
     <>
       <SplashScreen onComplete={() => setShowSplash(false)} />
       <WhatsNewModal />
-      {isAuthOverlayOpen && <WelcomeScreen />}
       <AuthOverlay />
       <GlobalPresence />
       {getScreenContent()}

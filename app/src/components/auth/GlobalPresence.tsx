@@ -227,7 +227,7 @@ export function GlobalPresence() {
                                         }}
                                         className="w-full mt-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-bold text-sm"
                                     >
-                                        Crear Cuenta para Guardar Progreso
+                                        Crear cuenta y guardar mi progreso
                                     </Button>
                                 )}
                             </div>

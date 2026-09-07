@@ -219,10 +219,10 @@ export function GuestSetup({ onJoin, onBack }: GuestSetupProps) {
               
               {!user ? (
                 <div className="mt-6 rounded-[24px] border border-[hsl(var(--primary)/0.3)] bg-[hsl(var(--primary)/0.05)] p-4 text-center">
-                  <p className="text-sm font-semibold text-white mb-2">¿Juegas habitualmente?</p>
+                  <p className="text-sm font-semibold text-white mb-2">¿Vas a repetir? Guarda tu progreso</p>
                   <Button onClick={() => setAuthOverlayOpen(true)} className="w-full bg-[linear-gradient(135deg,hsl(var(--primary)),hsl(var(--accent)))] text-white font-bold rounded-xl h-11 border-none hover:opacity-90 transition-opacity shadow-lg">
                     <Sparkles className="w-4 h-4 mr-2" />
-                    Crear Cuenta Definitiva
+                    Crear mi cuenta
                   </Button>
                 </div>
               ) : (
