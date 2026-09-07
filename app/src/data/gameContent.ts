@@ -6612,12 +6612,16 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     ' 🍻 El que NO haya participado, bebe 2.',
   ];
 
+  // Consecuencias DIRIGIDAS y rápidas: nada de menús de "elige a quién",
+  // que se pierde tiempo. El objetivo es que la mesa reaccione al instante.
   const tragosReparte = [
-    ' 👑 Si aciertas, reparte 2 tragos.',
-    ' 👑 Si ganas, elige a alguien que beba 3.',
-    ' 👑 ¡Victoria! Reparte 2 tragos a quien quieras.',
-    ' 👑 Ganador reparte 1 trago a cada uno.',
-    ' 👑 Si lo haces bien, el de tu derecha bebe 2.',
+    ' 👉 El de tu izquierda bebe 2.',
+    ' 👉 El último en tocarse la nariz bebe 2.',
+    ' 👉 El que menos haya bebido esta ronda, bebe 2.',
+    ' 👉 El que hable primero después de esto, bebe 2.',
+    ' 👉 Señala a alguien YA (menos de 2s) y bebe. Si dudas, bebes tú.',
+    ' 👉 Bebéis tú y el de tu derecha, sin discutir.',
+    ' 👉 El más callado de la mesa bebe 2.',
   ];
 
   function addDrinking(card: string, intensity: 'leve' | 'medio' | 'fuerte' | 'grupo' | 'reparte'): string {
@@ -6866,31 +6870,31 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
 
   // ── TRIVIA EXPRESS — pregunta directa, sin overlay ──────────────────────────
   const triviaExpressCards: string[] = shuffleArray([
-    "⚡ TRIVIA EXPRESS: ¿Cuántos países tiene la Unión Europea? (27) — El que falle bebe 2. El que acierte reparte 2. 🍻",
-    "⚡ TRIVIA EXPRESS: ¿En qué año cayó el Muro de Berlín? (1989) — El que falle bebe 2. El que acierte reparte 2. 🍻",
-    "⚡ TRIVIA EXPRESS: ¿Cuál es el río más largo del mundo? (Nilo o Amazonas) — El que falle bebe 2. El que acierte reparte 2. 🍻",
-    "⚡ TRIVIA EXPRESS: ¿Cuántos jugadores tiene un equipo de fútbol? (11) — El que falle bebe 3. El que acierte reparte 3. 🍻",
-    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Australia? (Canberra) — El que falle bebe 2. El que acierte reparte 2. 🍻",
-    "⚡ TRIVIA EXPRESS: ¿Cuántos huesos tiene el cuerpo humano adulto? (206) — El que falle bebe 2. El que acierte reparte 2. 🍻",
-    "⚡ TRIVIA EXPRESS: ¿En qué año llegó el hombre a la Luna? (1969) — El que falle bebe 2. El que acierte reparte 2. 🍻",
-    "⚡ TRIVIA EXPRESS: ¿Cuál es el país más grande del mundo? (Rusia) — El que falle bebe 1. El que acierte reparte 2. 🍻",
-    "⚡ TRIVIA EXPRESS: ¿Cuántos colores tiene el arcoíris? (7) — El que falle bebe 2. El que acierte reparte 2. 🍻",
-    "⚡ TRIVIA EXPRESS: ¿Cuál es el planeta más cercano al Sol? (Mercurio) — El que falle bebe 2. El que acierte reparte 2. 🍻",
-    "⚡ TRIVIA EXPRESS: ¿Cuántos gramos tiene un kilogramo? (1000) — El que falle bebe 3. El que acierte reparte 3. 🍻",
-    "⚡ TRIVIA EXPRESS: ¿Cuál es el animal terrestre más rápido? (Guepardo) — El que falle bebe 2. El que acierte reparte 2. 🍻",
-    "⚡ TRIVIA EXPRESS: ¿En qué continente está Egipto? (África) — El que falle bebe 2. El que acierte reparte 2. 🍻",
-    "⚡ TRIVIA EXPRESS: ¿Cuántos lados tiene un hexágono? (6) — El que falle bebe 2. El que acierte reparte 2. 🍻",
-    "⚡ TRIVIA EXPRESS: ¿Cuál es la moneda de Japón? (Yen) — El que falle bebe 2. El que acierte reparte 2. 🍻",
-    "⚡ TRIVIA EXPRESS: ¿Cuántos minutos tiene una hora? (60) — El que falle bebe 4. El que acierte reparte 4. 🥃",
-    "⚡ TRIVIA EXPRESS: ¿Cuál es el océano más grande? (Pacífico) — El que falle bebe 2. El que acierte reparte 2. 🍻",
-    "⚡ TRIVIA EXPRESS: ¿En qué año se fundó WhatsApp? (2009) — El que falle bebe 2. El que acierte reparte 2. 🍻",
-    "⚡ TRIVIA EXPRESS: ¿Cuántos jugadores hay en un equipo de baloncesto? (5) — El que falle bebe 2. El que acierte reparte 2. 🍻",
-    "⚡ TRIVIA EXPRESS: ¿Cuál es el idioma más hablado del mundo? (Mandarín) — El que falle bebe 2. El que acierte reparte 2. 🍻",
-    "⚡ TRIVIA EXPRESS: ¿Cuántos segundos tiene un minuto? (60) — El que falle bebe 4. El que acierte reparte 4. 🥃",
-    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Canadá? (Ottawa) — El que falle bebe 2. El que acierte reparte 2. 🍻",
-    "⚡ TRIVIA EXPRESS: ¿Cuántos planetas tiene el sistema solar? (8) — El que falle bebe 2. El que acierte reparte 2. 🍻",
-    "⚡ TRIVIA EXPRESS: ¿Cuál es el metal más caro del mundo? (Rodio) — El que falle bebe 2. El que acierte reparte 2. 🍻",
-    "⚡ TRIVIA EXPRESS: ¿En qué año se inventó el iPhone? (2007) — El que falle bebe 2. El que acierte reparte 2. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos países tiene la Unión Europea? (27) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿En qué año cayó el Muro de Berlín? (1989) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el río más largo del mundo? (Nilo o Amazonas) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos jugadores tiene un equipo de fútbol? (11) — Falla y bebes 3, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Australia? (Canberra) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos huesos tiene el cuerpo humano adulto? (206) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿En qué año llegó el hombre a la Luna? (1969) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el país más grande del mundo? (Rusia) — Falla y bebes 1, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos colores tiene el arcoíris? (7) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el planeta más cercano al Sol? (Mercurio) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos gramos tiene un kilogramo? (1000) — Falla y bebes 3, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el animal terrestre más rápido? (Guepardo) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿En qué continente está Egipto? (África) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos lados tiene un hexágono? (6) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la moneda de Japón? (Yen) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos minutos tiene una hora? (60) — Falla y bebes 4, aciertas y te salvas. 🥃",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el océano más grande? (Pacífico) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿En qué año se fundó WhatsApp? (2009) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos jugadores hay en un equipo de baloncesto? (5) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el idioma más hablado del mundo? (Mandarín) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos segundos tiene un minuto? (60) — Falla y bebes 4, aciertas y te salvas. 🥃",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Canadá? (Ottawa) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos planetas tiene el sistema solar? (8) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el metal más caro del mundo? (Rodio) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿En qué año se inventó el iPhone? (2007) — Falla y bebes 2, aciertas y te salvas. 🍻",
   ]);
 
   const grupalCards: string[] = shuffleArray([
