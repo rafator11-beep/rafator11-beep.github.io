@@ -2775,8 +2775,17 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         {/* Virus Flash */}
         <VirusFlash show={virusFlash} />
 
-        {/* VIRUS ALERT — sheet compacto desde abajo */}
+        {/* VIRUS ALERT — sheet compacto desde abajo, con fondo que tapa el resto */}
         <AnimatePresence>
+          {gameState.showVirusAlert && gameState.virusAlertData && !gameState.showCaptainSelection && (
+            <motion.div
+              key="virus-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[245] bg-slate-950/88 backdrop-blur-md"
+            />
+          )}
           {gameState.showVirusAlert && gameState.virusAlertData && !gameState.showCaptainSelection && (
             <motion.div
               key="virus-banner"
@@ -2784,7 +2793,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: '100%' }}
               transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-              className="fixed bottom-0 left-0 right-0 z-[200] px-4 pb-6 pt-2"
+              className="fixed inset-x-0 bottom-0 z-[250] px-4 pb-6 pt-2 flex justify-center"
               style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}
             >
               <div className="w-full max-w-sm mx-auto bg-gradient-to-b from-green-950/98 to-slate-950/98 border-2 border-green-400/50 rounded-[2rem] p-5 shadow-[0_-8px_40px_rgba(34,197,94,0.25)] flex flex-col items-center gap-4">
@@ -2964,9 +2973,9 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         )}
       </AnimatePresence>
 
-      {/* ── RETO OUTCOME OVERLAY ── */}
+      {/* ── RETO OUTCOME OVERLAY ── (no mientras hay virus/torneo/impostor) */}
       <AnimatePresence>
-        {showRetoOutcome && currentPlayer && (
+        {showRetoOutcome && currentPlayer && !gameState.showVirusAlert && !showTorneoRound && !gameState.showImpostor && (
           <RetoOutcome
             player={currentPlayer}
             onResult={handleRetoOutcome}
