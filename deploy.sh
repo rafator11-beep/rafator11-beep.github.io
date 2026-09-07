@@ -1,30 +1,25 @@
 #!/bin/bash
-# DEPLOY SCRIPT - GitHub Pages sirve desde /docs en rama main
-# Usar siempre este script para publicar cambios
-
+# DEPLOY — GitHub Pages sirve beep/docs/ (rama main, carpeta /docs).
+# El código fuente está en beep/app/. vite.config compila DIRECTO a ../docs,
+# así que este script solo construye, commitea y sube.
 set -e
 
-echo ">> Instalando dependencias..."
-cd app
-npm ci
-
-echo ">> Building app..."
+cd "$(dirname "$0")/app"
+echo ">> Build..."
 npm run build
 
-if [ ! -d "dist" ] || [ -z "$(ls -A dist)" ]; then
-  echo "ERROR: dist/ vacío o no existe. Build fallido."
+cd ..
+if [ ! -f docs/index.html ]; then
+  echo "ERROR: docs/index.html no existe. Build fallido."
   exit 1
 fi
 
-echo ">> Syncing to /docs..."
-cd ..
-rm -rf docs/*
-cp -r app/dist/* docs/
-
-echo ">> Committing..."
+echo ">> Commit + push..."
 git add docs/
-git diff --cached --quiet && echo "Sin cambios en docs/ — nada que commitear." && exit 0
-git commit -m "deploy: rebuild + sync to /docs [$(date '+%Y-%m-%d %H:%M')]"
+if git diff --cached --quiet; then
+  echo "Sin cambios en docs/ — nada que subir."
+  exit 0
+fi
+git commit -m "deploy: rebuild [$(date '+%Y-%m-%d %H:%M')]"
 git push origin main
-
-echo ">> Done. GitHub Pages updated."
+echo ">> Listo. GitHub Pages se actualiza en 1-2 min."
