@@ -1,16 +1,39 @@
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 import path from "path";
+import fs from "fs";
 import { fileURLToPath } from "url";
 // Removed viteSingleFile to allow correct code splitting
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const OUT_DIR = "docs"; // GitHub Pages serves this repo from main → /docs
+
+/**
+ * GitHub Pages is static + has no SPA rewrite. Serve a copy of index.html as
+ * 404.html so deep links / refreshes on client routes still boot the app,
+ * and drop a .nojekyll so Pages doesn't strip build files.
+ */
+function githubPagesSpaFallback(): Plugin {
+  return {
+    name: "github-pages-spa-fallback",
+    apply: "build",
+    closeBundle() {
+      const dir = path.resolve(__dirname, OUT_DIR);
+      const indexHtml = path.join(dir, "index.html");
+      if (fs.existsSync(indexHtml)) {
+        fs.copyFileSync(indexHtml, path.join(dir, "404.html"));
+      }
+      fs.writeFileSync(path.join(dir, ".nojekyll"), "");
+    },
+  };
+}
+
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: "",
+  base: "/",
   server: {
     host: "::",
     port: 8080,
@@ -47,11 +70,12 @@ export default defineConfig({
         start_url: '/',
         icons: [
           { src: 'favicon.ico', sizes: '48x48', type: 'image/x-icon' },
-          { src: 'favicon.ico', sizes: '192x192', type: 'image/x-icon', purpose: 'maskable' },
-          { src: 'favicon.ico', sizes: '512x512', type: 'image/x-icon', purpose: 'maskable' },
+          { src: 'beep-icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
+          { src: 'beep-icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'maskable' },
         ],
       },
     }),
+    githubPagesSpaFallback(),
   ],
   resolve: {
     alias: {
@@ -59,6 +83,8 @@ export default defineConfig({
     },
   },
   build: {
+    outDir: OUT_DIR,
+    emptyOutDir: true,
     chunkSizeWarningLimit: 2000,
     assetsInlineLimit: 4096, // Keep small assets inline, externalize large ones
     rollupOptions: {

@@ -747,7 +747,7 @@ export function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }: Me
           try {
             const standingsSummary = sortedPlayers.map(p => `${p.name}: Casilla ${p.position}, ${p.score} XP`).join('\n');
             const enriched = await geminiEnrichChallenge(text, standingsSummary, sortedPlayers.map(p => p.name), currentPlayer.name);
-            if (enriched) text = `🤖 IA EVENTO:\n${enriched}`;
+            if (enriched) text = `🎲 EVENTO:\n${enriched}`;
           } catch (e) {
             console.warn("Gemini enrich failed for board challenge:", e);
           }
@@ -785,7 +785,7 @@ export function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }: Me
           try {
             const standingsSummary = sortedPlayers.map(p => `${p.name}: Casilla ${p.position}, ${p.score} XP`).join('\n');
             const enriched = await geminiEnrichChallenge(text, standingsSummary, sortedPlayers.map(p => p.name), currentPlayer.name);
-            if (enriched) text = `🤖 IA DUELO:\n${enriched}`;
+            if (enriched) text = `🎲 DUELO:\n${enriched}`;
           } catch (e) {
             console.warn("Gemini enrich failed for board duel:", e);
           }

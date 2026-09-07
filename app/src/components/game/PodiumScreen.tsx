@@ -351,7 +351,7 @@ export const PodiumScreen = ({ players, onRestart, onHome, trackingData }: Podiu
                     className="flex-1 h-14 flex items-center justify-center gap-1.5 rounded-2xl bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-600 text-white font-black text-xs tracking-wider shadow-[0_4px_20px_rgba(6,182,212,0.3)] active:scale-95 transition-transform"
                   >
                     <Sparkles className="w-4 h-4 text-cyan-200 animate-pulse" />
-                    CRÓNICA IA
+                    CRÓNICA
                   </button>
                 </div>
               ) : (
@@ -483,7 +483,7 @@ export const PodiumScreen = ({ players, onRestart, onHome, trackingData }: Podiu
               </button>
               <div>
                 <p className="text-white/40 font-mono text-[10px] uppercase tracking-widest">Post-Game</p>
-                <h2 className="text-white font-black text-lg leading-none">CRÓNICA IA</h2>
+                <h2 className="text-white font-black text-lg leading-none">CRÓNICA</h2>
               </div>
               <Sparkles className="ml-auto w-5 h-5 text-cyan-400" />
             </div>

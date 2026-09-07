@@ -1,0 +1,13 @@
+# Source: normalize to LF in the repo
+*.ts   text eol=lf
+*.tsx  text eol=lf
+*.js   text eol=lf
+*.jsx  text eol=lf
+*.json text eol=lf
+*.css  text eol=lf
+*.md   text eol=lf
+*.html text eol=lf
+
+# Built site committed for GitHub Pages — don't touch line endings, don't diff
+docs/**            -text -diff linguist-generated
+package-lock.json  -diff linguist-generated

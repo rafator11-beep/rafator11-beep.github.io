@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Trophy, AlertCircle, Video, VideoOff, Copy, Crown, Plus, Minus, EyeOff, Cast, TrendingUp, Music } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { isGeminiConfigured, geminiGenerateImpostorRound } from '@/services/geminiClient';
 import { toast } from 'sonner';
 import {
   Dialog,

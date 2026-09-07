@@ -457,7 +457,7 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
                   <h3 className="text-sm font-black uppercase tracking-wider text-white">Tema de la Fiesta (IA)</h3>
                 </div>
                 <p className="text-[11px] text-muted-foreground text-left mb-3">
-                  Escribe un tema (ej: "Boda de Rafa", "Cumpleaños", "Cotilleos de oficina") y Gemini adaptará los retos de salseo.
+                  Escribe un tema (ej: "Boda de Rafa", "Cumpleaños", "Cotilleos de oficina") y BEEP mezclará los retos usando ese tema.
                 </p>
                 <Input
                   placeholder="Escribe el tema de la fiesta aquí... 🎭"
@@ -480,7 +480,7 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
                   <h3 className="text-sm font-black uppercase tracking-wider text-white">Confesiones Anónimas (IA)</h3>
                 </div>
                 <p className="text-[11px] text-muted-foreground text-left mb-3">
-                  Escribe un chisme o secreto de cada jugador. En el modo Cultura General, la IA creará un Quiz de Chismes personalizado para adivinar de quién es cada uno 🤫
+                  Escribe un chisme o secreto de cada jugador. En el modo Cultura General, BEEP creará un Quiz de Chismes para adivinar de quién es cada uno 🤫
                 </p>
                 <div className="space-y-2 max-h-[180px] overflow-y-auto pr-1 slim-scroll">
                   {players.map(p => {

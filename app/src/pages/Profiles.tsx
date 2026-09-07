@@ -468,7 +468,7 @@ export default function Profiles() {
                             <Sparkles className="h-5 w-5 text-fuchsia-300 animate-pulse" />
                           </div>
                           <div className="text-left">
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Entrenador IA</p>
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Entrenador BEEP</p>
                             <h2 className="text-xl font-bold text-white font-arcade uppercase tracking-tight">Análisis de Rendimiento</h2>
                           </div>
                         </div>
@@ -477,7 +477,7 @@ export default function Profiles() {
                           disabled={isCallingCoach}
                           className="h-10 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 border-none hover:opacity-90 font-black text-xs tracking-wider uppercase"
                         >
-                          {isCallingCoach ? 'Analizando...' : '🤖 Consultar Coach'}
+                          {isCallingCoach ? 'Analizando...' : 'Consultar Coach'}
                         </Button>
                       </div>
                       {coachAnalysis ? (
@@ -490,7 +490,7 @@ export default function Profiles() {
                         </motion.div>
                       ) : (
                         <p className="text-xs text-muted-foreground text-left font-arcade uppercase tracking-wider leading-relaxed">
-                          ¿Quieres saber qué piensa la IA de tus habilidades fiesteras y competitivas? Pulsa el botón para recibir un diagnóstico hilarante y 100% personalizado.
+                          ¿Quieres el diagnóstico del Entrenador de BEEP sobre tus habilidades fiesteras y competitivas? Pulsa el botón.
                         </p>
                       )}
                     </div>

@@ -1,104 +1,47 @@
 /**
- * AI Service for BEEP Megamix
- * Connects to local Ollama instance (localhost:11434)
- * Bridge: 19GB Local Inference Model
+ * Generador de cartas "sorpresa" — 100 % local, sin IA ni backend.
+ * (Antes llamaba a Gemini/Ollama; ahora usa plantillas + los jugadores reales.)
  */
-
-const OLLAMA_URL = 'http://localhost:11434/v1/chat/completions';
 
 export interface AIChallengeResponse {
   content: string;
   type: 'common' | 'rare' | 'legendary' | 'chaos' | 'virus';
 }
 
+const rnd = () => Math.random();
+const pick = <T,>(a: T[]): T => a[Math.floor(rnd() * a.length)];
+
+const YO_NUNCA = [
+  'Yo nunca he mandado un mensaje y me he arrepentido a los 2 segundos.',
+  'Yo nunca he fingido una llamada para escapar de una conversación.',
+  'Yo nunca me he reído en un momento totalmente inapropiado.',
+  'Yo nunca he mirado el móvil de alguien sin permiso.',
+  'Yo nunca he vuelto con un/a ex sabiendo que era mala idea.',
+  'Yo nunca he echado la culpa a otra persona por algo que hice yo.',
+];
+const RETOS = [
+  (a: string, b: string) => `Reto: ${a}, dile a ${b} un piropo tan exagerado que dé vergüenza ajena. Si te cortas, bebes 2.`,
+  (a: string, b: string) => `Reto: ${a} y ${b} hacen un pulso. El que pierda bebe el doble esta ronda.`,
+  (a: string) => `Reto: ${a} habla 30 segundos sin parar sobre por qué es el mejor jugador de la mesa. Sin pruebas.`,
+  (a: string, b: string) => `Reto: ${a} imita a ${b}. Si ${b} no se ríe, bebe ${b}.`,
+  (a: string) => `Reto: ${a} enseña la última foto de su galería o bebe 3.`,
+  (a: string, b: string) => `Reto: ${a} y ${b} intercambian un secreto. El que dude más de 5s, bebe.`,
+];
+
 export const generateAIChallenge = async (
-  players: any[],
+  players: { name: string }[],
   currentMode: string,
-  intensity: 'soft' | 'medium' | 'hard' = 'medium'
+  _intensity: 'soft' | 'medium' | 'hard' = 'medium',
 ): Promise<AIChallengeResponse> => {
-  const playerNames = players.map(p => p.name).join(', ');
+  const names = (players || []).map(p => p.name).filter(Boolean);
+  const a = names.length ? pick(names) : 'Tú';
+  const b = names.filter(n => n !== a).length ? pick(names.filter(n => n !== a)) : a;
 
-  const systemPrompt = `Actúa como un Senior Game Designer experto en juegos de fiesta ("Yo Nunca", "Retos", "Picante"). 
-  Tu objetivo es generar una única tarjeta de juego creativa, divertida, sorprendente y relevante para los jugadores.
-  
-  CONTEXTO:
-  - Jugadores actuales: ${playerNames}
-  - Modo: ${currentMode}
-  - Intensidad: ${intensity} (soft = amigable y divertido, medium = puede ser un poco más picante o personal, hard = atrevido y desafiante)
+  const type = pick<AIChallengeResponse['type']>(['common', 'common', 'rare', 'legendary', 'chaos']);
 
-  REGLAS:
-  1. Si el modo es "yo_nunca", responde con una frase que empiece por "Yo nunca...".
-  2. Si el modo es "clasico" o "megamix", responde con un Reto para uno de los jugadores. Ejemplo: "Reto: {player} haz X...".
-  3. Usa el formato JSON: { "content": "texto del reto", "type": "common|rare|legendary|chaos|virus" }.
-  4. Sé original, evita clichés. Aprovecha que tienes nombres de jugadores para crear piques sanos.
-  5. Responde SOLO el JSON.
-  6. Ajusta el tono del desafío según la Intensidad. Para \'hard\', busca generar piques sanos y situaciones divertidas entre los jugadores mencionados.`;
-
-  // Only attempt Ollama on localhost — CORS blocks it from production origins
-  const isLocalhost = typeof window !== 'undefined' &&
-    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-
-  if (!isLocalhost) {
-    return {
-      content: "La IA solo funciona en modo local. ¡Sigue con las cartas normales!",
-      type: 'common'
-    };
+  if (currentMode === 'yo_nunca') {
+    return { content: pick(YO_NUNCA), type };
   }
-
-  try {
-    const response = await fetch(OLLAMA_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ollama'
-      },
-      body: JSON.stringify({
-        model: 'glm-4.7-flash:latest',
-        messages: [
-          {
-            role: 'system',
-            content: systemPrompt
-          },
-          {
-            role: 'user',
-            content: `Genera una tarjeta épica para el modo ${currentMode}.`
-          }
-        ],
-        temperature: 0.8,
-        max_tokens: 150
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error('Ollama not responding');
-    }
-
-    const data = await response.json();
-    const content = data.choices?.[0]?.message?.content;
-
-    if (!content) {
-      throw new Error('Empty response from AI');
-    }
-
-    // Try to parse JSON from the content
-    try {
-      const result = JSON.parse(content);
-      return {
-        content: result.content || "Error en el formato de la IA",
-        type: result.type || 'common'
-      };
-    } catch (e) {
-      // If AI didn't return valid JSON, try to clean it or just use the text
-      return {
-        content: content.replace(/```json|```/g, '').trim(),
-        type: 'common'
-      };
-    }
-  } catch (error) {
-    console.error('AI Bridge Error:', error);
-    return {
-      content: "La IA se ha tomado un trago de más y no responde. ¡Sigue con las cartas normales!",
-      type: 'common'
-    };
-  }
+  const tmpl = pick(RETOS);
+  return { content: tmpl(a, b), type };
 };

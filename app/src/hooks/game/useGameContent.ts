@@ -86,6 +86,44 @@ function applyVoteWeights(items: string[], category: string): string[] {
     }
 }
 
+// ─── Rotación entre partidas ───────────────────────────────────────────────
+// Recuerda las cartas mostradas en sesiones recientes y las manda al fondo del
+// mazo la próxima vez, para que cada partida (sobre todo Megamix) se sienta
+// nueva sin quitar nada del pool. Todo protegido: si localStorage falla, se
+// devuelve el mazo intacto.
+const RECENT_KEY = 'beep_recent_cards';
+const RECENT_CAP = 400;
+
+function rotateByRecent(deck: string[], mode: string, sessionSize: number): string[] {
+    try {
+        const raw = localStorage.getItem(RECENT_KEY);
+        const seen: string[] = raw ? (JSON.parse(raw)?.[mode] || []) : [];
+        if (seen.length === 0) return deck;
+        const seenSet = new Set(seen);
+        const fresh = deck.filter(c => !seenSet.has(c));
+        const stale = deck.filter(c => seenSet.has(c));
+        // Si casi todo está "visto", no penalices: baraja normal.
+        if (fresh.length < Math.max(sessionSize, deck.length * 0.15)) return deck;
+        return [...shuffleArray(fresh), ...shuffleArray(stale)];
+    } catch {
+        return deck;
+    }
+}
+
+function rememberSession(deck: string[], mode: string, sessionSize: number): void {
+    try {
+        const raw = localStorage.getItem(RECENT_KEY);
+        const store = raw ? JSON.parse(raw) : {};
+        const prev: string[] = Array.isArray(store?.[mode]) ? store[mode] : [];
+        const justShown = deck.slice(0, Math.max(12, sessionSize));
+        const merged = [...justShown, ...prev].slice(0, RECENT_CAP);
+        store[mode] = merged;
+        localStorage.setItem(RECENT_KEY, JSON.stringify(store));
+    } catch {
+        /* sin persistencia, no pasa nada */
+    }
+}
+
 export const useGameContent = (mode: GameMode, currentIndex: number, currentPlayerName: string, playersCount: number = 4) => {
     const [content, setContent] = useState<string[]>([]);
     const [currentQuestion, setCurrentQuestion] = useState<any | null>(null);
@@ -169,8 +207,11 @@ export const useGameContent = (mode: GameMode, currentIndex: number, currentPlay
 
         const cleanedContent = normalizeDeckEntries(modeContent as any[]);
         const weighted = normalizeDeckEntries(applyVoteWeights(cleanedContent, mode));
-        // Force an extra shuffle on the final weighted content for total randomness
-        setContent(shuffleArray(weighted));
+        // Baraja + manda al fondo lo visto en partidas recientes (frescura entre sesiones)
+        const sessionSize = Math.max(18, playersCount * 12);
+        const rotated = rotateByRecent(shuffleArray(weighted), mode, sessionSize);
+        setContent(rotated);
+        rememberSession(rotated, mode, sessionSize);
 
         // Reset used questions for fresh game
         setUsedQuestionIds(new Set());

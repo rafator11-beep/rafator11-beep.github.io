@@ -1,19 +1,49 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>Cargando...</title>
-  <script type="text/javascript">
-    var pathSegmentsToKeep = 1;
-    var l = window.location;
-    l.replace(
-      l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-      l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
-      l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
-      (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
-      l.hash
-    );
-  </script>
-</head>
-<body></body>
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="theme-color" content="#0a0a0a" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <title>BEEP</title>
+    <meta name="description" content="BEEP – El mejor juego de fiesta para jugar con amigos." />
+
+    <!-- Social Metadata -->
+    <meta property="og:title" content="BEEP – Juego de Fiesta" />
+    <meta property="og:description" content="El mejor juego de fiesta para jugar con amigos." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/beep-icon.svg" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="/beep-icon.svg" />
+    <script type="module" crossorigin src="/assets/index-92589dbc.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/react-vendor-42938d74.js">
+    <link rel="modulepreload" crossorigin href="/assets/ui-vendor-65d6293c.js">
+    <link rel="stylesheet" href="/assets/index-41d3a579.css">
+  <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
+
+  <body>
+    <!-- PWA Native Splash Screen -->
+    <style>
+      #pwa-splash { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #020817; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 99999; animation: fadeOut 0.5s ease-out 1.5s forwards; }
+      #pwa-splash h1 { color: #fff; font-family: 'Space Mono', monospace; font-size: 3rem; margin-bottom: 2rem; letter-spacing: 0.2em; text-transform: uppercase; text-shadow: 0 0 20px rgba(34, 211, 238, 0.5); }
+      .pwa-loader { width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.1); border-left-color: #22d3ee; border-radius: 50%; animation: spin 1s linear infinite; }
+      @keyframes spin { 100% { transform: rotate(360deg); } }
+      @keyframes fadeOut { 100% { opacity: 0; visibility: hidden; pointer-events: none; } }
+      body { margin: 0; background-color: #020817; }
+    </style>
+    <div id="pwa-splash">
+      <h1>BEEP</h1>
+      <div class="pwa-loader"></div>
+    </div>
+    
+    <div id="root"></div>
+    
+    <!-- Service worker registration is injected by vite-plugin-pwa (injectRegister: 'auto') -->
+  </body>
 </html>

@@ -257,7 +257,7 @@ export const CardDisplay = React.memo(({
             const intensities: ('soft' | 'medium' | 'hard')[] = ['soft', 'medium', 'hard'];
             const result = await generateAIChallenge(players || [], gameMode, intensities[Math.floor(Math.random() * 3)]);
             onAIUpdate?.(result.content, result.type);
-            toast.success('Reto IA generado ✨', { style: { background: '#1e1b4b', color: '#fff' } });
+            toast.success('Reto sorpresa ✨', { style: { background: '#1e1b4b', color: '#fff' } });
         } catch {
             toast.error('Error generando reto');
         } finally {
@@ -452,7 +452,7 @@ export const CardDisplay = React.memo(({
                                         animate={{ opacity: 1, scale: 1 }}
                                         className="mt-4 p-3.5 rounded-xl border border-pink-500/30 bg-pink-950/20 text-xs text-pink-300 leading-relaxed font-semibold animate-pulse"
                                     >
-                                        <span className="font-black text-pink-400 block mb-1 text-[11px] uppercase tracking-wider">🎲 CASTIGO IA PERSONALIZADO:</span>
+                                        <span className="font-black text-pink-400 block mb-1 text-[11px] uppercase tracking-wider">🎲 CASTIGO PERSONALIZADO:</span>
                                         {customPunishment}
                                     </motion.div>
                                 )}
@@ -480,7 +480,7 @@ export const CardDisplay = React.memo(({
                                 onClick={(e) => { e.stopPropagation(); setShowJudgePanel(true); }}
                                 className="h-9 flex items-center justify-center gap-1.5 rounded-xl bg-cyan-600/10 border border-cyan-500/30 text-cyan-300 font-black text-[10px] uppercase tracking-wider active:scale-95 transition-transform"
                             >
-                                <span>⚖️ JUEZ IA</span>
+                                <span>⚖️ JUEZ</span>
                             </motion.button>
                             <motion.button
                                 whileTap={{ scale: 0.95 }}
@@ -491,7 +491,7 @@ export const CardDisplay = React.memo(({
                                 {loadingPunishment ? (
                                     <Loader2 className="w-3.5 h-3.5 animate-spin text-pink-400" />
                                 ) : (
-                                    <span>🎲 CASTIGO IA</span>
+                                    <span>🎲 CASTIGO</span>
                                 )}
                             </motion.button>
                         </div>
