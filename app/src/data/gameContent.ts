@@ -6549,9 +6549,11 @@ export function isIndividualCard(cardText: string): boolean {
   // NORMA y TRIGGER nunca son individuales
   if (t.toUpperCase().startsWith('NORMA:') || t.toUpperCase().startsWith('NUEVA NORMA:') || t.startsWith('TRIGGER:') || t.startsWith('📜')) return false;
   // Prefijos individuales
-  if (t.startsWith('🎯') || t.startsWith('🎤') || t.startsWith('⚡') || t.startsWith('🔤') || t.startsWith('⚔️')) return true;
+  if (t.startsWith('🎯') || t.startsWith('🎤') || t.startsWith('⚡') || t.startsWith('🔤') || t.startsWith('⚔️')
+    || t.startsWith('📱') || t.startsWith('🤥') || t.startsWith('⏳')) return true;
   // Patrones de texto individuales
-  if (tl.includes('reto:') || tl.includes('verdad o bebe') || tl.includes('trivia express') || tl.includes('categorías') || tl.includes('duelo') || tl.includes('cultura chupística')) return true;
+  if (tl.includes('reto:') || tl.includes('verdad o bebe') || tl.includes('trivia express') || tl.includes('categorías') || tl.includes('duelo') || tl.includes('cultura chupística')
+    || tl.includes('el móvil manda') || tl.includes('dos verdades y una mentira') || tl.includes('10 segundos:')) return true;
   // Cartas personalizadas con nombre de jugador
   if (t.includes('{player}')) return true;
   return false;

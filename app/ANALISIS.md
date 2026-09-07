@@ -100,6 +100,12 @@ Todo el estado de la partida se lee y se teje en el resto:
 - **Rivalidades reales** → `buildMatch` ([useTorneoManager](src/hooks/game/useTorneoManager.ts)) ya no cruza al azar: puntúa cada pareja por historia compartida (uno nombra al otro, duelos previos, actividad) y enfrenta a los que más "tensión" acumulan.
 - **Callbacks literales** (D anterior) + **estadísticas/tragos** (rivalry pique) siguen alimentando el enriquecimiento, ahora apilados con un tope de 2 remates para no hacer un tocho.
 
+### G. Oleada 3 — 6 tipos de carta nuevos + refuerzo  ✅ HECHO
+`src/data/updatePostVerano2026_v3.ts`. Tipos que NO existían:
+- **Generales**: ✋ MANOS ARRIBA (revelación por mayoría), 📊 EL RANKING (ordenar a toda la mesa y negociar), 🎬 ESCENA (improvisación de 20s en grupo).
+- **Individuales**: 🤥 DOS VERDADES Y UNA MENTIRA, 📱 EL MÓVIL MANDA (prendas de móvil rápidas), ⏳ 10 SEGUNDOS (rapidez solo bajo presión).
+- Refuerzo: +55 Yo Nunca, +22 picante, +22 votación, +22 retos, +18 cadena, +16 en la cama. `isIndividualCard` reconoce los prefijos `📱 🤥 ⏳`.
+
 ### E. Segunda oleada de contenido  ✅ HECHO (wave 2)
 `src/data/updatePostVerano2026_v2.ts` — ~280 frases nuevas más, misma guía de tono, sin repetir la oleada 1: `yoNuncaV5b`, `retosV5b`, `picanteV5b`, `votacionV5b`, `clasicoV5b`, `enLaCamaV5b`, `espanaV5b`, `normasV5b`, `duelosV5b`. Conectadas a sus modos y a Megamix.
 _(Pendiente wave 3+ para llegar a los 500+/modo que pediste — es trabajo incremental; la identidad ya está fijada.)_

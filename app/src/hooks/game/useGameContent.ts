@@ -59,6 +59,11 @@ import {
     enLaCamaV5b, espanaV5b, normasV5b, duelosV5b,
 } from '@/data/updatePostVerano2026_v2';
 import {
+    manosArribaV5, elRankingV5, escenaV5,
+    dosVerdadesV5, elMovilV5, diezSegundosV5,
+    yoNuncaV5c, picanteV5c, votacionV5c, retosV5c, cadenaV5c, enLaCamaV5c,
+} from '@/data/updatePostVerano2026_v3';
+import {
     moreYoNunca, morePicante, moreVotacion, moreClasico, moreEspana,
     moreEnLaCama, moreNormas, moreMimica, moreSalseo, moreTorneoRetos,
 } from '@/data/extraContentIndex';
@@ -174,12 +179,22 @@ export const useGameContent = (mode: GameMode, currentIndex: number, currentPlay
                     ...retosV5, ...retosV5b,
                     ...duelosV5, ...duelosV5b,
                     ...moreTorneoRetos,
-                    ...[...yoNuncaV5, ...yoNuncaV5b].map(q => `🙈 ${q}`),
+                    ...[...yoNuncaV5, ...yoNuncaV5b, ...yoNuncaV5c].map(q => `🙈 ${q}`),
                     ...moreYoNunca.map(q => `🙈 ${q}`),
-                    ...[...picanteV5, ...picanteV5b].map(q => `🌶️ ${q}`),
+                    ...[...picanteV5, ...picanteV5b, ...picanteV5c].map(q => `🌶️ ${q}`),
                     ...morePicante.map(q => `🌶️ ${q}`),
-                    ...[...votacionV5, ...votacionV5b].map(q => `🗳️ ${q}`),
+                    ...[...votacionV5, ...votacionV5b, ...votacionV5c].map(q => `🗳️ ${q}`),
                     ...moreVotacion.map(q => `🗳️ ${q}`),
+                    // OLEADA 3 — 6 tipos de carta nuevos
+                    ...manosArribaV5,
+                    ...elRankingV5,
+                    ...escenaV5,
+                    ...dosVerdadesV5,
+                    ...elMovilV5,
+                    ...diezSegundosV5,
+                    ...retosV5c,
+                    ...cadenaV5c,
+                    ...enLaCamaV5c.map(q => `🛌 ${q}`),
                     ...clasicoV5, ...clasicoV5b,
                     ...moreClasico,
                     ...[...enLaCamaV5, ...enLaCamaV5b].map(q => `🛌 ${q}`),
@@ -238,7 +253,8 @@ export const useGameContent = (mode: GameMode, currentIndex: number, currentPlay
                     ...cadenasV4,
                     ...clasicoV5, ...clasicoV5b,
                     ...moreClasico,
-                    ...retosV5, ...retosV5b,
+                    ...retosV5, ...retosV5b, ...retosV5c, ...cadenaV5c,
+                    ...diezSegundosV5, ...dosVerdadesV5,
                     ...[...normasV5, ...normasV5b].map(q => `NORMA: ${q.replace(/^NORMA:\s*/i, '')}`),
                     ...moreNormas.map(q => `NORMA: ${q.replace(/^NORMA:\s*/i, '')}`),
                     ...[...enLaCamaV5, ...enLaCamaV5b].map(q => `🛌 ${q}`),
@@ -247,16 +263,16 @@ export const useGameContent = (mode: GameMode, currentIndex: number, currentPlay
                 break;
             case 'yo_nunca':
             case 'yo_nunca_equipos':
-                modeContent = shuffleArray([...yoNunca, ...yoNuncaExtra, ...yoNuncaExtra2, ...yoNuncaExtra3, ...yoNuncaV4, ...yoNuncaV5, ...yoNuncaV5b, ...moreYoNunca]);
+                modeContent = shuffleArray([...yoNunca, ...yoNuncaExtra, ...yoNuncaExtra2, ...yoNuncaExtra3, ...yoNuncaV4, ...yoNuncaV5, ...yoNuncaV5b, ...yoNuncaV5c, ...moreYoNunca]);
                 break;
             case 'picante':
-                modeContent = shuffleArray([...picante, ...picanteExtra, ...picanteExtra2, ...picanteExtra3, ...picanteV4, ...picanteV5, ...picanteV5b, ...morePicante]);
+                modeContent = shuffleArray([...picante, ...picanteExtra, ...picanteExtra2, ...picanteExtra3, ...picanteV4, ...picanteV5, ...picanteV5b, ...picanteV5c, ...morePicante]);
                 break;
             case 'espana':
                 modeContent = shuffleArray([...nostalgia, ...pacoversExtra, ...pacoversExtra2, ...espanaExtra3, ...espanaV5, ...espanaV5b, ...moreEspana]);
                 break;
             case 'votacion':
-                modeContent = shuffleArray([...quienEsMasProbable, ...masProbableExtra, ...quienEsMasProbableExtra2, ...masProbableExtra3, ...votacionV4, ...votacionV5, ...votacionV5b, ...moreVotacion]);
+                modeContent = shuffleArray([...quienEsMasProbable, ...masProbableExtra, ...quienEsMasProbableExtra2, ...masProbableExtra3, ...votacionV4, ...votacionV5, ...votacionV5b, ...votacionV5c, ...moreVotacion, ...manosArribaV5, ...elRankingV5]);
                 break;
             case 'pacovers':
                 modeContent = shuffleArray([...pacovers, ...pacoversExtra, ...pacoversExtra2, ...pacoversExtra3, ...espanaV5, ...espanaV5b, ...moreEspana]);
