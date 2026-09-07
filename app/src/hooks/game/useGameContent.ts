@@ -44,6 +44,7 @@ import { footballQuestions } from '@/data/footballQuestionsNew';
 import { cultureQuestions } from '@/data/cultureQuestions';
 import { cultureQuestionsNew2025 } from '@/data/cultureQuestionsNew2025';
 import { buildGodDeck } from '@/lib/godDeck';
+import { rememberQuizIds } from '@/lib/recentContent';
 import { sanitizeCardText } from '../../components/game/CardDisplay';
 import {
     megamixRetosV4, yoNuncaV4, picanteV4, votacionV4,
@@ -53,6 +54,10 @@ import {
     yoNuncaV5, retosV5, picanteV5, votacionV5, clasicoV5,
     enLaCamaV5, espanaV5, normasV5, duelosV5,
 } from '@/data/updatePostVerano2026';
+import {
+    yoNuncaV5b, retosV5b, picanteV5b, votacionV5b, clasicoV5b,
+    enLaCamaV5b, espanaV5b, normasV5b, duelosV5b,
+} from '@/data/updatePostVerano2026_v2';
 import {
     moreYoNunca, morePicante, moreVotacion, moreClasico, moreEspana,
     moreEnLaCama, moreNormas, moreMimica, moreSalseo, moreTorneoRetos,
@@ -165,24 +170,24 @@ export const useGameContent = (mode: GameMode, currentIndex: number, currentPlay
             case 'megamix':
                 modeContent = [
                     ...getStructuredMegamix(500, playersCount),
-                    // Actualización post-verano 2026 + contenido que estaba sin conectar
-                    ...retosV5,
-                    ...duelosV5,
+                    // Actualización post-verano 2026 (oleadas 1 y 2) + contenido reconectado
+                    ...retosV5, ...retosV5b,
+                    ...duelosV5, ...duelosV5b,
                     ...moreTorneoRetos,
-                    ...yoNuncaV5.map(q => `🙈 ${q}`),
+                    ...[...yoNuncaV5, ...yoNuncaV5b].map(q => `🙈 ${q}`),
                     ...moreYoNunca.map(q => `🙈 ${q}`),
-                    ...picanteV5.map(q => `🌶️ ${q}`),
+                    ...[...picanteV5, ...picanteV5b].map(q => `🌶️ ${q}`),
                     ...morePicante.map(q => `🌶️ ${q}`),
-                    ...votacionV5.map(q => `🗳️ ${q}`),
+                    ...[...votacionV5, ...votacionV5b].map(q => `🗳️ ${q}`),
                     ...moreVotacion.map(q => `🗳️ ${q}`),
-                    ...clasicoV5,
+                    ...clasicoV5, ...clasicoV5b,
                     ...moreClasico,
-                    ...enLaCamaV5.map(q => `🛌 ${q}`),
+                    ...[...enLaCamaV5, ...enLaCamaV5b].map(q => `🛌 ${q}`),
                     ...moreEnLaCama.map(q => `🛌 ${q}`),
-                    ...espanaV5.map(q => `🇪🇸 ${q}`),
+                    ...[...espanaV5, ...espanaV5b].map(q => `🇪🇸 ${q}`),
                     ...moreEspana.map(q => `🇪🇸 ${q}`),
                     ...moreMimica.map(q => `🎭 ${q}`),
-                    ...normasV5.map(q => `NORMA: ${q.replace(/^NORMA:\s*/i, '')}`),
+                    ...[...normasV5, ...normasV5b].map(q => `NORMA: ${q.replace(/^NORMA:\s*/i, '')}`),
                     ...moreNormas.map(q => `NORMA: ${q.replace(/^NORMA:\s*/i, '')}`),
                     ...moreSalseo,
                 ];
@@ -231,30 +236,30 @@ export const useGameContent = (mode: GameMode, currentIndex: number, currentPlay
                     ...normasV4.map(q => `NORMA: ${q.replace(/^📜\s*NORMA:\s*/i, '')}`),
                     ...duelosV4,
                     ...cadenasV4,
-                    ...clasicoV5,
+                    ...clasicoV5, ...clasicoV5b,
                     ...moreClasico,
-                    ...retosV5,
-                    ...normasV5.map(q => `NORMA: ${q.replace(/^NORMA:\s*/i, '')}`),
+                    ...retosV5, ...retosV5b,
+                    ...[...normasV5, ...normasV5b].map(q => `NORMA: ${q.replace(/^NORMA:\s*/i, '')}`),
                     ...moreNormas.map(q => `NORMA: ${q.replace(/^NORMA:\s*/i, '')}`),
-                    ...enLaCamaV5.map(q => `🛌 ${q}`),
+                    ...[...enLaCamaV5, ...enLaCamaV5b].map(q => `🛌 ${q}`),
                     ...moreEnLaCama.map(q => `🛌 ${q}`),
                 ]);
                 break;
             case 'yo_nunca':
             case 'yo_nunca_equipos':
-                modeContent = shuffleArray([...yoNunca, ...yoNuncaExtra, ...yoNuncaExtra2, ...yoNuncaExtra3, ...yoNuncaV4, ...yoNuncaV5, ...moreYoNunca]);
+                modeContent = shuffleArray([...yoNunca, ...yoNuncaExtra, ...yoNuncaExtra2, ...yoNuncaExtra3, ...yoNuncaV4, ...yoNuncaV5, ...yoNuncaV5b, ...moreYoNunca]);
                 break;
             case 'picante':
-                modeContent = shuffleArray([...picante, ...picanteExtra, ...picanteExtra2, ...picanteExtra3, ...picanteV4, ...picanteV5, ...morePicante]);
+                modeContent = shuffleArray([...picante, ...picanteExtra, ...picanteExtra2, ...picanteExtra3, ...picanteV4, ...picanteV5, ...picanteV5b, ...morePicante]);
                 break;
             case 'espana':
-                modeContent = shuffleArray([...nostalgia, ...pacoversExtra, ...pacoversExtra2, ...espanaExtra3, ...espanaV5, ...moreEspana]);
+                modeContent = shuffleArray([...nostalgia, ...pacoversExtra, ...pacoversExtra2, ...espanaExtra3, ...espanaV5, ...espanaV5b, ...moreEspana]);
                 break;
             case 'votacion':
-                modeContent = shuffleArray([...quienEsMasProbable, ...masProbableExtra, ...quienEsMasProbableExtra2, ...masProbableExtra3, ...votacionV4, ...votacionV5, ...moreVotacion]);
+                modeContent = shuffleArray([...quienEsMasProbable, ...masProbableExtra, ...quienEsMasProbableExtra2, ...masProbableExtra3, ...votacionV4, ...votacionV5, ...votacionV5b, ...moreVotacion]);
                 break;
             case 'pacovers':
-                modeContent = shuffleArray([...pacovers, ...pacoversExtra, ...pacoversExtra2, ...pacoversExtra3, ...espanaV5, ...moreEspana]);
+                modeContent = shuffleArray([...pacovers, ...pacoversExtra, ...pacoversExtra2, ...pacoversExtra3, ...espanaV5, ...espanaV5b, ...moreEspana]);
                 break;
             default:
                 modeContent = getMegamixContent(200);
@@ -328,17 +333,27 @@ export const useGameContent = (mode: GameMode, currentIndex: number, currentPlay
             return;
         }
 
+        const seenKey = `beep_trivia_seen_${category}`;
+        let persistedSeen = new Set<string>();
+        try { persistedSeen = new Set(JSON.parse(localStorage.getItem(seenKey) || '[]')); } catch { /* ignore */ }
+
         const shuffledQuestions = shuffleArray(sourceQuestions);
-        const availableQuestions = shuffledQuestions.filter(q => !usedQuestionIds.has(q.question));
+        // No visto ni en esta partida ni en partidas recientes.
+        let availableQuestions = shuffledQuestions.filter(q => !usedQuestionIds.has(q.question) && !persistedSeen.has(q.question));
+        if (availableQuestions.length === 0) {
+            availableQuestions = shuffledQuestions.filter(q => !usedQuestionIds.has(q.question));
+        }
 
         if (availableQuestions.length > 0) {
             const randomQ = availableQuestions[0];
             setCurrentQuestion(randomQ);
             setUsedQuestionIds(prev => new Set([...prev, randomQ.question]));
+            rememberQuizIds([randomQ.question], seenKey);
         } else {
             setUsedQuestionIds(new Set());
             const randomQ = shuffledQuestions[0];
             setCurrentQuestion(randomQ);
+            rememberQuizIds([randomQ.question], seenKey);
         }
     }, [usedQuestionIds]);
 

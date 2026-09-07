@@ -4,10 +4,11 @@ import { Trophy, Award, Calendar, Users, Layers, List, Play, X, Star } from 'luc
 import { Player } from '@/types/game';
 import { torneoRetos } from '@/data/gameContent';
 import { duelosV5 } from '@/data/updatePostVerano2026';
+import { duelosV5b } from '@/data/updatePostVerano2026_v2';
 import { moreTorneoRetos } from '@/data/extraContentIndex';
 
 // Pool ampliado de retos de duelo, sin repeticiones dentro de la sesión.
-const DUEL_POOL: string[] = Array.from(new Set([...torneoRetos, ...duelosV5, ...moreTorneoRetos]))
+const DUEL_POOL: string[] = Array.from(new Set([...torneoRetos, ...duelosV5, ...duelosV5b, ...moreTorneoRetos]))
   .map(s => s.trim())
   .filter(Boolean);
 

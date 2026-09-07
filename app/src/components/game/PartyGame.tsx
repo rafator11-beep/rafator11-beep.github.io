@@ -30,10 +30,11 @@ import { duelos } from '@/data/duelosContent';
 import { impostorRounds } from '@/data/impostorContent';
 import { isIndividualCard, torneoRetos } from '@/data/gameContent';
 import { duelosV5 } from '@/data/updatePostVerano2026';
+import { duelosV5b } from '@/data/updatePostVerano2026_v2';
 import { moreTorneoRetos } from '@/data/extraContentIndex';
 
 // Pool de retos de duelo ampliado (base + post-verano + contenido reconectado)
-const DUEL_POOL: string[] = Array.from(new Set([...torneoRetos, ...duelosV5, ...moreTorneoRetos]));
+const DUEL_POOL: string[] = Array.from(new Set([...torneoRetos, ...duelosV5, ...duelosV5b, ...moreTorneoRetos]));
 import { YoNuncaResponse } from '@/components/game/YoNuncaResponse';
 import { RetoOutcome } from '@/components/game/RetoOutcome';
 import { useGameMemory, enrichChallengeWithAI } from '@/hooks/game/useGameMemory';

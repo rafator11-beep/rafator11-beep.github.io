@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Zap, Trophy, X, ArrowRight, Flame, Timer, Star, RotateCcw } from 'lucide-react';
 import { speedRoundQuestions, SPEED_CATEGORIES, type SpeedQuestion } from '@/data/speedRoundContent';
+import { pickFreshQuiz } from '@/lib/recentContent';
 import { hapticFeedback } from '@/utils/haptics';
 
 interface SpeedRoundGameProps {
@@ -42,7 +43,8 @@ export function SpeedRoundGame({ onExit, players }: SpeedRoundGameProps) {
     const pool = category
       ? speedRoundQuestions.filter(q => q.category === category)
       : speedRoundQuestions;
-    const shuffled = shuffleArray(pool).slice(0, TOTAL_QUESTIONS);
+    // Anti-repetición entre partidas: prioriza preguntas no vistas recientemente.
+    const shuffled = pickFreshQuiz(pool, `beep_speed_seen_${category || 'all'}`, q => q.question, TOTAL_QUESTIONS);
     setQuestions(shuffled);
     setCurrentIndex(0);
     setScore(0);

@@ -5,7 +5,9 @@ import { useGameContext } from '@/contexts/GameContext';
 import { Player } from '@/types/game';
 import { Button } from '@/components/ui/button';
 import { cleanGameText } from '@/utils/sanitize';
-import { cultureQuestions, CultureQuestion, getRandomCultureQuestions } from '@/data/cultureQuestions';
+import { cultureQuestions, CultureQuestion } from '@/data/cultureQuestions';
+import { cultureQuestionsNew2025 } from '@/data/cultureQuestionsNew2025';
+import { pickFreshQuiz } from '@/lib/recentContent';
 import { isGeminiConfigured } from '@/services/geminiClient';
 
 interface Lifeline {
@@ -43,7 +45,9 @@ export default function CultureGame() {
       return;
     }
 
-    const shuffledQuestions = getRandomCultureQuestions(30);
+    // Anti-repetición entre partidas: prioriza preguntas no vistas recientemente.
+    const culturePool = [...cultureQuestions, ...(cultureQuestionsNew2025 as unknown as CultureQuestion[])];
+    const shuffledQuestions = pickFreshQuiz(culturePool, 'beep_culture_seen', q => q.question, 30);
 
     const initialScores: Record<string, number> = {};
     const initialLifelines: Record<string, Lifeline[]> = {};

@@ -87,8 +87,12 @@ No hay pantalla final de **resumen + clasificación** consistente en todos los m
 - El mazo ya no se repetía igual al agotarse: ahora se **re-baraja con otra semilla en cada vuelta** (`seededShuffle` por lap) en `useGameContent`.
 - **Podio** con **tabla de clasificación final** de todos los jugadores (puesto · XP · 🍺 tragos), además de los títulos que ya había.
 
-### D. Ampliar Cultura / Fútbol / Speed
-Buen pool pero se repite en sesiones largas. Aplicar la misma rotación `beep_recent_cards` / `seededShuffle`.
+### D. Anti-repetición en Cultura / Fútbol / Speed  ✅ HECHO
+Nuevo `src/lib/recentContent.ts` (`pickFreshQuiz` / `rememberQuizIds`): memoria de preguntas vistas entre partidas en localStorage.
+- **Speed Round** (`beep_speed_seen_<cat>`): cada partida prioriza preguntas no vistas.
+- **Cultura** standalone (`beep_culture_seen`): idem, sobre el pool completo (`cultureQuestions` + `cultureQuestionsNew2025`).
+- **Trivia por cartas** en `useGameContent` (`beep_trivia_seen_<cat>`): filtra por vistas de sesiones anteriores además del `usedQuestionIds` de la partida.
 
-### E. Segunda oleada de contenido
-Con la identidad de la tabla 2 fijada, escribir 500+ frases más por modo siguiendo la guía de tono.
+### E. Segunda oleada de contenido  ✅ HECHO (wave 2)
+`src/data/updatePostVerano2026_v2.ts` — ~280 frases nuevas más, misma guía de tono, sin repetir la oleada 1: `yoNuncaV5b`, `retosV5b`, `picanteV5b`, `votacionV5b`, `clasicoV5b`, `enLaCamaV5b`, `espanaV5b`, `normasV5b`, `duelosV5b`. Conectadas a sus modos y a Megamix.
+_(Pendiente wave 3+ para llegar a los 500+/modo que pediste — es trabajo incremental; la identidad ya está fijada.)_
