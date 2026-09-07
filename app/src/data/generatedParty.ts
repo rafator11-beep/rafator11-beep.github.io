@@ -202,6 +202,32 @@ const YN_ACC: string[] = [
   "dicho 'este año viajo más' y no salir de la provincia", "guardado destinos en el móvil para viajes que no hago",
   "hecho la maleta la misma noche y olvidar el cargador", "llevado ropa para un viaje que no me puse ni una vez",
   "vuelto de un viaje y dejar la maleta a medio deshacer una semana", "comprado un imán o llavero cutre 'de recuerdo' y tirarlo al mes",
+  "vuelto a descargar una app de citas por aburrimiento y arrepentirme al instante", "hablado con alguien meses por una app y no quedar nunca",
+  "puesto una foto de perfil de una app en la que salgo mucho mejor que en persona", "mentido en la edad o en la altura en un perfil",
+  "hecho match con alguien que conocía y hacer como que no", "quedado con alguien solo por no cancelar",
+  "vuelto a hablar con un ex 'como amigos' sabiendo que no", "guardado conversaciones para releerlas cuando estoy de bajón",
+  "stalkeado a la nueva pareja de un ex hasta el fondo del feed", "dado 'me gusta' a una foto muy antigua y morirme de vergüenza",
+  "fingido que se me acababa la batería para cortar una cita", "puesto excusa de trabajo para no tener una segunda cita",
+  "ghosteado a alguien majo por pura pereza de contestar", "ofendido cuando me hicieron a mí lo mismo que yo había hecho",
+  "vuelto con la misma persona más de dos veces", "dicho 'no quiero nada serio' y ponerme celoso a la semana",
+  "borrado y recuperado el número de la misma persona varias veces", "mirado el 'última conexión' de alguien más de lo que admito",
+  "escrito un 'te echo de menos' de madrugada y arrepentirme al segundo", "mandado un audio llorando y pedir que lo borren",
+  "revisado el móvil de una pareja o de un ex", "cotilleado a mi cita en redes antes de conocerla en persona",
+  "dicho que me daba igual y montarme una película en la cabeza", "tenido una crush con alguien solo porque me trató bien un día",
+  "fingido interés en el deporte o el hobby de alguien por gustarle", "aguantado una relación por pereza de gestionar la ruptura",
+  "puesto en un grupo 'a ver si quedamos' sabiendo que no voy a organizarlo", "confirmado un plan cuando ya había empezado",
+  "silenciado a alguien y hacerme el sorprendido cuando se quejó", "dejado a alguien en visto porque no sabía qué contestar",
+  "contestado 'jajaja' a un audio de tres minutos que no escuché entero", "reenviado un meme para no tener que responder a algo importante",
+  "dicho que 'ya casi salgo' desde la cama sin haberme levantado", "buscado en Google los síntomas y autodiagnosticarme algo grave antes de cenar",
+  "dicho 'yo el finde descanso' y acabar más cansado que el lunes", "hecho planes para 'ser más productivo' y verlos desde el sofá",
+  "empezado el gimnasio en enero y no volver desde febrero", "comprado ropa de deporte cara para usarla de estar por casa",
+  "dicho 'esta semana cocino en casa' y pedir a domicilio tres veces", "abandonado un carrito de la compra online lleno tres veces seguidas",
+  "hecho un curso online para motivarme y no pasar del segundo vídeo", "guardado 200 recetas y cocinar siempre lo mismo",
+  "dicho 'el año que viene me organizo' varios eneros seguidos", "tenido una suscripción olvidada que me cobra desde hace más de un año",
+  "abierto LinkedIn en mi peor día de trabajo solo para hacerme daño", "actualizado el CV un domingo por drama sin intención de mandarlo",
+  "calculado cuánto cobro por hora en mitad de una reunión aburrida", "asentido en una reunión sin tener ni idea de qué se hablaba",
+  "fingido que se cortaba la videollamada para salir de ella", "dicho 'buena pregunta, lo miro y te digo' y no mirarlo jamás",
+  "puesto una reunión falsa en el calendario para que me dejaran en paz", "trabajado en pijama de cintura para abajo en una videollamada",
 ];
 
 // Remates para multiplicar los "Yo nunca"
@@ -756,6 +782,70 @@ const DV_TEMAS: string[] = [
   "récords personales absurdos", "lo que opinas de verdad de alguien de esta mesa",
 ];
 
+// Dilemas para "¿QUÉ PREFIERES?" (Would You Rather) — cada uno "opción A | opción B"
+const QP_PARES: string[] = [
+  "no volver a mirar el móvil en la mesa | no volver a llegar tarde a nada",
+  "que te lean todos los mensajes que has mandado hoy | que te lean el historial de búsquedas de la semana",
+  "vivir sin cafeína | vivir sin postre",
+  "tener el sueldo el doble pero el trabajo el triple de aburrido | ganar la mitad haciendo algo que te encanta",
+  "que suene una canción tuya cada vez que entras a un sitio | que suene una risa enlatada después de cada cosa que dices",
+  "no poder mentir nunca más | no poder decir que no a un plan nunca más",
+  "que tu ex te escriba mañana | que te escriba tu jefe un domingo",
+  "cenar siempre solo tranquilo | cenar siempre con gente pero eligiendo ellos",
+  "que te toque la lotería y no poder contarlo | que no te toque pero puedas presumir un año",
+  "tener que hablar con acento andaluz todo el mes | tener que hablar en tercera persona todo el mes",
+  "no volver a tener resaca | no volver a tener agujetas",
+  "que te devuelvan todo lo que has prestado y nunca te volvieron | recuperar todo el tiempo perdido en colas",
+  "vivir en un pueblo con gente maja y sin planes | vivir en la ciudad con planes y sin conocer a nadie",
+  "que tus padres vean tu galería de fotos | que tu jefe vea tus notas del móvil",
+  "poder teletrabajar siempre pero sin vacaciones | ir a la oficina cada día con dos meses de vacaciones",
+  "no volver a hacer la compra | no volver a poner una lavadora",
+  "tener siempre el asiento del medio en el avión | tener siempre el vecino de al lado que da conversación",
+  "que se sepa cuánto te has gastado este mes | que se sepa a quién has stalkeado",
+  "olvidar por qué entras a una habitación siempre | olvidar el nombre de alguien dos segundos después de que te lo diga",
+  "tener una nevera que juzga tu comida en voz alta | un móvil que suspira cada vez que abres una red social",
+  "no poder volver a decir 'literal' | no poder volver a decir 'o sea'",
+  "que te obliguen a ir a todas las bodas a las que te inviten | no poder ir a ninguna nunca más",
+  "tener que cantar en vez de hablar durante una hora | tener que bailar cada vez que entras a la cocina un día entero",
+  "saber la fecha exacta de tu muerte | saber la causa pero no la fecha",
+  "que tu grupo de amigos sepa lo que piensas de verdad de cada uno | que tú sepas lo que piensan ellos de ti",
+  "no volver a ver series ni pelis | no volver a escuchar música",
+  "que te paguen por dormir la siesta pero no puedas viajar nunca | poder viajar gratis a cualquier sitio pero durmiendo 4 horas",
+  "que todos tus audios de WhatsApp se escuchen en altavoz en el bar | que se lean todos tus mensajes de después de las 2 de la mañana",
+  "tener superpoderes solo los lunes | ser millonario pero solo poder gastarlo en regalos para otros",
+  "no poder usar mayúsculas nunca más | no poder usar tildes nunca más",
+  "que te caiga bien todo el mundo | caerle bien a todo el mundo",
+  "vivir la misma semana buena en bucle un año | vivir un año entero distinto pero mediocre",
+  "que tu casa esté siempre impecable pero no puedas invitar a nadie | tener la casa hecha un desastre pero llena de gente",
+  "no volver a pagar impuestos pero sin sanidad ni carreteras | pagar el doble y que todo funcione perfecto",
+  "tener el don de cocinar de lujo | el don de dormir de un tirón siempre",
+  "que te toque el vecino de arriba que taladra los domingos | el compañero de piso que limpia y te lo recuerda",
+  "poder pausar el tiempo pero envejeciendo tú el doble | rebobinar 10 segundos una vez al día",
+  "no volver a discutir con la pareja por el lavavajillas | no volver a discutir por dónde cenar",
+  "que se te dé bien el trabajo y mal la vida social | al revés",
+  "tener 30 años para siempre con la cuenta corriente de ahora | tener 50 con el triple de dinero",
+  "que te graben en tu peor momento del año y lo suban | que borren tu mejor recuerdo",
+  "no volver a tener frío | no volver a tener sueño a deshora",
+  "conocer todos los idiomas pero no poder callarte nunca | poder callar a cualquiera 5 minutos al día",
+  "que tu perro pueda hablar y te diga verdades | que tu planta viva para siempre",
+  "trabajar 4 días y cobrar el 80% | trabajar 5 y cobrar el 100 pero sin poder elegir vacaciones",
+  "vivir sin wifi en casa | vivir sin datos en el móvil",
+  "que te reconozcan por la calle por algo vergonzoso | que nadie se acuerde nunca de ti",
+  "tener que contar un secreto tuyo cada vez que bebes | tener que beber el doble y no contar nada",
+  "que tu cita lea tu conversación con tus amigos sobre ella | que tú leas la suya",
+  "no volver a ligar por una app | no volver a ligar en persona",
+  "tener el móvil con 2% de batería para siempre | el portátil que va lento para siempre",
+  "que se cancele siempre el plan que te apetece | que nunca se cancele el que no te apetece",
+  "poder comer lo que quieras sin engordar pero sin saborearlo | saborearlo todo el triple pero engordando el triple",
+  "que tu jefe sea tu mejor amigo | que tu mejor amigo sea tu jefe",
+  "vivir en la playa lejos de todos | en el centro con todos al lado y sin silencio nunca",
+  "no poder cambiar de canción en Spotify durante un año | que solo suene tu canción más vergonzosa un mes",
+  "que te toque hacer de conductor en cada salida | que te toque organizar cada plan",
+  "que tu ex sea feliz y te lo restrieguen | que le vaya regular y te dé pena",
+  "tener que decir siempre la verdad en la primera cita | poder mentir pero que se note",
+  "no volver a pisar un gimnasio y estar en forma | ir cada día y no notar nada",
+];
+
 // ══════════════════════════════════════════════════════════════════════
 //  MULTIPLICACIÓN → cartas
 // ══════════════════════════════════════════════════════════════════════
@@ -851,11 +941,29 @@ export const genDosVerdades: string[] = uniq(
   ])
 );
 
+// NUEVO — 🤔 ¿QUÉ PREFIERES? (would you rather). General: cada uno elige y bebe la minoría.
+export const genQuePrefieres: string[] = uniq(
+  QP_PARES.flatMap(par => {
+    const [a, b] = par.split('|').map(s => s.trim());
+    return [
+      `🤔 ¿QUÉ PREFIERES? A) ${a[0].toUpperCase() + a.slice(1)}. B) ${b[0].toUpperCase() + b.slice(1)}. A la de 3, todos señaláis A o B. Bebe 2 el bando minoritario.`,
+      `🤔 ¿QUÉ PREFIERES? ${a[0].toUpperCase() + a.slice(1)}, o... ${b}. Elegís por turnos y lo defendéis en una frase. El que dude o repita argumento, bebe 2.`,
+    ];
+  })
+);
+
+// NUEVO — 🫣 PARANOIA. El jugador del turno susurra una pregunta "¿quién...?" al de su
+// derecha; este responde un nombre en voz alta pero la pregunta es secreta.
+export const genParanoia: string[] = uniq(
+  PRED.map(p => `🫣 PARANOIA: susurra al de tu derecha "¿quién es más probable que ${p}?". Contesta un nombre en voz alta; la pregunta es secreta. El nombrado bebe 1, o bebe 2 y le dices qué era.`)
+);
+
 // Todo junto, por si se quiere un único pool
 export const generatedAll: string[] = [
   ...genYoNunca, ...genCadena, ...genCategorias, ...genCulturaChupistica, ...genDiezSegundos,
   ...genVotacion, ...genManosArriba, ...genTodosALaVez, ...genRanking, ...genEnLaCama,
   ...genRetos, ...genVerdadOBebe, ...genEscena, ...genMovil, ...genDosVerdades,
+  ...genQuePrefieres, ...genParanoia,
 ];
 
 // Conteo en consola solo en dev

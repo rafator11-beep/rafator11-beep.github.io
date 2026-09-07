@@ -1,59 +1,52 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Sparkles, Zap, Flame, Brain, Trophy, Star, Layers, Shuffle } from 'lucide-react';
+import { X, Sparkles, Zap, Flame, Brain, Trophy, Star } from 'lucide-react';
 
-const CURRENT_VERSION = '5.0';
+const CURRENT_VERSION = '5.2';
 const STORAGE_KEY = 'beep_version_seen';
 
 const updates = [
   {
+    icon: <Flame className="w-5 h-5 text-rose-400" />,
+    color: 'from-rose-950/60 to-slate-950/60 border-rose-500/30',
+    label: 'CONTENIDO',
+    title: '¡Casi 30.000 cartas! 🃏',
+    desc: 'Muchísimas cartas nuevas de Yo Nunca, retos, picante, votaciones... y del día a día de tener 30 años. En Megamix casi no se repite ni jugando cientos de partidas.',
+  },
+  {
+    icon: <Sparkles className="w-5 h-5 text-cyan-400" />,
+    color: 'from-cyan-950/60 to-slate-950/60 border-cyan-500/30',
+    label: 'TIPOS NUEVOS',
+    title: 'Cartas que no había 🎭',
+    desc: '¿Qué prefieres?, Paranoia (le susurras una pregunta al de al lado), Manos Arriba, El Ranking, Escena improvisada, Dos Verdades y una Mentira, 10 Segundos y El Móvil Manda.',
+  },
+  {
     icon: <Brain className="w-5 h-5 text-violet-400" />,
     color: 'from-violet-950/60 to-slate-950/60 border-violet-500/30',
-    label: 'MOTOR DE SALSEO',
-    title: 'El gran engranaje ⚙️',
-    desc: 'Cartas personalizadas con vuestros nombres, piques del historial de partida, callbacks a lo que respondisteis, la norma activa y la liga de duelos. Todo conectado, 100% offline.',
-  },
-  {
-    icon: <Layers className="w-5 h-5 text-cyan-400" />,
-    color: 'from-cyan-950/60 to-slate-950/60 border-cyan-500/30',
-    label: 'CAPITÁN',
-    title: 'Panel Capitán rediseñado 👑',
-    desc: 'Nuevo panel deslizante con 5 comandos (Hacer beber, Virus, Anular norma, Doble o nada, Todos beben) y selector de jugador con contadores de tragos en tiempo real.',
-  },
-  {
-    icon: <Shuffle className="w-5 h-5 text-emerald-400" />,
-    color: 'from-emerald-950/60 to-slate-950/60 border-emerald-500/30',
-    label: 'MEGAMIX',
-    title: 'Megamix más activo ⚡',
-    desc: 'Nuevo patrón [GRUPAL + INDIVIDUAL] por turno. Torneos cada 15 cartas. Yo Nunca siempre grupal — todos votan a la vez. Más dinamismo en cada ronda.',
+    label: 'MOTOR',
+    title: 'Todo conectado ⚙️',
+    desc: 'Las cartas se acuerdan de lo que respondisteis y lo sacan luego, montan piques entre vosotros, meten la norma activa y hasta la liga de duelos. Sin internet.',
   },
   {
     icon: <Trophy className="w-5 h-5 text-amber-400" />,
     color: 'from-amber-950/60 to-slate-950/60 border-amber-500/30',
-    label: 'PUNTUACIÓN',
-    title: 'XP realista y estadísticas 🏆',
-    desc: 'Sistema de XP reequilibrado: reto=30, duelo ganado=45, torneo ganado=80, impostor se escapa=60. Contadores de tragos visibles en los avatares durante la partida.',
-  },
-  {
-    icon: <Flame className="w-5 h-5 text-rose-400" />,
-    color: 'from-rose-950/60 to-slate-950/60 border-rose-500/30',
-    label: 'CONTENIDO',
-    title: '+1.300 cartas nuevas 🃏',
-    desc: 'Más de 1.300 cartas nuevas en todos los modos: Yo Nunca por etapa vital (infancia, instituto, uni, curro, fiesta), Picante, Votación, Retos, Salseo, En la Cama y más.',
+    label: 'MEGAMIX',
+    title: 'Bracket que no para 🏆',
+    desc: 'El torneo de duelos ahora encadena llaves: gana uno, empieza otra, y hay una clasificación de campeones. Menos "reparte tragos a quien quieras", más reacción al momento.',
   },
   {
     icon: <Zap className="w-5 h-5 text-yellow-400" />,
     color: 'from-yellow-950/60 to-slate-950/60 border-yellow-500/30',
-    label: 'VISUAL',
-    title: 'Animaciones mejoradas ✨',
-    desc: 'Flip 3D en las cartas al pasar. Flash de turno con avatar del jugador y glow de color. Badges de bebidas 🍺 en tiempo real sobre los avatares.',
+    label: 'ENTRAR',
+    title: 'Empezar es más fácil 🚀',
+    desc: 'Te pones un nombre, eliges monigote y a jugar. La cuenta es opcional (guarda tus monedas y tu ranking). Todo en cristiano, sin palabros raros.',
   },
   {
     icon: <Star className="w-5 h-5 text-pink-400" />,
     color: 'from-pink-950/60 to-slate-950/60 border-pink-500/30',
-    label: 'IMPOSTOR',
-    title: 'Ronda del Impostor 🕵️',
-    desc: 'Categorías y palabras del banco del juego, con pista para la mesa. El impostor que se escapa gana 60 XP.',
+    label: 'RESUMEN',
+    title: 'Clasificación al final 📊',
+    desc: 'El podio muestra a todos con sus XP, sus tragos 🍺 y sus llaves de duelo 🏆, más los títulos de la noche ("EL BORRACHÍN", "REY DE LOS DUELOS"...).',
   },
 ];
 

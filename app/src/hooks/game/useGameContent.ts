@@ -67,6 +67,7 @@ import {
     genYoNunca, genCadena, genCategorias, genCulturaChupistica, genDiezSegundos,
     genVotacion, genManosArriba, genTodosALaVez, genRanking, genEnLaCama,
     genRetos, genVerdadOBebe, genEscena, genMovil, genDosVerdades,
+    genQuePrefieres, genParanoia,
 } from '@/data/generatedParty';
 import {
     moreYoNunca, morePicante, moreVotacion, moreClasico, moreEspana,
@@ -207,6 +208,7 @@ export const useGameContent = (mode: GameMode, currentIndex: number, currentPlay
                     ...genVotacion, ...genManosArriba, ...genTodosALaVez, ...genRanking,
                     ...genEnLaCama, ...genRetos, ...genVerdadOBebe,
                     ...genEscena, ...genMovil, ...genDosVerdades,
+                    ...genQuePrefieres, ...genParanoia,
                     ...clasicoV5, ...clasicoV5b,
                     ...moreClasico,
                     ...[...enLaCamaV5, ...enLaCamaV5b].map(q => `🛌 ${q}`),
@@ -285,7 +287,7 @@ export const useGameContent = (mode: GameMode, currentIndex: number, currentPlay
                 modeContent = shuffleArray([...nostalgia, ...pacoversExtra, ...pacoversExtra2, ...espanaExtra3, ...espanaV5, ...espanaV5b, ...moreEspana]);
                 break;
             case 'votacion':
-                modeContent = shuffleArray([...quienEsMasProbable, ...masProbableExtra, ...quienEsMasProbableExtra2, ...masProbableExtra3, ...votacionV4, ...votacionV5, ...votacionV5b, ...votacionV5c, ...moreVotacion, ...manosArribaV5, ...elRankingV5, ...genVotacion, ...genManosArriba, ...genTodosALaVez, ...genRanking]);
+                modeContent = shuffleArray([...quienEsMasProbable, ...masProbableExtra, ...quienEsMasProbableExtra2, ...masProbableExtra3, ...votacionV4, ...votacionV5, ...votacionV5b, ...votacionV5c, ...moreVotacion, ...manosArribaV5, ...elRankingV5, ...genVotacion, ...genManosArriba, ...genTodosALaVez, ...genRanking, ...genQuePrefieres, ...genParanoia]);
                 break;
             case 'pacovers':
                 modeContent = shuffleArray([...pacovers, ...pacoversExtra, ...pacoversExtra2, ...pacoversExtra3, ...espanaV5, ...espanaV5b, ...moreEspana]);
