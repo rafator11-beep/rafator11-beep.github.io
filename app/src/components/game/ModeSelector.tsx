@@ -8,15 +8,15 @@ interface ModeSelectorProps {
 
 // Total de preguntas por modo (actualizado con extras)
 const QUESTIONS_COUNT: Record<string, number> = {
-  megamix: 12000,
-  clasico: 1500,
-  yo_nunca: 500,
-  yo_nunca_equipos: 500,
-  picante: 500,
+  megamix: 24000,
+  clasico: 3000,
+  yo_nunca: 2500,
+  yo_nunca_equipos: 2500,
+  picante: 1200,
   cultura: 1400,
-  espana: 500,
-  votacion: 300,
-  pacovers: 500,
+  espana: 900,
+  votacion: 1500,
+  pacovers: 900,
   trivia_futbol: 900,
   futbol: 900,
 };

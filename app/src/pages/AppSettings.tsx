@@ -394,8 +394,8 @@ export function AppSettings() {
                 <div className="space-y-2.5">
                   {[
                     ['Versión', '2.0.0 Premium'],
-                    ['Pruebas disponibles', '19.000+'],
-                    ['Modos de juego', '10'],
+                    ['Pruebas disponibles', '30.000+'],
+                    ['Modos de juego', '15'],
                   ].map(([label, value]) => (
                     <div key={label} className="flex items-center justify-between rounded-2xl border border-white/8 bg-white/[0.04] px-4 py-3 text-sm">
                       <span className="text-white/90">{label}</span>

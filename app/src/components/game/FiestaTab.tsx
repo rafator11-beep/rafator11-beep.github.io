@@ -40,7 +40,7 @@ export function FiestaTab({ onSelectMode }: FiestaTabProps) {
               <span className="premium-title">empieza aquí</span>
             </h1>
             <p className="max-w-md text-sm leading-relaxed text-white/50 md:text-base">
-              +19.000 cartas, retos, normas y caos. Ahora con Speed Round ⚡
+              +30.000 cartas, retos, normas y caos. Ahora con Speed Round ⚡
             </p>
           </div>
 
@@ -48,7 +48,7 @@ export function FiestaTab({ onSelectMode }: FiestaTabProps) {
           <div className="flex gap-3 md:flex-col">
             {[
               { icon: '🎲', label: 'Modos', value: `${fiestaModes.length}` },
-              { icon: '🃏', label: 'Cartas', value: '19K+' },
+              { icon: '🃏', label: 'Cartas', value: '30K+' },
               { icon: '👥', label: 'Jugadores', value: '2–20' },
             ].map(({ icon, label, value }) => (
               <div key={label} className="flex flex-col items-center rounded-2xl border border-white/8 bg-white/5 px-4 py-3 text-center backdrop-blur-sm">
