@@ -162,39 +162,51 @@ export function useGame(gameId: string | null) {
     };
   }, [gameId]);
 
+  const buildLocalGame = (mode: GameMode): Game => {
+    const newGame: Game = {
+      id: uuidv4(),
+      mode,
+      status: 'waiting' as any, // Cast to any to avoid strict literal mismatch if types differ
+      current_round: 1,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      current_turn: 0
+    };
+
+    // Update local ref
+    localGameState.current = { game: newGame, players: [], teams: [] };
+
+    // Simulating React state update
+    setGame(newGame);
+    setPlayers([]);
+    setTeams([]);
+
+    return newGame;
+  };
+
   const createGame = async (mode: GameMode) => {
     if (!isSupabaseConfigured) {
-      const newGame: Game = {
-        id: uuidv4(),
-        mode,
-        status: 'waiting' as any, // Cast to any to avoid strict literal mismatch if types differ
-        current_round: 1,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        current_turn: 0
-      };
-
-      // Update local ref
-      localGameState.current = { game: newGame, players: [], teams: [] };
-
-      // Simulating React state update
-      setGame(newGame);
-      setPlayers([]);
-      setTeams([]);
-
-      return newGame;
+      return buildLocalGame(mode);
     }
 
-    const { data, error } = await supabase
-      .from('games')
-      .insert({ mode })
-      .select()
-      .single();
+    // Jugar "en el mismo dispositivo" nunca debe depender de que Supabase esté
+    // sano: si la base de datos falla (proyecto caído, esquema desincronizado,
+    // sin conexión...) se cae a partida local en vez de bloquear la creación.
+    let data: any, error: any;
+    try {
+      ({ data, error } = await supabase
+        .from('games')
+        .insert({ mode })
+        .select()
+        .single());
+    } catch (err) {
+      error = err;
+    }
 
     if (error) {
-      console.error("Error creating game in Supabase:", error);
-      toast.error(`Error al crear partida en línea: ${error.message}. Comprueba la configuración de base de datos.`);
-      throw error;
+      console.warn("No se pudo crear la partida en Supabase, se juega en local:", error?.message || error);
+      toast.info('Sin conexión con el servidor: jugando en modo local.');
+      return buildLocalGame(mode);
     }
 
     // If football mode, create tictactoe state
