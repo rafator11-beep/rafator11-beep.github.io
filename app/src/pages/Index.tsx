@@ -210,7 +210,7 @@ function GameAppInner() {
       }
     } catch (error) {
       console.error("Error confirming mode selection:", error);
-      toast.error("Hubo un error al iniciar el modo. Inténtalo de nuevo.");
+      toast.error("Vaya, algo ha fallado al abrir el modo. Prueba otra vez.");
     } finally {
       setSelectedModeForOptions(null);
     }
@@ -230,7 +230,7 @@ function GameAppInner() {
       setScreen('player-setup');
     } catch (err) {
       console.error('Error creating game:', err);
-      toast.error("Error al crear la partida. Inténtalo de nuevo.");
+      toast.error("No se ha podido crear la partida. Prueba otra vez.");
     }
   };
 
@@ -247,7 +247,7 @@ function GameAppInner() {
       setScreen('player-setup');
     } catch (err) {
       console.error('Error creating game:', err);
-      toast.error("Error al crear la partida. Inténtalo de nuevo.");
+      toast.error("No se ha podido crear la partida. Prueba otra vez.");
     }
   };
 
@@ -536,7 +536,7 @@ function GameAppInner() {
 
       case 'player-setup':
         return (
-          <Suspense fallback={<div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white"><Loader2 className="w-8 h-8 animate-spin text-primary" /> Configurando jugadores...</div>}>
+          <Suspense fallback={<div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white"><Loader2 className="w-8 h-8 animate-spin text-primary" /> Preparando a los jugadores...</div>}>
             <PlayerSetup onStart={handleStartGame} onBack={handleBack} isTeamMode={isTeamMode} isMultiplayer={!!roomId} roomId={roomId} />
           </Suspense>
         );

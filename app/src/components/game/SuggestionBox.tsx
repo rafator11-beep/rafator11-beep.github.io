@@ -38,7 +38,7 @@ export function SuggestionBox({ onClose, gameMode, senderName }: SuggestionBoxPr
       setTimeout(() => onClose(), 2000);
     } catch (err) {
       console.error('Error submitting feedback:', err);
-      setError('Error al enviar. Inténtalo de nuevo.');
+      setError('No se ha podido enviar. Prueba otra vez.');
     } finally {
       setLoading(false);
     }

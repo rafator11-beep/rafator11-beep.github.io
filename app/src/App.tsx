@@ -39,7 +39,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-            <Suspense fallback={<div className="min-h-screen bg-slate-950 flex items-center justify-center text-white font-arcade animate-pulse">CARGANDO BEEP...</div>}>
+            <Suspense fallback={<div className="min-h-screen bg-slate-950 flex items-center justify-center text-white font-arcade animate-pulse">Preparando la fiesta...</div>}>
               <Routes>
                 <Route path="/" element={<PageTransition><Index /></PageTransition>} />
                 <Route path="/reset-app" element={<PageTransition><ResetApp /></PageTransition>} />

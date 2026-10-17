@@ -83,7 +83,7 @@ export function ArcadeOnlineHub({ onReturn }: ArcadeOnlineHubProps) {
       });
     } catch {
       setP2pStatus('idle');
-      toast.error('Error al crear sala P2P');
+      toast.error('No se ha podido crear la sala. Prueba otra vez.');
     }
   };
 

@@ -36,7 +36,7 @@ const GuestProgressBanner: React.FC<GuestProgressBannerProps> = ({ player_id }) 
             }
         } catch (err: any) {
             console.error('Error al guardar el progreso del invitado:', err);
-            setError('Error al guardar el progreso. Inténtalo de nuevo.');
+            setError('No se ha podido guardar tu progreso. Prueba otra vez.');
             setClaimCode(null); // Resetear el código si hay error
         } finally {
             setLoading(false);

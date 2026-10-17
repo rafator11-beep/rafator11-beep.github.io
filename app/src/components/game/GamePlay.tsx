@@ -283,7 +283,7 @@ export function GamePlay({ onExit, isTeamMode = false, roomId = null, isHost = f
                 className="flex flex-col items-center justify-center py-20"
               >
                 <div className="text-4xl mb-4 animate-bounce">{modeInfo?.icon}</div>
-                <p className="text-lg text-muted-foreground">Cargando pregunta...</p>
+                <p className="text-lg text-muted-foreground">Preparando la pregunta...</p>
               </motion.div>
             )}
           </AnimatePresence>
