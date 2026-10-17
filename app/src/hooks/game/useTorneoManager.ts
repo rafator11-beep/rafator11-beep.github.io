@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Player } from '@/types/game';
 import { GameEvent, PlayerStats, enrichChallengeWithAI } from './useGameMemory';
 import { supabase, isSupabaseConfigured } from '@/integrations/supabase/client';
@@ -109,6 +109,13 @@ export function useTorneoManager(players: Player[]) {
   const [roundComment, setRoundComment] = useState<string | null>(null);
   const [roundCommentVisible, setRoundCommentVisible] = useState(false);
 
+  // Historial de parejas recientes y nº de veces que cada uno ha jugado un
+  // duelo esta partida. Sirve para ROTAR de verdad: sin esto, los que más
+  // actividad acumulan (torneo_win/torneo_lose) se vuelven cada vez MÁS
+  // probables de salir elegidos otra vez -> siempre los mismos 2.
+  const recentPairsRef = useRef<string[]>([]);
+  const duelCountRef = useRef<Record<string, number>>({});
+
   // ── Build Match ─────────────────────────────────────────────────────────
   // Solo usa retos que sean explícitamente 1v1 (Tarea 3: filtro isDuel)
   const buildMatch = useCallback(async (
@@ -124,15 +131,20 @@ export function useTorneoManager(players: Player[]) {
     );
     const pool = duelRetos.length > 0 ? duelRetos : retoPool;
 
-    // El gran engranaje: elige el cruce por RIVALIDAD real, no al azar.
-    // Puntúa cada pareja por historia compartida (uno nombra al otro en una
-    // carta, duelos previos entre ellos, ambos muy activos).
+    // El gran engranaje: elige el cruce por RIVALIDAD real, pero sin caer en
+    // el bucle de "los mismos de siempre": quien menos duelos lleva pesa MÁS
+    // (para que rote toda la mesa) y una pareja repetida hace poco pesa MUCHO
+    // menos (penalización fuerte, no solo un empate).
     const activity: Record<string, number> = {};
     events.forEach(e => {
-      if (['reto_done', 'reto_fail', 'torneo_win', 'torneo_lose', 'duelo_win', 'duelo_lose', 'voted'].includes(e.type)) {
+      if (['reto_done', 'reto_fail', 'voted'].includes(e.type)) {
         activity[e.playerId] = (activity[e.playerId] || 0) + 1;
       }
     });
+
+    const pairKey = (a: Player, b: Player) => [a.id, b.id].sort().join('|');
+    const recentPairs = recentPairsRef.current;
+    const duelCount = duelCountRef.current;
 
     const tension = (a: Player, b: Player): number => {
       let t = (activity[a.id] || 0) + (activity[b.id] || 0);
@@ -140,13 +152,19 @@ export function useTorneoManager(players: Player[]) {
         const txt = (e.cardText || '').toLowerCase();
         if (e.playerId === a.id && txt.includes(b.name.toLowerCase())) t += 4;
         if (e.playerId === b.id && txt.includes(a.name.toLowerCase())) t += 4;
-        if ((e.type === 'duelo_win' || e.type === 'duelo_lose' || e.type === 'torneo_win' || e.type === 'torneo_lose')
-          && (e.playerName === a.name || e.playerName === b.name)) t += 2;
       }
-      return t + Math.random() * 3; // pizca de azar para que no sea siempre igual
+      // Rotación: cuantos menos duelos lleve cada uno, más prioridad tiene.
+      const playedA = duelCount[a.id] || 0;
+      const playedB = duelCount[b.id] || 0;
+      t -= (playedA + playedB) * 6;
+      // Penalización fuerte si esta pareja exacta ha jugado hace poco.
+      const key = pairKey(a, b);
+      const recentIdx = recentPairs.indexOf(key);
+      if (recentIdx !== -1) t -= 40 - recentIdx * 5; // cuanto más reciente, peor
+      return t + Math.random() * 4; // pizca de azar para desempatar
     };
 
-    let p1 = players[0], p2 = players[1], bestT = -1;
+    let p1 = players[0], p2 = players[1], bestT = -Infinity;
     for (let i = 0; i < players.length; i++) {
       for (let j = i + 1; j < players.length; j++) {
         const t = tension(players[i], players[j]);
@@ -154,6 +172,11 @@ export function useTorneoManager(players: Player[]) {
       }
     }
     if (!p1 || !p2 || p1.id === p2.id) return null;
+
+    // Actualiza el historial de rotación para el próximo duelo.
+    duelCount[p1.id] = (duelCount[p1.id] || 0) + 1;
+    duelCount[p2.id] = (duelCount[p2.id] || 0) + 1;
+    recentPairsRef.current = [pairKey(p1, p2), ...recentPairs].slice(0, 8);
 
     const reto = pool[Math.floor(Math.random() * pool.length)];
 

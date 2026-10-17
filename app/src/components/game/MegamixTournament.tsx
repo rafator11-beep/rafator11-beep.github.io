@@ -12,6 +12,28 @@ const DUEL_POOL: string[] = Array.from(new Set([...torneoRetos, ...duelosV5, ...
   .map(s => s.trim())
   .filter(Boolean);
 
+// Pool de la REPESCA: para que de verdad se sienta "otro torneo de otra
+// cosa" (como pediste), nada de pulsos ni duelos físicos — aquí es memoria,
+// rapidez mental y suerte. Los eliminados del bracket principal compiten en
+// esto por una segunda oportunidad.
+const REPESCA_POOL: string[] = [
+  "🧠 REPESCA — MEMORIA: {player} y {player2}, la mesa dice 6 objetos. Repetidlos en orden por turnos. El que se equivoque antes, pierde.",
+  "🧠 REPESCA — CADENA DE PAÍSES: {player} empieza, {player2} sigue con la última letra. El que se quede en blanco 3s, pierde.",
+  "🧠 REPESCA — NÚMEROS: {player} y {player2} cuentan alternando del 1 al 30, pero si toca múltiplo de 3 hay que decir 'bip'. El que falle, pierde.",
+  "⚡ REPESCA — RAPIDEZ: a la de 3, {player} y {player2} dicen un color. Si coincide, se repite; el primero que dude, pierde.",
+  "⚡ REPESCA — ALFABETO: {player} y {player2} dicen nombres de famosos empezando por la letra que diga la mesa, por turnos. El que se atasque, pierde.",
+  "🎯 REPESCA — PUNTERÍA: {player} y {player2} intentan encestar algo (un papel, un tapón) en un vaso desde la misma distancia. Mejor de 3 tiros.",
+  "🤐 REPESCA — AGUANTA LA RISA: la mesa intenta hacer reír a {player} y {player2} a la vez durante 15s. El primero que se ría, pierde.",
+  "🧠 REPESCA — TRIVIAL EXPRÉS: la mesa hace una pregunta de cultura general. El primero de {player} o {player2} en contestar bien, gana.",
+  "👁️ REPESCA — ESTATUA: {player} y {player2} se quedan congelados. El primero que se mueva o se ría, pierde.",
+  "🗣️ REPESCA — TRABALENGUAS: {player} y {player2} repiten el mismo trabalenguas 3 veces seguidas lo más rápido posible. Gana quien lo borde.",
+  "🧠 REPESCA — CATEGORÍA RÁPIDA: la mesa dice una categoría (animales, comida...). {player} y {player2} se turnan diciendo uno cada uno sin repetir hasta que alguien falle.",
+  "✋ REPESCA — PALMADA: {player} y {player2} ponen las manos juntas; uno intenta dar una palmada en la mano del otro antes de que la retire. Mejor de 3.",
+  "🎲 REPESCA — PIEDRA PAPEL TIJERA: mejor de 5 entre {player} y {player2}. Sin trampas.",
+  "🧠 REPESCA — ORDEN CRONOLÓGICO: la mesa dice 4 años al azar; {player} y {player2} compiten por decir el orden correcto primero.",
+  "⚡ REPESCA — ECO: {player} dice una frase corta, {player2} tiene que repetirla exacta al momento. Si falla una palabra, pierde; si acierta, cambian los papeles.",
+];
+
 const SEEN_KEY = 'beep_duel_retos_seen';
 function loadSeen(): Set<string> {
   try { return new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || '[]')); } catch { return new Set(); }
@@ -53,31 +75,37 @@ function shuffle<T>(arr: T[]): T[] {
   return [...arr].sort(() => Math.random() - 0.5);
 }
 
-function pickReto(p1: Player, p2: Player): string {
-  const seen = loadSeen();
-  let pool = DUEL_POOL.filter(r => !seen.has(r));
-  if (pool.length === 0) { seen.clear(); pool = DUEL_POOL; }
-  const r = pool[Math.floor(Math.random() * pool.length)] || DUEL_POOL[0] || 'DUELO: {player} vs {player2}. Pulso de miradas, el que parpadee bebe 2.';
+function pickReto(p1: Player, p2: Player, pool: string[], seenKey: string): string {
+  const seen = loadSeen2(seenKey);
+  let fresh = pool.filter(r => !seen.has(r));
+  if (fresh.length === 0) { seen.clear(); fresh = pool; }
+  const r = fresh[Math.floor(Math.random() * fresh.length)] || pool[0] || 'DUELO: {player} vs {player2}. Pulso de miradas, el que parpadee bebe 2.';
   seen.add(r);
-  saveSeen(seen);
+  saveSeen2(seenKey, seen);
   return r
     .replace(/\{player2\}|\{jugador2\}|\{rival\}/gi, p2.name)
     .replace(/\{player\}|\{jugador\}|\{nombre\}/gi, p1.name)
     .replace(/vs \{player2\}:/gi, `vs ${p2.name}:`);
 }
+function loadSeen2(key: string): Set<string> {
+  try { return new Set(JSON.parse(localStorage.getItem(key) || '[]')); } catch { return new Set(); }
+}
+function saveSeen2(key: string, set: Set<string>) {
+  try { localStorage.setItem(key, JSON.stringify([...set].slice(-400))); } catch { /* ignore */ }
+}
 
-function buildRound(players: (Player | null)[], roundIdx: number): Match[] {
+function buildRound(players: (Player | null)[], roundIdx: number, pool: string[], seenKey: string): Match[] {
   const matches: Match[] = [];
   for (let i = 0; i < players.length; i += 2) {
     const p1 = players[i] ?? null;
     const p2 = players[i + 1] ?? null;
     const isBye = !p2;
     matches.push({
-      id: `r${roundIdx}-m${i / 2}`,
+      id: `r${roundIdx}-m${i / 2}-${Math.random().toString(36).slice(2, 6)}`,
       player1: p1,
       player2: p2,
       winner: isBye ? p1 : null,
-      reto: p1 && p2 ? pickReto(p1, p2) : '',
+      reto: p1 && p2 ? pickReto(p1, p2, pool, seenKey) : '',
       round: roundIdx,
       isBye,
     });
@@ -85,22 +113,22 @@ function buildRound(players: (Player | null)[], roundIdx: number): Match[] {
   return matches;
 }
 
-function buildBracket(players: Player[]): Match[][] {
+function buildBracket(players: Player[], pool: string[] = DUEL_POOL, seenKey: string = SEEN_KEY): Match[][] {
   const shuffled = shuffle(players);
-  // Pad to next power of 2
-  const size = Math.pow(2, Math.ceil(Math.log2(shuffled.length)));
+  // Pad to next power of 2 (mínimo 2 para evitar log2(1)=0)
+  const size = Math.pow(2, Math.ceil(Math.log2(Math.max(shuffled.length, 2))));
   const padded: (Player | null)[] = [...shuffled, ...Array(size - shuffled.length).fill(null)];
 
-  const rounds: Match[][] = [];
-  let current: (Player | null)[] = padded;
-  let roundIdx = 0;
-  while (current.length > 1) {
-    const matches = buildRound(current, roundIdx);
-    rounds.push(matches);
-    current = matches.map(m => m.winner); // BYEs auto-advance
-    roundIdx++;
-  }
-  return rounds;
+  // OJO: solo se construye la PRIMERA ronda aquí. Las siguientes rondas las
+  // añade advanceWinner() dinámicamente según se van conociendo los
+  // ganadores reales — si se pre-construían todas las rondas de golpe (como
+  // antes), las rondas 2+ nacían con player1/player2 null y la comprobación
+  // `!p2` las marcaba isBye=true con winner=null. Eso bloqueaba el torneo
+  // para siempre en cualquier bracket de más de 2 jugadores: advanceWinner
+  // nunca encontraba hueco para escribir el ganador real (la ronda "ya
+  // existía") y la búsqueda del siguiente duelo descartaba esa ronda por
+  // tener isBye=true, así que no pasaba nada al tocar nada = app pillada.
+  return [buildRound(padded, 0, pool, seenKey)];
 }
 
 const ROUND_NAMES = ['Cuartos', 'Semifinales', 'Final', 'Campeón'];
@@ -295,12 +323,17 @@ const DuelScreen = ({
 
 const ChampionScreen = ({
   winner, onNewBracket, onFinish, standings, bracketNumber,
+  stage, eliminatedCount, onStartRepesca, onBackToMain,
 }: {
   winner: Player;
   onNewBracket: () => void;
   onFinish: () => void;
   standings: { name: string; wins: number }[];
   bracketNumber: number;
+  stage: 'main' | 'repesca';
+  eliminatedCount: number;
+  onStartRepesca: () => void;
+  onBackToMain: () => void;
 }) => {
   // Sparkle stars array for visual excellence animation
   const sparkles = useMemo(() => Array.from({ length: 15 }, (_, i) => ({
@@ -366,7 +399,7 @@ const ChampionScreen = ({
           transition={{ delay: 0.2 }}
           className="text-amber-400 font-black text-xs uppercase tracking-[0.4em] mb-2"
         >
-          🏆 Campeón de la llave {bracketNumber} 🏆
+          {stage === 'repesca' ? '🥈 Campeón de la Repesca 🥈' : `🏆 Campeón de la llave ${bracketNumber} 🏆`}
         </motion.p>
         <motion.p 
           initial={{ opacity: 0, y: 15 }}
@@ -385,7 +418,11 @@ const ChampionScreen = ({
         className="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-center max-w-xs shadow-xl"
       >
         <p className="text-amber-400 font-bold text-xs uppercase tracking-wider mb-1">🎁 Recompensa Real</p>
-        <p className="text-white font-bold text-sm">{winner.name} reparte 5 tragos a quien quiera 👑</p>
+        <p className="text-white font-bold text-sm">
+          {stage === 'repesca'
+            ? `${winner.name} se gana una revancha: elige a alguien del bracket principal y que beba 2 👑`
+            : `${winner.name} reparte 5 tragos a quien quiera 👑`}
+        </p>
       </motion.div>
 
       {/* Liga de duelos — clasificación continua entre llaves */}
@@ -411,6 +448,24 @@ const ChampionScreen = ({
       )}
 
       <div className="mt-4 flex flex-col gap-3 w-full max-w-xs z-10">
+        {stage === 'main' && eliminatedCount >= 2 && (
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={onStartRepesca}
+            className="px-10 py-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 border-2 border-cyan-400 text-white font-black text-sm uppercase tracking-widest shadow-lg shadow-cyan-500/20 active:scale-95 transition-all"
+          >
+            🥈 Repesca de eliminados ({eliminatedCount})
+          </motion.button>
+        )}
+        {stage === 'repesca' && (
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={onBackToMain}
+            className="px-10 py-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 border-2 border-cyan-400 text-white font-black text-sm uppercase tracking-widest shadow-lg shadow-cyan-500/20 active:scale-95 transition-all"
+          >
+            🏆 Volver al torneo principal
+          </motion.button>
+        )}
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={onNewBracket}
@@ -432,7 +487,17 @@ const ChampionScreen = ({
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
+const REPESCA_SEEN_KEY = 'beep_repesca_retos_seen';
+
 export function MegamixTournament({ players, onWinner, onClose, addScore }: Props) {
+  // Quiénes compiten en el bracket que se ve AHORA mismo: el principal
+  // (todos) o la repesca (solo los eliminados del principal).
+  const [stage, setStage] = useState<'main' | 'repesca'>('main');
+  const [activePlayers, setActivePlayers] = useState<Player[]>(players);
+  const [eliminated, setEliminated] = useState<Player[]>([]);
+  const pool = stage === 'repesca' ? REPESCA_POOL : DUEL_POOL;
+  const seenKey = stage === 'repesca' ? REPESCA_SEEN_KEY : SEEN_KEY;
+
   const [rounds, setRounds] = useState<Match[][]>(() => buildBracket(players));
   const [currentRoundIdx, setCurrentRoundIdx] = useState(0);
   const [currentMatchIdx, setCurrentMatchIdx] = useState(0);
@@ -497,34 +562,43 @@ export function MegamixTournament({ players, onWinner, onClose, addScore }: Prop
         if (nextPlayers.length === 1) {
           const finalMatch = next[rIdx][mIdx];
           const runnerUp = finalMatch.player1?.id === winner.id ? finalMatch.player2 : finalMatch.player1;
-          
+
           setChampion(winner);
-          recordTournament(winner.name, runnerUp?.name || 'Subcampeón', players.length);
-          setBracketWins(prev => {
-            const upd = { ...prev, [winner.id]: (prev[winner.id] || 0) + 1 };
-            try {
-              localStorage.setItem('beep_bracket_wins', JSON.stringify(upd));
-              // Mapa id→nombre para que el PartyDirector pueda citar al rey de duelos.
-              const names = JSON.parse(localStorage.getItem('beep_bracket_win_names') || '{}');
-              players.forEach(p => { names[p.id] = p.name; });
-              localStorage.setItem('beep_bracket_win_names', JSON.stringify(names));
-            } catch { /* ignore */ }
-            return upd;
-          });
+          const label = stage === 'repesca' ? `${winner.name} (Repesca)` : winner.name;
+          recordTournament(label, runnerUp?.name || 'Subcampeón', activePlayers.length);
+          if (stage === 'main') {
+            setBracketWins(prev => {
+              const upd = { ...prev, [winner.id]: (prev[winner.id] || 0) + 1 };
+              try {
+                localStorage.setItem('beep_bracket_wins', JSON.stringify(upd));
+                // Mapa id→nombre para que el PartyDirector pueda citar al rey de duelos.
+                const names = JSON.parse(localStorage.getItem('beep_bracket_win_names') || '{}');
+                players.forEach(p => { names[p.id] = p.name; });
+                localStorage.setItem('beep_bracket_win_names', JSON.stringify(names));
+              } catch { /* ignore */ }
+              return upd;
+            });
+          }
           return next;
         }
         if (rIdx + 1 >= next.length) {
-          const newRound = buildRound(nextPlayers, rIdx + 1);
+          const newRound = buildRound(nextPlayers, rIdx + 1, pool, seenKey);
           return [...next, newRound];
         }
       }
       return next;
     });
 
-    addScore(winner.id, 30);
+    // Quien pierde un duelo real (no un BYE) del bracket PRINCIPAL pasa a la
+    // bolsa de la repesca, para que nadie se quede mirando sin jugar.
+    if (stage === 'main') {
+      setEliminated(prev => prev.some(p => p.id === loser.id) ? prev : [...prev, loser]);
+    }
+
+    addScore(winner.id, stage === 'repesca' ? 15 : 30);
     addScore(loser.id, 5);
     onWinner(winner, loser);
-  }, [addScore, onWinner, players.length, recordTournament]);
+  }, [addScore, onWinner, players, activePlayers.length, recordTournament, stage, pool, seenKey]);
 
   const handleVote = useCallback((winner: Player) => {
     const match = rounds[currentRoundIdx][currentMatchIdx];
@@ -551,8 +625,14 @@ export function MegamixTournament({ players, onWinner, onClose, addScore }: Prop
     });
   }, [rounds, currentRoundIdx, currentMatchIdx, advanceWinner]);
 
-  const handleNewBracket = useCallback(() => {
-    const fresh = buildBracket(players);
+  // Arranca un bracket nuevo para el grupo de jugadores indicado (por
+  // defecto, repite el bracket principal con los mismos de siempre).
+  const startBracket = useCallback((group: Player[], nextStage: 'main' | 'repesca') => {
+    const nextPool = nextStage === 'repesca' ? REPESCA_POOL : DUEL_POOL;
+    const nextSeenKey = nextStage === 'repesca' ? REPESCA_SEEN_KEY : SEEN_KEY;
+    const fresh = buildBracket(group, nextPool, nextSeenKey);
+    setStage(nextStage);
+    setActivePlayers(group);
     setRounds(fresh);
     setCurrentRoundIdx(0);
     setCurrentMatchIdx(0);
@@ -560,7 +640,10 @@ export function MegamixTournament({ players, onWinner, onClose, addScore }: Prop
     setViewTab('bracket');
     setChampion(null);
     setShowDuel(false);
-    setBracketNumber(n => n + 1);
+    if (nextStage === 'main') {
+      setEliminated([]);
+      setBracketNumber(n => n + 1);
+    }
     setTimeout(() => {
       const firstActive = fresh[0]?.findIndex(m => !m.winner && !m.isBye) ?? -1;
       if (firstActive >= 0) {
@@ -568,10 +651,25 @@ export function MegamixTournament({ players, onWinner, onClose, addScore }: Prop
         setShowDuel(true);
       }
     }, 400);
-  }, [players]);
+  }, []);
+
+  const handleNewBracket = useCallback(() => {
+    // Nueva llave: si hay suficientes eliminados esperando, prioriza
+    // mandarlos a la Repesca; si no, repite el bracket principal con todos.
+    startBracket(players, 'main');
+  }, [players, startBracket]);
+
+  const handleStartRepesca = useCallback(() => {
+    if (eliminated.length < 2) return;
+    startBracket(eliminated, 'repesca');
+  }, [eliminated, startBracket]);
+
+  const handleBackToMain = useCallback(() => {
+    startBracket(players, 'main');
+  }, [players, startBracket]);
 
   const activeMatch = rounds[currentRoundIdx]?.[currentMatchIdx];
-  const voters = players.filter(p => p.id !== activeMatch?.player1?.id && p.id !== activeMatch?.player2?.id);
+  const voters = activePlayers.filter(p => p.id !== activeMatch?.player1?.id && p.id !== activeMatch?.player2?.id);
 
   if (champion) {
     const standings = Object.entries(bracketWins)
@@ -583,7 +681,11 @@ export function MegamixTournament({ players, onWinner, onClose, addScore }: Prop
         winner={champion}
         standings={standings}
         bracketNumber={bracketNumber}
+        stage={stage}
+        eliminatedCount={eliminated.length}
         onNewBracket={handleNewBracket}
+        onStartRepesca={handleStartRepesca}
+        onBackToMain={handleBackToMain}
         onFinish={onClose}
       />
     );
@@ -602,9 +704,16 @@ export function MegamixTournament({ players, onWinner, onClose, addScore }: Prop
           <div>
             <div className="flex items-center gap-1.5">
               <Trophy className="w-5 h-5 text-amber-400 animate-pulse fill-current" />
-              <p className="text-amber-400 font-black text-sm uppercase tracking-[0.2em] shadow-sm">Torneo Megamix</p>
+              <p className="text-amber-400 font-black text-sm uppercase tracking-[0.2em] shadow-sm">
+                {stage === 'repesca' ? 'Repesca — segunda oportunidad' : 'Torneo Megamix'}
+              </p>
             </div>
-            <p className="text-white/40 text-[10px] uppercase font-bold tracking-wider">Llave {bracketNumber} · {players.length} Jugadores · Eliminatoria Directa</p>
+            <p className="text-white/40 text-[10px] uppercase font-bold tracking-wider">
+              {stage === 'repesca'
+                ? `${activePlayers.length} eliminados compiten · El ganador vuelve con honor`
+                : `Llave ${bracketNumber} · ${activePlayers.length} Jugadores · Eliminatoria Directa`}
+              {stage === 'main' && eliminated.length > 0 && ` · 🥈 ${eliminated.length} esperando repesca`}
+            </p>
           </div>
           <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors">
             <X className="w-4 h-4 text-white/60" />
