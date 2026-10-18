@@ -583,9 +583,27 @@ export function MegamixTournament({ players, onWinner, onClose, addScore }: Prop
         }
         if (rIdx + 1 >= next.length) {
           const newRound = buildRound(nextPlayers, rIdx + 1, pool, seenKey);
-          return [...next, newRound];
+          next.push(newRound);
         }
       }
+
+      // Busca la siguiente pelea pendiente ya sobre el estado FINAL (next),
+      // en vez de leerlo en una segunda actualización separada: evita que el
+      // torneo se quede pillado si el orden de aplicación de los updaters
+      // cambia entre versiones de React.
+      const allMatches = next.flatMap((r, ri) => r.map((m, mi) => ({ m, ri, mi })));
+      const nextMatch = allMatches.find(({ m, ri, mi }) =>
+        !m.winner && !m.isBye && (ri > rIdx || (ri === rIdx && mi > mIdx))
+      );
+      if (nextMatch) {
+        setTimeout(() => {
+          setCurrentRoundIdx(nextMatch.ri);
+          setCurrentMatchIdx(nextMatch.mi);
+          setViewRound(nextMatch.ri);
+          setShowDuel(true);
+        }, 800);
+      }
+
       return next;
     });
 
@@ -606,23 +624,6 @@ export function MegamixTournament({ players, onWinner, onClose, addScore }: Prop
 
     advanceWinner(winner, loser, currentRoundIdx, currentMatchIdx);
     setShowDuel(false);
-
-    // Find next pending match in current or future rounds
-    setRounds(prev => {
-      const allMatches = prev.flatMap((r, ri) => r.map((m, mi) => ({ m, ri, mi })));
-      const next = allMatches.find(({ m, ri, mi }) =>
-        !m.winner && !m.isBye && (ri > currentRoundIdx || (ri === currentRoundIdx && mi > currentMatchIdx))
-      );
-      if (next) {
-        setTimeout(() => {
-          setCurrentRoundIdx(next.ri);
-          setCurrentMatchIdx(next.mi);
-          setViewRound(next.ri);
-          setShowDuel(true);
-        }, 800);
-      }
-      return prev;
-    });
   }, [rounds, currentRoundIdx, currentMatchIdx, advanceWinner]);
 
   // Arranca un bracket nuevo para el grupo de jugadores indicado (por
