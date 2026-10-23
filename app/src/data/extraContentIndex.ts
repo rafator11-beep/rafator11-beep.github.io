@@ -92,4 +92,7 @@ export const moreMimica: string[] = [
 
 export const moreSalseo: string[] = [...salseoExtra, ...salseoExtra17];
 
-export const moreTorneoRetos: string[] = [...torneoRetos, ...retosExtra19];
+// OJO: retosExtra19 son retos para UN jugador ("{player}, haz X") y no tienen
+// {player2}, así que no valen para duelos 1v1 del Megamix — si se meten aquí
+// salen pruebas sin sentido ("Juan vs María: Juan, imita a un cantante...").
+export const moreTorneoRetos: string[] = [...torneoRetos];

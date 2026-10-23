@@ -2659,6 +2659,9 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                 if (correct) {
                   addScore(currentPlayer.id, points);
                   confetti();
+                  toast.success(`✓ ${currentPlayer?.name} acierta — +${points} XP · reparte 1 trago 🍺`, { duration: 2000 });
+                } else {
+                  toast(`✗ ${currentPlayer?.name} falla — bebe 1 🍻`, { duration: 2000 });
                 }
 
                 // If it was a trigger (megamix), close the overlay.
