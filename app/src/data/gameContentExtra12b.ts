@@ -99,6 +99,7 @@ export const verdadOBebeExtra12: string[] = [
   "🎤 VERDAD O BEBE: {player} — ¿Cuándo fue la última vez que te reíste hasta que te dolió la barriga? Si no respondes, bebe 1. 🍺",
   "🎤 VERDAD O BEBE: {player} — ¿Hay algo que quieras que el grupo sepa sobre ti antes de que acabe la noche? Si no respondes, bebe 3. 🥃",
   "🎤 VERDAD O BEBE: {player} — ¿Qué es lo que más valoras de ti que crees que la gente no ve? Si no respondes, bebe 2. 🍻",
+  "🎤 VERDAD O BEBE: {player} — ¿Cuál ha sido la mentira más grande que le has dicho a un profesor o jefe? Si no respondes, bebe 2. 🍻",
   "🎤 VERDAD O BEBE: {player} — ¿Cuándo fue la última vez que hiciste algo que te daba vergüenza y lo hiciste igual? Si no respondes, bebe 2. 🍻",
   "🎤 VERDAD O BEBE: {player} — ¿Qué te hace diferente del resto del grupo? Si no respondes, bebe 1. 🍺",
   "🎤 VERDAD O BEBE: {player} — ¿Cuál es la app que más tiempo te roba y sabes que no vale la pena? Si no respondes, bebe 1. 🍺",

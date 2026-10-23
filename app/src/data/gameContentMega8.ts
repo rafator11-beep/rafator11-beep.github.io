@@ -604,7 +604,7 @@ export const impostorExtra8b: Array<{ category: string; normalQuestion: string; 
   { category: "Cine", normalQuestion: "Di una peli de terror de los 80", impostorQuestion: "Di una peli de terror de los 2000", hint: "Eso es demasiado reciente para ser de los 80..." },
   { category: "Tecnología", normalQuestion: "Di una app de redes sociales", impostorQuestion: "Di una app de productividad", hint: "¿Eso es para socializar o para trabajar?" },
   { category: "Geografía", normalQuestion: "Di una ciudad de Andalucía", impostorQuestion: "Di una ciudad de Cataluña", hint: "Eso no suena muy andaluz..." },
-  { category: "TV", normalQuestion: "Di un personaje de Pasión de Gavilanes", impostorQuestion: "Di un personaje de Betty la Fea", hint: "¿Ese personaje sale en esa serie?" },
+  { category: "TV", normalQuestion: "Di un personaje de La Casa de Papel", impostorQuestion: "Di un personaje de Física o Química", hint: "¿Ese personaje sale en esa serie?" },
   { category: "Marcas", normalQuestion: "Di una marca de cerveza española", impostorQuestion: "Di una marca de cerveza alemana", hint: "Ese nombre tiene mucha H en el que no debería haber..." },
   { category: "Animales", normalQuestion: "Di un animal que haya en España", impostorQuestion: "Di un animal exótico de África", hint: "Ese animal no lo verías en el campo de aquí..." },
   { category: "Famosos", normalQuestion: "Di un futbolista español famoso", impostorQuestion: "Di un tenista español famoso", hint: "Ese juega a otro deporte distinto..." },

@@ -91,7 +91,7 @@ const footballQuestionsData = [
   // LA LIGA
   ,{ question: "¿Qué equipo ganó La Liga en la temporada 2022-23?", options: ["Real Madrid", "Barcelona", "Atlético Madrid", "Real Sociedad"], correctIndex: 1, difficulty: "easy", category: "laliga" },
   { question: "¿Cuántas Ligas tiene el Real Madrid?", options: ["33", "35", "36", "34"], correctIndex: 2, difficulty: "medium", category: "laliga" },
-  { question: "¿Quién ganó el Pichichi en 2023?", options: ["Benzema", "Lewandowski", "Vinicius", "Griezmann"], correctIndex: 0, difficulty: "easy", category: "laliga" },
+  { question: "¿Quién ganó el Pichichi en 2023?", options: ["Benzema", "Lewandowski", "Vinicius", "Griezmann"], correctIndex: 1, difficulty: "easy", category: "laliga" },
   { question: "¿En qué año ganó el Atlético de Madrid su última Liga?", options: ["2014", "2021", "2018", "2016"], correctIndex: 1, difficulty: "medium", category: "laliga" },
   { question: "¿Quién era el entrenador del Barcelona cuando ganaron el sextete en 2009?", options: ["Luis Enrique", "Frank Rijkaard", "Pep Guardiola", "Tito Vilanova"], correctIndex: 2, difficulty: "easy", category: "laliga" },
   { question: "¿Cuántos Balones de Oro ganó Messi en el Barcelona?", options: ["6", "7", "8", "5"], correctIndex: 1, difficulty: "medium", category: "laliga" },
@@ -1735,7 +1735,7 @@ const footballQuestionsData = [
   { category: "Mundiales", question: "¿En qué Mundial Maradona marcó 'La Mano de Dios'?", options: ["1982", "1986", "1990", "1994"], correctIndex: 1, difficulty: "easy" },
   { category: "Mundiales", question: "¿Qué país organizó el Mundial 2018?", options: ["Brasil", "Alemania", "Rusia", "Qatar"], correctIndex: 2, difficulty: "easy" },
   { category: "Mundiales", question: "¿Cuántos goles marcó Francia en la final del Mundial 2022?", options: ["2", "3", "4", "1"], correctIndex: 1, difficulty: "medium" },
-  { category: "Mundiales", question: "¿Qué país fue subcampeón en los Mundiales 2014 y 2018?", options: ["Francia", "Argentina", "Croacia", "Alemania"], correctIndex: 1, difficulty: "medium" }, // Nota: Argentina 2014, Croacia 2018. La respuesta correcta depende del enfoque, aquí se asume Argentina por 2014.
+  { category: "Mundiales", question: "¿Qué país fue subcampeón en el Mundial 2014?", options: ["Francia", "Argentina", "Croacia", "Alemania"], correctIndex: 1, difficulty: "medium" },
   
   // --- Jugadores Históricos ---
   { category: "Jugadores Históricos", question: "¿Cuántos Balones de Oro ha ganado Lionel Messi?", options: ["6", "7", "8", "9"], correctIndex: 2, difficulty: "easy" },
@@ -1751,7 +1751,7 @@ const footballQuestionsData = [
   { category: "Fichajes", question: "¿Cuánto pagó el PSG por Neymar en 2017?", options: ["180 millones", "200 millones", "222 millones", "250 millones"], correctIndex: 2, difficulty: "easy" },
   { category: "Fichajes", question: "¿A qué equipo fichó Mbappé en 2017?", options: ["Real Madrid", "PSG", "Manchester City", "Barcelona"], correctIndex: 1, difficulty: "easy" },
   { category: "Fichajes", question: "¿Cuánto costó el fichaje de Cristiano Ronaldo al Real Madrid en 2009?", options: ["80 millones", "94 millones", "100 millones", "120 millones"], correctIndex: 1, difficulty: "medium" },
-  { category: "Fichajes", question: "¿Qué jugador fichó el Real Madrid gratis del Bayern en 2014?", options: ["Kroos", "James", "Modric", "Bale"], correctIndex: 0, difficulty: "medium" }, // Nota: Kroos costó 25M, no fue gratis. Lewandowski fue gratis al Bayern. Aquí se asume Kroos por contexto.
+  { category: "Fichajes", question: "¿Qué jugador fichó el Real Madrid del Bayern en 2014?", options: ["Kroos", "James", "Modric", "Bale"], correctIndex: 0, difficulty: "medium" },
   { category: "Fichajes", question: "¿Cuánto pagó el Chelsea por Kepa en 2018?", options: ["60 millones", "72 millones", "80 millones", "85 millones"], correctIndex: 2, difficulty: "medium" },
   { category: "Fichajes", question: "¿A qué equipo fichó Erling Haaland en 2022?", options: ["Manchester City", "Real Madrid", "Chelsea", "Liverpool"], correctIndex: 0, difficulty: "easy" },
   
@@ -1781,7 +1781,7 @@ const footballQuestionsData = [
   // --- Partidos Icónicos ---
   { category: "Partidos Icónicos", question: "¿Cuál fue el resultado de la final del Mundial 2014?", options: ["Alemania 1-0 Argentina", "Alemania 2-1 Argentina", "Alemania 1-0 Brasil", "Alemania 2-0 Argentina"], correctIndex: 0, difficulty: "medium" },
   { category: "Partidos Icónicos", question: "¿Cuántos goles marcó Alemania a Brasil en el 7-1 del Mundial 2014?", options: ["6", "7", "8", "5"], correctIndex: 1, difficulty: "easy" },
-  { category: "Partidos Icónicos", question: "¿Qué equipo remontó un 0-4 en la final de la Champions 2005?", options: ["AC Milan", "Liverpool", "Juventus", "Real Madrid"], correctIndex: 1, difficulty: "medium" }, // Remontó un 0-3, no 0-4. Ajustado al contexto Liverpool.
+  { category: "Partidos Icónicos", question: "¿Qué equipo remontó un 0-3 en la final de la Champions 2005?", options: ["AC Milan", "Liverpool", "Juventus", "Real Madrid"], correctIndex: 1, difficulty: "medium" },
   { category: "Partidos Icónicos", question: "¿Cuál fue el resultado del Barcelona-Real Madrid del 2-6 en el Bernabéu?", options: ["6-2", "5-1", "2-6", "4-0"], correctIndex: 2, difficulty: "easy" },
   { category: "Partidos Icónicos", question: "¿Quién marcó el gol de Iniesta contra Holanda en la final del Mundial 2010?", options: ["Xavi", "Villa", "Iniesta", "Torres"], correctIndex: 2, difficulty: "easy" }, // Pregunta redundante, respuesta obvia: Iniesta.
   
@@ -1907,9 +1907,17 @@ const footballQuestionsData = [
   { category: "Variado", question: "¿Qué país nunca ha clasificado a un Mundial?", options: ["China", "India", "Indonesia", "Todos han clasificado"], correctIndex: 1, difficulty: "medium" }
 ];
 
+const DIFFICULTY_NUMBER_TO_LABEL: Record<number, 'easy' | 'medium' | 'hard'> = {
+  1: 'easy',
+  2: 'medium',
+  3: 'hard',
+};
+
 export const footballQuestions: FootballQuestion[] = footballQuestionsData.map(q => ({
   ...q,
-  difficulty: String(q.difficulty),
+  difficulty: typeof q.difficulty === 'number'
+    ? (DIFFICULTY_NUMBER_TO_LABEL[q.difficulty] ?? 'medium')
+    : q.difficulty,
   correctIndex: q.correctIndex ?? (q.correct_answer ? q.options.indexOf(q.correct_answer) : 0)
 }));
 

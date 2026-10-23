@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { GameMode } from '@/types/game';
+import { GameMode, Player } from '@/types/game';
+import { TASTE_CARD_TEMPLATES } from '@/data/tasteQuestionsContent';
+import { fetchThemeCards } from '@/services/customThemeService';
 import {
     normasRonda,
     clasico,
@@ -102,6 +104,57 @@ function seededShuffle<T>(array: T[], seed: number): T[] {
     return a;
 }
 
+// ─── Cartas de "gustos" (ver PlayerSetup → sección Gustos) ─────────────────
+// Si nadie rellenó gustos, esto devuelve [] y el mazo se construye exactamente
+// igual que antes (no se nota ningún cambio).
+function buildTasteCards(players: Player[]): string[] {
+    if (!players || players.length === 0) return [];
+    try {
+        const raw = localStorage.getItem('fiesta_player_tastes');
+        if (!raw) return [];
+        const stored: Record<string, { chips?: string[]; free?: string }> = JSON.parse(raw);
+        const cards: string[] = [];
+        for (const p of players) {
+            const taste = stored[p.id];
+            if (!taste || !Array.isArray(taste.chips)) continue;
+            for (const chipKey of taste.chips) {
+                const templates = TASTE_CARD_TEMPLATES[chipKey];
+                if (!templates || templates.length === 0) continue;
+                // 1-2 cartas por gusto marcado, para no saturar el mazo con una sola persona.
+                const picks = shuffleArray(templates).slice(0, Math.min(2, templates.length));
+                for (const t of picks) {
+                    cards.push(t.replace(/\{taste_player\}/g, p.name));
+                }
+            }
+            if (taste.free && taste.free.trim().length > 0) {
+                cards.push(`🎯 GUSTOS: ${p.name} dijo que le gusta "${taste.free.trim()}". Que alguien del grupo le haga una pregunta rápida sobre eso; si ${p.name} tarda más de 5 segundos en responder, bebe 2.`);
+            }
+        }
+        return cards;
+    } catch {
+        return [];
+    }
+}
+
+// Mezcla cartas de gustos en el mazo a un ritmo fijo (cada ~16 cartas), en vez
+// de simplemente concatenarlas y dejar que se diluyan en un pool de miles de
+// cartas (donde casi nunca saldrían). Si tasteCards está vacío, devuelve deck igual.
+function interleaveTasteCards(deck: string[], tasteCards: string[]): string[] {
+    if (tasteCards.length === 0) return deck;
+    const shuffledTastes = shuffleArray(tasteCards);
+    const out: string[] = [];
+    const GAP = 16;
+    let tPtr = 0;
+    for (let i = 0; i < deck.length; i++) {
+        out.push(deck[i]);
+        if ((i + 1) % GAP === 0) {
+            out.push(shuffledTastes[tPtr % shuffledTastes.length]);
+            tPtr++;
+        }
+    }
+    return out;
+}
+
 function normalizeDeckEntries(items: any[]): string[] {
     return items
         .map(item => typeof item === 'string' ? item : String(item ?? ''))
@@ -166,7 +219,7 @@ function rememberSession(deck: string[], mode: string, sessionSize: number): voi
     }
 }
 
-export const useGameContent = (mode: GameMode, currentIndex: number, currentPlayerName: string, playersCount: number = 4) => {
+export const useGameContent = (mode: GameMode, currentIndex: number, currentPlayerName: string, playersCount: number = 4, players: Player[] = []) => {
     const [content, setContent] = useState<string[]>([]);
     const [currentQuestion, setCurrentQuestion] = useState<any | null>(null);
     const [usedQuestionIds, setUsedQuestionIds] = useState<Set<string>>(new Set());
@@ -296,7 +349,14 @@ export const useGameContent = (mode: GameMode, currentIndex: number, currentPlay
                 modeContent = getMegamixContent(200);
         }
 
-        const cleanedContent = normalizeDeckEntries(modeContent as any[]);
+        let cleanedContent = normalizeDeckEntries(modeContent as any[]);
+        // Gustos: solo en los modos "mezcla" (megamix/clasico) tiene sentido meter
+        // una carta de vez en cuando sobre un jugador concreto. Si nadie rellenó
+        // gustos, buildTasteCards devuelve [] y esto no cambia nada.
+        if (mode === 'megamix' || mode === 'clasico') {
+            const tasteCards = buildTasteCards(players);
+            cleanedContent = interleaveTasteCards(cleanedContent, tasteCards);
+        }
         const weighted = normalizeDeckEntries(applyVoteWeights(cleanedContent, mode));
         // Baraja + manda al fondo lo visto en partidas recientes (frescura entre sesiones)
         const sessionSize = Math.max(18, playersCount * 12);
@@ -307,6 +367,19 @@ export const useGameContent = (mode: GameMode, currentIndex: number, currentPlay
         // Reset used questions for fresh game
         setUsedQuestionIds(new Set());
         setQuestionNumber(0);
+
+        // Tema personalizado (Fase 5): se pide en paralelo, sin bloquear el inicio
+        // de la partida. Si tarda, falla, o no hay tema puesto, no pasa nada — el
+        // mazo ya está jugable desde el principio con el banco normal.
+        if (mode === 'megamix' || mode === 'clasico') {
+            const theme = (localStorage.getItem('fiesta_party_theme') || '').trim();
+            if (theme) {
+                fetchThemeCards(theme).then(themeCards => {
+                    if (themeCards.length === 0) return;
+                    setContent(prev => interleaveTasteCards(prev, themeCards));
+                });
+            }
+        }
 
         // Pre-load first trivia question synchronously to avoid 'Cargando pregunta' flash
         if (mode === 'trivia_futbol' || mode === 'cultura') {

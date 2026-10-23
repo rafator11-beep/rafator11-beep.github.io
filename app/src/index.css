@@ -103,6 +103,20 @@
   button, input, textarea, select { font: inherit; }
 }
 
+/* ── ACCESIBILIDAD / BATERÍA: respeta "reducir movimiento" del sistema ──
+   Para quien lo activa (o para ahorrar batería), recortamos animaciones y
+   transiciones CSS a casi nada en vez de desactivarlas del todo (evita saltos
+   bruscos de layout en componentes que dependen de una transición para
+   mostrar/ocultar contenido). */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 @layer utilities {
 
   /* ── SCROLLBAR ──────────────────────────────────────────────── */

@@ -164,7 +164,7 @@ export const verdadOBebeNuevo: string[] = [
   "🎤 VERDAD O BEBE: {player} — ¿Cuál es la opinión impopular que tienes sobre alguien del grupo? Si no respondes, bebe 5. 🍻",
   "🎤 VERDAD O BEBE: {player} — Lee el último audio que has mandado en voz alta o bebe 3. 🍻",
   "🎤 VERDAD O BEBE: {player} — ¿Cuál es el peor mote que te han puesto? Si no respondes, bebe 2. 🍻",
-  "🎤 VERDAD O BEBE: {player} — ¿Has llorido viendo una peli o serie este mes? ¿Cuál? Si no respondes, bebe 2. 🍻",
+  "🎤 VERDAD O BEBE: {player} — ¿Has llorado viendo una peli o serie este mes? ¿Cuál? Si no respondes, bebe 2. 🍻",
   "🎤 VERDAD O BEBE: {player} — ¿Qué es lo más ilegal que has hecho? Si no respondes, bebe 4. 🍻",
   "🎤 VERDAD O BEBE: {player} — ¿Cuántas veces has vuelto con un ex después de decir que nunca volverías? Si no respondes, bebe 3. 🍻",
   "🎤 VERDAD O BEBE: {player} — ¿Cuál es la app más vergonzosa que tienes instalada? Si no la enseñas, bebe 3. 🍻",

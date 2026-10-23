@@ -59,6 +59,36 @@ export interface GameState {
 
   // Voting State
   votingSelections?: string[]; // Array of player IDs selected in voting mode
+
+  // Torneo Megamix — snapshot del bracket para que se vea en tiempo real en
+  // todos los móviles conectados (se reutiliza el canal de broadcastState ya
+  // existente: basta con que esto viva dentro de gameState).
+  tournamentBracket?: TournamentBracketSnapshot | null;
+}
+
+export interface TournamentBracketPlayerSnap {
+  id: string;
+  name: string;
+  avatar_url?: string;
+}
+
+export interface TournamentBracketMatchSnap {
+  id: string;
+  player1: TournamentBracketPlayerSnap | null;
+  player2: TournamentBracketPlayerSnap | null;
+  winner: TournamentBracketPlayerSnap | null;
+  isBye: boolean;
+  round: number;
+}
+
+export interface TournamentBracketSnapshot {
+  active: boolean;
+  stage: 'main' | 'repesca';
+  bracketNumber: number;
+  rounds: TournamentBracketMatchSnap[][];
+  currentRoundIdx: number;
+  currentMatchIdx: number;
+  champion: TournamentBracketPlayerSnap | null;
 }
 
 export const useGameEngine = (mode: GameMode) => {

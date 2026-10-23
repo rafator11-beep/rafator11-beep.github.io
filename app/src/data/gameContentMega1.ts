@@ -148,7 +148,7 @@ export const yoNuncaInfancia: string[] = [
   "he tenido una pelea épica por quién se sentaba al fondo del autobús escolar",
   "me he dormido en el autobús del cole y me he pasado de parada",
   "he roto el jersey del uniforme jugando a pillapilla y lo he cosido fatal",
-  "me he quedado últmo en una carrera de atletismo del cole y me he puesto a llorar",
+  "me he quedado último en una carrera de atletismo del cole y me he puesto a llorar",
   "he empujado a alguien del columpio para montar yo primero",
   "me he inventado un club secreto en el recreo con reglas absurdas",
   "he intercambiado cromos trucados haciéndolos pasar por originales",

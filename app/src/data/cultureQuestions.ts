@@ -158,7 +158,7 @@ export const cultureQuestions: CultureQuestion[] = [
   { question: "¿Cuál es la moneda de Japón?", options: ["Yuan", "Won", "Yen", "Ringgit"], correctIndex: 2, difficulty: 1, category: "general", hint: "Empieza por Y" },
   { question: "¿Cuál es la moneda de Suiza?", options: ["Euro", "Franco suizo", "Corona", "Libra"], correctIndex: 1, difficulty: 2, category: "general", hint: "No están en la UE" },
   { question: "¿Qué idioma es oficial en Austria?", options: ["Francés", "Italiano", "Alemán", "Inglés"], correctIndex: 2, difficulty: 1, category: "general", hint: "País vecino de Alemania" },
-  { question: "Nombra 5 colores en inglés", options: ["Red, Blue, Green, Yellow, Black", "Rojo, Azul, Verde, Amarillo, Negro", "Rouge, Bleu, Vert, Jaune, Noir", "Rot, Blau, Grün, Gelb, Schwarz"], correctIndex: 0, difficulty: 1, category: "general", hint: "Idioma anglosajón" },
+  { question: "¿Cómo se dice 'rojo' en inglés?", options: ["Red", "Blue", "Green", "Black"], correctIndex: 0, difficulty: 1, category: "general", hint: "Idioma anglosajón" },
   { question: "¿Qué significan las siglas RAE?", options: ["Real Academia Española", "Registro de Archivos Españoles", "Red de Academias Europeas", "Reglamento Académico Educativo"], correctIndex: 0, difficulty: 1, category: "general", hint: "Diccionario oficial" },
   { question: "¿Cuál es el animal terrestre más grande?", options: ["Rinoceronte", "Hipopótamo", "Elefante africano", "Jirafa"], correctIndex: 2, difficulty: 1, category: "naturaleza", hint: "Tiene trompa" },
   { question: "¿Cuál es el mamífero más grande del mundo?", options: ["Elefante", "Ballena azul", "Tiburón ballena", "Orca"], correctIndex: 1, difficulty: 1, category: "naturaleza", hint: "Vive en el océano" },
@@ -173,7 +173,7 @@ export const cultureQuestions: CultureQuestion[] = [
   { question: "¿En qué país se encuentra la ciudad de Petra?", options: ["Egipto", "Jordania", "Irán", "Turquía"], correctIndex: 1, difficulty: 2, category: "geografia", hint: "Famosa ciudad excavada en piedra" },
 
   // TELEVISIÓN Y NOSTALGIA
-  { question: "¿Cómo se llamaba el perro de la familia de 'Los Serrano'?", options: ["Curro", "Choni", "Pepe", "No tenían perro"], correctIndex: 3, difficulty: 3, category: "nostalgia", hint: "¡Cuidado! Es una pregunta trampa" },
+  { question: "¿Cómo se llamaba el perro de la familia de 'Los Serrano'?", options: ["Curro", "Choni", "Pepe", "No tenían perro"], correctIndex: 3, difficulty: 3, category: "nostalgia", hint: "Piensa bien si realmente tenían mascota en la serie" },
   { question: "¿Quién fue el ganador de la primera edición de Operación Triunfo en España?", options: ["David Bisbal", "Rosa López", "David Bustamante", "Chenoa"], correctIndex: 1, difficulty: 1, category: "nostalgia", hint: "Rosa de España" },
   { question: "En 'Aquí no hay quien viva', ¿cómo se llamaba el videoclub de Paco?", options: ["Paco's Video", "Videoclub Paco", "Cinema Paco", "Pura Ficción"], correctIndex: 1, difficulty: 2, category: "nostalgia", hint: "Nombre muy directo" },
   { question: "¿Cuál era el nombre del colegio en la serie 'Física o Química'?", options: ["Zurbarán", "Las Encinas", "San Severo", "Laguna Negra"], correctIndex: 0, difficulty: 2, category: "nostalgia", hint: "Nombre de un famoso pintor español" },
@@ -925,7 +925,7 @@ export const lawQuestions: CultureQuestion[] = [
   { question: "¿Qué es la 'Plusvalía' en términos fiscales?", options: ["Impuesto al trabajo", "Valor añadido", "Incremento de valor de un bien", "Descuento por familia"], correctIndex: 2, difficulty: 4, category: "leyes", hint: "Impuesto municipal al vender piso" },
   { question: "¿Quién es el Jefe del Estado en una Monarquía Parlamentaria?", options: ["El Presidente", "El Primer Ministro", "El Rey", "El Juez Supremo"], correctIndex: 2, difficulty: 1, category: "leyes", hint: "Reina pero no gobierna" },
   { question: "¿Qué es un 'referéndum'?", options: ["Elección de alcalde", "Votación directa del pueblo", "Reunión de ministros", "Juicio popular"], correctIndex: 1, difficulty: 2, category: "leyes", hint: "Sí o No" },
-  { question: "¿Cuál es la pena máxima en el Código Penal español actual?", options: ["Cadena perpetua", "Pena de muerte", "Prisión permanente revisable", "30 años fijos"], correctIndex: 2, difficulty: 3, category: "leyes", hint: "No es cadena perpetua exacta" },
+  { question: "¿Cuál es la pena máxima en el Código Penal español actual?", options: ["Cadena perpetua", "Pena de muerte", "Prisión permanente revisable", "30 años fijos"], correctIndex: 2, difficulty: 3, category: "leyes", hint: "Existe desde 2015, para delitos muy graves" },
   { question: "¿Qué es el 'Usufructo'?", options: ["Ser dueño total", "Derecho a usar y disfrutar", "Pagar una deuda", "Robar legalmente"], correctIndex: 1, difficulty: 4, category: "leyes", hint: "Uso y fruto" },
   { question: "¿Qué organismo internacional tiene sede en La Haya?", options: ["OTAN", "FMI", "Corte Internacional de Justicia", "Banco Mundial"], correctIndex: 2, difficulty: 3, category: "leyes", hint: "Juzga países" },
   { question: "¿Qué es el 'Derecho de Veto' en la ONU?", options: ["Derecho a votar", "Poder para bloquear una decisión", "Derecho a hablar", "Obligación de pagar"], correctIndex: 1, difficulty: 3, category: "leyes", hint: "Lo tienen 5 países" },
@@ -995,7 +995,7 @@ export const lawQuestions: CultureQuestion[] = [
   { question: "¿Qué país tiene forma de 'bota'?", options: ["Nueva Zelanda", "Italia", "Chile", "Noruega"], correctIndex: 1, difficulty: 1, category: "geografia", hint: "En el Mediterráneo" },
   { question: "¿En qué océano se encuentra la Isla de Pascua?", options: ["Atlántico", "Índico", "Pacífico", "Antártico"], correctIndex: 2, difficulty: 3, category: "geografia", hint: "Moais" },
   { question: "¿Cuál es la montaña más alta de América?", options: ["Denali", "Aconcagua", "Chimborazo", "Huascarán"], correctIndex: 1, difficulty: 3, category: "geografia", hint: "En Argentina" },
-  { question: "¿Qué país limita al norte con Estados Unidos?", options: ["Canadá", "México", "Rusia", "Groenlandia"], correctIndex: 1, difficulty: 2, category: "geografia", hint: "Al norte de EE.UU. está Canadá, pero la pregunta es 'limita al norte CON EE.UU.'" },
+  { question: "¿Qué país limita al norte con Estados Unidos?", options: ["Canadá", "México", "Rusia", "Groenlandia"], correctIndex: 1, difficulty: 2, category: "geografia", hint: "País que comparte la frontera más larga del mundo con EE.UU." },
 
   // --- LÓGICA Y CULTURA VARIADA (NIVEL ALTO) ---
   { question: "¿Qué es una 'falacia ad hominem'?", options: ["Atacar la idea", "Atacar a la persona", "Apelar a la autoridad", "Circularidad"], correctIndex: 1, difficulty: 4, category: "logica", hint: "Contra el hombre" },

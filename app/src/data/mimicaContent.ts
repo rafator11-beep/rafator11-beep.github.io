@@ -16,7 +16,7 @@ export const mimicaChallenges: MimicaChallenge[] = [
   { text: "Un arqueólogo que rompe una pieza milenaria por accidente", category: "oficios" },
   { text: "Un director de orquesta que pierde la batuta en mitad de la sinfonía", category: "oficios" },
   { text: "Un probador de colchones que tiene pesadillas en el trabajo", category: "oficios" },
-  { text: "Un crítico de arte intentando encontrarle sentido a una pared blanca", category: "oficios" },
+  { text: "Un pintor de brocha gorda pintando una pared y manchándose entero", category: "oficios" },
   { text: "Un minero atrapado en un túnel muy estrecho", category: "oficios" },
   { text: "Un peluquero que le corta la oreja a un cliente por error", category: "oficios" },
   { text: "Un deshollinador que se queda atascado en una chimenea", category: "oficios" },
@@ -230,7 +230,7 @@ export const mimicaChallenges: MimicaChallenge[] = [
   { text: "La serie Wednesday bailando de forma totalmente surrealista e inexpresiva", category: "series" },
   { text: "La serie Bridgerton repartiendo cartas de cotilleo con guantes blancos muy elegante", category: "series" },
   { text: "La serie Squid Game haciendo estatuas en 'luz roja, luz verde' con cara de terror", category: "series" },
-  { text: "La serie Merlí dando una clase de filosofía gesticulando muchísimo sin que nadie entienda nada", category: "series" },
+  { text: "La serie La Casa de Papel atracando el Banco de España con el mono rojo y la máscara de Dalí", category: "series" },
   { text: "La serie Vis a Vis (Macarena intentando escapar por los conductos de ventilación)", category: "series" },
 
   // DISNEY EXTRA (+5)

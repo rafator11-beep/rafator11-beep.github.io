@@ -24,6 +24,8 @@ import { useRanking } from '@/hooks/useRanking';
 import { ChatComponent } from '@/components/multiplayer/ChatComponent';
 import { supabase } from '@/integrations/supabase/client';
 import AddPlayerModal from '@/components/AddPlayerModal';
+import { TASTE_CHIPS } from '@/data/tasteQuestionsContent';
+import { Heart } from 'lucide-react';
 
 // Wrapper to avoid prop drilling issues or valid types
 const ChatEmbed = ({ roomId, playerName }: { roomId: string, playerName: string }) => (
@@ -49,6 +51,36 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
   const [isLoading, setIsLoading] = useState(false);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const [partyTheme, setPartyTheme] = useState(() => localStorage.getItem('fiesta_party_theme') || '');
+  const [showTastes, setShowTastes] = useState(false);
+  const [playerTastes, setPlayerTastes] = useState<Record<string, { chips: string[]; free: string }>>(() => {
+    try {
+      const raw = localStorage.getItem('fiesta_player_tastes');
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const toggleTasteChip = (playerId: string, chipKey: string) => {
+    setPlayerTastes(prev => {
+      const current = prev[playerId] || { chips: [], free: '' };
+      const nextChips = current.chips.includes(chipKey)
+        ? current.chips.filter(c => c !== chipKey)
+        : [...current.chips, chipKey];
+      const updated = { ...prev, [playerId]: { ...current, chips: nextChips } };
+      try { localStorage.setItem('fiesta_player_tastes', JSON.stringify(updated)); } catch { /* ignore */ }
+      return updated;
+    });
+  };
+
+  const setTasteFreeText = (playerId: string, free: string) => {
+    setPlayerTastes(prev => {
+      const current = prev[playerId] || { chips: [], free: '' };
+      const updated = { ...prev, [playerId]: { ...current, free } };
+      try { localStorage.setItem('fiesta_player_tastes', JSON.stringify(updated)); } catch { /* ignore */ }
+      return updated;
+    });
+  };
 
   useEffect(() => {
     localStorage.setItem('fiesta_party_theme', partyTheme.trim());
@@ -508,6 +540,65 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
                     );
                   })}
                 </div>
+              </motion.div>
+            )}
+
+            {players.length >= 1 && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="bg-card/85 backdrop-blur-sm rounded-2xl p-4 md:p-5 shadow-lg border border-amber-500/20 shadow-amber-500/5 relative overflow-hidden"
+              >
+                <button
+                  onClick={() => setShowTastes(v => !v)}
+                  className="w-full flex items-center justify-between gap-2 text-left"
+                >
+                  <div className="flex items-center gap-2">
+                    <Heart className="h-4.5 w-4.5 text-amber-400" />
+                    <h3 className="text-sm font-black uppercase tracking-wider text-white">Gustos (opcional)</h3>
+                  </div>
+                  <span className="text-[10px] text-white/40 font-bold uppercase">{showTastes ? 'Ocultar' : 'Rellenar'}</span>
+                </button>
+                {showTastes && (
+                  <>
+                    <p className="text-[11px] text-muted-foreground text-left mt-2 mb-3">
+                      Marca lo que le gusta a cada jugador. De vez en cuando saldrá una carta sobre ello en la que participa todo el grupo. Si no rellenas nada, se juega igual.
+                    </p>
+                    <div className="space-y-3 max-h-[260px] overflow-y-auto pr-1 slim-scroll">
+                      {players.map(p => {
+                        const current = playerTastes[p.id] || { chips: [], free: '' };
+                        return (
+                          <div key={p.id} className="flex flex-col gap-2 bg-black/25 p-2.5 rounded-xl border border-white/5">
+                            <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest">{p.name}</span>
+                            <div className="flex flex-wrap gap-1.5">
+                              {TASTE_CHIPS.map(chip => {
+                                const active = current.chips.includes(chip.key);
+                                return (
+                                  <button
+                                    key={chip.key}
+                                    onClick={() => toggleTasteChip(p.id, chip.key)}
+                                    className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition-colors ${active
+                                      ? 'bg-amber-500/20 border-amber-500/50 text-amber-300'
+                                      : 'bg-white/5 border-white/10 text-white/50 hover:border-white/30'
+                                      }`}
+                                  >
+                                    {chip.label}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            <Input
+                              placeholder="Otro gusto (texto libre, opcional)..."
+                              defaultValue={current.free}
+                              onChange={(e) => setTasteFreeText(p.id, e.target.value.trim())}
+                              className="bg-black/30 border-white/10 text-white placeholder-white/20 text-xs h-8 rounded-lg focus-visible:ring-amber-500/50"
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
               </motion.div>
             )}
 

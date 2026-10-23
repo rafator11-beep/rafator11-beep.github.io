@@ -54,6 +54,8 @@ export function KahootVoteSession({
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(0);
+  const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const retryCountRef = useRef(0);
 
   // Initialize votes map
   useEffect(() => {
@@ -66,40 +68,71 @@ export function KahootVoteSession({
   useEffect(() => {
     if (!roomId) return;
 
-    const channel = supabase.channel(`kahoot:${roomId}`)
-      .on('broadcast', { event: 'vote_cast' }, (payload) => {
-        const { target, voter, reactionTime } = payload.payload as VotePayload;
-        
-        if (mode === 'fastest_finger') {
-          if (target === correctAnswer) {
-            setFastestWinner({ name: voter, time: reactionTime || 0 });
-            setPhase('results');
-            if (timerRef.current) clearInterval(timerRef.current);
-            if (isHost && onResult) onResult(voter, { [target]: 1 });
-          }
-        } else {
-          setVotes(prev => ({
-            ...prev,
-            [target]: (prev[target] || 0) + 1,
-          }));
-          setTotalVoters(prev => prev + 1);
-        }
-      })
-      .on('broadcast', { event: 'show_results' }, () => {
-        setPhase('results');
-        if (timerRef.current) clearInterval(timerRef.current);
-      })
-      .on('broadcast', { event: 'start_voting' }, () => {
-        if (!isHost) {
-          setPhase('voting');
-          startTimeRef.current = Date.now();
-        }
-      })
-      .subscribe();
+    let unmounted = false;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
 
-    channelRef.current = channel;
+    const setup = () => {
+      if (unmounted) return;
+
+      channel = supabase.channel(`kahoot:${roomId}`)
+        .on('broadcast', { event: 'vote_cast' }, (payload) => {
+          const { target, voter, reactionTime } = payload.payload as VotePayload;
+
+          if (mode === 'fastest_finger') {
+            if (target === correctAnswer) {
+              setFastestWinner({ name: voter, time: reactionTime || 0 });
+              setPhase('results');
+              if (timerRef.current) clearInterval(timerRef.current);
+              if (isHost && onResult) onResult(voter, { [target]: 1 });
+            }
+          } else {
+            setVotes(prev => ({
+              ...prev,
+              [target]: (prev[target] || 0) + 1,
+            }));
+            setTotalVoters(prev => prev + 1);
+          }
+        })
+        .on('broadcast', { event: 'show_results' }, () => {
+          setPhase('results');
+          if (timerRef.current) clearInterval(timerRef.current);
+        })
+        .on('broadcast', { event: 'start_voting' }, () => {
+          if (!isHost) {
+            setPhase('voting');
+            startTimeRef.current = Date.now();
+          }
+        })
+        .subscribe((status) => {
+          if (unmounted) return;
+          if (status === 'SUBSCRIBED') {
+            retryCountRef.current = 0;
+          } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+            // Reconexión básica: móvil bloqueado o red perdida un instante
+            if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current);
+            const attempt = retryCountRef.current + 1;
+            retryCountRef.current = attempt;
+            const delay = Math.min(1000 * attempt, 8000);
+            retryTimeoutRef.current = setTimeout(() => {
+              if (unmounted) return;
+              if (channel) supabase.removeChannel(channel);
+              setup();
+            }, delay);
+          }
+        });
+
+      channelRef.current = channel;
+    };
+
+    setup();
+
     return () => {
-      supabase.removeChannel(channel);
+      unmounted = true;
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current);
+        retryTimeoutRef.current = null;
+      }
+      if (channel) supabase.removeChannel(channel);
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [roomId, mode, correctAnswer, isHost, onResult]);

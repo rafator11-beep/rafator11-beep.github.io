@@ -6,6 +6,7 @@ import { torneoRetos } from '@/data/gameContent';
 import { duelosV5 } from '@/data/updatePostVerano2026';
 import { duelosV5b } from '@/data/updatePostVerano2026_v2';
 import { moreTorneoRetos } from '@/data/extraContentIndex';
+import { TournamentBracket, BracketMatch } from '@/components/game/TournamentBracket';
 
 // Pool ampliado de retos de duelo, sin repeticiones dentro de la sesión.
 const DUEL_POOL: string[] = Array.from(new Set([...torneoRetos, ...duelosV5, ...duelosV5b, ...moreTorneoRetos]))
@@ -59,6 +60,18 @@ interface Props {
   onWinner: (winner: Player, loser: Player) => void;
   onClose: () => void;
   addScore: (playerId: string, delta: number) => void;
+  // Fired on every bracket change (nuevo ganador, nueva ronda, nueva llave,
+  // campeón...) para que el host pueda espejarlo en gameState y así llegue
+  // por el canal realtime ya existente a todos los móviles conectados.
+  onStateChange?: (snapshot: {
+    active: boolean;
+    stage: 'main' | 'repesca';
+    bracketNumber: number;
+    rounds: BracketMatch[][];
+    currentRoundIdx: number;
+    currentMatchIdx: number;
+    champion: Player | null;
+  }) => void;
 }
 
 interface TournamentRecord {
@@ -489,7 +502,7 @@ const ChampionScreen = ({
 
 const REPESCA_SEEN_KEY = 'beep_repesca_retos_seen';
 
-export function MegamixTournament({ players, onWinner, onClose, addScore }: Props) {
+export function MegamixTournament({ players, onWinner, onClose, addScore, onStateChange }: Props) {
   // Quiénes compiten en el bracket que se ve AHORA mismo: el principal
   // (todos) o la repesca (solo los eliminados del principal).
   const [stage, setStage] = useState<'main' | 'repesca'>('main');
@@ -527,6 +540,37 @@ export function MegamixTournament({ players, onWinner, onClose, addScore }: Prop
       setCurrentMatchIdx(firstActive);
       setShowDuel(true);
     }
+  }, []);
+
+  // Espeja el estado del bracket hacia el padre (PartyGame) cada vez que
+  // cambia algo relevante, para que el host pueda meterlo en gameState y
+  // llegue por realtime a todos los móviles (vista de bracket en vivo).
+  useEffect(() => {
+    onStateChange?.({
+      active: true,
+      stage,
+      bracketNumber,
+      rounds,
+      currentRoundIdx,
+      currentMatchIdx,
+      champion,
+    });
+  }, [rounds, currentRoundIdx, currentMatchIdx, champion, stage, bracketNumber, onStateChange]);
+
+  // Al desmontar (torneo cerrado), avisa de que ya no hay bracket activo.
+  useEffect(() => {
+    return () => {
+      onStateChange?.({
+        active: false,
+        stage,
+        bracketNumber,
+        rounds,
+        currentRoundIdx,
+        currentMatchIdx,
+        champion: null,
+      });
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Save champion record to memory (localStorage)
@@ -760,32 +804,21 @@ export function MegamixTournament({ players, onWinner, onClose, addScore }: Prop
 
         {/* ── Tab Content 1: Visual Bracket Tree ── */}
         {viewTab === 'bracket' && (
-          <div className="flex-1 overflow-x-auto overflow-y-hidden flex flex-row items-center p-6 gap-8 select-none no-scrollbar">
-            {rounds.map((roundMatches, ri) => (
-              <div key={ri} className="flex flex-col justify-around h-full min-h-[420px] gap-6 min-w-[240px] relative">
-                <div className="text-center absolute -top-2 left-0 right-0">
-                  <span className="text-[10px] bg-slate-900 border border-white/10 px-3 py-1 rounded-full text-white/50 font-black uppercase tracking-widest shadow-sm">
-                    {ROUND_NAMES[ri] || `Ronda ${ri + 1}`}
-                  </span>
-                </div>
-                <div className="flex flex-col justify-around h-full gap-4 pt-6">
-                  {roundMatches.map((match, mi) => (
-                    <BracketSlot
-                      key={match.id}
-                      match={match}
-                      isActive={currentRoundIdx === ri && currentMatchIdx === mi && !match.winner}
-                      onClick={() => {
-                        if (!match.winner && !match.isBye && match.player1 && match.player2) {
-                          setCurrentRoundIdx(ri);
-                          setCurrentMatchIdx(mi);
-                          setShowDuel(true);
-                        }
-                      }}
-                    />
-                  ))}
-                </div>
-              </div>
-            ))}
+          <div className="flex-1 p-6">
+            <TournamentBracket
+              rounds={rounds}
+              currentRoundIdx={currentRoundIdx}
+              currentMatchIdx={currentMatchIdx}
+              roundNames={ROUND_NAMES}
+              onMatchClick={(ri, mi) => {
+                const match = rounds[ri]?.[mi];
+                if (match && !match.winner && !match.isBye && match.player1 && match.player2) {
+                  setCurrentRoundIdx(ri);
+                  setCurrentMatchIdx(mi);
+                  setShowDuel(true);
+                }
+              }}
+            />
           </div>
         )}
 

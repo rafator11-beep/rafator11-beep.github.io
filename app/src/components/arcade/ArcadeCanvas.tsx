@@ -6,6 +6,7 @@ import { globalPerformance } from './engine/PerformanceMonitor';
 import { globalNetwork, PlayerState } from './engine/NetworkManager';
 import { ArcadeMatchmaking } from './ArcadeMatchmaking';
 import { VirtualJoystick } from './VirtualJoystick';
+import { useIsTabVisible } from '../../hooks/useIsTabVisible';
 
 // Constantes Físicas
 const GRAVITY = 0.5;
@@ -18,6 +19,8 @@ export function ArcadeCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const levelData = ARCADE_LEVELS['neo_tokyo'];
   const [inLobby, setInLobby] = useState(true);
+  const isTabVisible = useIsTabVisible();
+  const rafIdRef = useRef<number | null>(null);
   
   // Estado local independiente de React para evitar re-renders cada Frame
   const engineState = useRef({
@@ -39,6 +42,17 @@ export function ArcadeCanvas() {
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
+  }, []);
+
+  // Cancelar el render loop al desmontar (antes no se limpiaba nunca el rAF,
+  // lo que podía dejarlo corriendo de fondo tras salir de la partida).
+  useEffect(() => {
+    return () => {
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
+      }
+    };
   }, []);
 
   // Bucle de inicialización del Engine P2P
@@ -72,12 +86,21 @@ export function ArcadeCanvas() {
     });
 
     // Iniciar render loop
-    requestAnimationFrame(gameLoop);
+    rafIdRef.current = requestAnimationFrame(gameLoop);
   };
 
   const gameLoop = (time: number) => {
+    // Pausar el loop pesado (física + render + envío de red) cuando la pestaña
+    // está oculta, para no calentar el móvil ni gastar batería en segundo plano.
+    // Seguimos pidiendo el siguiente frame (barato) para reanudar en cuanto
+    // la pestaña vuelva a estar visible.
+    if (!isTabVisible.current) {
+      if (!inLobby) rafIdRef.current = requestAnimationFrame(gameLoop);
+      return;
+    }
+
     globalPerformance.update(time); // FPS Monitoring
-    
+
     const deltaTime = (time - engineState.current.lastFrameTime) / 1000;
     engineState.current.lastFrameTime = time;
 
@@ -100,7 +123,7 @@ export function ArcadeCanvas() {
       });
     }
 
-    if (!inLobby) requestAnimationFrame(gameLoop);
+    if (!inLobby) rafIdRef.current = requestAnimationFrame(gameLoop);
   };
 
   const updatePhysics = () => {

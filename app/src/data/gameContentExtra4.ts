@@ -116,7 +116,7 @@ export const yoNuncaExtra4: string[] = [
   // --- Viajes & vida cotidiana ---
   "Yo nunca he llegado al aeropuerto con el tiempo justo por no madrugar.",
   "Yo nunca me he dormido en el transporte público y perdido mi parada.",
-  "Yo nunca he mandado un email o mensaje importante y luego revivir si lo había enviado bien.",
+  "Yo nunca he mandado un email o mensaje importante y luego revisar si lo había enviado bien.",
   "Yo nunca he ignorado las instrucciones de montaje de un mueble y montarlo a ojo.",
   "Yo nunca he apagado una alarma sin recordar haberlo hecho.",
   "Yo nunca he perdido las llaves de casa más de dos veces en un mes.",
@@ -177,7 +177,7 @@ export const yoNuncaExtra4: string[] = [
   "Yo nunca me he equivocado de planta en un ascensor y salido tranquilamente como si fuera adrede.",
 
   // --- Extra realistas / generación actual ---
-  "Yo nunca he hecho una limpieza de seguidores y luego reusado hacerla.",
+  "Yo nunca he hecho una limpieza de seguidores y luego me he arrepentido de hacerla.",
   "Yo nunca he comparado mi vida con la de alguien de Instagram que no conozco.",
   "Yo nunca he pensado 'qué envidia' viendo las vacaciones de alguien en redes.",
   "Yo nunca he guardado una publicación de Instagram de comida para hacerla y nunca haberla hecho.",

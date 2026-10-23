@@ -41,6 +41,7 @@ import { useGameMemory, enrichChallengeWithAI } from '@/hooks/game/useGameMemory
 import { useTorneoManager } from '@/hooks/game/useTorneoManager';
 import { TorneoRound } from '@/components/game/TorneoRound';
 import { MegamixTournament } from '@/components/game/MegamixTournament';
+import { TournamentBracket } from '@/components/game/TournamentBracket';
 
 import { ChatComponent } from '@/components/multiplayer/ChatComponent';
 import { PeerBubbles } from '@/components/multiplayer/PeerBubbles';
@@ -533,7 +534,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     setUsedQuestionIds,
     getCurrentContent,
     getNextPreview
-  } = useGameContent(mode, currentIndex, currentPlayer?.name || 'Jugador', players.length);
+  } = useGameContent(mode, currentIndex, currentPlayer?.name || 'Jugador', players.length, players);
 
   const {
     checkDrinkingGame,
@@ -582,6 +583,9 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
   } = useTorneoManager(players);
   const [showTorneoRound, setShowTorneoRound] = useState(false);
   const [showMegamixTournament, setShowMegamixTournament] = useState(false);
+  // Panel de bracket en vivo: visible/minimizable en cualquier móvil
+  // conectado (host o invitado) mientras haya un torneo Megamix activo.
+  const [bracketPanelOpen, setBracketPanelOpen] = useState(true);
   // Track whether we've shown response UI for the current card index
   const respondedCardRef = useRef<number>(-1);
   // Count cards shown to know when to inject AI card
@@ -1078,7 +1082,10 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
   useEffect(() => () => { try { localStorage.removeItem('beep_active_norma'); } catch { /* ignore */ } }, []);
 
   // Bug 6/8: NORMA - Auto turn advance logic (Megamix)
-  // Moved here to avoid 'handleNext' hoisting issues
+  // handleNext se recrea en cada render; lo leemos de un ref para que este timer
+  // de 5s no se reinicie constantemente (nunca llegaba a disparar en partidas activas).
+  const handleNextRef = useRef(handleNext);
+  handleNextRef.current = handleNext;
   useEffect(() => {
     if (mode !== 'megamix' || !gameState.currentNorma) return;
 
@@ -1091,14 +1098,14 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       const timer = setTimeout(() => {
         // Bug 6: Ensure we are still on the same card before skipping
         if (!gameState.showVirusAlert && !gameState.showTrivia) {
-          handleNext();
+          handleNextRef.current();
         }
       }, 5000);
       return () => clearTimeout(timer);
     }
   }, [gameState.currentNorma, gameState.showVirusAlert, gameState.showTrivia, gameState.showVoting,
   gameState.showDuel, gameState.showImpostor, gameState.showMimica,
-  gameState.showImpostorWord, mode, handleNext]);
+  gameState.showImpostorWord, mode]);
 
   // Rarity calculation for CardDisplay
   const rawText = enrichedCardText || aiCardOverride || getCurrentContent();
@@ -1136,11 +1143,17 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
   const rarity = aiCardOverride ? 'legendary' : detectRarity(currentText);
 
   // Trigger / Content Detection System
+  // Guard: solo procesar el TRIGGER de cada carta una vez. Sin esto, un refetch de
+  // `players` por Realtime (nueva referencia de array aunque el contenido no cambie)
+  // re-ejecuta este efecto y reinicia el overlay (duelo/virus/impostor) ya abierto.
+  const handledTriggerIndexRef = useRef<number>(-1);
   useEffect(() => {
     if (!currentText || currentText === 'Siguiente carta' || currentText === 'Cargando pregunta...') return;
 
     // 1. Check for explicit TRIGGERS (Megamix)
     if (currentText.startsWith('TRIGGER:')) {
+      if (handledTriggerIndexRef.current === currentIndex) return;
+      handledTriggerIndexRef.current = currentIndex;
       const triggerParts = currentText.split(':');
       const triggerType = triggerParts[1];
 
@@ -1290,7 +1303,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       }
     }
 
-  }, [currentText, advanceTurn, applyRandomVirus, currentPlayer, players, setGameState, loadSpecificQuestion, showTorneoRound, buildTorneoMatch, gameEvents, setTorneoMatch]); // Mejora 1: Correct dependencies
+  }, [currentText, currentIndex, advanceTurn, applyRandomVirus, currentPlayer, players, setGameState, loadSpecificQuestion, showTorneoRound, buildTorneoMatch, gameEvents, setTorneoMatch]); // Mejora 1: Correct dependencies
 
   // ── Inyección de carta IA cada 10 cartas + Auto-Torneo cada 10 turnos ─────
   useEffect(() => {
@@ -3022,11 +3035,61 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
             }}
             onClose={() => {
               setShowMegamixTournament(false);
+              setGameState(prev => ({ ...prev, tournamentBracket: null }));
               advanceTurn(true);
             }}
+            onStateChange={(isHost || !isMultiplayer) ? (snapshot) => {
+              // Espejo del bracket en gameState: reutiliza el canal/broadcast
+              // ya existente (useMultiplayer) para que todos los móviles
+              // conectados vean el cuadro de eliminatorias en tiempo real.
+              setGameState(prev => ({
+                ...prev,
+                tournamentBracket: {
+                  active: snapshot.active,
+                  stage: snapshot.stage,
+                  bracketNumber: snapshot.bracketNumber,
+                  rounds: snapshot.rounds,
+                  currentRoundIdx: snapshot.currentRoundIdx,
+                  currentMatchIdx: snapshot.currentMatchIdx,
+                  champion: snapshot.champion
+                    ? { id: snapshot.champion.id, name: snapshot.champion.name, avatar_url: snapshot.champion.avatar_url }
+                    : null,
+                },
+              }));
+            } : undefined}
           />
         )}
       </AnimatePresence>
+
+      {/* ── BRACKET EN VIVO: visible en todo momento para todos los móviles
+          conectados mientras el torneo Megamix está en marcha, incluso
+          cuando el host está metido en la pantalla de duelo/votación ── */}
+      {gameState.tournamentBracket?.active && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[260] w-[min(92vw,420px)]">
+          <div className="rounded-2xl border border-amber-500/30 bg-slate-950/95 backdrop-blur-md shadow-2xl overflow-hidden">
+            <button
+              onClick={() => setBracketPanelOpen(o => !o)}
+              className="w-full flex items-center justify-between px-4 py-2.5 text-left"
+            >
+              <span className="text-amber-400 font-black text-xs uppercase tracking-widest">
+                🏆 Bracket en vivo · Ronda {gameState.tournamentBracket.currentRoundIdx + 1}
+              </span>
+              <span className="text-white/40 text-xs">{bracketPanelOpen ? '▾ ocultar' : '▸ ver'}</span>
+            </button>
+            {bracketPanelOpen && (
+              <div className="px-3 pb-3 max-h-[42vh] overflow-y-auto">
+                <TournamentBracket
+                  compact
+                  rounds={gameState.tournamentBracket.rounds}
+                  currentRoundIdx={gameState.tournamentBracket.currentRoundIdx}
+                  currentMatchIdx={gameState.tournamentBracket.currentMatchIdx}
+                  champion={gameState.tournamentBracket.champion}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Podium Screen Overlay */}
       {showPodium && (

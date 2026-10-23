@@ -13,58 +13,89 @@ export function useMultiplayer(
     const [players, setPlayers] = useState<any[]>([]);
     const [connectionStatus, setConnectionStatus] = useState<'SUBSCRIBED' | 'TIMED_OUT' | 'CLOSED' | 'CHANNEL_ERROR' | 'JOINING'>('JOINING');
     const channelRef = useRef<RealtimeChannel | null>(null);
+    const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const retryCountRef = useRef(0);
+    const unmountedRef = useRef(false);
 
     useEffect(() => {
         if (!roomId || !playerName) return;
 
-        setConnectionStatus('JOINING');
+        unmountedRef.current = false;
+        retryCountRef.current = 0;
 
-        const channel = supabase.channel(`room:${roomId}`, {
-            config: {
-                presence: {
-                    key: playerId || playerName, 
+        let channel: RealtimeChannel | null = null;
+
+        const setup = () => {
+            if (unmountedRef.current) return;
+
+            setConnectionStatus('JOINING');
+
+            channel = supabase.channel(`room:${roomId}`, {
+                config: {
+                    presence: {
+                        key: playerId || playerName,
+                    },
                 },
-            },
-        });
-
-        channel
-            .on('broadcast', { event: 'game_state' }, ({ payload }) => {
-                if (!isHost) {
-                    onGameStateUpdate(payload);
-                }
-            })
-            .on('broadcast', { event: 'guest_action' }, ({ payload }) => {
-                if (isHost && onGuestAction) {
-                    onGuestAction(payload);
-                }
-            })
-            .on('presence', { event: 'sync' }, () => {
-                const state = channel.presenceState();
-                const users = Object.keys(state).map(key => ({
-                    presence_key: key,
-                    id: key,
-                    ...state[key][0] 
-                }));
-                setPlayers(users);
-            })
-            .subscribe(async (status) => {
-                setConnectionStatus(status as any);
-                if (status === 'SUBSCRIBED') {
-                    await channel.track({ 
-                        online_at: new Date().toISOString(), 
-                        isHost,
-                        playerName,
-                        playerId
-                    });
-                } else if (status === 'CHANNEL_ERROR') {
-                    console.error(`[useMultiplayer] Channel error in room: ${roomId}`);
-                }
             });
 
-        channelRef.current = channel;
+            channel
+                .on('broadcast', { event: 'game_state' }, ({ payload }) => {
+                    if (!isHost) {
+                        onGameStateUpdate(payload);
+                    }
+                })
+                .on('broadcast', { event: 'guest_action' }, ({ payload }) => {
+                    if (isHost && onGuestAction) {
+                        onGuestAction(payload);
+                    }
+                })
+                .on('presence', { event: 'sync' }, () => {
+                    const state = channel!.presenceState();
+                    const users = Object.keys(state).map(key => ({
+                        presence_key: key,
+                        id: key,
+                        ...state[key][0]
+                    }));
+                    setPlayers(users);
+                })
+                .subscribe(async (status) => {
+                    if (unmountedRef.current) return;
+                    setConnectionStatus(status as any);
+                    if (status === 'SUBSCRIBED') {
+                        retryCountRef.current = 0;
+                        await channel!.track({
+                            online_at: new Date().toISOString(),
+                            isHost,
+                            playerName,
+                            playerId
+                        });
+                    } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+                        console.error(`[useMultiplayer] Channel ${status} in room: ${roomId}. Reintentando...`);
+                        // Reconexión básica con backoff (móvil bloqueado / pérdida de red momentánea)
+                        if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current);
+                        const attempt = retryCountRef.current + 1;
+                        retryCountRef.current = attempt;
+                        const delay = Math.min(1000 * attempt, 8000);
+                        retryTimeoutRef.current = setTimeout(() => {
+                            if (unmountedRef.current) return;
+                            if (channel) supabase.removeChannel(channel);
+                            setup();
+                        }, delay);
+                    }
+                });
+
+            channelRef.current = channel;
+        };
+
+        setup();
 
         return () => {
-            supabase.removeChannel(channel);
+            unmountedRef.current = true;
+            if (retryTimeoutRef.current) {
+                clearTimeout(retryTimeoutRef.current);
+                retryTimeoutRef.current = null;
+            }
+            if (channel) supabase.removeChannel(channel);
         };
     }, [roomId, playerName, playerId, isHost]);
 
