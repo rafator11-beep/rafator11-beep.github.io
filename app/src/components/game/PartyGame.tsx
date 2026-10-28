@@ -3011,7 +3011,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                   ? currentQuestion.options[currentQuestion.correctIndex]
                   : undefined
               }
-              isHost={isHost}
+              isHost={isHost || !isMultiplayer}
               onClose={() => setShowKahoot({ active: false, mode: 'standard' })}
               onRaceComplete={(ranking: RaceRankEntry[]) => {
                 // Reparte puntos reales a cada jugador según su puesto en el ranking
