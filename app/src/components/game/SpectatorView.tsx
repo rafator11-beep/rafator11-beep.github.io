@@ -18,13 +18,22 @@ interface SpectatorViewProps {
 // resto del payload (texto de la carta, jugadores...) lo sigue viendo todo el
 // mundo igual que hasta ahora. Pensado primero para Impostor (rol + palabra),
 // pero el "kind" es genérico para poder reutilizarlo en otras mecánicas.
-export interface PrivateForPlayer {
-  kind: 'impostor';
-  isImpostor: boolean;
-  category: string;
-  word: string;   // palabra real (no-impostores) o palabra/pista falsa (impostor)
-  hint?: string;
-}
+export type PrivateForPlayer =
+  | {
+      kind: 'impostor';
+      isImpostor: boolean;
+      category: string;
+      word: string;   // palabra real (no-impostores) o palabra/pista falsa (impostor)
+      hint?: string;
+    }
+  | {
+      kind: 'award';
+      emoji: string;
+      title: string;
+      subtitle: string;
+      stat?: string;
+      accent: string;
+    };
 
 interface CardState {
   text: string;
@@ -91,8 +100,18 @@ export function SpectatorQRPanel({ roomId, currentCard, currentPlayer, players, 
   }, [roomId]);
 
   // Reenvía el estado cada vez que cambia algo relevante (carta, jugadores, voto activo).
+  // Si llega un privateFor NUEVO (objeto distinto al de la última vez — nueva
+  // ronda de Impostor, o el premio final), se genera un cardIndex fresco para
+  // que el móvil sepa que es un aviso privado NUEVO y lo vuelva a mostrar aunque
+  // ya hubiera cerrado uno antes (si no, cardIndex se queda siempre igual y
+  // "cardState.cardIndex !== dismissedPrivateAt" nunca se vuelve a cumplir).
+  const prevPrivateForRef = useRef<typeof privateFor>(undefined);
   useEffect(() => {
     if (!roomId) return;
+    if (privateFor && privateFor !== prevPrivateForRef.current) {
+      latestPayloadRef.current = { ...latestPayloadRef.current, cardIndex: Date.now() };
+    }
+    prevPrivateForRef.current = privateFor;
     channelRef.current?.send({
       type: 'broadcast',
       event: 'card_update',
@@ -365,6 +384,49 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
   // móviles ven la carta normal de siempre. Se vuelve a mostrar en cada
   // ronda de impostor nueva (cardIndex distinto) aunque ya se haya cerrado.
   if (myPrivateMessage && cardState && cardState.cardIndex !== dismissedPrivateAt) {
+    // ── Premio final de la partida: pantalla pensada para hacer captura y
+    // enseñársela a los amigos — es el momento con más probabilidad de que
+    // alguien la comparta fuera del grupo (lo que de verdad hace crecer el juego).
+    if (myPrivateMessage.kind === 'award') {
+      const award = myPrivateMessage;
+      return (
+        <div
+          className="flex min-h-screen flex-col items-center justify-center p-6 text-center"
+          style={{ background: `radial-gradient(circle at 50% 20%, ${award.accent}22, #0a0a14 65%)` }}
+        >
+          <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.35em] text-white/40">Tu premio de la noche</p>
+          <p className="mb-5 text-7xl">{award.emoji}</p>
+          <h1 className="mb-2 text-2xl font-black uppercase tracking-wide" style={{ color: award.accent }}>{award.title}</h1>
+          <p className="mb-6 text-sm text-white/60 max-w-xs">{award.subtitle}</p>
+          {award.stat && (
+            <div className="mb-2 rounded-full px-5 py-2 text-lg font-black" style={{ background: `${award.accent}25`, color: award.accent }}>
+              {award.stat}
+            </div>
+          )}
+          <p className="mt-6 text-[11px] font-mono uppercase tracking-widest text-white/20">BEEP · haz captura y presume 😏</p>
+          <div className="mt-8 flex gap-3">
+            <button
+              onClick={() => {
+                if (navigator.share) {
+                  navigator.share({ title: 'BEEP', text: `${award.emoji} ${award.title} — ${award.subtitle}${award.stat ? ` (${award.stat})` : ''} 🎉` }).catch(() => {});
+                }
+              }}
+              className="rounded-2xl border px-6 py-2.5 text-sm font-semibold text-white hover:opacity-80"
+              style={{ borderColor: `${award.accent}50`, background: `${award.accent}20` }}
+            >
+              Compartir
+            </button>
+            <button
+              onClick={() => setDismissedPrivateAt(cardState.cardIndex)}
+              className="rounded-2xl bg-white/10 border border-white/15 px-6 py-2.5 text-sm font-semibold text-white hover:bg-white/20"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      );
+    }
+
     const isImpostor = myPrivateMessage.isImpostor;
     return (
       <div className={`flex min-h-screen flex-col items-center justify-center p-6 text-center ${isImpostor ? 'bg-gradient-to-b from-red-950 to-[#0a0a14]' : 'bg-gradient-to-b from-emerald-950 to-[#0a0a14]'}`}>

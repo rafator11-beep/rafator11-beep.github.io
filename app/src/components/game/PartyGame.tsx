@@ -63,7 +63,7 @@ import { TurnFlash } from './TurnFlash';
 import { SuggestionBox } from './SuggestionBox';
 import { QuestionVote } from './QuestionVote';
 import { YoNuncaEquiposFlow } from './YoNuncaEquiposFlow';
-import { PodiumScreen } from './PodiumScreen';
+import { PodiumScreen, computePartyAwards } from './PodiumScreen';
 import confetti from 'canvas-confetti';
 
 
@@ -565,6 +565,21 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
   const [drinkCounts, setDrinkCounts] = useState<Record<string, number>>({});
   const [skipCounts, setSkipCounts] = useState<Record<string, number>>({});
   const [virusReceived, setVirusReceived] = useState<Record<string, number>>({});
+
+  // Al acabar la partida, cada móvil conectado recibe SU propio premio en su
+  // pantalla (mismo buzón privado del Impostor) — es el momento con más
+  // posibilidades de que alguien haga captura y lo comparta fuera del grupo.
+  const podiumPrivateFor = useMemo(() => {
+    if (!showPodium || players.length < 2) return undefined;
+    const podiumPlayers = players.map(p => ({ id: p.id, name: p.name, score: scores[p.id] || 0 }));
+    const awards = computePartyAwards(podiumPlayers, { voteCounts, drinkCounts, virusReceived, skipCounts });
+    const map: Record<string, { kind: 'award'; emoji: string; title: string; subtitle: string; stat?: string; accent: string }> = {};
+    for (const p of players) {
+      const award = awards.find(a => a.playerId === p.id);
+      if (award) map[p.name] = { kind: 'award', emoji: award.emoji, title: award.title, subtitle: award.subtitle, stat: award.stat, accent: award.accent };
+    }
+    return map;
+  }, [showPodium, players, scores, voteCounts, drinkCounts, virusReceived, skipCounts]);
 
   // --- AI MEMORY SYSTEM ---
   const { events: gameEvents, playerStats, addEvent, addEvents, trackDrink: memoryTrackDrink, hasAiCard, peekAiCard, consumeAiCard, getMemorySummary } = useGameMemory(players);
@@ -1856,7 +1871,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               currentCard={safeCurrentText} 
               currentPlayer={currentPlayer?.name || ''} 
               players={players.map(p => p.name)}
-              privateFor={(gameState.showImpostorWarning || gameState.showImpostor) ? gameState.impostorPrivateFor : undefined}
+              privateFor={showPodium ? podiumPrivateFor : (gameState.showImpostorWarning || gameState.showImpostor) ? gameState.impostorPrivateFor : undefined}
               kahootConfig={showKahoot.active ? {
                 mode: showKahoot.mode,
                 question: showKahoot.mode === 'speed_race' && speedRaceQuestion

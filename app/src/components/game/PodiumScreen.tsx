@@ -125,6 +125,111 @@ interface PodiumScreenProps {
   trackingData?: TrackingData;
 }
 
+export interface PartyAward {
+  emoji: string;
+  title: string;
+  subtitle: string;
+  playerId: string;
+  accent: string;
+  stat?: string;
+}
+
+// Extraída de dentro del componente para poder reutilizarla desde PartyGame.tsx
+// y mandar a cada móvil su propio premio personalizado al acabar la partida
+// (mismo "buzón privado" ya usado para el Impostor).
+export function computePartyAwards(players: PodiumPlayer[], trackingData?: TrackingData): PartyAward[] {
+  if (players.length < 2) return [];
+  const sortedPlayers = [...players].sort((a, b) => b.score - a.score);
+  const vc = trackingData?.voteCounts || {};
+  const dc = trackingData?.drinkCounts || {};
+  const vr = trackingData?.virusReceived || {};
+  const sc = trackingData?.skipCounts || {};
+  const ids = players.map(p => p.id);
+
+  const maxBy = (d: Record<string, number>) => {
+    let best = ''; let max = -1;
+    for (const [id, v] of Object.entries(d)) { if (v > max) { max = v; best = id; } }
+    return best || ids[0];
+  };
+  const minBy = (d: Record<string, number>) => {
+    let best = ids[0]; let min = Infinity;
+    for (const id of ids) { const v = d[id] ?? Infinity; if (v < min) { min = v; best = id; } }
+    return best;
+  };
+
+  const list: PartyAward[] = [];
+
+  // Score-based
+  list.push({ emoji: '🔥', title: 'EL FIESTERO', subtitle: 'Mayor puntuación', playerId: sortedPlayers[0].id, accent: '#f97316', stat: `${sortedPlayers[0].score} XP` });
+  if (sortedPlayers.length > 1) list.push({ emoji: '😇', title: 'EL SANTITO', subtitle: 'Siempre tan inocente...', playerId: sortedPlayers[sortedPlayers.length - 1].id, accent: '#38bdf8', stat: `${sortedPlayers[sortedPlayers.length - 1].score} XP` });
+
+  // Drink counts
+  if (Object.keys(dc).length > 0) {
+    const maxDrink = maxBy(dc);
+    const minDrink = minBy(dc);
+    list.push({ emoji: '🍺', title: 'EL BORRACHÍN', subtitle: 'Bebió más que nadie', playerId: maxDrink, accent: '#f59e0b', stat: `${dc[maxDrink] || 0} tragos` });
+    if (minDrink !== maxDrink) list.push({ emoji: '💧', title: 'EL ABSTEMIO', subtitle: 'Se salvó esta vez', playerId: minDrink, accent: '#06b6d4', stat: `${dc[minDrink] || 0} tragos` });
+  }
+
+  // Virus
+  if (Object.keys(vr).length > 0) {
+    const maxVirus = maxBy(vr);
+    list.push({ emoji: '🦠', title: 'EL INFECTADO', subtitle: 'Recibió más virus', playerId: maxVirus, accent: '#22c55e', stat: `${vr[maxVirus] || 0} virus` });
+  }
+
+  // Voting
+  if (Object.keys(vc).length > 0) {
+    const mostVoted = maxBy(vc);
+    list.push({ emoji: '🎯', title: 'EL SEÑALADO', subtitle: 'Todos apuntaron a ti', playerId: mostVoted, accent: '#ef4444', stat: `${vc[mostVoted] || 0} votos` });
+  }
+
+  // Skips
+  if (Object.keys(sc).length > 0) {
+    const mostSkip = maxBy(sc);
+    list.push({ emoji: '💨', title: 'EL ESQUIVO', subtitle: 'Pasó más veces', playerId: mostSkip, accent: '#a78bfa', stat: `${sc[mostSkip] || 0} skips` });
+  }
+
+  // El gran engranaje: liga de duelos (bracket continuo de Megamix)
+  try {
+    const bw = JSON.parse(localStorage.getItem('beep_bracket_wins') || '{}');
+    let kingId = ''; let kingWins = 0;
+    for (const id of ids) { const w = Number(bw[id]) || 0; if (w > kingWins) { kingWins = w; kingId = id; } }
+    if (kingId && kingWins > 0) {
+      list.push({ emoji: '👑', title: 'REY DE LOS DUELOS', subtitle: 'Dominó el bracket', playerId: kingId, accent: '#fbbf24', stat: `${kingWins} ${kingWins === 1 ? 'llave' : 'llaves'}` });
+    }
+  } catch { /* ignore */ }
+
+  // Random fun titles — assigned deterministically (not random each render)
+  const funPool: { emoji: string; title: string; subtitle: string; accent: string }[] = [
+    { emoji: '👑', title: 'REY DEL DRAMA', subtitle: 'Actor/actriz de la noche', accent: '#c084fc' },
+    { emoji: '🎭', title: 'EL IMPOSTOR NATO', subtitle: 'Maestro del engaño', accent: '#818cf8' },
+    { emoji: '💣', title: 'EL KAMIKAZE', subtitle: 'Sin miedo al ridículo', accent: '#fb923c' },
+    { emoji: '🤝', title: 'EL DIPLOMÁTICO', subtitle: 'Siempre tan correcto', accent: '#34d399' },
+    { emoji: '😈', title: 'EL DIABLILLO', subtitle: 'Traviesura nivel pro', accent: '#f87171' },
+    { emoji: '🤡', title: 'EL PAYASO', subtitle: 'El grupo se lo debe', accent: '#fbbf24' },
+    { emoji: '🔮', title: 'EL ADIVINO', subtitle: 'Siempre lo sabía', accent: '#a78bfa' },
+    { emoji: '🎤', title: 'EL SHOWMAN', subtitle: 'Todo un espectáculo', accent: '#f472b6' },
+    { emoji: '📚', title: 'EL EMPOLLÓN', subtitle: 'Demasiado listo', accent: '#2dd4bf' },
+    { emoji: '🚀', title: 'SPEED RUNNER', subtitle: 'El más rápido del oeste', accent: '#60a5fa' },
+    { emoji: '🧊', title: 'DE HIELO', subtitle: 'Imperturbable', accent: '#94a3b8' },
+    { emoji: '🧙', title: 'EL MAGO', subtitle: 'Capaz de cualquier cosa', accent: '#c084fc' },
+    { emoji: '🌟', title: 'ESTRELLA', subtitle: 'Brilla con luz propia', accent: '#fcd34d' },
+    { emoji: '💤', title: 'EL DORMILÓN', subtitle: 'Siempre al límite', accent: '#6366f1' },
+    { emoji: '🍷', title: 'SOMMELIER', subtitle: 'Siempre con clase', accent: '#f43f5e' },
+  ];
+
+  // Assign remaining fun titles to players deterministically
+  const shuffledPlayers = [...players].sort((a, b) => a.id.localeCompare(b.id));
+  let funIdx = 0;
+  for (const p of shuffledPlayers) {
+    if (funIdx >= funPool.length) break;
+    list.push({ ...funPool[funIdx], playerId: p.id, stat: undefined });
+    funIdx++;
+  }
+
+  return list.slice(0, Math.min(list.length, players.length + 8));
+}
+
 const AnimatedCounter = ({ value }: { value: number }) => {
   const [displayValue, setDisplayValue] = useState(0);
   useEffect(() => {
@@ -179,98 +284,7 @@ export const PodiumScreen = ({ players, onRestart, onHome, trackingData }: Podiu
     return () => clearTimeout(id);
   }, []);
 
-  // ── Big Data awards ──────────────────────────────────────────────────────────
-  const awards = useMemo(() => {
-    if (players.length < 2) return [];
-    const vc = trackingData?.voteCounts || {};
-    const dc = trackingData?.drinkCounts || {};
-    const vr = trackingData?.virusReceived || {};
-    const sc = trackingData?.skipCounts || {};
-    const ids = players.map(p => p.id);
-
-    const maxBy = (d: Record<string, number>) => {
-      let best = ''; let max = -1;
-      for (const [id, v] of Object.entries(d)) { if (v > max) { max = v; best = id; } }
-      return best || ids[0];
-    };
-    const minBy = (d: Record<string, number>) => {
-      let best = ids[0]; let min = Infinity;
-      for (const id of ids) { const v = d[id] ?? Infinity; if (v < min) { min = v; best = id; } }
-      return best;
-    };
-
-    const list: { emoji: string; title: string; subtitle: string; playerId: string; accent: string; stat?: string }[] = [];
-
-    // Score-based
-    list.push({ emoji: '🔥', title: 'EL FIESTERO', subtitle: 'Mayor puntuación', playerId: sortedPlayers[0].id, accent: '#f97316', stat: `${sortedPlayers[0].score} XP` });
-    if (sortedPlayers.length > 1) list.push({ emoji: '😇', title: 'EL SANTITO', subtitle: 'Siempre tan inocente...', playerId: sortedPlayers[sortedPlayers.length - 1].id, accent: '#38bdf8', stat: `${sortedPlayers[sortedPlayers.length - 1].score} XP` });
-
-    // Drink counts
-    if (Object.keys(dc).length > 0) {
-      const maxDrink = maxBy(dc);
-      const minDrink = minBy(dc);
-      list.push({ emoji: '🍺', title: 'EL BORRACHÍN', subtitle: 'Bebió más que nadie', playerId: maxDrink, accent: '#f59e0b', stat: `${dc[maxDrink] || 0} tragos` });
-      if (minDrink !== maxDrink) list.push({ emoji: '💧', title: 'EL ABSTEMIO', subtitle: 'Se salvó esta vez', playerId: minDrink, accent: '#06b6d4', stat: `${dc[minDrink] || 0} tragos` });
-    }
-
-    // Virus
-    if (Object.keys(vr).length > 0) {
-      const maxVirus = maxBy(vr);
-      list.push({ emoji: '🦠', title: 'EL INFECTADO', subtitle: 'Recibió más virus', playerId: maxVirus, accent: '#22c55e', stat: `${vr[maxVirus] || 0} virus` });
-    }
-
-    // Voting
-    if (Object.keys(vc).length > 0) {
-      const mostVoted = maxBy(vc);
-      list.push({ emoji: '🎯', title: 'EL SEÑALADO', subtitle: 'Todos apuntaron a ti', playerId: mostVoted, accent: '#ef4444', stat: `${vc[mostVoted] || 0} votos` });
-    }
-
-    // Skips
-    if (Object.keys(sc).length > 0) {
-      const mostSkip = maxBy(sc);
-      list.push({ emoji: '💨', title: 'EL ESQUIVO', subtitle: 'Pasó más veces', playerId: mostSkip, accent: '#a78bfa', stat: `${sc[mostSkip] || 0} skips` });
-    }
-
-    // El gran engranaje: liga de duelos (bracket continuo de Megamix)
-    try {
-      const bw = JSON.parse(localStorage.getItem('beep_bracket_wins') || '{}');
-      let kingId = ''; let kingWins = 0;
-      for (const id of ids) { const w = Number(bw[id]) || 0; if (w > kingWins) { kingWins = w; kingId = id; } }
-      if (kingId && kingWins > 0) {
-        list.push({ emoji: '👑', title: 'REY DE LOS DUELOS', subtitle: 'Dominó el bracket', playerId: kingId, accent: '#fbbf24', stat: `${kingWins} ${kingWins === 1 ? 'llave' : 'llaves'}` });
-      }
-    } catch { /* ignore */ }
-
-    // Random fun titles — assigned deterministically (not random each render)
-    const funPool: { emoji: string; title: string; subtitle: string; accent: string }[] = [
-      { emoji: '👑', title: 'REY DEL DRAMA', subtitle: 'Actor/actriz de la noche', accent: '#c084fc' },
-      { emoji: '🎭', title: 'EL IMPOSTOR NATO', subtitle: 'Maestro del engaño', accent: '#818cf8' },
-      { emoji: '💣', title: 'EL KAMIKAZE', subtitle: 'Sin miedo al ridículo', accent: '#fb923c' },
-      { emoji: '🤝', title: 'EL DIPLOMÁTICO', subtitle: 'Siempre tan correcto', accent: '#34d399' },
-      { emoji: '😈', title: 'EL DIABLILLO', subtitle: 'Traviesura nivel pro', accent: '#f87171' },
-      { emoji: '🤡', title: 'EL PAYASO', subtitle: 'El grupo se lo debe', accent: '#fbbf24' },
-      { emoji: '🔮', title: 'EL ADIVINO', subtitle: 'Siempre lo sabía', accent: '#a78bfa' },
-      { emoji: '🎤', title: 'EL SHOWMAN', subtitle: 'Todo un espectáculo', accent: '#f472b6' },
-      { emoji: '📚', title: 'EL EMPOLLÓN', subtitle: 'Demasiado listo', accent: '#2dd4bf' },
-      { emoji: '🚀', title: 'SPEED RUNNER', subtitle: 'El más rápido del oeste', accent: '#60a5fa' },
-      { emoji: '🧊', title: 'DE HIELO', subtitle: 'Imperturbable', accent: '#94a3b8' },
-      { emoji: '🧙', title: 'EL MAGO', subtitle: 'Capaz de cualquier cosa', accent: '#c084fc' },
-      { emoji: '🌟', title: 'ESTRELLA', subtitle: 'Brilla con luz propia', accent: '#fcd34d' },
-      { emoji: '💤', title: 'EL DORMILÓN', subtitle: 'Siempre al límite', accent: '#6366f1' },
-      { emoji: '🍷', title: 'SOMMELIER', subtitle: 'Siempre con clase', accent: '#f43f5e' },
-    ];
-
-    // Assign remaining fun titles to players deterministically
-    const shuffledPlayers = [...players].sort((a, b) => a.id.localeCompare(b.id));
-    let funIdx = 0;
-    for (const p of shuffledPlayers) {
-      if (funIdx >= funPool.length) break;
-      list.push({ ...funPool[funIdx], playerId: p.id, stat: undefined });
-      funIdx++;
-    }
-
-    return list.slice(0, Math.min(list.length, players.length + 8));
-  }, [players, trackingData, sortedPlayers]);
+  const awards = useMemo(() => computePartyAwards(players, trackingData), [players, trackingData]);
 
   const podiumHeights = ['60%', '90%', '45%'];
   const podiumBorders = ['border-slate-400', 'border-yellow-400', 'border-amber-700'];
