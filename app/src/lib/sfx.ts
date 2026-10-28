@@ -1,21 +1,49 @@
+// Antes cada beep() creaba un AudioContext nuevo (new AudioCtx()) y lo cerraba
+// al terminar. Si varios sonidos se disparaban seguidos (p. ej. al abrir el
+// Kahoot/"quién es más probable"), se creaban y destruían varios contextos de
+// audio en ráfaga — crear un AudioContext es caro (sobre todo en móvil/iOS),
+// así que eso congelaba un poco la interfaz, y arrancar/parar el oscilador de
+// golpe sin rampa de volumen producía un "clic" audible en cada beep. Ahora se
+// reutiliza un único AudioContext para toda la sesión y cada nota tiene una
+// rampa de entrada/salida suave para no sonar entrecortada.
+
+let sharedCtx: AudioContext | null = null;
+
+function getCtx(): AudioContext | null {
+  try {
+    if (sharedCtx && sharedCtx.state !== 'closed') {
+      if (sharedCtx.state === 'suspended') sharedCtx.resume().catch(() => { });
+      return sharedCtx;
+    }
+    const AudioCtx = (window.AudioContext || (window as any).webkitAudioContext);
+    if (!AudioCtx) return null;
+    sharedCtx = new AudioCtx();
+    return sharedCtx;
+  } catch {
+    return null;
+  }
+}
 
 function beep(freq = 440, ms = 90, vol = 0.08) {
   try {
-    const AudioCtx = (window.AudioContext || (window as any).webkitAudioContext);
-    if (!AudioCtx) return;
-    const ctx = new AudioCtx();
+    const ctx = getCtx();
+    if (!ctx) return;
     const o = ctx.createOscillator();
     const g = ctx.createGain();
     o.type = 'sine';
     o.frequency.value = freq;
-    g.gain.value = vol;
+
+    const now = ctx.currentTime;
+    const durationSec = ms / 1000;
+    const rampSec = Math.min(0.015, durationSec / 4); // rampa corta, evita el "clic"
+    g.gain.setValueAtTime(0, now);
+    g.gain.linearRampToValueAtTime(vol, now + rampSec);
+    g.gain.linearRampToValueAtTime(0, now + durationSec);
+
     o.connect(g);
     g.connect(ctx.destination);
-    o.start();
-    setTimeout(() => {
-      o.stop();
-      ctx.close().catch(() => { });
-    }, ms);
+    o.start(now);
+    o.stop(now + durationSec + 0.02);
   } catch { }
 }
 
@@ -42,12 +70,12 @@ export const sfx = {
   cursed: () => { try { beep(180, 600, 0.15); } catch { } },
   chaos: () => { try { beep(100, 800, 0.2); } catch { } },
   whoosh: () => { try { beep(880, 150, 0.05); beep(440, 300, 0.03); } catch { } },
-  success: () => { 
-    try { 
-      beep(523, 100); 
-      setTimeout(() => beep(659, 100), 100); 
-      setTimeout(() => beep(783, 200), 200); 
-    } catch { } 
+  success: () => {
+    try {
+      beep(523, 100);
+      setTimeout(() => beep(659, 100), 100);
+      setTimeout(() => beep(783, 200), 200);
+    } catch { }
   },
   arcade: () => {
     try {

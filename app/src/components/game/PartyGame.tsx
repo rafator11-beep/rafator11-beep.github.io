@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, Trophy, AlertCircle, Video, VideoOff, Copy, Crow
 import { Button } from '@/components/ui/button';
 import { isGeminiConfigured, geminiGenerateImpostorRound } from '@/services/geminiClient';
 import { toast } from 'sonner';
+import { copyInviteLink } from '@/utils/clipboard';
 import {
   Dialog,
   DialogContent,
@@ -1782,16 +1783,16 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
       {/* Captain Indicator — moved to header above */}
 
-      {/* Host / Spectator Banner - SIEMPRE VISIBLE PARA EL HOST para permitir QR */}
-      {
-        <div className="absolute top-2 left-1/2 -translate-x-1/2 flex items-center gap-2 z-50">
+      {/* Host / Spectator Banner - SIEMPRE VISIBLE PARA EL HOST para permitir QR.
+          Antes iba con position:absolute centrado encima del <header>, lo que lo
+          hacía solaparse con el icono de Chromecast y los botones de Finalizar/
+          Ronda en pantallas estrechas. Ahora es una segunda fila normal del flujo,
+          debajo del header, así nunca pisa nada. */}
+      <div className="w-full flex justify-center px-4 -mt-1 mb-2 relative z-20">
+        <div className="flex items-center gap-2">
           <div
             className="bg-gradient-to-r from-slate-800/80 to-slate-700/80 px-3 py-1 rounded-full text-xs font-mono text-green-400 border border-green-500/30 flex items-center gap-2 cursor-pointer hover:bg-slate-800/90 hover:border-green-500/60 transition-all"
-            onClick={() => {
-              const url = `${window.location.origin}?room=${spectatorRoomId}`;
-              navigator.clipboard.writeText(url);
-              toast.success('Enlace de invitación copiado');
-            }}
+            onClick={() => copyInviteLink(spectatorRoomId)}
           >
             <span>{isMultiplayer ? (isHost ? 'HOST' : 'ESPEC') : 'LOCAL'} • SALA: {spectatorRoomId}</span>
             <Copy className="w-3 h-3 opacity-70" />
@@ -1817,7 +1818,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
             />
           )}
         </div>
-      }
+      </div>
 
       {/* Mobile Player Indicator (only visible on small screens where sidebar is hidden) */}
       <div className="sm:hidden flex items-center gap-2">

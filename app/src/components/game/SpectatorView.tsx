@@ -1,10 +1,11 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { QRCodeSVG } from 'qrcode.react';
-import { Wifi, Eye, Smartphone, X, RefreshCw, UserCircle2 } from 'lucide-react';
+import { Wifi, Eye, Smartphone, X, RefreshCw, UserCircle2, Copy, Users } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { KahootVoteSession } from '@/components/game/KahootVoteSession';
 import { createPortal } from 'react-dom';
+import { copyToClipboard } from '@/utils/clipboard';
 
 interface SpectatorViewProps {
   roomId: string;
@@ -48,6 +49,11 @@ export function SpectatorQRPanel({ roomId, currentCard, currentPlayer, players, 
 
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
+  // Quién se ha identificado desde su móvil (ver SpectatorView → handleSelectPlayer,
+  // que manda "spectator_identified" al elegir nombre). Así el anfitrión sabe, de
+  // un vistazo, quién está ya conectado con su móvil antes/durante la partida.
+  const [joinedNames, setJoinedNames] = useState<string[]>([]);
+
   // Canal persistente de la sala (se crea una sola vez por roomId, no en cada
   // cambio de carta): responde "spectator_ready" con el estado actual, para
   // que quien escanea el QR a mitad de partida no se quede esperando a que
@@ -57,6 +63,11 @@ export function SpectatorQRPanel({ roomId, currentCard, currentPlayer, players, 
     const channel = supabase.channel(`spectator:${roomId}`)
       .on('broadcast', { event: 'spectator_ready' }, () => {
         channel.send({ type: 'broadcast', event: 'card_update', payload: latestPayloadRef.current });
+      })
+      .on('broadcast', { event: 'spectator_identified' }, (payload) => {
+        const name = (payload.payload as { name?: string })?.name;
+        if (!name) return;
+        setJoinedNames(prev => prev.includes(name) ? prev : [...prev, name]);
       })
       .subscribe();
     channelRef.current = channel;
@@ -79,11 +90,17 @@ export function SpectatorQRPanel({ roomId, currentCard, currentPlayer, players, 
     <>
       <button
         onClick={() => setShowQR(true)}
-        className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white/70 transition hover:bg-white/10 hover:text-white"
+        className="relative flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white/70 transition hover:bg-white/10 hover:text-white"
         title="Ver en móvil (QR)"
       >
         <Smartphone className="h-3.5 w-3.5" />
         <span className="hidden sm:inline">QR</span>
+        {joinedNames.length > 0 && (
+          <span className="flex items-center gap-1 rounded-full bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-bold text-emerald-300">
+            <Users className="h-2.5 w-2.5" />
+            {joinedNames.length}
+          </span>
+        )}
       </button>
 
       {typeof document !== 'undefined' && createPortal(
@@ -136,14 +153,38 @@ export function SpectatorQRPanel({ roomId, currentCard, currentPlayer, players, 
                   Escanea con la cámara del móvil para ver las cartas en tiempo real
                 </p>
 
-                <div className="mt-4 flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+                <button
+                  onClick={() => copyToClipboard(spectatorUrl, 'Enlace copiado')}
+                  className="mt-4 flex w-full items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-left transition hover:bg-white/10 active:scale-[0.98]"
+                >
                   <Wifi className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
-                  <p className="truncate text-xs text-muted-foreground font-mono">{spectatorUrl}</p>
-                </div>
+                  <p className="min-w-0 flex-1 truncate text-xs text-muted-foreground font-mono">{spectatorUrl}</p>
+                  <Copy className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                </button>
 
                 <div className="mt-3 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
                   <Eye className="h-3 w-3" />
                   Las cartas se sincronizan en tiempo real
+                </div>
+
+                {/* Quién ya está dentro con su móvil */}
+                <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-3">
+                  <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                    <Users className="h-3 w-3" />
+                    Conectados desde el móvil ({joinedNames.length})
+                  </p>
+                  {joinedNames.length === 0 ? (
+                    <p className="text-xs text-muted-foreground/70">Nadie se ha identificado todavía — en cuanto escaneen y elijan su nombre, aparecerá aquí.</p>
+                  ) : (
+                    <div className="flex flex-wrap gap-1.5">
+                      {joinedNames.map(name => (
+                        <span key={name} className="flex items-center gap-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-1 text-xs font-semibold text-emerald-300">
+                          <UserCircle2 className="h-3 w-3" />
+                          {name}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </motion.div>
             </motion.div>
@@ -168,9 +209,13 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
     return null;
   });
 
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+
   const handleSelectPlayer = (p: string) => {
     setMyPlayerName(p);
     localStorage.setItem('beep_spectator_name', p);
+    // Avisa al anfitrión para que lo vea en su lista de "conectados desde el móvil".
+    channelRef.current?.send({ type: 'broadcast', event: 'spectator_identified', payload: { name: p } });
   };
 
   useEffect(() => {
@@ -185,13 +230,20 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
       .subscribe((status) => {
         setConnected(status === 'SUBSCRIBED');
         if (status === 'SUBSCRIBED') {
+          channelRef.current = channel;
           // Pide el estado actual al conectarse — si ya hay partida en marcha,
           // no hace falta esperar a que cambie algo para enterarse.
           channel.send({ type: 'broadcast', event: 'spectator_ready', payload: {} });
+          // Si ya te habías identificado en una sesión anterior (localStorage),
+          // vuelve a avisar al anfitrión ahora que estás conectado de nuevo.
+          if (myPlayerName) {
+            channel.send({ type: 'broadcast', event: 'spectator_identified', payload: { name: myPlayerName } });
+          }
         }
       });
 
-    return () => { supabase.removeChannel(channel); };
+    return () => { supabase.removeChannel(channel); channelRef.current = null; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roomId]);
 
   // ¿Hay una prueba activa que necesita que esta persona responda (voto/trivia)?

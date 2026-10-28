@@ -362,7 +362,7 @@ const COSAS: string[] = [
   "canciones que suenan en todos los gimnasios", "canciones de anuncio pegadizas", "sintonías de programas de tele", "sintonías de series",
   "grupos que darías por muertos y siguen de gira", "artistas que 'antes eran mejores'", "colaboraciones musicales imposibles", "one-hit wonders",
   "raperos", "trapreros", "grupos de indie con nombre en inglés", "cantautores de guitarra",
-  "programas de cocina de la tele", "concursos de repostería", "programas de reformas de casas", "realities de convivencia",
+  "programas de cocina de la tele", "concursos de la tele", "programas de reformas de casas", "realities de convivencia",
   "programas del corazón", "tertulianos que salen en todos lados", "presentadores de late night", "reporteros de calle",
   "series que abandonaste en la temporada 2", "series con final decepcionante", "series que todo el mundo recomienda", "series para ver mientras cenas",
   "documentales de crímenes reales", "documentales de estafadores", "biopics musicales", "pelis que has visto mil veces",

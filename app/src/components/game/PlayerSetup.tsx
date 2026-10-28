@@ -25,6 +25,7 @@ import { ChatComponent } from '@/components/multiplayer/ChatComponent';
 import { supabase } from '@/integrations/supabase/client';
 import AddPlayerModal from '@/components/AddPlayerModal';
 import { TASTE_CHIPS } from '@/data/tasteQuestionsContent';
+import { copyInviteLink } from '@/utils/clipboard';
 import { Heart } from 'lucide-react';
 
 // Wrapper to avoid prop drilling issues or valid types
@@ -328,11 +329,7 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
               {isMultiplayer && roomId && (
                 <div
                   className="mt-1 flex items-center gap-2 bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20 cursor-pointer hover:bg-primary/20 transition-colors"
-                  onClick={() => {
-                    const url = `${window.location.origin}?room=${roomId}`;
-                    navigator.clipboard.writeText(url);
-                    toast.success('Enlace de invitación copiado');
-                  }}
+                  onClick={() => copyInviteLink(roomId)}
                 >
                   <span className="text-[10px] md:text-xs font-mono font-bold text-primary text-left">SALA: {roomId}</span>
                   <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-70"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>
