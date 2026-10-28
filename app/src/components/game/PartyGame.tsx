@@ -1638,51 +1638,50 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         );
       })()}
 
-      {/* Top Bar with Chromecast */}
-      <header className="p-4 flex justify-between items-center z-10 relative">
-        <div className="flex gap-2 items-center">
-          <Button variant="ghost" size="icon" onClick={() => {
-            if (window.confirm("¿Seguro que quieres salir?")) {
-              onExit();
-            }
-          }}>
-            <ArrowLeft className="h-6 w-6 text-white/80" />
-          </Button>
+      {/* Top Bar with Chromecast.
+          Antes: [Atrás, Cast] | [Capitán] | [Siguiente, Finalizar, "Ronda N"] con
+          justify-between en una sola fila — en móviles estrechos la última cifra
+          (RONDA) se salía de pantalla, y encima había un segundo botón
+          "Finalizar" más abajo que hacía casi lo mismo (ver nota de handleExit).
+          Simplificado: se quita "Siguiente" del header (ya existe el botón
+          grande de abajo), "Ronda" pasa a una pastilla compacta que no depende
+          de cuánto texto quepa, y min-w-0/truncate evitan que nada se salga. */}
+      <header className="p-3 flex items-center gap-1.5 z-10 relative">
+        <Button variant="ghost" size="icon" className="shrink-0" onClick={() => {
+          if (window.confirm("¿Seguro que quieres salir?")) {
+            handleExit();
+          }
+        }}>
+          <ArrowLeft className="h-6 w-6 text-white/80" />
+        </Button>
 
-          {/* Botón Chromecast */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="bg-primary/10 hover:bg-primary/20 hover:text-white rounded-full transition-all border border-primary/20"
-            onClick={() => setShowChromecastModal(true)}
-          >
-            <Cast className="h-5 w-5 text-primary-200" />
-          </Button>
-        </div>
+        {/* Botón Chromecast */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="shrink-0 bg-primary/10 hover:bg-primary/20 hover:text-white rounded-full transition-all border border-primary/20"
+          onClick={() => setShowChromecastModal(true)}
+        >
+          <Cast className="h-5 w-5 text-primary-200" />
+        </Button>
 
         {/* Captain Indicator — integrated in header */}
         {gameState.captainId && (
-          <div className="flex items-center gap-1.5 bg-amber-500/20 border border-amber-500/40 px-3 py-1.5 rounded-full">
-            <Crown className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-            <span className="text-amber-200 text-xs font-black uppercase tracking-wider">
-              {players.find(p => p.id === gameState.captainId)?.name}
-            </span>
+          <div className="min-w-0 flex-1 flex justify-center">
+            <div className="flex items-center gap-1.5 bg-amber-500/20 border border-amber-500/40 px-3 py-1.5 rounded-full min-w-0">
+              <Crown className="w-3.5 h-3.5 text-amber-400 fill-amber-400 shrink-0" />
+              <span className="text-amber-200 text-xs font-black uppercase tracking-wider truncate">
+                {players.find(p => p.id === gameState.captainId)?.name}
+              </span>
+            </div>
           </div>
         )}
 
-        <div className="flex gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-[10px] font-arcade font-black uppercase tracking-wider bg-white/5 text-white/40 hover:text-white hover:bg-white/10 border border-white/5"
-            onClick={handleNext}
-          >
-            Siguiente
-          </Button>
+        <div className="ml-auto flex items-center gap-1.5 shrink-0">
           <Button
             variant="destructive"
             size="sm"
-            className="text-[10px] font-arcade font-black uppercase tracking-wider bg-gradient-to-r from-red-500/10 to-red-600/10 text-red-300 border border-red-500/30"
+            className="text-[10px] font-arcade font-black uppercase tracking-wider bg-gradient-to-r from-red-500/10 to-red-600/10 text-red-300 border border-red-500/30 px-2.5"
             onClick={() => {
               if (window.confirm("¿Terminar partida y ver resultados?")) {
                 setGameOver(true);
@@ -1692,19 +1691,18 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           >
             Finalizar
           </Button>
-          <div className="bg-gradient-to-r from-slate-800/80 to-slate-700/80 backdrop-blur-xl px-4 py-2 rounded-full border border-white/10 flex items-center gap-2">
+          <div className="bg-gradient-to-r from-slate-800/80 to-slate-700/80 backdrop-blur-xl px-2.5 py-1.5 rounded-full border border-white/10 flex items-center gap-1">
             <AnimatePresence mode="wait">
               <motion.span
                 key={gameState.round}
                 initial={{ y: 10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: -10, opacity: 0 }}
-                className="font-arcade font-bold text-xl text-white"
+                className="font-arcade font-bold text-base text-white"
               >
-                {gameState.round}
+                R{gameState.round}
               </motion.span>
             </AnimatePresence>
-            <span className="text-[10px] text-white/60 uppercase font-arcade font-black tracking-widest">Ronda</span>
           </div>
         </div>
       </header>
@@ -1839,10 +1837,9 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           </Button>
         )}
 
-        <Button variant="destructive" size="sm" className="text-xs h-8 mr-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 border border-white/10 backdrop-blur-sm" onClick={handleExit}>
-          Finalizar
-        </Button>
-
+        {/* El botón "Finalizar" duplicado que había aquí se quitó — la flecha de
+            volver del header ya hace lo mismo (sale guardando el historial) y
+            el "Finalizar" del header ya cubre terminar la partida con podio. */}
         <Dialog>
           <DialogTrigger asChild>
             <Button variant="outline" size="sm" className="bg-transparent border-white/20 text-xs gap-1">
@@ -2378,123 +2375,11 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           </motion.div>
         )}
 
-        {/* CAPTAIN ACTION PANEL - Give/Take XP in real-time */}
-        {(!gameState.showTrivia && !gameState.showVoting && !gameState.showDuel && !gameState.showImpostor && !gameState.showMimica && !gameState.showImpostorWord && mode !== 'cultura' && mode !== 'trivia_futbol') && (
-          <div className="w-full max-w-md mt-3 mb-2 z-10">
-            <div className="flex items-center justify-between px-3 mb-2">
-              <div className="flex items-center gap-1.5">
-                <Crown className="w-3 h-3 text-amber-400" />
-                <span className="text-[10px] text-amber-400 font-black uppercase tracking-[0.25em]">Mesa del Capitán</span>
-              </div>
-              <span className="text-[9px] text-white/30 font-bold">
-                +{Math.min(50, 10 + Math.floor(gameState.round / 2) * 5)} / -{Math.max(5, Math.floor(Math.min(50, 10 + Math.floor(gameState.round / 2) * 5) / 2))} XP
-              </span>
-            </div>
-            <div className="flex flex-wrap justify-center gap-2 bg-black/30 backdrop-blur-xl border border-white/8 rounded-2xl px-4 py-3">
-              {players.map(p => {
-                const isCaptain = gameState.captainId === p.id;
-                const isActive = currentPlayer?.id === p.id;
-                const baseXP = 10 + Math.floor(gameState.round / 2) * 5;
-                const rewardXP = Math.min(50, baseXP);
-                const penaltyXP = Math.max(5, Math.floor(rewardXP / 2));
-                return (
-                  <div key={p.id} className="flex flex-col items-center gap-1">
-                    <div className="flex items-center gap-1">
-                      {/* Minus */}
-                      <motion.button
-                        whileTap={{ scale: 0.8 }}
-                        disabled={isCaptain || (isMultiplayer && !isHost)}
-                        onClick={() => {
-                          if (isCaptain) { toast.error("El Capitán no puede penalizarse 👑"); return; }
-                          handleAdjustXP(p.id, -penaltyXP);
-                          toast.error(`-${penaltyXP} XP ${p.name}`, { duration: 1200 });
-                        }}
-                        className="w-6 h-6 rounded-lg bg-red-500/80 text-white flex items-center justify-center hover:bg-red-500 disabled:opacity-30 transition-colors"
-                      >
-                        <Minus className="w-3 h-3" />
-                      </motion.button>
-
-                      {/* Avatar */}
-                      <div className={`relative w-10 h-10 rounded-xl overflow-hidden border transition-all duration-200
-                        ${isActive ? 'border-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.4)] scale-110' : 'border-white/10'}`}>
-                        {p.avatar_url
-                          ? <img src={p.avatar_url} className="w-full h-full object-cover" alt={p.name} />
-                          : <div className="w-full h-full bg-slate-800 flex items-center justify-center text-xs font-black text-white/60">{p.name[0]}</div>
-                        }
-                        {isCaptain && (
-                          <div className="absolute top-0 right-0 w-3 h-3 bg-amber-500 flex items-center justify-center rounded-bl">
-                            <Crown className="w-2 h-2 text-black" />
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Plus */}
-                      <motion.button
-                        whileTap={{ scale: 0.8 }}
-                        disabled={isCaptain || (isMultiplayer && !isHost)}
-                        onClick={() => {
-                          if (isCaptain) { toast.error("El Capitán no puede auto-asignarse XP 👑"); return; }
-                          handleAdjustXP(p.id, rewardXP);
-                          toast.success(`+${rewardXP} XP ${p.name} 🔥`, { duration: 1200 });
-                        }}
-                        className="w-6 h-6 rounded-lg bg-emerald-500/80 text-white flex items-center justify-center hover:bg-emerald-500 disabled:opacity-30 transition-colors"
-                      >
-                        <Plus className="w-3 h-3" />
-                      </motion.button>
-                    </div>
-                    <span className={`text-[9px] font-black uppercase truncate max-w-[56px] text-center
-                      ${isActive ? 'text-primary' : isCaptain ? 'text-amber-400' : 'text-white/30'}`}>
-                      {p.name}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* YO NUNCA - INTERACTIVE AVATARS with EXP rewards */}
-        {currentText && (currentText.toLowerCase().includes('yo nunca') || mode === 'yo_nunca' || mode === 'yo_nunca_equipos') && (
-          <div className="w-full max-w-sm mt-3 mb-2 z-10">
-            <div className="bg-gradient-to-r from-amber-900/40 to-orange-900/40 border border-amber-500/40 rounded-xl p-3">
-              <p className="text-[10px] text-amber-400 uppercase font-bold tracking-widest mb-2 text-center">🍺 ¿Quién ha bebido? (toca para registrar)</p>
-              <div className="flex flex-wrap justify-center gap-2">
-                {players.map(p => (
-                  <motion.button
-                    key={`drink-${p.id}`}
-                    whileTap={{ scale: 0.85 }}
-                    onClick={async () => {
-                      trackDrink(p.id);
-                      addScore(p.id, XP.DRINK_BRAVE);
-                      toast(`🍺 ${p.name} ha bebido! +${XP.DRINK_BRAVE} XP (Total: ${(drinkCounts[p.id] || 0) + 1})`, { duration: 1500, position: 'top-center' });
-                      // Sync EXP to Supabase profile if player has a linked account
-                      try {
-                        const pid = (p as any).supabase_id;
-                        if (pid) {
-                          await supabase.rpc('increment_player_exp', { player_id: pid, exp_amount: XP.DRINK_BRAVE }).catch(() => { });
-                        }
-                      } catch { /* silent fail */ }
-                    }}
-                    className="flex flex-col items-center gap-1 px-2 py-1.5 rounded-lg bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 hover:bg-gradient-to-r hover:from-amber-500/40 hover:to-orange-500/40 transition-all min-w-[60px] active:shadow-[0_0_15px_rgba(251,191,36,0.5)]"
-                  >
-                    <div className="w-10 h-10 rounded-full border-2 border-amber-400/50 overflow-hidden shadow-[0_0_8px_rgba(251,191,36,0.2)]">
-                      {p.avatar_url ? (
-                        <img src={p.avatar_url} className="w-full h-full object-cover" alt={p.name} />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-amber-700 to-orange-800 flex items-center justify-center text-sm font-bold text-white">
-                          {p.name.substring(0, 2).toUpperCase()}
-                        </div>
-                      )}
-                    </div>
-                    <span className="text-[9px] font-bold text-amber-300 truncate max-w-[55px]">{p.name}</span>
-                    <span className="text-[10px] font-black text-amber-400">{drinkCounts[p.id] || 0} 🍺</span>
-                  </motion.button>
-                ))}
-              </div>
-              <p className="text-[9px] text-amber-500/60 text-center mt-2">Cada trago otorga +5 XP al jugador</p>
-            </div>
-          </div>
-        )}
+        {/* Mesa del Capitán + "¿Quién ha bebido?" se movieron debajo de la carta
+            (justo después del botón "Siguiente turno") — iban aquí arriba y
+            empujaban tanto la carta hacia abajo que en móviles su cabecera
+            (emoji + "YO NUNCA HE...") quedaba fuera de la pantalla visible,
+            pareciendo "cortada" tras el resto de paneles. */}
 
         {/* Virus Cycle Alert (Periodic Infection/Mutation) - Manual overlay removed to use Dialog instead */}
 
@@ -2661,6 +2546,124 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               </button>
             </div>
           )}
+
+        {/* CAPTAIN ACTION PANEL - Give/Take XP in real-time (movido debajo de la carta) */}
+        {(!gameState.showTrivia && !gameState.showVoting && !gameState.showDuel && !gameState.showImpostor && !gameState.showMimica && !gameState.showImpostorWord && mode !== 'cultura' && mode !== 'trivia_futbol') && (
+          <div className="w-full max-w-md mt-3 mb-2 z-10">
+            <div className="flex items-center justify-between px-3 mb-2">
+              <div className="flex items-center gap-1.5">
+                <Crown className="w-3 h-3 text-amber-400" />
+                <span className="text-[10px] text-amber-400 font-black uppercase tracking-[0.25em]">Mesa del Capitán</span>
+              </div>
+              <span className="text-[9px] text-white/30 font-bold">
+                +{Math.min(50, 10 + Math.floor(gameState.round / 2) * 5)} / -{Math.max(5, Math.floor(Math.min(50, 10 + Math.floor(gameState.round / 2) * 5) / 2))} XP
+              </span>
+            </div>
+            <div className="flex flex-wrap justify-center gap-2 bg-black/30 backdrop-blur-xl border border-white/8 rounded-2xl px-4 py-3">
+              {players.map(p => {
+                const isCaptain = gameState.captainId === p.id;
+                const isActive = currentPlayer?.id === p.id;
+                const baseXP = 10 + Math.floor(gameState.round / 2) * 5;
+                const rewardXP = Math.min(50, baseXP);
+                const penaltyXP = Math.max(5, Math.floor(rewardXP / 2));
+                return (
+                  <div key={p.id} className="flex flex-col items-center gap-1">
+                    <div className="flex items-center gap-1">
+                      {/* Minus */}
+                      <motion.button
+                        whileTap={{ scale: 0.8 }}
+                        disabled={isCaptain || (isMultiplayer && !isHost)}
+                        onClick={() => {
+                          if (isCaptain) { toast.error("El Capitán no puede penalizarse 👑"); return; }
+                          handleAdjustXP(p.id, -penaltyXP);
+                          toast.error(`-${penaltyXP} XP ${p.name}`, { duration: 1200 });
+                        }}
+                        className="w-6 h-6 rounded-lg bg-red-500/80 text-white flex items-center justify-center hover:bg-red-500 disabled:opacity-30 transition-colors"
+                      >
+                        <Minus className="w-3 h-3" />
+                      </motion.button>
+
+                      {/* Avatar */}
+                      <div className={`relative w-10 h-10 rounded-xl overflow-hidden border transition-all duration-200
+                        ${isActive ? 'border-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.4)] scale-110' : 'border-white/10'}`}>
+                        {p.avatar_url
+                          ? <img src={p.avatar_url} className="w-full h-full object-cover" alt={p.name} />
+                          : <div className="w-full h-full bg-slate-800 flex items-center justify-center text-xs font-black text-white/60">{p.name[0]}</div>
+                        }
+                        {isCaptain && (
+                          <div className="absolute top-0 right-0 w-3 h-3 bg-amber-500 flex items-center justify-center rounded-bl">
+                            <Crown className="w-2 h-2 text-black" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Plus */}
+                      <motion.button
+                        whileTap={{ scale: 0.8 }}
+                        disabled={isCaptain || (isMultiplayer && !isHost)}
+                        onClick={() => {
+                          if (isCaptain) { toast.error("El Capitán no puede auto-asignarse XP 👑"); return; }
+                          handleAdjustXP(p.id, rewardXP);
+                          toast.success(`+${rewardXP} XP ${p.name} 🔥`, { duration: 1200 });
+                        }}
+                        className="w-6 h-6 rounded-lg bg-emerald-500/80 text-white flex items-center justify-center hover:bg-emerald-500 disabled:opacity-30 transition-colors"
+                      >
+                        <Plus className="w-3 h-3" />
+                      </motion.button>
+                    </div>
+                    <span className={`text-[9px] font-black uppercase truncate max-w-[56px] text-center
+                      ${isActive ? 'text-primary' : isCaptain ? 'text-amber-400' : 'text-white/30'}`}>
+                      {p.name}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* YO NUNCA - INTERACTIVE AVATARS with EXP rewards (movido debajo de la carta) */}
+        {currentText && (currentText.toLowerCase().includes('yo nunca') || mode === 'yo_nunca' || mode === 'yo_nunca_equipos') && (
+          <div className="w-full max-w-sm mt-3 mb-2 z-10">
+            <div className="bg-gradient-to-r from-amber-900/40 to-orange-900/40 border border-amber-500/40 rounded-xl p-3">
+              <p className="text-[10px] text-amber-400 uppercase font-bold tracking-widest mb-2 text-center">🍺 ¿Quién ha bebido? (toca para registrar)</p>
+              <div className="flex flex-wrap justify-center gap-2">
+                {players.map(p => (
+                  <motion.button
+                    key={`drink-${p.id}`}
+                    whileTap={{ scale: 0.85 }}
+                    onClick={async () => {
+                      trackDrink(p.id);
+                      addScore(p.id, XP.DRINK_BRAVE);
+                      toast(`🍺 ${p.name} ha bebido! +${XP.DRINK_BRAVE} XP (Total: ${(drinkCounts[p.id] || 0) + 1})`, { duration: 1500, position: 'top-center' });
+                      // Sync EXP to Supabase profile if player has a linked account
+                      try {
+                        const pid = (p as any).supabase_id;
+                        if (pid) {
+                          await supabase.rpc('increment_player_exp', { player_id: pid, exp_amount: XP.DRINK_BRAVE }).catch(() => { });
+                        }
+                      } catch { /* silent fail */ }
+                    }}
+                    className="flex flex-col items-center gap-1 px-2 py-1.5 rounded-lg bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 hover:bg-gradient-to-r hover:from-amber-500/40 hover:to-orange-500/40 transition-all min-w-[60px] active:shadow-[0_0_15px_rgba(251,191,36,0.5)]"
+                  >
+                    <div className="w-10 h-10 rounded-full border-2 border-amber-400/50 overflow-hidden shadow-[0_0_8px_rgba(251,191,36,0.2)]">
+                      {p.avatar_url ? (
+                        <img src={p.avatar_url} className="w-full h-full object-cover" alt={p.name} />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-amber-700 to-orange-800 flex items-center justify-center text-sm font-bold text-white">
+                          {p.name.substring(0, 2).toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+                    <span className="text-[9px] font-bold text-amber-300 truncate max-w-[55px]">{p.name}</span>
+                    <span className="text-[10px] font-black text-amber-400">{drinkCounts[p.id] || 0} 🍺</span>
+                  </motion.button>
+                ))}
+              </div>
+              <p className="text-[9px] text-amber-500/60 text-center mt-2">Cada trago otorga +5 XP al jugador</p>
+            </div>
+          </div>
+        )}
 
         {/* Render other game components (Trivia, Drinking, etc) overlaying or replacing card */}
         {!gameState.showVirusAlert && ((gameState.showTrivia) || (mode === 'cultura') || (mode === 'trivia_futbol')) && currentQuestion && (
