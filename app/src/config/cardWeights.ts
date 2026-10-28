@@ -9,11 +9,11 @@ export const GENERAL_TYPE_WEIGHTS: Record<string, number> = {
   yoNunca: 1.0,
   picante: 1.3,
   humorNegro: 1.3,
-  enLaCama: 0.8,
+  enLaCama: 1.2,
   masProbable: 1.1,
   grupal: 1.1,
   cadena: 0.8,
-  pacovers: 0.6,
+  pacovers: 1.0,
   espana: 0.5,
   mimica: 0.9,
 };
@@ -21,7 +21,7 @@ export const GENERAL_TYPE_WEIGHTS: Record<string, number> = {
 // Tipos INDIVIDUAL (actúa el jugador activo, sí avanza el turno):
 export const INDIVIDUAL_TYPE_WEIGHTS: Record<string, number> = {
   retos: 1.0,
-  verdadOBebe: 1.1,
+  verdadOBebe: 1.5,
   triviaExpress: 0.6,
   categorias: 0.6,
   duelos: 1.0,
