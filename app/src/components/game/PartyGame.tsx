@@ -22,7 +22,9 @@ import { useGameEffects } from '@/hooks/game/useGameEffects';
 import { useMultiplayer } from '@/hooks/game/useMultiplayer';
 import { useRanking } from '@/hooks/useRanking';
 import { useGameContext } from '@/contexts/GameContext';
-import { CardDisplay, sanitizeCardText } from '@/components/game/CardDisplay';
+import { CardDisplay, sanitizeCardText, detectCardKind, INTERACTIVE_CARD_KINDS } from '@/components/game/CardDisplay';
+import { cultureQuestions, type CultureQuestion } from '@/data/cultureQuestions';
+import type { RaceRankEntry } from '@/components/game/KahootVoteSession';
 import { detectRarity } from '@/lib/godDeck';
 import { sfx } from '@/lib/sfx';
 import { vibe } from '@/lib/vibration';
@@ -762,7 +764,15 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
   const { updateMultiplePlayers, rankings } = useRanking();
 
   const [showChromecastModal, setShowChromecastModal] = useState(false);
-  const [showKahoot, setShowKahoot] = useState<{ active: boolean; mode: 'standard' | 'fastest_finger' }>({ active: false, mode: 'standard' });
+  const [showKahoot, setShowKahoot] = useState<{ active: boolean; mode: 'standard' | 'fastest_finger' | 'speed_race' }>({ active: false, mode: 'standard' });
+  // Trivia de cultura general en carrera: pregunta elegida manualmente (botón del host),
+  // independiente de currentQuestion para no interferir con el flujo normal del juego.
+  const [speedRaceQuestion, setSpeedRaceQuestion] = useState<CultureQuestion | null>(null);
+  const launchSpeedRaceTrivia = useCallback(() => {
+    const q = cultureQuestions[Math.floor(Math.random() * cultureQuestions.length)];
+    setSpeedRaceQuestion(q);
+    setShowKahoot({ active: true, mode: 'speed_race' });
+  }, []);
   
   // Siempre tenemos un room ID para que los espectadores puedan unirse, incluso en local
   const spectatorRoomId = useRef<string>(roomId || Math.random().toString(36).substring(2, 8).toUpperCase()).current;
@@ -1142,6 +1152,22 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     ? currentText
     : '';
   const rarity = aiCardOverride ? 'legendary' : detectRarity(currentText);
+
+  // Auto-Kahoot: ciertas cartas (votación, trivia express) tienen más sentido
+  // si CADA móvil conectado responde desde el suyo en vez de leerse en voz alta
+  // en la pantalla única. Para esas, lanzamos el modo Kahoot automáticamente.
+  // Las cartas de reto/picante/verdad_o_bebe/duelo siguen igual que siempre.
+  const autoKahootIndexRef = useRef<number>(-1);
+  useEffect(() => {
+    if (!safeCurrentText) return;
+    if (!(isHost || !isMultiplayer)) return;
+    if (showKahoot.active) return;
+    const kind = detectCardKind(safeCurrentText);
+    if (!INTERACTIVE_CARD_KINDS.includes(kind)) return;
+    if (autoKahootIndexRef.current === currentIndex) return;
+    autoKahootIndexRef.current = currentIndex;
+    setShowKahoot({ active: true, mode: 'standard' });
+  }, [safeCurrentText, currentIndex, showKahoot.active, isHost, isMultiplayer]);
 
   // Trigger / Content Detection System
   // Guard: solo procesar el TRIGGER de cada carta una vez. Sin esto, un refetch de
@@ -1833,17 +1859,32 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               privateFor={(gameState.showImpostorWarning || gameState.showImpostor) ? gameState.impostorPrivateFor : undefined}
               kahootConfig={showKahoot.active ? {
                 mode: showKahoot.mode,
-                question: (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion
+                question: showKahoot.mode === 'speed_race' && speedRaceQuestion
+                  ? speedRaceQuestion.question
+                  : (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion
                   ? currentQuestion.question
                   : sanitizeCardText(currentText || ''),
-                options: (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion
+                options: showKahoot.mode === 'speed_race' && speedRaceQuestion
+                  ? speedRaceQuestion.options
+                  : (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion
                   ? currentQuestion.options
                   : players.map(p => p.name),
-                correctAnswer: (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion
+                correctAnswer: showKahoot.mode === 'speed_race' && speedRaceQuestion
+                  ? speedRaceQuestion.options[speedRaceQuestion.correctIndex]
+                  : (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion
                   ? currentQuestion.options[currentQuestion.correctIndex]
                   : undefined
               } : null}
             />
+          )}
+          {(isHost || !isMultiplayer) && !showKahoot.active && (
+            <button
+              onClick={launchSpeedRaceTrivia}
+              title="Trivia de cultura general: todos los móviles conectados responden a la vez y se reparten puntos según velocidad de acierto"
+              className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow flex items-center gap-1 hover:brightness-110 transition-all"
+            >
+              ⚡ Trivia en carrera
+            </button>
           )}
         </div>
       </div>
@@ -2950,22 +2991,39 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               roomId={spectatorRoomId}
               mode={showKahoot.mode}
               question={
-                (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion
+                showKahoot.mode === 'speed_race' && speedRaceQuestion
+                  ? speedRaceQuestion.question
+                  : (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion
                   ? currentQuestion.question
                   : sanitizeCardText(currentText || '')
               }
               options={
-                (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion
+                showKahoot.mode === 'speed_race' && speedRaceQuestion
+                  ? speedRaceQuestion.options
+                  : (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion
                   ? currentQuestion.options
                   : players.map(p => p.name)
               }
               correctAnswer={
-                (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion
+                showKahoot.mode === 'speed_race' && speedRaceQuestion
+                  ? speedRaceQuestion.options[speedRaceQuestion.correctIndex]
+                  : (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion
                   ? currentQuestion.options[currentQuestion.correctIndex]
                   : undefined
               }
               isHost={isHost}
               onClose={() => setShowKahoot({ active: false, mode: 'standard' })}
+              onRaceComplete={(ranking: RaceRankEntry[]) => {
+                // Reparte puntos reales a cada jugador según su puesto en el ranking
+                // de velocidad de acierto (el más rápido se lleva más puntos).
+                ranking.forEach(entry => {
+                  const p = players.find(pl => pl.name === entry.voter);
+                  if (p) addScore(p.id, entry.points);
+                });
+                if (ranking.length > 0) confetti();
+                setSpeedRaceQuestion(null);
+                setShowKahoot({ active: false, mode: 'standard' });
+              }}
               onResult={(winner, votes) => {
                 if (!((gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion)) {
                   const wPlayer = players.find(p => p.name === winner);

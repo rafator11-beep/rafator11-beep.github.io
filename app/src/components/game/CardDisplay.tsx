@@ -116,9 +116,13 @@ export function processDrinkingMultiplier(text: string, round: number = 1): Reac
 }
 
 // ── CARD TYPE DETECTION ───────────────────────────────────────────────────────
-type CardKind = 'yo_nunca' | 'reto' | 'votacion' | 'grupal' | 'picante' | 'norma' | 'duelo' | 'espana' | 'categorias' | 'verdad_o_bebe' | 'cadena' | 'trivia_express' | 'generic';
+export type CardKind = 'yo_nunca' | 'reto' | 'votacion' | 'grupal' | 'picante' | 'norma' | 'duelo' | 'espana' | 'categorias' | 'verdad_o_bebe' | 'cadena' | 'trivia_express' | 'generic';
 
-function detectCardKind(content: string): CardKind {
+// Tipos de carta donde tiene sentido que CADA móvil conectado responda desde el
+// suyo (flujo tipo Kahoot) en vez de leerse en voz alta / actuarse por un jugador.
+export const INTERACTIVE_CARD_KINDS: CardKind[] = ['votacion', 'trivia_express'];
+
+export function detectCardKind(content: string): CardKind {
     const c = content.toLowerCase();
     if (c.includes('yo nunca') || c.startsWith('🙈')) return 'yo_nunca';
     if (c.startsWith('🙌') || c.includes('todos a la vez')) return 'grupal';

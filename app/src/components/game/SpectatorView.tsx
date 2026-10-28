@@ -34,6 +34,7 @@ interface CardState {
     question: string;
     options: string[];
     correctAnswer?: string;
+    mode?: 'standard' | 'fastest_finger' | 'speed_race';
   };
   privateFor?: Record<string, PrivateForPlayer>;
   cardIndex: number;
@@ -518,6 +519,7 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
             question={cardState.kahootConfig.question}
             options={cardState.kahootConfig.options}
             correctAnswer={cardState.kahootConfig.correctAnswer}
+            mode={cardState.kahootConfig.mode}
             isHost={false}
             onClose={() => {}}
           />

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Zap, X, Crown, Users, Check, Timer } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,7 +11,17 @@ interface KahootVoteSessionProps {
   isHost: boolean;
   onClose: () => void;
   onResult?: (winner: string, votes: Record<string, number>) => void;
-  mode?: 'standard' | 'fastest_finger';
+  // speed_race: ronda de trivia en carrera — todos responden, la ronda sigue
+  // activa el tiempo completo y se reparten puntos por velocidad de acierto.
+  mode?: 'standard' | 'fastest_finger' | 'speed_race';
+  onRaceComplete?: (ranking: RaceRankEntry[]) => void;
+}
+
+export interface RaceRankEntry {
+  voter: string;
+  correct: boolean;
+  reactionTime: number;
+  points: number;
 }
 
 interface VotePayload {
@@ -22,6 +32,10 @@ interface VotePayload {
 }
 
 const VOTE_DURATION = 20; // segundos
+const RACE_DURATION = 15; // segundos — trivia en carrera
+// Puntos decrecientes por orden de acierto (velocidad). Quien acierta más tarde
+// que el último hueco de la escala sigue llevándose el mínimo (1 punto).
+const RACE_POINTS_SCALE = [10, 8, 6, 5, 4, 3, 2, 1];
 
 // Paleta de colores para los botones de voto (tipo Kahoot)
 const PLAYER_COLORS = [
@@ -43,14 +57,17 @@ export function KahootVoteSession({
   isHost,
   onClose,
   onResult,
+  onRaceComplete,
   mode = 'standard',
 }: KahootVoteSessionProps) {
   const [votes, setVotes] = useState<Record<string, number>>({});
   const [myVote, setMyVote] = useState<string | null>(null);
   const [phase, setPhase] = useState<'countdown' | 'voting' | 'results'>(mode === 'fastest_finger' ? 'countdown' : 'voting');
-  const [timeLeft, setTimeLeft] = useState(mode === 'fastest_finger' ? 3 : VOTE_DURATION);
+  const [timeLeft, setTimeLeft] = useState(mode === 'fastest_finger' ? 3 : mode === 'speed_race' ? RACE_DURATION : VOTE_DURATION);
   const [totalVoters, setTotalVoters] = useState(0);
   const [fastestWinner, setFastestWinner] = useState<{ name: string, time: number } | null>(null);
+  // speed_race: cada acierto registrado (voter + tiempo de reacción), para el ranking final
+  const [raceEntries, setRaceEntries] = useState<{ voter: string; correct: boolean; reactionTime: number }[]>([]);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(0);
@@ -85,6 +102,13 @@ export function KahootVoteSession({
               if (timerRef.current) clearInterval(timerRef.current);
               if (isHost && onResult) onResult(voter, { [target]: 1 });
             }
+          } else if (mode === 'speed_race') {
+            // La ronda sigue abierta todo el tiempo: solo registramos el acierto/fallo
+            // y el tiempo de reacción de cada jugador, sin cortar en el primero.
+            setRaceEntries(prev => (
+              prev.some(e => e.voter === voter) ? prev : [...prev, { voter, correct: target === correctAnswer, reactionTime: reactionTime || 0 }]
+            ));
+            setTotalVoters(prev => prev + 1);
           } else {
             setVotes(prev => ({
               ...prev,
@@ -107,6 +131,13 @@ export function KahootVoteSession({
           if (unmounted) return;
           if (status === 'SUBSCRIBED') {
             retryCountRef.current = 0;
+            // speed_race arranca en 'voting' directamente (sin countdown) — el host
+            // sincroniza el instante de inicio con todos los móviles conectados para
+            // que el tiempo de reacción sea comparable entre todos.
+            if (isHost && mode === 'speed_race' && startTimeRef.current === 0) {
+              startTimeRef.current = Date.now();
+              channel?.send({ type: 'broadcast', event: 'start_voting', payload: {} });
+            }
           } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
             // Reconexión básica: móvil bloqueado o red perdida un instante
             if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current);
@@ -175,8 +206,9 @@ export function KahootVoteSession({
     if (myVote || phase !== 'voting' || !channelRef.current) return;
     setMyVote(target);
 
-    // In fastest finger, wrong answer locks you out but doesn't end the session
-    const reactionTime = mode === 'fastest_finger' ? (Date.now() - startTimeRef.current) / 1000 : 0;
+    // En fastest_finger y speed_race medimos el tiempo de reacción desde el inicio
+    // sincronizado de la ronda, para poder ordenar/premiar por velocidad.
+    const reactionTime = (mode === 'fastest_finger' || mode === 'speed_race') ? (Date.now() - startTimeRef.current) / 1000 : 0;
     const voterName = localStorage.getItem('beep_spectator_name') || 'Jugador Anónimo';
 
     await channelRef.current.send({
@@ -200,6 +232,15 @@ export function KahootVoteSession({
   const winner = Object.entries(votes).sort((a, b) => b[1] - a[1])[0]?.[0];
   const maxVotes = Math.max(...Object.values(votes), 1);
 
+  // speed_race: ranking final por velocidad de acierto. Solo quien acertó se lleva
+  // puntos, de forma decreciente según el orden de su tiempo de reacción.
+  const raceRanking: RaceRankEntry[] = useMemo(() => {
+    return raceEntries
+      .filter(e => e.correct)
+      .sort((a, b) => a.reactionTime - b.reactionTime)
+      .map((e, i) => ({ ...e, points: RACE_POINTS_SCALE[i] ?? 1 }));
+  }, [raceEntries]);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -210,14 +251,14 @@ export function KahootVoteSession({
       {/* Header */}
       <div className="mb-4 flex w-full max-w-2xl items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${mode === 'fastest_finger' ? 'bg-red-500/20' : 'bg-yellow-400/15'}`}>
-            <Zap className={`h-5 w-5 ${mode === 'fastest_finger' ? 'text-red-400' : 'text-yellow-300'}`} />
+          <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${mode === 'fastest_finger' || mode === 'speed_race' ? 'bg-red-500/20' : 'bg-yellow-400/15'}`}>
+            <Zap className={`h-5 w-5 ${mode === 'fastest_finger' || mode === 'speed_race' ? 'text-red-400' : 'text-yellow-300'}`} />
           </div>
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-              {mode === 'fastest_finger' ? 'El Más Rápido' : 'Modo Kahoot'}
+              {mode === 'fastest_finger' ? 'El Más Rápido' : mode === 'speed_race' ? 'Trivia en Carrera' : 'Modo Kahoot'}
             </p>
-            <p className="text-sm font-bold text-white">{mode === 'fastest_finger' ? 'Bomba Cultural' : '¿Quién es más probable?'}</p>
+            <p className="text-sm font-bold text-white">{mode === 'fastest_finger' ? 'Bomba Cultural' : mode === 'speed_race' ? 'Puntos por velocidad' : '¿Quién es más probable?'}</p>
           </div>
         </div>
 
@@ -370,9 +411,50 @@ export function KahootVoteSession({
         </div>
       )}
 
+      {/* Results panel — speed_race ranking */}
+      <AnimatePresence>
+        {phase === 'results' && mode === 'speed_race' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-6 w-full max-w-2xl rounded-[24px] border border-emerald-400/30 bg-emerald-400/10 p-5"
+          >
+            <p className="text-center text-[11px] font-semibold uppercase tracking-widest text-emerald-300/80 mb-3">
+              🏁 Ranking por velocidad
+            </p>
+            {raceRanking.length === 0 ? (
+              <p className="text-center text-sm text-muted-foreground">Nadie acertó a tiempo 😅</p>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {raceRanking.map((entry, i) => (
+                  <div
+                    key={entry.voter}
+                    className={`flex items-center justify-between rounded-xl px-4 py-2.5 ${i === 0 ? 'bg-yellow-400/20 border border-yellow-400/40' : 'bg-white/5 border border-white/10'}`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-black text-white/60 w-5 text-center">{i + 1}.</span>
+                      {i === 0 && <Crown className="w-4 h-4 text-yellow-400" />}
+                      <span className="text-sm font-bold text-white">{entry.voter}</span>
+                      <span className="text-[10px] text-muted-foreground">({entry.reactionTime.toFixed(2)}s)</span>
+                    </div>
+                    <span className="text-sm font-black text-emerald-300">+{entry.points} pts</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            <button
+              onClick={() => { onRaceComplete?.(raceRanking); onClose(); }}
+              className="mt-4 w-full rounded-2xl bg-emerald-400 px-6 py-2.5 text-sm font-bold text-black hover:bg-emerald-300 transition"
+            >
+              Continuar
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Results panel */}
       <AnimatePresence>
-        {phase === 'results' && mode !== 'fastest_finger' && (correctAnswer || winner) && (
+        {phase === 'results' && mode !== 'fastest_finger' && mode !== 'speed_race' && (correctAnswer || winner) && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
