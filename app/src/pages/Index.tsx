@@ -1,4 +1,4 @@
-import { useState, useEffect, Suspense, lazy } from 'react';
+import { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import { useGSAPFlash } from '@/hooks/useGSAPFlash';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Globe, Smartphone, Coins } from 'lucide-react';
@@ -393,9 +393,25 @@ function GameAppInner() {
   }, [roomId, screen, setGameId, isHost, localPlayerId, pendingPlayer]);
 
   // MULTIPLAYER BROADCAST FOR HOST (Keep Alive for late joiners)
+  // El payload cambia a menudo (screen, gameId, game?.mode); antes el efecto
+  // dependía de todo eso y recreaba el canal `room:${roomId}` (removeChannel +
+  // subscribe) en cada cambio, duplicando brevemente la suscripción Realtime
+  // en cada resubscribe. Ahora el canal solo se crea/destruye con isHost/roomId,
+  // y el payload a enviar se lee de un ref siempre actualizado.
+  const keepAlivePayloadRef = useRef({
+    mode: game?.mode || pendingHostMode,
+    gameId,
+    status: screen === 'player-setup' ? 'setup' : 'playing',
+  });
+  keepAlivePayloadRef.current = {
+    mode: game?.mode || pendingHostMode,
+    gameId,
+    status: screen === 'player-setup' ? 'setup' : 'playing',
+  };
+
   useEffect(() => {
-    // Run as long as the host has a room and gameId, even during 'playing'
-    if (isHost && roomId && gameId) {
+    // Run as long as the host has a room, even before gameId exists yet
+    if (isHost && roomId) {
       const channel = supabase.channel(`room:${roomId}`);
       let interval: NodeJS.Timeout;
 
@@ -403,14 +419,11 @@ function GameAppInner() {
         if (status === 'SUBSCRIBED') {
           // Broadcast state every 2 seconds for late joiners
           const broadcastSetup = () => {
+            if (!keepAlivePayloadRef.current.gameId) return;
             channel.send({
               type: 'broadcast',
               event: 'game_state',
-              payload: {
-                mode: game?.mode || pendingHostMode,
-                gameId: gameId,
-                status: screen === 'player-setup' ? 'setup' : 'playing'
-              }
+              payload: keepAlivePayloadRef.current,
             });
           };
 
@@ -424,7 +437,7 @@ function GameAppInner() {
         supabase.removeChannel(channel);
       };
     }
-  }, [isHost, roomId, screen, gameId, game?.mode, pendingHostMode]);
+  }, [isHost, roomId]);
 
 
   const getScreenContent = () => {

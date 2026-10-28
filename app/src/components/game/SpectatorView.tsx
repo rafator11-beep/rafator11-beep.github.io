@@ -196,9 +196,64 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
 
   // ¿Hay una prueba activa que necesita que esta persona responda (voto/trivia)?
   const needsParticipant = !!cardState?.kahootConfig;
-  // Mientras haga falta participar y no se haya identificado, hay que elegir
-  // jugador ANTES de poder votar — si no hay nada activo, modo narrador normal.
-  const awaitingIdentity = needsParticipant && !myPlayerName;
+
+  // ── Paso obligatorio de entrada: elegir quién eres ANTES de ver nada más.
+  // Así desde el primer segundo lees la partida como esa persona y puedes
+  // participar en cuanto te toque, no solo cuando salta un voto concreto.
+  if (!myPlayerName) {
+    const roster = cardState?.players || [];
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-[#0a0a14] p-4">
+        <div className="mb-6 flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[hsl(var(--primary)/0.2)]">
+            <UserCircle2 className="h-5 w-5 text-[hsl(var(--primary))]" />
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Sala {roomId}</p>
+            <h1 className="text-lg font-bold text-white">¿Quién eres?</h1>
+          </div>
+        </div>
+
+        {roster.length > 0 ? (
+          <div className="w-full max-w-md rounded-[24px] border border-fuchsia-500/30 bg-fuchsia-500/10 p-5 backdrop-blur-md">
+            <p className="mb-3 text-center text-sm font-semibold text-fuchsia-200">
+              Elige tu nombre de la lista de la partida para seguirla y poder participar cuando te toque
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              {roster.map(p => (
+                <button
+                  key={p}
+                  onClick={() => handleSelectPlayer(p)}
+                  className="flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-sm font-medium text-white transition hover:bg-white/20 active:scale-95"
+                >
+                  <UserCircle2 className="h-4 w-4 opacity-70" />
+                  <span className="truncate">{p}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-4 text-center">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full border border-white/10 bg-white/5">
+              <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+            <p className="text-muted-foreground">
+              {connected ? 'Esperando la lista de jugadores...' : 'Conectando a la sala...'}
+            </p>
+          </div>
+        )}
+
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="mt-8 rounded-2xl border border-white/10 bg-white/5 px-6 py-2.5 text-sm font-semibold text-white/60 hover:bg-white/10"
+          >
+            Salir
+          </button>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[#0a0a14] p-4">
@@ -231,31 +286,6 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
             : 'bg-white/5 text-white/40 border border-white/10'
         }`}>
           {needsParticipant ? '🎮 Participante — te toca responder' : '🎙️ Narrador — solo estás viendo la partida'}
-        </div>
-      )}
-
-      {/* Identificación de jugador. Si hay una prueba activa (needsParticipant) y
-          aún no has dicho quién eres, esto bloquea el voto hasta que elijas —
-          no puedes responder "como anónimo" en una prueba que lo necesita. */}
-      {!myPlayerName && cardState?.players && cardState.players.length > 0 && (
-        <div className={`mb-6 w-full max-w-md rounded-[24px] border p-5 backdrop-blur-md ${
-          awaitingIdentity ? 'border-fuchsia-500/40 bg-fuchsia-500/10' : 'border-white/10 bg-white/5'
-        }`}>
-          <p className={`mb-3 text-center text-sm font-semibold ${awaitingIdentity ? 'text-fuchsia-200' : 'text-white/80'}`}>
-            {awaitingIdentity ? '¡Te toca! Elige quién eres para poder responder' : '¿Quién eres? (opcional, por si te toca participar)'}
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            {cardState.players.map(p => (
-              <button
-                key={p}
-                onClick={() => handleSelectPlayer(p)}
-                className="flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-sm font-medium text-white transition hover:bg-white/20 active:scale-95"
-              >
-                <UserCircle2 className="h-4 w-4 opacity-70" />
-                <span className="truncate">{p}</span>
-              </button>
-            ))}
-          </div>
         </div>
       )}
 
