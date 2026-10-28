@@ -35,27 +35,42 @@ export function SpectatorQRPanel({ roomId, currentCard, currentPlayer, players, 
 }) {
   const spectatorUrl = `${window.location.origin}${window.location.pathname}?room=${roomId}&spectator=true`;
 
-  // Broadcast card to spectators whenever it changes
+  // Siempre con el último estado a mano (sin esperar a un efecto) para poder
+  // responder al instante cuando alguien se conecta a mitad de partida.
+  const latestPayloadRef = useRef<CardState>({
+    text: currentCard, playerName: currentPlayer, players, kahootConfig,
+    cardIndex: Date.now(), timestamp: Date.now(),
+  });
+  latestPayloadRef.current = {
+    text: currentCard, playerName: currentPlayer, players, kahootConfig,
+    cardIndex: latestPayloadRef.current.cardIndex, timestamp: Date.now(),
+  };
+
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+
+  // Canal persistente de la sala (se crea una sola vez por roomId, no en cada
+  // cambio de carta): responde "spectator_ready" con el estado actual, para
+  // que quien escanea el QR a mitad de partida no se quede esperando a que
+  // cambie algo — recibe la foto actual al momento de conectarse.
   useEffect(() => {
-    if (!roomId || !currentCard) return;
-    const channel = supabase.channel(`spectator:${roomId}`);
-    channel.subscribe((status) => {
-      if (status === 'SUBSCRIBED') {
-        channel.send({
-          type: 'broadcast',
-          event: 'card_update',
-          payload: {
-            text: currentCard,
-            playerName: currentPlayer,
-            players: players,
-            kahootConfig: kahootConfig,
-            cardIndex: Date.now(),
-            timestamp: Date.now(),
-          },
-        });
-      }
+    if (!roomId) return;
+    const channel = supabase.channel(`spectator:${roomId}`)
+      .on('broadcast', { event: 'spectator_ready' }, () => {
+        channel.send({ type: 'broadcast', event: 'card_update', payload: latestPayloadRef.current });
+      })
+      .subscribe();
+    channelRef.current = channel;
+    return () => { supabase.removeChannel(channel); channelRef.current = null; };
+  }, [roomId]);
+
+  // Reenvía el estado cada vez que cambia algo relevante (carta, jugadores, voto activo).
+  useEffect(() => {
+    if (!roomId) return;
+    channelRef.current?.send({
+      type: 'broadcast',
+      event: 'card_update',
+      payload: latestPayloadRef.current,
     });
-    return () => { supabase.removeChannel(channel); };
   }, [roomId, currentCard, currentPlayer, players, kahootConfig]);
 
   const [showQR, setShowQR] = useState(false);
@@ -169,10 +184,21 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
       })
       .subscribe((status) => {
         setConnected(status === 'SUBSCRIBED');
+        if (status === 'SUBSCRIBED') {
+          // Pide el estado actual al conectarse — si ya hay partida en marcha,
+          // no hace falta esperar a que cambie algo para enterarse.
+          channel.send({ type: 'broadcast', event: 'spectator_ready', payload: {} });
+        }
       });
 
     return () => { supabase.removeChannel(channel); };
   }, [roomId]);
+
+  // ¿Hay una prueba activa que necesita que esta persona responda (voto/trivia)?
+  const needsParticipant = !!cardState?.kahootConfig;
+  // Mientras haga falta participar y no se haya identificado, hay que elegir
+  // jugador ANTES de poder votar — si no hay nada activo, modo narrador normal.
+  const awaitingIdentity = needsParticipant && !myPlayerName;
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[#0a0a14] p-4">
@@ -197,10 +223,27 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
         </div>
       </div>
 
-      {/* Identificación de jugador */}
+      {/* Modo actual: narrador (solo mirando) vs participante (hay que responder) */}
+      {connected && (
+        <div className={`mb-4 flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wide ${
+          needsParticipant
+            ? 'bg-fuchsia-500/15 text-fuchsia-300 border border-fuchsia-500/30'
+            : 'bg-white/5 text-white/40 border border-white/10'
+        }`}>
+          {needsParticipant ? '🎮 Participante — te toca responder' : '🎙️ Narrador — solo estás viendo la partida'}
+        </div>
+      )}
+
+      {/* Identificación de jugador. Si hay una prueba activa (needsParticipant) y
+          aún no has dicho quién eres, esto bloquea el voto hasta que elijas —
+          no puedes responder "como anónimo" en una prueba que lo necesita. */}
       {!myPlayerName && cardState?.players && cardState.players.length > 0 && (
-        <div className="mb-6 w-full max-w-md rounded-[24px] border border-white/10 bg-white/5 p-5 backdrop-blur-md">
-          <p className="mb-3 text-center text-sm font-semibold text-white/80">¿Quién eres?</p>
+        <div className={`mb-6 w-full max-w-md rounded-[24px] border p-5 backdrop-blur-md ${
+          awaitingIdentity ? 'border-fuchsia-500/40 bg-fuchsia-500/10' : 'border-white/10 bg-white/5'
+        }`}>
+          <p className={`mb-3 text-center text-sm font-semibold ${awaitingIdentity ? 'text-fuchsia-200' : 'text-white/80'}`}>
+            {awaitingIdentity ? '¡Te toca! Elige quién eres para poder responder' : '¿Quién eres? (opcional, por si te toca participar)'}
+          </p>
           <div className="grid grid-cols-2 gap-2">
             {cardState.players.map(p => (
               <button
@@ -221,7 +264,7 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
           <span className="text-xs font-semibold text-emerald-300">
             Jugando como: {myPlayerName}
           </span>
-          <button 
+          <button
             onClick={() => {
               setMyPlayerName(null);
               localStorage.removeItem('beep_spectator_name');
@@ -233,7 +276,8 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
         </div>
       )}
 
-      {/* Card display */}
+      {/* Card display — vista de narrador normal (no se oculta ni en modo participante,
+          así siempre se ve qué está pasando en la partida) */}
       <AnimatePresence mode="wait">
         {cardState ? (
           <motion.div
@@ -285,9 +329,10 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
         )}
       </AnimatePresence>
 
-      {/* KAHOOT MODAL para el espectador */}
+      {/* KAHOOT MODAL para el espectador — no se muestra hasta que sepamos
+          quién eres, para que el voto quede atribuido a un jugador real */}
       <AnimatePresence>
-        {cardState?.kahootConfig && (
+        {cardState?.kahootConfig && myPlayerName && (
           <KahootVoteSession
             roomId={roomId}
             question={cardState.kahootConfig.question}
