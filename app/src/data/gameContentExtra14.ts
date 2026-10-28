@@ -199,7 +199,7 @@ export const retosExtra14: string[] = [
   "🎯 {player} hace el reto de la botella: gira una botella y besa a quien señale en la mejilla. Si se niega, bebe 3 🥃",
   "🎯 {player} tiene 20 segundos para recordar el último sueño que tuvo. Si no recuerda ninguno, bebe 2 🍻",
   "🎯 {player} actúa como si fuera un influencer presentando el cuarto de baño de esta casa. 20 segundos. Si el grupo no le sigue, bebe 2 🍻",
-  "🎯 {player} tiene que hacer 3 cosas raras en 15 segundos que diga el grupo. Por cada cosa que no haga, bebe 1 🍺",
+  "🎯 {player} tiene que hacer, en 15 segundos, 3 cosas raras que diga el grupo. Por cada cosa que no haga, bebe 1 🍺",
   "🎯 {player} lee el último estado de WhatsApp que puso o el último tweet. Si no recuerda o no tiene, bebe 2 🍻",
   "🎯 {player} cambia de sitio con alguien sin hablar y solo con mímica de 10 segundos explicando por qué quiere su sitio 🎭. Si no hay negociación, beben los dos 1 🍺",
   "🎯 {player} tiene que aguantar 45 segundos sin usar el móvil. El grupo vigila. Si mira, bebe 3 🥃",

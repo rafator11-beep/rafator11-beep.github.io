@@ -14,13 +14,13 @@ export const clasicoExtra9: string[] = [
   "TODOS a la vez: señalad quién del grupo sería el más pesado en un chat de viaje. El más señalado propone un destino absurdo en 10 segundos o bebe 2 tragos.",
 
   // — RETOS INDIVIDUALES CON CONSECUENCIA —
-  "Di 10 apellidos españoles en 10 segundos sin repetir. Por cada uno que te saltes, bebes medio trago. Si llegas a 10, reparte 3.",
+  "Di 7 apellidos españoles en 15 segundos sin repetir. Por cada uno que te saltes, bebes medio trago. Si llegas a 7, reparte 3.",
   "Imita a un político español durante 10 segundos. El grupo vota si se reconoce: si la mayoría acierta, reparte 2 tragos; si no, bebes 2.",
   "Canta el estribillo de la última canción que escuchaste. Si no recuerdas cuál fue, bebe 3 tragos.",
   "Di el nombre de 5 capitales de provincia española en 8 segundos. Por cada fallo, bebe 1 trago.",
   "Describe la trama de una película sin decir el título. Tienes 20 segundos. Si alguien adivina, tú repartes 3 tragos. Si nadie adivina, bebes 2.",
   "Haz 5 flexiones ahora mismo. Si llegas, reparte 3 tragos. Si no, bebe tú 3. Si lo intentas y fallas a medias, bebe 2.",
-  "Di 3 trabalenguas distintos sin trabarte. Por cada uno que falles, bebe 1 trago. Si los dices todos, reparte 3.",
+  "Di 3 trabalenguas sin equivocarte. Por cada uno en el que te trabes, bebe 1 trago; si aciertas los 3, reparte 3.",
   "Convence al grupo de que algo obviamente falso es verdad en 20 segundos. Si alguien te cree, reparte 3 tragos. Si nadie te cree, bebes 3.",
 
   // — RETOS GRUPALES CON DINÁMICA —

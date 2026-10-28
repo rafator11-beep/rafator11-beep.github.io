@@ -319,7 +319,7 @@ export const picanteExtra12: string[] = [
   "Enseña la última nota de voz que hayas recibido o bebe 2. 🍻",
   "Di si actualmente estás enamorado/a de alguien o bebe 3. 🥃",
   "Cuenta en qué parte del cuerpo tienes alguna marca que nadie del grupo sepa o bebe 2. 🍻",
-  "Di si hay alguien en este grupo al que hayas stalkear esta semana o bebe 3. 🥃",
+  "Di si hay alguien en este grupo al que hayas estado stalkeando esta semana o bebe 3. 🥃",
   "Describe tu nivel de borrachera actual en porcentaje o bebe 1. 🍺",
   "Di si tienes guardado el número de alguien a quien no deberías tener o bebe 3. 🥃",
   "Cuenta la última vez que alguien te dejó en visto indefinidamente o bebe 1. 🍺",
@@ -397,7 +397,7 @@ export const retosExtra12: string[] = [
   "Reto: {player} intenta equilibrar una moneda en la punta de tu nariz durante 10 segundos o bebe 2. 🍻",
   "Reto: {player} di el número de teléfono de alguien del grupo de memoria o bebe 2. 🍻",
   "Reto: {player} haz una propuesta de brindis emotiva de 20 segundos por el grupo o bebe 2. 🍻",
-  "Reto: {player} di 7 palabras en inglés que empiecen por R en 15 segundos o bebe 2. 🍻",
+  "Reto: {player} di 5 palabras en español que empiecen por R en 10 segundos o bebe 2. 🍻",
   "Reto: {player} ordena a todos del grupo de mayor a menor probabilidad de casarse primero o bebe 2. 🍻",
   "Reto: {player} canta el estribillo de una canción de Alejandro Sanz sin conocerla o bebe 2. 🍻",
   "Reto: {player} describe el contenido de tu mochila o bolso sin mirarlo o bebe 2. 🍻",
@@ -479,7 +479,7 @@ export const retosExtra12: string[] = [
   "Reto: {player} recita los primeros 4 versos de cualquier canción pop española o bebe 2. 🍻",
   "Reto: {player} di en qué año se creó WhatsApp, Instagram y TikTok o bebe 2. 🍻",
   "Reto: {player} señala a la persona del grupo con quien más horas pasarías atrapado/a en un ascensor o bebe 1. 🍺",
-  "Reto: {player} di si alguna vez has hecho algo por peer pressure que no querías y cuéntalo en 20 segundos o bebe 2. 🍻",
+  "Reto: {player} cuenta en 20 segundos si alguna vez hiciste algo por presión del grupo que no querías hacer, o bebe 2. 🍻",
   "Reto: {player} haz una foto al cielo raso (o al techo) y súbela a tu estado de WhatsApp con el emoji que mejor defina la noche o bebe 2. 🍻",
 ];
 

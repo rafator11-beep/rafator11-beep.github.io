@@ -18,7 +18,7 @@ export const cascadeGames: DrinkingGame[] = [
   {
     name: "CASCADA INVERSA",
     emoji: "⬆️",
-    description: "{player} empieza la cascada hacia la IZQUIERDA. El de tu izquierda no puede parar hasta que tú pares.",
+    description: "{player} empieza la cascada hacia la izquierda. El de su izquierda no puede parar hasta que {player} pare.",
     type: 'cascade',
   },
   {
@@ -46,7 +46,7 @@ export const coinGames: DrinkingGame[] = [
   {
     name: "MONEDA AL AIRE",
     emoji: "💰",
-    description: "{player} lanza una moneda (o elige alguien cara/cruz). Cara = el de tu derecha bebe. Cruz = el de tu izquierda bebe.",
+    description: "{player} lanza una moneda (o elige alguien cara/cruz). Cara = el de su derecha bebe. Cruz = el de su izquierda bebe.",
     type: 'coin',
   },
   {

@@ -58,7 +58,7 @@ export const duelos = [
   { name: "Duelo de Fast Food", description: "Decid nombres de cadenas de comida rápida. El primero que no sepa decir una nueva, bebe 3 tragos.", type: "knowledge" },
   { name: "Duelo de Reggaetón", description: "Decid nombres de cantantes de reggaetón antiguo. El que falle, bebe.", type: "knowledge" },
   { name: "Duelo de Planetas", description: "Decid elementos del sistema solar (planetas, lunas conocidas, estrellas). El primero en fallar, bebe.", type: "knowledge" },
-  { name: "Duelo de Verbos", description: "El grupo elige un verbo. Debéis conjurarlo en distintos tiempos alternadamente. El que se trabe, bebe.", type: "knowledge" },
+  { name: "Duelo de Verbos", description: "El grupo elige un verbo. Debéis conjugarlo en distintos tiempos alternadamente. El que se trabe, bebe.", type: "knowledge" },
   { name: "Duelo de Brillo", description: "Comparad el nivel de brillo de vuestras pantallas. El que lo tenga más alto, bebe por estar quedándose ciego.", type: "tech" },
   { name: "Duelo de Alarma", description: "Enseñad a qué hora tenéis puesta la primera alarma de mañana. El que se despierte más temprano, reparte 3 tragos.", type: "tech" },
   { name: "Duelo de Bloqueo", description: "El que tenga el método de desbloqueo más antiguo (Patrón > Pin > Huella > Facial), bebe.", type: "tech" },
@@ -152,7 +152,7 @@ export const duelos = [
   { name: "Duelo de Excusas", description: "El grupo da una situación (ej: llegaste tarde al trabajo). Tenéis 15 segundos para inventar la mejor excusa. La más convincente reparte.", type: "social" },
   { name: "Duelo de Eslogan", description: "Inventad un eslogan publicitario para el jugador que os indica el grupo. El que haga el más ridículo, bebe.", type: "social" },
   { name: "Duelo del Confesionario", description: "Cada uno dice una cosa que el otro no sabe de sí mismo. El que revele algo más impactante, reparte 4 tragos.", type: "social" },
-  { name: "Duelo de Roast", description: "Tenéis 20 segundos para hacerle un 'roast' al otro con chistes a su costa. El grupo vota el más cruel. Ese bebe… o reparte — el grupo decide.", type: "social" },
+  { name: "Duelo de Roast", description: "Tenéis 20 segundos para hacerle un 'roast' al otro con chistes a su costa. El grupo vota el más cruel. El grupo decide si el perdedor bebe o reparte.", type: "social" },
   { name: "Duelo de Títulos de Película", description: "Inventad el título de una película donde el protagonista es el otro jugador. El más ridículo gana. El que pierde bebe.", type: "social" },
   { name: "Duelo de Obituario Absurdo", description: "Escribid mentalmente en 15 segundos el obituario del otro. El que lea el suyo más gracioso, reparte 4 tragos.", type: "social" },
   { name: "Duelo de LinkedIn Falso", description: "Inventad el perfil de LinkedIn del otro con cargos y habilidades absurdas. El grupo vota el más realista-ridículo. El perdedor bebe.", type: "social" },
@@ -216,7 +216,7 @@ export const duelos = [
 
   // — DUELOS GRUPALES (implican al resto) —
   { name: "Duelo Tribunal", description: "El grupo actúa como jurado. Los dos duelistas argumentan por qué merecen NO beber. El grupo vota. El perdedor apura su vaso.", type: "social" },
-  { name: "Duelo de Coro", description: "El grupo humea una canción. Los duelistas deben identificarla y gritar el título al mismo tiempo. El primero que grite bien, reparte 5 tragos. El otro bebe.", type: "social" },
+  { name: "Duelo de Coro", description: "El grupo tararea una canción. Los duelistas deben identificarla y gritar el título al mismo tiempo. El primero que grite bien, reparte 5 tragos. El otro bebe.", type: "social" },
   { name: "Duelo del Escudo", description: "Cada duelista elige a un 'escudo' del grupo. El escudo hace el reto en lugar del jugador. Si el escudo falla, ambos beben. Si gana, el duelista reparte.", type: "social" },
   { name: "Duelo de Alianza Rota", description: "Los duelistas deben hacer el mismo gesto al mismo tiempo sin hablarse. Si coinciden exactamente, el grupo bebe. Si fallan, beben los dos.", type: "social" },
   { name: "Duelo del Árbitro Borracho", description: "El jugador que más haya bebido hasta ahora actúa como árbitro. Inventa el reto (10 segundos para pensarlo). Los duelistas lo ejecutan. El árbitro decide quién perdió.", type: "social" },

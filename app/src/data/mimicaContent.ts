@@ -128,7 +128,7 @@ export const mimicaChallenges: MimicaChallenge[] = [
   { text: "La película Piratas del Caribe manejando el timón de un barco", category: "peliculas" },
   { text: "La película Tiburón acechando a un bañista", category: "peliculas" },
   { text: "La película Joker bajando las escaleras bailando", category: "peliculas" },
-  { text: "La película Toy Story quedándote rígido porque viene un humano", category: "peliculas" },
+  { text: "La película Toy Story (quedándose rígido porque viene un humano)", category: "peliculas" },
   { text: "La película Psicosis (la escena de la ducha)", category: "peliculas" },
 
   // SERIES (15)
@@ -202,7 +202,7 @@ export const mimicaChallenges: MimicaChallenge[] = [
   { text: "Intentar poner una sábana ajustable en un colchón y que siempre se salte una esquina", category: "situaciones" },
   { text: "Bajar las escaleras mecánicas averiadas como si fueran escalones normales con mucho esfuerzo", category: "situaciones" },
   { text: "Intentar mantener el equilibrio en un bus lleno sin agarrarte a nada ni rozar a nadie", category: "situaciones" },
-  { text: "Pagar con tarjeta pero el datáfono no reconoce ninguna posición y lo pruebas de 10 formas distintas", category: "situaciones" },
+  { text: "Pagar con tarjeta pero el datáfono no reconoce ninguna posición y probarlo de 10 formas distintas", category: "situaciones" },
   { text: "Intentar sacar un chicle del envoltorio sin que se te pegue en los dedos", category: "situaciones" },
 
   // ANIMALES EXTRA (+10)

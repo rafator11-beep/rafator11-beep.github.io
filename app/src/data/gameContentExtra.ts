@@ -30,7 +30,7 @@ export const clasicoExtra: string[] = [
   "Acción: ‘Aplauso’. Aplaudid a {player} como si hubiera ganado un premio.",
   "Acción: ‘Dedo acusador’. A la cuenta de 3 señaláis al más cuñado. Ese bebe.",
   "Acción: ‘Confesión light’. {player} cuenta un secreto inofensivo. Si no quiere, bebe.",
-  "Acción: ‘Trending’. {player} inventa una palabra nueva y todos la usan hasta el final de ronda.",
+  "Acción: ‘Palabra de moda’. {player} inventa una palabra nueva y todos la usan hasta el final de ronda.",
   "Reto: {player} haz un sonido de animal cada vez que alguien diga ‘vale’ hasta tu próximo turno.",
   "Reto: {player} canta el estribillo de una canción random. Si desafinas, bebes.",
   "Reto: {player} haz un mini monólogo de 20 segundos sobre por qué eres una leyenda.",

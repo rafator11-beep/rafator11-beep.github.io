@@ -430,7 +430,7 @@ export const pacoversExtra11c: string[] = [
 
 // ── CLÁSICO EXTRA 11 ─────────────────────────────────────────────────────────
 export const clasicoExtra11: string[] = [
-  "Reto: {player} di 3 cosas que harías si fueras invisible durante 1 hora. Si el grupo cree que mientes, bebes 2.",
+  "Reto: {player} di 3 cosas que harías si fueras invisible durante 1 hora. Si al grupo no le convence tu respuesta, bebes 2.",
   "Reto: {player} imita al jugador que más habla del grupo durante 15 segundos. Si nadie lo adivina, bebes 2.",
   "Reto: {player} di el nombre de tu canción de karaoke favorita y canta el estribillo. Si desafinas, bebes 2. Si el grupo no está de acuerdo con tu respuesta, bebes 2 de penalización.",
   "Reto: {player} cuenta en 20 segundos la historia más vergonzosa que te haya pasado en un bar. Si el grupo se aburre, bebes 2.",
@@ -570,23 +570,23 @@ export const clasicoExtra11c: string[] = [
   "Reto: {player} nombra 3 ingredientes de una tortilla española. Si el grupo debate, todos beben 1.",
   "Reto: {player} di 3 marcas de mermelada. Si repites, bebes 2. Si el grupo no está de acuerdo con tu respuesta, bebes 2 de penalización.",
   "Reto: {player} cuenta en 15 segundos tu mayor talento oculto. Si el grupo no te cree, bebes 2.",
-  "Reto: {player} di 3 tipos de seta. Si fallas, bebes 2. Si el grupo no está de acuerdo con tu respuesta, bebes 2 de penalización.",
+  "Reto: {player} di 3 tipos de fruta de verano. Si fallas, bebes 2. Si el grupo no está de acuerdo con tu respuesta, bebes 2 de penalización.",
   "Reto: {player} imita a un guía turístico en el Prado durante 15 segundos. Si el grupo no está de acuerdo con tu respuesta, bebes 2 de penalización.",
   "Reto: {player} di 3 canciones de Beyoncé. Si fallas, bebes 2. Si el grupo no está de acuerdo con tu respuesta, bebes 2 de penalización.",
   "Reto: {player} nombra 3 ingredientes de un cocido madrileño. Si fallas, bebes 2. Si el grupo no está de acuerdo con tu respuesta, bebes 2 de penalización.",
-  "Reto: {player} di 3 marcas de mayonesa. Si repites, bebes 2. Si el grupo no está de acuerdo con tu respuesta, bebes 2 de penalización.",
+  "Reto: {player} di 3 marcas de salsas de bote. Si repites, bebes 2. Si el grupo no está de acuerdo con tu respuesta, bebes 2 de penalización.",
   "Reto: {player} cuenta en 20 segundos la historia de tu peor resaca. Si el grupo se aburre, bebes 2.",
-  "Reto: {player} di 3 tipos de nuez. Si fallas, bebes 2. Si el grupo no está de acuerdo con tu respuesta, bebes 2 de penalización.",
+  "Reto: {player} di 3 frutos secos. Si fallas, bebes 2. Si el grupo no está de acuerdo con tu respuesta, bebes 2 de penalización.",
   "Reto: {player} imita a un DJ en una discoteca durante 15 segundos. Si el grupo no está de acuerdo con tu respuesta, bebes 2 de penalización.",
   "Reto: {player} di 3 canciones de Rihanna. Si fallas, bebes 2. Si el grupo no está de acuerdo con tu respuesta, bebes 2 de penalización.",
   "Reto: {player} nombra 3 ingredientes de una fabada asturiana. Si fallas, bebes 2. Si el grupo no está de acuerdo con tu respuesta, bebes 2 de penalización.",
-  "Reto: {player} di 3 marcas de ketchup. Si repites, bebes 2. Si el grupo no está de acuerdo con tu respuesta, bebes 2 de penalización.",
+  "Reto: {player} di 3 aplicaciones de móvil que uses a diario. Si repites, bebes 2. Si el grupo no está de acuerdo con tu respuesta, bebes 2 de penalización.",
   "Reto: {player} cuenta en 15 segundos tu mayor adicción inofensiva. Si el grupo cree que es mentira, bebes 2.",
   "Reto: {player} di 3 tipos de cereal. Si fallas, bebes 2. Si el grupo no está de acuerdo con tu respuesta, bebes 2 de penalización.",
   "Reto: {player} imita a un presentador del tiempo durante 15 segundos. Si el grupo no está de acuerdo con tu respuesta, bebes 2 de penalización.",
   "Reto: {player} di 3 canciones de Adele. Si fallas, bebes 2. Si el grupo no está de acuerdo con tu respuesta, bebes 2 de penalización.",
   "Reto: {player} nombra 3 ingredientes de un pisto manchego. Si fallas, bebes 2. Si el grupo no está de acuerdo con tu respuesta, bebes 2 de penalización.",
-  "Reto: {player} di 3 marcas de mostaza. Si repites, bebes 2. Si el grupo no está de acuerdo con tu respuesta, bebes 2 de penalización.",
+  "Reto: {player} di 3 marcas de detergente. Si repites, bebes 2. Si el grupo no está de acuerdo con tu respuesta, bebes 2 de penalización.",
   "Reto: {player} cuenta en 20 segundos tu mayor logro deportivo. Si el grupo cree que exageras, bebes 2.",
 ];
 

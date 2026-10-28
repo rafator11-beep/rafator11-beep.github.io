@@ -94,7 +94,7 @@ export const yoNuncaUniversidad: string[] = [
   "me he inventado referencias bibliográficas para el TFG que no existen",
   "he dormido en un sofá prestado durante la primera semana de carrera porque no encontraba piso",
   "he tenido una relación a distancia durante toda la carrera porque cada uno estudiaba en una ciudad",
-  "me he empalado una noche de fiesta y he llegado a clase con la misma ropa y los ojos vidriosos",
+  "me he empalmado una noche de fiesta y he llegado a clase con la misma ropa y los ojos vidriosos",
   "he discutido con mi compañero de piso por quién limpia el baño hasta casi llegar a las manos",
   "me he graduado sin haber ido a la biblioteca ni una sola vez en serio",
   "me he comido una tortilla de patatas que llevaba una semana en la nevera y he sobrevivido",

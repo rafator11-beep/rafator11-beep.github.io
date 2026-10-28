@@ -18,7 +18,7 @@ export const yoNuncaHumorNegro: string[] = [
   "Yo nunca he pensado que si me atropellara un coche ahora mismo, al menos dejaría de tener que ir a trabajar el lunes.",
   "Yo nunca he calculado cuánto dura el duelo medio por una ex-pareja antes de que socialmente ya puedas hacer chistes sobre ello.",
   "Yo nunca he pensado que mi lápida debería tener una cita de una canción que avergonzaría a mi familia.",
-  "Yo nunca he sentido envidia del ataúd de otra persona en un funeral porque era más bonito que el mío sería.",
+  "Yo nunca he sentido envidia del ataúd de otra persona en un funeral porque era más bonito que el que tendré yo.",
   "Yo nunca he pensado que, si me diagnosticaran algo grave, lo primero que haría sería dejar de devolver ciertos préstamos.",
   "Yo nunca he imaginado el chiste que haría alguien de este grupo en mi funeral.",
   "Yo nunca he pensado que la vida es básicamente esperar la jubilación o la muerte, lo que llegue antes.",
@@ -83,7 +83,7 @@ export const picanteHumorNegro: string[] = [
   "Votación: ¿Quién de nosotros tiene más papeletas para acabar siendo la típica anécdota triste-divertida de la familia dentro de 20 años? El elegido bebe 2.",
   "Pregunta: {player}, ¿qué dirías en tu lecho de muerte que no te atreves a decir ahora mismo?",
   "Reto: {player}, da un discurso de 15 segundos como si estuvieras presentando los Oscar a 'Peor Año de mi Vida'. Si no arrancas una risa, bebes 2.",
-  "Votación: si tuviéramos que abandonar a uno de nosotros en un zombie apocalypse para salvarnos el resto, ¿a quién sería? El elegido bebe por intentar sobrevivir.",
+  "Votación: si tuviéramos que abandonar a uno de nosotros en un apocalipsis zombi para salvarnos el resto, ¿a quién sería? El elegido bebe por intentar sobrevivir.",
   "Pregunta: {player}, ¿cuál es la herencia o el objeto que más ilusión (mala) te haría recibir de alguien de tu familia cuando falte?",
   "Categorías: decid, por turnos, excusas creíbles para no ir al funeral de alguien que no os cae bien. La más cínica reparte 2.",
 

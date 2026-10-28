@@ -41,7 +41,7 @@ export const TASTE_CARD_TEMPLATES: Record<string, string[]> = {
     "🎯 GUSTOS: {taste_player}, describe tu videojuego favorito con mímica durante 10 segundos sin hablar. Si nadie lo adivina, bebes 2.",
   ],
   viajes: [
-    "🎯 GUSTOS: {taste_player}, cuenta el destino que más feo te ha quedado en una app de viajes o en la vida real. Si no hace gracia, bebes 2.",
+    "🎯 GUSTOS: {taste_player}, cuenta el peor destino al que has ido, o el viaje que peor te ha salido. Si no hace gracia, bebes 2.",
     "🎯 GUSTOS: Votación: ¿a qué país mandaríais a {taste_player} de viaje sorpresa sin avisar? El más votado, que lo diga en voz alta y {taste_player} decide si le convence o bebe 1.",
     "🎯 GUSTOS: Todos a la vez: decid un país que creéis que {taste_player} aún no ha visitado. El que acierte más veces, reparte 2.",
   ],
