@@ -1195,10 +1195,35 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       } else if (triggerType === 'IMPOSTOR') {
         // Handle IMPOSTOR triggers from deck cards
         if (players.length >= 3) {
-          const impostorPlayer = players[Math.floor(Math.random() * players.length)];
+          // Nº de impostores según el grupo: con mesas grandes, 1 solo impostor
+          // se encuentra demasiado rápido — escala a 2 a partir de 7 jugadores.
+          const impostorCount = players.length >= 7 ? 2 : 1;
+          const shuffled = [...players].sort(() => Math.random() - 0.5);
+          const impostorIds = shuffled.slice(0, impostorCount).map(p => p.id);
+          const impostorPlayer = players.find(p => p.id === impostorIds[0])!;
+
+          // Reparte el rol+palabra a CADA jugador, por su móvil (ver
+          // SpectatorQRPanel → privateFor). Clave = nombre, porque la
+          // identidad del espectador en el móvil es por nombre, no por id.
+          const buildPrivateFor = (category: string, realWord: string, fakeWord: string, hint?: string) => {
+            const map: NonNullable<typeof gameState.impostorPrivateFor> = {};
+            for (const p of players) {
+              const isImpostor = impostorIds.includes(p.id);
+              map[p.name] = {
+                kind: 'impostor',
+                isImpostor,
+                category,
+                word: isImpostor ? fakeWord : realWord,
+                hint: isImpostor ? hint : undefined,
+              };
+            }
+            return map;
+          };
+
           setGameState(prev => ({
             ...prev,
             showImpostorWarning: true,
+            impostorPlayerIds: impostorIds,
             impostorData: {
               impostorPlayerId: impostorPlayer.id,
               currentImpostorReal: 'Cargando palabra secreta...',
@@ -1217,7 +1242,8 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                     currentImpostorReal: `${result.category}: ${result.word}`,
                     currentImpostorFake: `${result.category}: ${result.fakeWord} (${result.hint})`,
                     isLoading: false,
-                  }
+                  },
+                  impostorPrivateFor: buildPrivateFor(result.category, result.word, result.fakeWord, result.hint),
                 }));
               } else {
                 const round = impostorRounds[Math.floor(Math.random() * impostorRounds.length)];
@@ -1228,7 +1254,8 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                     currentImpostorReal: round.normalQuestion || round.category || '',
                     currentImpostorFake: round.impostorQuestion || round.hint || '',
                     isLoading: false,
-                  }
+                  },
+                  impostorPrivateFor: buildPrivateFor(round.category, round.normalQuestion, round.impostorQuestion, round.hint),
                 }));
               }
             }).catch(() => {
@@ -1240,7 +1267,8 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                   currentImpostorReal: round.normalQuestion || round.category || '',
                   currentImpostorFake: round.impostorQuestion || round.hint || '',
                   isLoading: false,
-                }
+                },
+                impostorPrivateFor: buildPrivateFor(round.category, round.normalQuestion, round.impostorQuestion, round.hint),
               }));
             });
           } else {
@@ -1252,7 +1280,8 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                 currentImpostorReal: round.normalQuestion || round.category || '',
                 currentImpostorFake: round.impostorQuestion || round.hint || '',
                 isLoading: false,
-              }
+              },
+              impostorPrivateFor: buildPrivateFor(round.category, round.normalQuestion, round.impostorQuestion, round.hint),
             }));
           }
         } else {
@@ -1801,6 +1830,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               currentCard={safeCurrentText} 
               currentPlayer={currentPlayer?.name || ''} 
               players={players.map(p => p.name)}
+              privateFor={(gameState.showImpostorWarning || gameState.showImpostor) ? gameState.impostorPrivateFor : undefined}
               kahootConfig={showKahoot.active ? {
                 mode: showKahoot.mode,
                 question: (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion

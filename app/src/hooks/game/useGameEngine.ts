@@ -47,6 +47,18 @@ export interface GameState {
     currentImpostorFake: string | null;
     impostorPlayerId: string | null;
   };
+  // IDs de TODOS los impostores de la ronda actual (puede haber más de 1 según
+  // el número de jugadores) y el "buzón" con el rol+palabra que le toca ver a
+  // cada jugador en SU móvil (ver SpectatorQRPanel/SpectatorView) — clave =
+  // nombre del jugador, porque la identidad en el móvil espectador es por nombre.
+  impostorPlayerIds?: string[];
+  impostorPrivateFor?: Record<string, {
+    kind: 'impostor';
+    isImpostor: boolean;
+    category: string;
+    word: string;
+    hint?: string;
+  }>;
   captainId: string | null;
   virusAlertData: { player: Player; virus: any } | null;
   virusCycleData?: { type: string; title: string; message: string; virusName?: string; virusDescription?: string; challenge?: string }; // Added

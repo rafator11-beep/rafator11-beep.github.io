@@ -13,6 +13,19 @@ interface SpectatorViewProps {
   isHost?: boolean;
 }
 
+// Mensaje secreto, distinto por jugador, que viaja dentro del mismo broadcast
+// de siempre pero que cada móvil filtra para quedarse SOLO con el suyo — el
+// resto del payload (texto de la carta, jugadores...) lo sigue viendo todo el
+// mundo igual que hasta ahora. Pensado primero para Impostor (rol + palabra),
+// pero el "kind" es genérico para poder reutilizarlo en otras mecánicas.
+export interface PrivateForPlayer {
+  kind: 'impostor';
+  isImpostor: boolean;
+  category: string;
+  word: string;   // palabra real (no-impostores) o palabra/pista falsa (impostor)
+  hint?: string;
+}
+
 interface CardState {
   text: string;
   playerName: string;
@@ -22,28 +35,30 @@ interface CardState {
     options: string[];
     correctAnswer?: string;
   };
+  privateFor?: Record<string, PrivateForPlayer>;
   cardIndex: number;
   timestamp: number;
 }
 
 // ── HOST MODE: muestra el QR y emite cartas ────────────────────────────────
-export function SpectatorQRPanel({ roomId, currentCard, currentPlayer, players, kahootConfig }: {
+export function SpectatorQRPanel({ roomId, currentCard, currentPlayer, players, kahootConfig, privateFor }: {
   roomId: string;
   currentCard: string;
   currentPlayer: string;
   players: string[];
   kahootConfig?: any;
+  privateFor?: Record<string, PrivateForPlayer>;
 }) {
   const spectatorUrl = `${window.location.origin}${window.location.pathname}?room=${roomId}&spectator=true`;
 
   // Siempre con el último estado a mano (sin esperar a un efecto) para poder
   // responder al instante cuando alguien se conecta a mitad de partida.
   const latestPayloadRef = useRef<CardState>({
-    text: currentCard, playerName: currentPlayer, players, kahootConfig,
+    text: currentCard, playerName: currentPlayer, players, kahootConfig, privateFor,
     cardIndex: Date.now(), timestamp: Date.now(),
   });
   latestPayloadRef.current = {
-    text: currentCard, playerName: currentPlayer, players, kahootConfig,
+    text: currentCard, playerName: currentPlayer, players, kahootConfig, privateFor,
     cardIndex: latestPayloadRef.current.cardIndex, timestamp: Date.now(),
   };
 
@@ -82,7 +97,7 @@ export function SpectatorQRPanel({ roomId, currentCard, currentPlayer, players, 
       event: 'card_update',
       payload: latestPayloadRef.current,
     });
-  }, [roomId, currentCard, currentPlayer, players, kahootConfig]);
+  }, [roomId, currentCard, currentPlayer, players, kahootConfig, privateFor]);
 
   const [showQR, setShowQR] = useState(false);
 
@@ -272,8 +287,12 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roomId]);
 
-  // ¿Hay una prueba activa que necesita que esta persona responda (voto/trivia)?
-  const needsParticipant = !!cardState?.kahootConfig;
+  // Mensaje secreto para ESTE jugador (p. ej. su rol de Impostor), si lo hay.
+  const myPrivateMessage = myPlayerName ? cardState?.privateFor?.[myPlayerName] : undefined;
+  const [dismissedPrivateAt, setDismissedPrivateAt] = useState<number>(0);
+
+  // ¿Hay una prueba activa que necesita que esta persona responda (voto/trivia/rol secreto)?
+  const needsParticipant = !!cardState?.kahootConfig || !!myPrivateMessage;
 
   // ── Paso obligatorio de entrada: elegir quién eres ANTES de ver nada más.
   // Así desde el primer segundo lees la partida como esa persona y puedes
@@ -336,6 +355,52 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
             Salir
           </button>
         )}
+      </div>
+    );
+  }
+
+  // ── Rol secreto (Impostor): pantalla propia, a pantalla completa, SOLO
+  // visible en el móvil de esa persona. Nadie más recibe esto — el resto de
+  // móviles ven la carta normal de siempre. Se vuelve a mostrar en cada
+  // ronda de impostor nueva (cardIndex distinto) aunque ya se haya cerrado.
+  if (myPrivateMessage && cardState && cardState.cardIndex !== dismissedPrivateAt) {
+    const isImpostor = myPrivateMessage.isImpostor;
+    return (
+      <div className={`flex min-h-screen flex-col items-center justify-center p-6 text-center ${isImpostor ? 'bg-gradient-to-b from-red-950 to-[#0a0a14]' : 'bg-gradient-to-b from-emerald-950 to-[#0a0a14]'}`}>
+        <p className="mb-2 text-xs font-bold uppercase tracking-[0.3em] text-white/40">{myPrivateMessage.category}</p>
+        {isImpostor ? (
+          <>
+            <p className="mb-4 text-5xl">🎭</p>
+            <h1 className="mb-3 text-2xl font-black uppercase tracking-wide text-red-400">Eres el impostor</h1>
+            <p className="mb-6 text-sm text-white/60 max-w-xs">
+              No sabes la palabra real. Disimula con esta pista sin que se note que no la conoces:
+            </p>
+            <div className="w-full max-w-xs rounded-[24px] border border-red-500/30 bg-red-500/10 p-5">
+              <p className="text-xl font-bold text-white">{myPrivateMessage.word}</p>
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="mb-4 text-5xl">🕵️</p>
+            <h1 className="mb-3 text-2xl font-black uppercase tracking-wide text-emerald-400">No eres el impostor</h1>
+            <p className="mb-6 text-sm text-white/60 max-w-xs">
+              Esta es la palabra real. Descríbela sin decirla y sin que el impostor la adivine:
+            </p>
+            <div className="w-full max-w-xs rounded-[24px] border border-emerald-500/30 bg-emerald-500/10 p-5">
+              <p className="text-xl font-bold text-white">{myPrivateMessage.word}</p>
+              {myPrivateMessage.hint && (
+                <p className="mt-2 text-xs text-emerald-300/70">{myPrivateMessage.hint}</p>
+              )}
+            </div>
+          </>
+        )}
+        <p className="mt-6 text-xs text-white/30">No le enseñes esto a nadie 🤫</p>
+        <button
+          onClick={() => setDismissedPrivateAt(cardState.cardIndex)}
+          className="mt-8 rounded-2xl bg-white/10 border border-white/15 px-6 py-2.5 text-sm font-semibold text-white hover:bg-white/20"
+        >
+          Ya lo sé, continuar
+        </button>
       </div>
     );
   }
