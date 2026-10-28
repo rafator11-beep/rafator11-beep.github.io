@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useId } from 'react';
 import { safeLower } from '@/utils/safeText';
 import { supabase, isSupabaseConfigured } from '@/integrations/supabase/client';
 import { loadLocalRankings, upsertLocalRanking, PlayerRanking } from '@/utils/localRanking';
@@ -92,15 +92,154 @@ function resolveCloudIdentity(
   const normalizedCurrent = safeLower(currentUsername || localStorage.getItem('fiesta_player_name') || '');
   const isRegisteredCurrentUser = !!currentUserId && !!normalizedCurrent && normalizedPlayer === normalizedCurrent;
 
+  // Todos los jugadores con un nombre válido se sincronizan a la nube, no solo
+  // el usuario logueado en este dispositivo. Esto permite que cualquier nombre
+  // se reconozca después en "Comunidad" desde cualquier móvil.
   return {
-    shouldSyncToCloud: isRegisteredCurrentUser,
+    shouldSyncToCloud: !!normalizedPlayer,
     actorUserId: isRegisteredCurrentUser ? currentUserId : null,
     canonicalName: isRegisteredCurrentUser ? (currentUsername || playerName) : playerName,
   };
 }
 
+/**
+ * Sincroniza a la nube (tabla `user_stats`, la misma que lee fetchRankings
+ * para "Comunidad") las estadísticas de un jugador SIN cuenta registrada en
+ * este dispositivo (invitado).
+ *
+ * Por qué no se usa el RPC `register_guest_event` para invitados:
+ * ese RPC hace `INSERT ... ON CONFLICT (user_id) DO UPDATE`, pero para
+ * invitados `p_actor_user_id` es NULL, y en Postgres dos NULL nunca se
+ * consideran iguales a efectos de ON CONFLICT. Eso significa que cada
+ * partida de un invitado crearía una fila nueva en `user_stats` en vez de
+ * acumular sobre la misma fila -> duplicados por cada partida jugada.
+ *
+ * Para evitarlo, aquí hacemos manualmente lo que el RPC no puede: buscamos
+ * una fila existente por nombre (case-insensitive, `ilike`) con
+ * `user_id IS NULL`, y si existe la actualizamos; si no, la creamos.
+ *
+ * LIMITACIÓN CONOCIDA (requiere decisión/migración, no se ha tocado el
+ * esquema de la base de datos): esta búsqueda+actualización no es atómica
+ * (son dos round-trips: SELECT y luego INSERT/UPDATE). Si dos dispositivos
+ * sincronizan el mismo nombre de invitado en una ventana de tiempo muy
+ * estrecha, podría crearse una fila duplicada por condición de carrera.
+ * La solución robusta sería un UNIQUE index case-insensitive en
+ * `user_stats (lower(player_name))` filtrado por `user_id IS NULL`, combinado
+ * con un RPC que haga `ON CONFLICT` sobre ese índice. Eso sí requiere tocar
+ * el esquema, así que se deja para que el usuario decida si aplicarlo.
+ */
+async function syncGuestStatsToCloud(
+  playerName: string,
+  scoreToAdd: number,
+  won: boolean,
+  avatarUrl?: string | null,
+) {
+  const normalizedName = (playerName || '').trim();
+  if (!normalizedName) return;
+
+  try {
+    const { data: existing, error: selErr } = await supabase
+      .from('user_stats')
+      .select('id, total_wins, total_xp, games_played')
+      .is('user_id', null)
+      .ilike('player_name', normalizedName)
+      .limit(1)
+      .maybeSingle();
+
+    if (selErr) throw selErr;
+
+    if (existing) {
+      const updatePayload: Record<string, unknown> = {
+        total_wins: (existing.total_wins || 0) + (won ? 1 : 0),
+        total_xp: (existing.total_xp || 0) + scoreToAdd,
+        games_played: (existing.games_played || 0) + 1,
+        updated_at: new Date().toISOString(),
+      };
+      if (avatarUrl) updatePayload.avatar_url = avatarUrl;
+
+      const { error: updErr } = await supabase
+        .from('user_stats')
+        .update(updatePayload)
+        .eq('id', existing.id);
+      if (updErr) throw updErr;
+    } else {
+      const { error: insErr } = await supabase
+        .from('user_stats')
+        .insert({
+          user_id: null,
+          player_name: normalizedName,
+          avatar_url: avatarUrl || null,
+          total_wins: won ? 1 : 0,
+          total_xp: scoreToAdd,
+          games_played: 1,
+        });
+      if (insErr) throw insErr;
+    }
+  } catch (err) {
+    console.warn('Guest cloud sync failed (local save was successful):', err);
+  }
+}
+
+/**
+ * Asegura que exista una fila en `user_stats` para este nombre de jugador
+ * (invitado, sin cuenta) en el momento en que se crea/guarda localmente,
+ * para que aparezca en "Comunidad" desde el primer momento y no solo tras
+ * terminar una partida. No incrementa contadores de partidas: si la fila ya
+ * existe solo actualiza el avatar (si cambió); si no existe, la crea con
+ * estadísticas en cero. Usa la misma estrategia de búsqueda por nombre
+ * (case-insensitive, `ilike`) que syncGuestStatsToCloud() para evitar
+ * duplicados — ver el comentario de esa función para la limitación conocida
+ * sobre condiciones de carrera (no hay UNIQUE case-insensitive en la BD).
+ */
+export async function ensureGuestPlayerSynced(playerName: string, avatarUrl?: string | null) {
+  if (!isSupabaseConfigured) return;
+  const normalizedName = (playerName || '').trim();
+  if (!normalizedName) return;
+
+  try {
+    const { data: existing, error: selErr } = await supabase
+      .from('user_stats')
+      .select('id, avatar_url')
+      .is('user_id', null)
+      .ilike('player_name', normalizedName)
+      .limit(1)
+      .maybeSingle();
+
+    if (selErr) throw selErr;
+
+    if (existing) {
+      if (avatarUrl && avatarUrl !== existing.avatar_url) {
+        await supabase
+          .from('user_stats')
+          .update({ avatar_url: avatarUrl, updated_at: new Date().toISOString() })
+          .eq('id', existing.id);
+      }
+    } else {
+      await supabase.from('user_stats').insert({
+        user_id: null,
+        player_name: normalizedName,
+        avatar_url: avatarUrl || null,
+        total_wins: 0,
+        total_xp: 0,
+        games_played: 0,
+      });
+    }
+  } catch (err) {
+    console.warn('ensureGuestPlayerSynced failed (non-critical):', err);
+  }
+}
+
 export function useRanking() {
   const { user, profile } = useAuth();
+  // useRanking() se monta a la vez en varios componentes (PartyGame,
+  // PlayerSetup, Profiles, ArcadeTab, GlobalPresence, MegaBoardGame...).
+  // Antes todos creaban un canal Realtime con el mismo nombre literal
+  // 'user_stats_realtime' — Supabase cachea los canales por nombre, así que
+  // el segundo montaje reutilizaba el canal ya suscrito del primero y
+  // `.on(...)` después de `.subscribe()` lanzaba
+  // "cannot add postgres_changes callbacks ... after subscribe()",
+  // tumbando la app. Cada instancia necesita su propio nombre de canal.
+  const instanceId = useId();
   const [rankings, setRankings] = useState<PlayerStats[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -203,7 +342,7 @@ export function useRanking() {
     if (!isSupabaseConfigured) return;
 
     const channel = supabase
-      .channel('user_stats_realtime')
+      .channel(`user_stats_realtime_${instanceId.replace(/[^a-zA-Z0-9]/g, '')}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'user_stats' }, () => fetchRankings())
       .subscribe();
 
@@ -274,25 +413,34 @@ export function useRanking() {
         const identity = resolveCloudIdentity(playerName, profile?.username, user?.id || null);
 
         if (identity.shouldSyncToCloud) {
-          try {
-            const { error: insertError } = await supabase.rpc('register_guest_event', {
-              p_game_id: actGameId,
-              p_event_type: 'game_finish',
-              p_actor_user_id: identity.actorUserId,
-              p_tab_id: tabId,
-              p_mode_id: gameMode,
-              p_play_mode: 'local',
-              p_score: scoreToAdd,
-              p_is_winner: !!won,
-              p_player_name: identity.canonicalName,
-              p_avatar_url: avatarUrl || profile?.avatar_url || null,
-            });
+          if (identity.actorUserId) {
+            // Jugador con cuenta logueada en este dispositivo: usamos el RPC,
+            // que hace ON CONFLICT (user_id) de forma segura porque user_id
+            // no es NULL aquí.
+            try {
+              const { error: insertError } = await supabase.rpc('register_guest_event', {
+                p_game_id: actGameId,
+                p_event_type: 'game_finish',
+                p_actor_user_id: identity.actorUserId,
+                p_tab_id: tabId,
+                p_mode_id: gameMode,
+                p_play_mode: 'local',
+                p_score: scoreToAdd,
+                p_is_winner: !!won,
+                p_player_name: identity.canonicalName,
+                p_avatar_url: avatarUrl || profile?.avatar_url || null,
+              });
 
-            if (insertError) {
-              console.warn('RPC register_guest_event error (local save was successful):', insertError.message);
+              if (insertError) {
+                console.warn('RPC register_guest_event error (local save was successful):', insertError.message);
+              }
+            } catch (rpcErr) {
+              console.warn('Supabase RPC failed (local save was successful):', rpcErr);
             }
-          } catch (rpcErr) {
-            console.warn('Supabase RPC failed (local save was successful):', rpcErr);
+          } else {
+            // Jugador sin cuenta (invitado): sincroniza por nombre evitando
+            // duplicados, ver syncGuestStatsToCloud().
+            await syncGuestStatsToCloud(identity.canonicalName, scoreToAdd, !!won, avatarUrl || null);
           }
 
           if (premiumSync?.cloudPayload && user?.id) {
@@ -339,18 +487,23 @@ export function useRanking() {
           const tabId: TabId = TAB_MAPPING.fiesta.includes((player.gameMode || 'megamix') as GameMode) ? 'fiesta' : 'juego';
           const identity = resolveCloudIdentity(player.name, profile?.username, user?.id || null);
           if (identity.shouldSyncToCloud) {
-            supabase.rpc('register_guest_event', {
-              p_game_id: actGameId,
-              p_event_type: 'game_finish',
-              p_actor_user_id: identity.actorUserId,
-              p_tab_id: tabId,
-              p_mode_id: player.gameMode || 'megamix',
-              p_play_mode: 'local',
-              p_score: player.score,
-              p_is_winner: !!player.won,
-              p_player_name: identity.canonicalName,
-              p_avatar_url: player.avatarUrl || profile?.avatar_url || null,
-            }).catch(err => console.warn('Batch RPC error (non-critical):', err));
+            if (identity.actorUserId) {
+              supabase.rpc('register_guest_event', {
+                p_game_id: actGameId,
+                p_event_type: 'game_finish',
+                p_actor_user_id: identity.actorUserId,
+                p_tab_id: tabId,
+                p_mode_id: player.gameMode || 'megamix',
+                p_play_mode: 'local',
+                p_score: player.score,
+                p_is_winner: !!player.won,
+                p_player_name: identity.canonicalName,
+                p_avatar_url: player.avatarUrl || profile?.avatar_url || null,
+              }).catch(err => console.warn('Batch RPC error (non-critical):', err));
+            } else {
+              syncGuestStatsToCloud(identity.canonicalName, player.score, !!player.won, player.avatarUrl || null)
+                .catch(err => console.warn('Batch guest sync error (non-critical):', err));
+            }
           }
         }
       }

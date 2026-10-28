@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect, useCallback } from 'react';
 import { safeLower, asString } from '@/utils/safeText';
 import { supabase, isSupabaseConfigured } from '@/integrations/supabase/client';
+import { ensureGuestPlayerSynced } from '@/hooks/useRanking';
 
 export interface SavedPlayer {
   name: string;
@@ -103,6 +104,13 @@ export function useSavedPlayers() {
 
     setSavedPlayers(updated);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+
+    // Sincroniza a la nube para que este jugador aparezca en "Comunidad"
+    // desde el momento en que se crea, no solo tras jugar una partida.
+    // Nota: los jugadores con cuenta logueada ya se sincronizan vía
+    // updatePlayerScore/useRanking al terminar una partida; esta llamada es
+    // fire-and-forget y no bloquea el guardado local.
+    ensureGuestPlayerSynced(name, avatar_url).catch(() => { /* no-op, ya se loguea dentro */ });
   };
 
   const removeFromSaved = (name: string) => {
