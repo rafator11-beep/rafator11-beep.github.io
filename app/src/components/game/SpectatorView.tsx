@@ -218,11 +218,21 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
     channelRef.current?.send({ type: 'broadcast', event: 'spectator_identified', payload: { name: p } });
   };
 
+  // Cuánto llevamos esperando respuesta del anfitrión (para el mensaje de ayuda).
+  const [waitingSeconds, setWaitingSeconds] = useState(0);
+
   useEffect(() => {
     if (!roomId) return;
 
+    let gotData = false;
+    let retryInterval: ReturnType<typeof setInterval> | null = null;
+    let waitingInterval: ReturnType<typeof setInterval> | null = null;
+
     const channel = supabase.channel(`spectator:${roomId}`)
       .on('broadcast', { event: 'card_update' }, (payload) => {
+        gotData = true;
+        if (retryInterval) { clearInterval(retryInterval); retryInterval = null; }
+        if (waitingInterval) { clearInterval(waitingInterval); waitingInterval = null; }
         setCardState(payload.payload as CardState);
         setLastUpdate(new Date());
         setConnected(true);
@@ -231,18 +241,34 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
         setConnected(status === 'SUBSCRIBED');
         if (status === 'SUBSCRIBED') {
           channelRef.current = channel;
-          // Pide el estado actual al conectarse — si ya hay partida en marcha,
-          // no hace falta esperar a que cambie algo para enterarse.
-          channel.send({ type: 'broadcast', event: 'spectator_ready', payload: {} });
-          // Si ya te habías identificado en una sesión anterior (localStorage),
-          // vuelve a avisar al anfitrión ahora que estás conectado de nuevo.
-          if (myPlayerName) {
-            channel.send({ type: 'broadcast', event: 'spectator_identified', payload: { name: myPlayerName } });
-          }
+
+          const announce = () => {
+            // Pide el estado actual — si ya hay partida en marcha, no hace falta
+            // esperar a que cambie algo para enterarse.
+            channel.send({ type: 'broadcast', event: 'spectator_ready', payload: {} });
+            // Si ya te habías identificado en una sesión anterior (localStorage),
+            // vuelve a avisar al anfitrión ahora que estás conectado de nuevo.
+            if (myPlayerName) {
+              channel.send({ type: 'broadcast', event: 'spectator_identified', payload: { name: myPlayerName } });
+            }
+          };
+
+          announce();
+          // Un solo aviso puede perderse si el anfitrión todavía no estaba
+          // escuchando en ese instante exacto (p. ej. acabas de entrar a la
+          // partida y el panel QR tarda un momento en montarse). Reintenta
+          // cada 3s hasta recibir datos, para no quedarse pillado para siempre.
+          retryInterval = setInterval(() => { if (!gotData) announce(); }, 3000);
+          waitingInterval = setInterval(() => { if (!gotData) setWaitingSeconds(s => s + 1); }, 1000);
         }
       });
 
-    return () => { supabase.removeChannel(channel); channelRef.current = null; };
+    return () => {
+      supabase.removeChannel(channel);
+      channelRef.current = null;
+      if (retryInterval) clearInterval(retryInterval);
+      if (waitingInterval) clearInterval(waitingInterval);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roomId]);
 
@@ -285,13 +311,20 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
             </div>
           </div>
         ) : (
-          <div className="flex flex-col items-center gap-4 text-center">
+          <div className="flex flex-col items-center gap-4 text-center max-w-xs">
             <div className="flex h-20 w-20 items-center justify-center rounded-full border border-white/10 bg-white/5">
               <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
             <p className="text-muted-foreground">
               {connected ? 'Esperando la lista de jugadores...' : 'Conectando a la sala...'}
             </p>
+            {waitingSeconds >= 8 && (
+              <p className="text-xs text-amber-300/80 leading-5">
+                Está tardando más de lo normal. Comprueba que en el móvil que creó la
+                partida la partida ya está en marcha (no solo en la pantalla de
+                configurar jugadores) — en cuanto lo esté, esto se actualiza solo.
+              </p>
+            )}
           </div>
         )}
 
