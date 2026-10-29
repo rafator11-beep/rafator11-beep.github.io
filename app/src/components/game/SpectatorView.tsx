@@ -35,6 +35,12 @@ export type PrivateForPlayer =
       subtitle: string;
       stat?: string;
       accent: string;
+    }
+  | {
+      kind: 'judge';
+      topic: string;
+      aFavorHints: string[];
+      enContraHints: string[];
     };
 
 interface CardState {
@@ -48,20 +54,21 @@ interface CardState {
     mode?: 'standard' | 'fastest_finger' | 'speed_race';
   };
   privateFor?: Record<string, PrivateForPlayer>;
-  debateInfo?: { topic: string; teamA: string[]; teamB: string[] };
+  debateInfo?: { topic: string; teamA: string[]; teamB: string[]; aFavorHints: string[]; enContraHints: string[]; judgeName?: string };
   cardIndex: number;
   timestamp: number;
 }
 
 // ── HOST MODE: muestra el QR y emite cartas ────────────────────────────────
-export function SpectatorQRPanel({ roomId, currentCard, currentPlayer, players, kahootConfig, privateFor, debateInfo }: {
+export function SpectatorQRPanel({ roomId, currentCard, currentPlayer, players, kahootConfig, privateFor, debateInfo, onDebateVerdict }: {
   roomId: string;
   currentCard: string;
   currentPlayer: string;
   players: string[];
   kahootConfig?: any;
   privateFor?: Record<string, PrivateForPlayer>;
-  debateInfo?: { topic: string; teamA: string[]; teamB: string[] };
+  debateInfo?: { topic: string; teamA: string[]; teamB: string[]; aFavorHints: string[]; enContraHints: string[]; judgeName?: string };
+  onDebateVerdict?: (winner: 'A' | 'B', judgeName: string) => void;
 }) {
   const spectatorUrl = `${window.location.origin}${window.location.pathname}?room=${roomId}&spectator=true`;
 
@@ -98,10 +105,19 @@ export function SpectatorQRPanel({ roomId, currentCard, currentPlayer, players, 
         if (!name) return;
         setJoinedNames(prev => prev.includes(name) ? prev : [...prev, name]);
       })
+      .on('broadcast', { event: 'debate_verdict' }, (payload) => {
+        const { winner, judgeName } = (payload.payload as { winner?: 'A' | 'B'; judgeName?: string }) || {};
+        if (winner && judgeName) onDebateVerdictRef.current?.(winner, judgeName);
+      })
       .subscribe();
     channelRef.current = channel;
     return () => { supabase.removeChannel(channel); channelRef.current = null; };
   }, [roomId]);
+
+  // Ref para no re-crear el canal cada vez que cambia la función (que suele
+  // ser una nueva closure en cada render del anfitrión).
+  const onDebateVerdictRef = useRef(onDebateVerdict);
+  onDebateVerdictRef.current = onDebateVerdict;
 
   // Reenvía el estado cada vez que cambia algo relevante (carta, jugadores, voto activo).
   // Si llega un privateFor NUEVO (objeto distinto al de la última vez — nueva
@@ -466,6 +482,16 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
     setThemeInput('');
   };
 
+  // Veredicto del juez de un debate: una vez mandado, se deshabilitan los
+  // botones hasta que llegue un debate nuevo (cardIndex distinto) — ver reset
+  // más abajo, donde se escucha el cambio de cardState.cardIndex.
+  const [judgeVerdictSent, setJudgeVerdictSent] = useState(false);
+  const sendDebateVerdict = (winner: 'A' | 'B') => {
+    if (!myPlayerName || judgeVerdictSent) return;
+    channelRef.current?.send({ type: 'broadcast', event: 'debate_verdict', payload: { winner, judgeName: myPlayerName } });
+    setJudgeVerdictSent(true);
+  };
+
   // Cuánto llevamos esperando respuesta del anfitrión (para el mensaje de ayuda).
   const [waitingSeconds, setWaitingSeconds] = useState(0);
 
@@ -481,7 +507,11 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
         gotData = true;
         if (retryInterval) { clearInterval(retryInterval); retryInterval = null; }
         if (waitingInterval) { clearInterval(waitingInterval); waitingInterval = null; }
-        setCardState(payload.payload as CardState);
+        const next = payload.payload as CardState;
+        setCardState(prev => {
+          if (!prev || prev.cardIndex !== next.cardIndex) setJudgeVerdictSent(false);
+          return next;
+        });
         setLastUpdate(new Date());
         setConnected(true);
       })
@@ -763,6 +793,54 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
       );
     }
 
+    // ── Juez del debate: pantalla privada propia. El juez puede decidir el
+    // ganador en cualquier momento (no hace falta esperar al final del
+    // cronómetro — así no se queda bloqueado si el debate se alarga o se
+    // corta antes), y su veredicto se manda solo al anfitrión.
+    if (myPrivateMessage.kind === 'judge') {
+      const judge = myPrivateMessage;
+      return (
+        <div className="flex min-h-screen flex-col items-center justify-center p-6 text-center bg-gradient-to-b from-amber-950 to-[#0a0a14]">
+          <p className="mb-3 text-5xl">⚖️</p>
+          <h1 className="mb-2 text-2xl font-black uppercase tracking-wide text-amber-400">Eres el juez de este debate</h1>
+          <p className="mb-5 text-sm text-white/60 max-w-xs">{judge.topic}</p>
+          <div className="w-full max-w-sm grid grid-cols-1 gap-3 mb-6">
+            <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-left">
+              <p className="font-black uppercase text-emerald-400 text-sm mb-1">A favor</p>
+              <ul className="text-[11px] text-emerald-200/80 list-disc pl-4 space-y-0.5">
+                {judge.aFavorHints.map((h, i) => <li key={i}>{h}</li>)}
+              </ul>
+            </div>
+            <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-3 text-left">
+              <p className="font-black uppercase text-red-400 text-sm mb-1">En contra</p>
+              <ul className="text-[11px] text-red-200/80 list-disc pl-4 space-y-0.5">
+                {judge.enContraHints.map((h, i) => <li key={i}>{h}</li>)}
+              </ul>
+            </div>
+          </div>
+          {judgeVerdictSent ? (
+            <p className="text-sm font-bold text-amber-300">✅ Veredicto enviado — esperando al anfitrión</p>
+          ) : (
+            <div className="w-full max-w-sm grid grid-cols-1 gap-3">
+              <button
+                onClick={() => sendDebateVerdict('A')}
+                className="rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 py-4 text-base font-black uppercase text-white shadow-lg active:scale-95 transition"
+              >
+                A FAVOR gana
+              </button>
+              <button
+                onClick={() => sendDebateVerdict('B')}
+                className="rounded-2xl bg-gradient-to-r from-red-500 to-red-600 px-6 py-4 text-base font-black uppercase text-white shadow-lg active:scale-95 transition"
+              >
+                EN CONTRA gana
+              </button>
+            </div>
+          )}
+          <p className="mt-6 text-xs text-white/30">Solo tú ves esta pantalla 🤫</p>
+        </div>
+      );
+    }
+
     const isImpostor = myPrivateMessage.isImpostor;
     return (
       <div className={`flex min-h-screen flex-col items-center justify-center p-6 text-center ${isImpostor ? 'bg-gradient-to-b from-red-950 to-[#0a0a14]' : 'bg-gradient-to-b from-emerald-950 to-[#0a0a14]'}`}>
@@ -838,22 +916,29 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
         </div>
       )}
 
-      {/* Debate en curso: tema + equipos + el mismo reloj que ve el anfitrión */}
-      {cardState?.debateInfo && !cardState?.kahootConfig && (
+      {/* Debate en curso: tema + equipos + pistas + el mismo reloj que ve el anfitrión.
+          No se muestra en el móvil del juez, que tiene su propia pantalla privada. */}
+      {cardState?.debateInfo && !cardState?.kahootConfig && myPrivateMessage?.kind !== 'judge' && (
         <div className="mb-4 w-full max-w-md rounded-[24px] border border-fuchsia-500/30 bg-fuchsia-500/10 p-4 text-center">
           <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-fuchsia-300">🗣️ Debate por equipos</p>
           <p className="mb-3 text-sm font-bold text-white">{cardState.debateInfo.topic}</p>
           <div className="mb-3 flex justify-center">
             <CountdownRing seconds={30} resetKey={cardState.debateInfo.topic} size={64} />
           </div>
-          <div className="flex items-start justify-center gap-4 text-xs">
-            <div>
-              <p className="font-black uppercase text-emerald-400">A favor</p>
-              <p className="text-white/80">{cardState.debateInfo.teamA.join(', ')}</p>
+          <div className="flex items-start justify-center gap-4 text-xs min-w-0">
+            <div className="min-w-0 flex-1">
+              <p className="font-black uppercase text-emerald-400 text-sm">A FAVOR</p>
+              <p className="text-white/80 mb-1 break-words">{cardState.debateInfo.teamA.join(', ')}</p>
+              <ul className="text-left text-[10px] text-emerald-200/70 list-disc pl-4 space-y-0.5">
+                {cardState.debateInfo.aFavorHints.map((h, i) => <li key={i}>{h}</li>)}
+              </ul>
             </div>
-            <div>
-              <p className="font-black uppercase text-red-400">En contra</p>
-              <p className="text-white/80">{cardState.debateInfo.teamB.join(', ')}</p>
+            <div className="min-w-0 flex-1">
+              <p className="font-black uppercase text-red-400 text-sm">EN CONTRA</p>
+              <p className="text-white/80 mb-1 break-words">{cardState.debateInfo.teamB.join(', ')}</p>
+              <ul className="text-left text-[10px] text-red-200/70 list-disc pl-4 space-y-0.5">
+                {cardState.debateInfo.enContraHints.map((h, i) => <li key={i}>{h}</li>)}
+              </ul>
             </div>
           </div>
         </div>
