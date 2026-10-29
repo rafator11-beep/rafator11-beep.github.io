@@ -41,6 +41,11 @@ export type PrivateForPlayer =
       topic: string;
       aFavorHints: string[];
       enContraHints: string[];
+    }
+  | {
+      kind: 'mimica';
+      word: string;
+      category?: string;
     };
 
 interface CardState {
@@ -836,6 +841,32 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
               </button>
             </div>
           )}
+          <p className="mt-6 text-xs text-white/30">Solo tú ves esta pantalla 🤫</p>
+        </div>
+      );
+    }
+
+    // ── Mímica: solo quien actúa debe ver la palabra. El resto solo ve en la
+    // pantalla compartida la categoría/framing genérico (ver PartyGame.tsx).
+    if (myPrivateMessage.kind === 'mimica') {
+      const mimica = myPrivateMessage;
+      return (
+        <div className="flex min-h-screen flex-col items-center justify-center p-6 text-center bg-gradient-to-b from-fuchsia-950 to-[#0a0a14]">
+          <p className="mb-3 text-5xl">🎭</p>
+          <h1 className="mb-2 text-xl font-black uppercase tracking-wide text-fuchsia-300">Tienes que representar esto</h1>
+          {mimica.category && (
+            <p className="mb-3 text-xs font-bold uppercase tracking-[0.3em] text-white/40">{mimica.category}</p>
+          )}
+          <div className="w-full max-w-sm rounded-2xl border border-fuchsia-500/30 bg-fuchsia-500/10 p-5 mb-6">
+            <p className="text-2xl font-black text-white">{mimica.word}</p>
+          </div>
+          <p className="text-sm text-white/60 max-w-xs">Sin hablar. El grupo adivina. Si no adivinan en 30s, bebes 2.</p>
+          <button
+            onClick={() => setDismissedPrivateAt(cardState.cardIndex)}
+            className="mt-6 rounded-2xl bg-white/10 border border-white/15 px-6 py-2.5 text-sm font-semibold text-white hover:bg-white/20"
+          >
+            Entendido
+          </button>
           <p className="mt-6 text-xs text-white/30">Solo tú ves esta pantalla 🤫</p>
         </div>
       );

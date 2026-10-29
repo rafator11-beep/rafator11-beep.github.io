@@ -64,6 +64,27 @@ import { yoNuncaCurro } from './gameContentMega4';
 import { yoNuncaFiesta, picanteNuevo } from './gameContentMega5';
 import { votacionNuevo, verdadOBebeNuevo } from './gameContentMega6';
 import { retosNuevo, cadenaNuevo, categoriasNuevo, normasNuevas, mimicaNueva, enLaCamaNuevo, pacoversEspanaNuevo } from './gameContentMega7';
+// ── Contenido "post-verano 2026" y plantillas generadas: antes solo se
+// concatenaban sin estructurar al final del mazo de megamix/clasico en
+// useGameContent.ts. Ahora se fusionan aquí dentro de los pools tipados para
+// que pasen por el mismo algoritmo ponderado con alternancia G/I.
+import { megamixRetosV4, yoNuncaV4, picanteV4, votacionV4, normasV4, duelosV4, cadenasV4 } from './gameContentExtra13';
+import { yoNuncaV5, retosV5, picanteV5, votacionV5, clasicoV5, enLaCamaV5, espanaV5, normasV5, duelosV5 } from './updatePostVerano2026';
+import { yoNuncaV5b, retosV5b, picanteV5b, votacionV5b, clasicoV5b, enLaCamaV5b, espanaV5b, normasV5b, duelosV5b } from './updatePostVerano2026_v2';
+import {
+    manosArribaV5, elRankingV5, escenaV5, dosVerdadesV5, elMovilV5, diezSegundosV5,
+    yoNuncaV5c, picanteV5c, votacionV5c, retosV5c, cadenaV5c, enLaCamaV5c,
+} from './updatePostVerano2026_v3';
+import {
+    genYoNunca, genCadena, genCategorias, genCulturaChupistica, genDiezSegundos,
+    genVotacion, genManosArriba, genTodosALaVez, genRanking, genEnLaCama,
+    genRetos, genVerdadOBebe, genEscena, genMovil, genDosVerdades,
+    genQuePrefieres, genParanoia,
+} from './generatedParty';
+import {
+    moreYoNunca, morePicante, moreVotacion, moreClasico, moreEspana,
+    moreEnLaCama, moreNormas, moreMimica, moreSalseo,
+} from './extraContentIndex';
 import {
   yoNuncaInfanciaExtra, yoNuncaInstitutoExtra, yoNuncaUniversidadExtra,
   yoNuncaCurroExtra, yoNuncaFiestaExtra,
@@ -6102,7 +6123,11 @@ export function isIndividualCard(cardText: string): boolean {
   return false;
 }
 
-export function getStructuredMegamix(count: number, playersCount: number = 4): string[] {
+export function getStructuredMegamix(
+  count: number,
+  playersCount: number = 4,
+  options?: { generalKeys?: string[]; individualKeys?: string[] },
+): string[] {
   function cleanDeckPool(items: any[]): string[] {
     const seen = new Set<string>();
     const cleaned: string[] = [];
@@ -6217,7 +6242,21 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     ...salseoNuevo.filter(s => s.toLowerCase().startsWith('yo nunca')),
   ]);
   const yoNuncaItems = getRandomItems(yoNuncaPool, yoNuncaPool.length);
-  const yoNuncaCards = yoNuncaItems.map(q => addDrinking(`🙈 Yo nunca... ${q}`, Math.random() < 0.4 ? 'medio' : 'leve'));
+  // Cartas ya formadas (texto completo con prefijo propio): no se envuelven de
+  // nuevo en "🙈 Yo nunca... X", se añaden tal cual al pool final del tipo.
+  const yoNuncaPreformed = cleanDeckPool([
+    ...yoNuncaV4.map(q => q.startsWith('🙈') ? q : `🙈 ${q}`),
+    // V5/V5b/V5c y genYoNunca ya son frases completas ("Yo nunca he...")
+    ...[...yoNuncaV5, ...yoNuncaV5b, ...yoNuncaV5c].map(q => `🙈 ${q}`),
+    ...genYoNunca.map(q => `🙈 ${q}`),
+    // moreYoNunca son continuaciones (duplican yoNuncaPool pero cleanDeckPool dedupea)
+    ...moreYoNunca.map(q => `🙈 Yo nunca... ${q}`),
+    ...moreSalseo.filter(s => s.startsWith('🙈')),
+  ]);
+  const yoNuncaCards = [
+    ...yoNuncaItems.map(q => addDrinking(`🙈 Yo nunca... ${q}`, Math.random() < 0.4 ? 'medio' : 'leve')),
+    ...yoNuncaPreformed.map(q => addDrinking(q, Math.random() < 0.4 ? 'medio' : 'leve')),
+  ];
 
   // ── HUMOR NEGRO (tipo propio, con peso independiente — ver src/config/cardWeights.ts) ──
   const humorNegroPool = cleanDeckPool([...yoNuncaHumorNegro, ...picanteHumorNegro]);
@@ -6232,6 +6271,10 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     ...votacionNuevo,
     // ── MEGA8 ──
     ...votacionExtra8b,
+    // ── Post-verano 2026 + generadas + ranking/preferencias ──
+    ...votacionV4, ...votacionV5, ...votacionV5b, ...votacionV5c,
+    ...moreVotacion, ...genVotacion, ...genQuePrefieres, ...genParanoia,
+    ...elRankingV5, ...genRanking,
   ]);
   const masProbableItems = getRandomItems(masProbablePool, masProbablePool.length);
   const masProbableCards = masProbableItems.map(q => addDrinking(`🗳️ ${q}`, Math.random() < 0.3 ? 'medio' : 'leve'));
@@ -6245,6 +6288,9 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     ...retosNuevo,
     // ── MEGA8 ──
     ...retosExtra8b,
+    // ── Post-verano 2026 + generadas + móvil manda / 10 segundos ──
+    ...megamixRetosV4, ...retosV5, ...retosV5b, ...retosV5c,
+    ...genRetos, ...elMovilV5, ...genMovil, ...diezSegundosV5, ...genDiezSegundos,
   ]);
   const retosItems = getRandomItems(retosPool, retosPool.length);
   const retosCards = retosItems.map(q => addDrinking(`🎯 ${q}`, Math.random() < 0.5 ? 'medio' : 'reparte'));
@@ -6254,6 +6300,9 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     ...clasicoExtra17,
     // ── ESCENARIOS DEL DÍA A DÍA ──
     ...escenariosDiaADia,
+    // ── Post-verano 2026 + generadas: Cultura Chupística, escena, dos verdades ──
+    ...clasicoV5, ...clasicoV5b, ...moreClasico,
+    ...escenaV5, ...genEscena, ...dosVerdadesV5, ...genDosVerdades, ...genCulturaChupistica,
   ]);
   const clasicoItems = getRandomItems(clasicoPool, clasicoPool.length);
   const clasicoCards = clasicoItems.map(q => addDrinking(q, Math.random() < 0.5 ? 'leve' : 'grupo'));
@@ -6269,6 +6318,8 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
   const espanaPool = cleanDeckPool([...(espanaExtra3 || []), ...(espanaExtra7 || []),
     // ── MEGA EXPANSION ──
     ...pacoversEspanaNuevo,
+    // ── Post-verano 2026 ──
+    ...espanaV5, ...espanaV5b, ...moreEspana,
   ]);
   const espanaItems = getRandomItems(espanaPool, espanaPool.length);
   const espanaCards = espanaItems.map(q => addDrinking(`🇪🇸 ${q}`, 'leve'));
@@ -6280,6 +6331,8 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     ...picanteNuevo,
     // ── MEGA8 ──
     ...picanteExtra8b,
+    // ── Post-verano 2026 ──
+    ...picanteV4, ...picanteV5, ...picanteV5b, ...picanteV5c, ...morePicante,
   ]);
   const picanteItems = getRandomItems(picantePool, picantePool.length);
   const picanteCards = picanteItems.map(q => addDrinking(`🌶️ ${q}`, Math.random() < 0.5 ? 'medio' : 'fuerte'));
@@ -6289,6 +6342,8 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     ...enLaCamaNuevo,
     // ── MEGA8 ──
     ...enLaCamaExtra8b,
+    // ── Post-verano 2026 ──
+    ...enLaCamaV5, ...enLaCamaV5b, ...enLaCamaV5c, ...moreEnLaCama, ...genEnLaCama,
   ]);
   const enLaCamaItems = getRandomItems(enLaCamaPool, enLaCamaPool.length);
   const enLaCamaCards = enLaCamaItems.map(q => addDrinking(`🛌 ${q}`, 'medio'));
@@ -6300,6 +6355,8 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     ...categoriasNuevo,
     // ── MEGA8 ──
     ...categoriasExtra8b,
+    // ── Plantillas generadas ──
+    ...genCategorias,
   ]);
   const categoriasItems = getRandomItems(categoriasPool, categoriasPool.length);
   const categoriasCards = categoriasItems.map(q => {
@@ -6316,6 +6373,8 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     ...mimicaNueva,
     // ── MEGA8 ──
     ...mimicaExtra8b,
+    // ── moreMimica ──
+    ...moreMimica,
   ]);
   const mimicaItems = getRandomItems(mimicaPool, mimicaPool.length);
   const mimicaCards = mimicaItems.map(q => {
@@ -6333,6 +6392,8 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     ...(duelosExtra12 || []).map(d => `${d.name}: ${d.description}`),
     // ── MEGA8 ──
     ...duelosExtra8b.map(d => `${d.name}: ${d.description}`),
+    // ── Post-verano 2026 (ya son strings completos "DUELO ... vs ...: ...") ──
+    ...duelosV4, ...duelosV5, ...duelosV5b,
   ]);
   const duelosItems = getRandomItems(duelosPool, duelosPool.length);
   const duelosCards = duelosItems.map(q => `⚔️ ${q}`);
@@ -6383,6 +6444,9 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     // ── MEGA8 ──
     ...verdadOBebeExtra8b,
     ...salseoNuevo.filter(s => s.startsWith('🎤')),
+    // ── Plantillas generadas ──
+    ...genVerdadOBebe,
+    ...moreSalseo.filter(s => s.startsWith('🎤')),
   ]);
   const verdadOBebeCards = getRandomItems(verdadOBebePool, verdadOBebePool.length);
 
@@ -6417,6 +6481,8 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     ...cadenaNuevo,
     // ── MEGA8 ──
     ...cadenaExtra8b,
+    // ── Post-verano 2026 + generadas ──
+    ...cadenasV4, ...cadenaV5c, ...genCadena,
   ]);
   const cadenaCards = getRandomItems(cadenaPool, cadenaPool.length);
 
@@ -6447,6 +6513,148 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     "⚡ TRIVIA EXPRESS: ¿Cuántos planetas tiene el sistema solar? (8) — Falla y bebes 2, aciertas y te salvas. 🍻",
     "⚡ TRIVIA EXPRESS: ¿Cuál es el metal más caro del mundo? (Rodio) — Falla y bebes 2, aciertas y te salvas. 🍻",
     "⚡ TRIVIA EXPRESS: ¿En qué año se inventó el iPhone? (2007) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    // ── +141 nuevas (expansión Trivia Express) ──
+    "⚡ TRIVIA EXPRESS: ¿Cuántos huesos tiene la mano humana? (27) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿En qué país se inventó el fútbol? (Inglaterra) — Falla y bebes 3, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el elemento químico más abundante en el universo? (Hidrógeno) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántas patas tiene una araña? (8) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la montaña más alta del mundo? (Everest) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿En qué año empezó la Primera Guerra Mundial? (1914) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos corazones tiene un pulpo? (3) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Portugal? (Lisboa) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos minutos dura un partido de fútbol (sin descuento)? (90) — Falla y bebes 3, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el metal líquido a temperatura ambiente? (Mercurio) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿En qué año se fundó Google? (1998) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos anillos tiene el logo olímpico? (5) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Egipto? (El Cairo) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos dientes tiene un adulto (sin muelas del juicio)? (28) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el desierto más grande del mundo? (Sahara) — Falla y bebes 3, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántas cuerdas tiene una guitarra clásica? (6) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿En qué año llegó el hombre a la Luna por segunda vez? (1969) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el río más largo de Europa? (Volga) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos jugadores tiene un equipo de voleibol en pista? (6) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Argentina? (Buenos Aires) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántas patas tiene un insecto? (6) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el país más poblado del mundo? (India) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos Grammys ganó Michael Jackson con Thriller? (8) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la moneda de Brasil? (Real) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos litros tiene un barril de petróleo? (159) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿En qué año cayó el Imperio Romano de Occidente? (476) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el animal más grande del mundo? (Ballena azul) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos huesos tiene un bebé recién nacido? (300) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Suecia? (Estocolmo) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántas cartas tiene una baraja española? (40) — Falla y bebes 3, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el punto más profundo del océano? (Fosa de las Marianas) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos años duró la Guerra Civil española? (3) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Grecia? (Atenas) — Falla y bebes 3, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos satélites naturales tiene la Tierra? (1) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el idioma oficial de Brasil? (Portugués) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántas patas tiene un cangrejo? (10) — Falla y bebes 3, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Marruecos? (Rabat) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos minutos tiene un round de boxeo? (3) — Falla y bebes 1, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el metal más ligero? (Litio) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos goles necesitas para un hat-trick? (3) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Turquía? (Ankara) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántas vueltas tiene un circuito de F1 de Mónaco? (78) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el órgano más grande del cuerpo humano? (La piel) — Falla y bebes 3, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos jugadores componen un equipo de rugby a 15? (15) — Falla y bebes 3, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Finlandia? (Helsinki) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos años tiene que cumplir alguien para ser presidente de EEUU? (35) — Falla y bebes 3, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el animal nacional de España? (El toro) — Falla y bebes 1, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos litros de sangre tiene un adulto medio? (5) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Noruega? (Oslo) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos minutos dura un tiempo muerto en la NBA? (1) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el país con más husos horarios? (Francia) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántas patas tiene un caballo? (4) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Polonia? (Varsovia) — Falla y bebes 3, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos Óscars ganó la película Titanic? (11) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el idioma con más hablantes nativos tras el mandarín? (Español) — Falla y bebes 3, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos kilómetros mide aproximadamente la Gran Muralla China? (21000) — Falla y bebes 1, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Dinamarca? (Copenhague) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos jugadores forman un equipo de balonmano en pista? (7) — Falla y bebes 1, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el planeta más grande del sistema solar? (Júpiter) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos sets se juegan como máximo en un Grand Slam masculino de tenis? (5) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Austria? (Viena) — Falla y bebes 3, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos huesos tiene el pie humano? (26) — Falla y bebes 1, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el río más largo de Asia? (Yangtsé) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántas estrellas tiene la bandera de la Unión Europea? (12) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Irlanda? (Dublín) — Falla y bebes 3, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos minutos dura un tiempo de descanso en el fútbol? (15) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el país más pequeño del mundo? (Vaticano) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántas patas tiene una mosca? (6) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Países Bajos? (Ámsterdam) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos jugadores tiene un equipo de béisbol en el campo? (9) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el animal terrestre más lento? (Caracol) — Falla y bebes 3, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos años dura una legislatura en España? (4) — Falla y bebes 3, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Suiza? (Berna) — Falla y bebes 1, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántas calorías tiene aproximadamente una cerveza mediana? (150) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el océano más pequeño? (Ártico) — Falla y bebes 3, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos dedos tiene una mano? (5) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Bélgica? (Bruselas) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos Mundiales de fútbol ha ganado Brasil? (5) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el metal más pesado de uso común? (Plomo) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos minutos dura una clase típica de instituto? (55) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de República Checa? (Praga) — Falla y bebes 1, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántas lunas tiene Marte? (2) — Falla y bebes 3, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el ave más rápida en vuelo? (Halcón peregrino) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos jugadores tiene un equipo de waterpolo en el agua? (7) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Hungría? (Budapest) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos corazones tiene una lombriz? (5) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el país con más volcanes activos? (Indonesia) — Falla y bebes 1, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántas letras tiene el alfabeto español? (27) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Rumanía? (Bucarest) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos minutos dura un partido de hockey sobre hielo (sin prórroga)? (60) — Falla y bebes 1, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el animal más venenoso del mundo? (Rana dorada) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos jugadores de tenis compiten en un dobles? (4) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Croacia? (Zagreb) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el río más caudaloso del mundo? (Amazonas) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos minutos dura un partido de rugby? (80) — Falla y bebes 1, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Bulgaria? (Sofía) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos premios Nobel existen? (6) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el animal con el cuello más largo? (Jirafa) — Falla y bebes 1, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántas cuerdas tiene un violín? (4) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Serbia? (Belgrado) — Falla y bebes 3, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos años de reinado tuvo Isabel II de Inglaterra? (70) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la fruta con más potasio de las comunes? (Plátano) — Falla y bebes 3, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos jugadores tiene un equipo de fútbol americano en campo? (11) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Eslovaquia? (Bratislava) — Falla y bebes 1, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos kilómetros tiene aproximadamente un maratón? (42) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el país con más lagos del mundo? (Canadá) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántas patas tiene una estrella de mar (lo normal)? (5) — Falla y bebes 1, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Ucrania? (Kiev) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos minutos dura un cuarto en la NBA? (12) — Falla y bebes 3, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el animal más longevo conocido? (La almeja de Islandia) — Falla y bebes 3, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos jugadores tiene un equipo de hockey sobre hielo en pista? (6) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Lituania? (Vilna) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos Juegos Olímpicos de verano se han celebrado hasta Tokio 2020 (sin cancelados)? (32) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el país que produce más café del mundo? (Brasil) — Falla y bebes 3, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántas patas tiene un saltamontes? (6) — Falla y bebes 3, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Letonia? (Riga) — Falla y bebes 1, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos minutos dura un asalto de boxeo olímpico? (3) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el animal más rápido en tierra en distancias cortas? (Guepardo) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos jugadores forman un equipo de cricket? (11) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Estonia? (Tallin) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántas cuerdas tiene un arpa de concierto aproximadamente? (47) — Falla y bebes 1, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el país más grande de África? (Argelia) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos minutos dura el tiempo reglamentario del fútbol sala? (40) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Eslovenia? (Liubliana) — Falla y bebes 3, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos huesos tiene la columna vertebral? (33) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el metal más caro tras el rodio? (Platino) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos jugadores tiene un equipo de fútbol gaélico? (15) — Falla y bebes 3, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Albania? (Tirana) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántas patas tiene un escorpión? (8) — Falla y bebes 3, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el país más extenso de Sudamérica? (Brasil) — Falla y bebes 3, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos minutos dura un periodo de hockey sobre hielo? (20) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Moldavia? (Chisinau) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos Juegos Olímpicos de invierno se han celebrado hasta Pekín 2022? (24) — Falla y bebes 1, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el animal más pequeño del mundo entre los mamíferos? (Musaraña etrusca) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos jugadores tiene un equipo de fútbol sala en pista? (5) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Islandia? (Reikiavik) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es el país con la bandera más antigua del mundo? (Dinamarca) — Falla y bebes 1, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Chipre? (Nicosia) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos jugadores tiene un equipo de polo? (4) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuál es la capital de Luxemburgo? (Luxemburgo) — Falla y bebes 2, aciertas y te salvas. 🍻",
+    "⚡ TRIVIA EXPRESS: ¿Cuántos minutos dura un tiempo en el baloncesto FIBA? (10) — Falla y bebes 3, aciertas y te salvas. 🍻",
   ]);
 
   const grupalCards: string[] = shuffleArray([
@@ -6494,6 +6702,80 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     ...(salseoExtra || []).filter(s => s.startsWith('🙌')),
     // ── EXTRA 17 SALSEO GRUPAL ──
     ...salseoExtra17.filter(s => s.startsWith('🙌')),
+    // ── Post-verano 2026 + generadas: manos arriba / todos a la vez ──
+    ...manosArribaV5, ...genManosArriba, ...genTodosALaVez,
+    ...moreSalseo.filter(s => s.startsWith('🙌')),
+    // ── +70 nuevas (expansión Grupal) ──
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más tarda en pedir perdón. Ese bebe 2. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más tarde se iría de la fiesta. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que cante en la ducha. Ese bebe 2. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que se quede sin batería en el móvil. Ese bebe 2. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que llegue tarde a su propia boda. Ese bebe 2. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que gane la lotería y no lo diga. Ese bebe 2. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que se pierda yendo al baño del bar. Ese bebe 2. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que acabe hablando con desconocidos. Ese bebe 2. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que se le rompa el móvil esta noche. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que acabe bailando solo. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que mande la foto equivocada al grupo. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que se duerma en el sofá de otro. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que pida la cuenta por error. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que se crea una excusa tonta. Ese bebe 2. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que llore de risa esta noche. Ese bebe 2. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que acabe cantando una power ballad. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que se pierda el último metro/bus. Ese bebe 2. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que se le caiga la bebida encima. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que acabe hablando de su ex. Ese bebe 2. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que mande un audio de 5 minutos. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que se compre algo random borracho. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que acabe en la cocina de un desconocido. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que se le olvide el nombre de alguien. Ese bebe 2. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que haga de DJ sin que nadie le pida. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que empiece una conga. Ese bebe 2. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que acabe discutiendo de política. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que se tire a la piscina vestido. Ese bebe 2. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que organice el próximo plan. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que se quede sin voz de gritar. Ese bebe 2. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que acabe pagando la ronda de todos. Ese bebe 2. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que se le rompa el tacón o la chancla. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que acabe en un corrillo ajeno. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que mande la ubicación mal. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que repita plato sin disimulo. Ese bebe 2. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que se le note todo en la cara. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que acabe comentando el partido. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que haga una videollamada sin querer. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que confunda los nombres de todos. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que acabe de árbitro de una discusión. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que pida la última canción del karaoke. Ese bebe 2. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que se le pegue la canción random del verano. Ese bebe 2. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que acabe contando la misma anécdota dos veces. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que se le note que tiene sueño. Ese bebe 2. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que acabe de fotógrafo oficial de la noche. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que pierda las llaves esta noche. Ese bebe 2. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que acabe de traductor de algo. Ese bebe 2. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que acabe opinando sin que le pregunten. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que se le note el roce con alguien. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que acabe en modo filósofo de bar. Ese bebe 3. 🍻",
+    "🙌 TODOS A LA VEZ: A la cuenta de 3, señalad al que más probable es que acabe pidiendo comida a las 4am. Ese bebe 2. 🍻",
+    "🙌 TODOS A LA VEZ: Pensad en una palabra que empiece por la primera letra de vuestro nombre. Los que coincidan con alguien beben 2. 🍻",
+    "🙌 TODOS A LA VEZ: Pensad en una fruta. Los que coincidan con alguien beben 2. 🍻",
+    "🙌 TODOS A LA VEZ: Pensad en un número del 1 al 7. Los que coincidan con alguien beben 2. 🍻",
+    "🙌 TODOS A LA VEZ: Pensad en un animal de granja. Los que coincidan con alguien beben 2. 🍻",
+    "🙌 TODOS A LA VEZ: Pensad en una ciudad que no sea española. Los que coincidan con alguien beben 2. 🍻",
+    "🙌 TODOS A LA VEZ: Pensad en un deporte olímpico. Los que coincidan con alguien beben 2. 🍻",
+    "🙌 TODOS A LA VEZ: Pensad en un color poco común. Los que coincidan con alguien beben 2. 🍻",
+    "🙌 TODOS A LA VEZ: Pensad en un postre. Los que coincidan con alguien beben 2. 🍻",
+    "🙌 TODOS A LA VEZ: Pensad en una serie de Netflix. Los que coincidan con alguien beben 2. 🍻",
+    "🙌 TODOS A LA VEZ: Pensad en un famoso español. Los que coincidan con alguien beben 2. 🍻",
+    "🙌 TODOS A LA VEZ: Pensad en un plato típico español. Los que coincidan con alguien beben 2. 🍻",
+    "🙌 TODOS A LA VEZ: Pensad en una bebida alcohólica. Los que coincidan con alguien beben 2. 🍻",
+    "🙌 TODOS A LA VEZ: Pensad en un instrumento musical. Los que coincidan con alguien beben 2. 🍻",
+    "🙌 TODOS A LA VEZ: Pensad en una profesión. Los que coincidan con alguien beben 2. 🍻",
+    "🙌 TODOS A LA VEZ: Pensad en un mes del año. Los que coincidan con alguien beben 2. 🍻",
+    "🙌 TODOS A LA VEZ: Pensad en una prenda de ropa. Los que coincidan con alguien beben 2. 🍻",
+    "🙌 TODOS A LA VEZ: Pensad en un objeto de la cocina. Los que coincidan con alguien beben 2. 🍻",
+    "🙌 TODOS A LA VEZ: Pensad en un personaje de dibujos. Los que coincidan con alguien beben 2. 🍻",
+    "🙌 TODOS A LA VEZ: Pensad en una palabra en inglés. Los que coincidan con alguien beben 2. 🍻",
+    "🙌 TODOS A LA VEZ: Pensad en un número del 1 al 100 (el más alto gana, el más bajo reparte). Los que coincidan con alguien beben 2. 🍻",
   ]);
 
   // --- FAIR-PLAY SCHEDULER ---
@@ -6523,7 +6805,7 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     makeTypedPool('pacovers', pacoversCards),          // 🇪🇸
     makeTypedPool('espana', espanaCards),              // 🇪🇸
     makeTypedPool('mimica', mimicaCards),              // 🎭
-  ].filter(t => t.cards.length > 0);
+  ].filter(t => t.cards.length > 0 && (!options?.generalKeys || options.generalKeys.includes(t.key)));
 
   const individualTypes: TypedPool[] = [
     makeTypedPool('retos', retosCards),                // 🎯
@@ -6532,7 +6814,7 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     makeTypedPool('categorias', categoriasCards),       // 🔤
     makeTypedPool('duelos', duelosCards),               // ⚔️
     makeTypedPool('clasico', clasicoCards),             // Reto: / Cultura Chupística
-  ].filter(t => t.cards.length > 0);
+  ].filter(t => t.cards.length > 0 && (!options?.individualKeys || options.individualKeys.includes(t.key)));
 
   function pickWeightedType(types: TypedPool[], weights: Record<string, number>, lastKeys: string[]): TypedPool {
     const blocked = lastKeys.length >= MAX_CONSECUTIVE_SAME_TYPE
@@ -6589,6 +6871,8 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
     ...normasRonda,
     // ── MEGA8 ──
     ...normasExtra8b,
+    // ── Post-verano 2026 ──
+    ...normasV4, ...normasV5, ...normasV5b, ...moreNormas,
   ].map(n => `📜 NORMA: ${n.replace(/NORMA:|NORMA: |📜 |\\\./g, '').trim()}`));
 
   let triggerPtr = 0;

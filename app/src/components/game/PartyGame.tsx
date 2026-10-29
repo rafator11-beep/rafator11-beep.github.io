@@ -22,7 +22,7 @@ import { useGameEffects } from '@/hooks/game/useGameEffects';
 import { useMultiplayer } from '@/hooks/game/useMultiplayer';
 import { useRanking } from '@/hooks/useRanking';
 import { useGameContext } from '@/contexts/GameContext';
-import { CardDisplay, sanitizeCardText, detectCardKind, INTERACTIVE_CARD_KINDS } from '@/components/game/CardDisplay';
+import { CardDisplay, sanitizeCardText, detectCardKind, INTERACTIVE_CARD_KINDS, extractMimicaWord } from '@/components/game/CardDisplay';
 import { cultureQuestions, type CultureQuestion } from '@/data/cultureQuestions';
 import { triviaPrimaria, triviaESO, triviaBachillerato, triviaVidaCotidiana } from '@/data/triviaConocimientoContent';
 import { debateTopics } from '@/data/debateTopics';
@@ -1263,6 +1263,18 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     setShowKahoot({ active: true, mode: 'standard' });
   }, [safeCurrentText, currentIndex, showKahoot.active, isHost, isMultiplayer]);
 
+  // Mímica: la palabra real solo debe llegar al jugador activo, por su móvil
+  // (buzón privado), NUNCA en la pantalla compartida — mismo patrón que el
+  // rol de Impostor / juez del debate. Se recalcula cada vez que cambia la
+  // carta o el jugador activo.
+  const mimicaPrivateFor = useMemo(() => {
+    if (!safeCurrentText || !currentPlayer?.name) return undefined;
+    if (detectCardKind(safeCurrentText) !== 'mimica') return undefined;
+    const word = extractMimicaWord(safeCurrentText);
+    if (!word) return undefined;
+    return { [currentPlayer.name]: { kind: 'mimica' as const, word } };
+  }, [safeCurrentText, currentPlayer?.name]);
+
   // Trigger / Content Detection System
   // Guard: solo procesar el TRIGGER de cada carta una vez. Sin esto, un refetch de
   // `players` por Realtime (nueva referencia de array aunque el contenido no cambie)
@@ -1952,7 +1964,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               players={players.map(p => p.name)}
               privateFor={debateSession ? {
                 [debateSession.judge.name]: { kind: 'judge', topic: debateSession.topic, aFavorHints: debateSession.aFavorHints, enContraHints: debateSession.enContraHints },
-              } : showPodium ? podiumPrivateFor : (gameState.showImpostorWarning || gameState.showImpostor) ? gameState.impostorPrivateFor : undefined}
+              } : showPodium ? podiumPrivateFor : (gameState.showImpostorWarning || gameState.showImpostor) ? gameState.impostorPrivateFor : mimicaPrivateFor}
               debateInfo={debateSession ? {
                 topic: debateSession.topic,
                 teamA: debateSession.teamA.map(p => p.name),

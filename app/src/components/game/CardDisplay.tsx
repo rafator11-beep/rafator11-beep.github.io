@@ -118,7 +118,24 @@ export function processDrinkingMultiplier(text: string, round: number = 1): Reac
 }
 
 // ── CARD TYPE DETECTION ───────────────────────────────────────────────────────
-export type CardKind = 'yo_nunca' | 'reto' | 'votacion' | 'grupal' | 'picante' | 'norma' | 'duelo' | 'espana' | 'categorias' | 'verdad_o_bebe' | 'cadena' | 'trivia_express' | 'generic';
+export type CardKind = 'yo_nunca' | 'reto' | 'votacion' | 'grupal' | 'picante' | 'norma' | 'duelo' | 'espana' | 'categorias' | 'verdad_o_bebe' | 'cadena' | 'trivia_express' | 'mimica' | 'generic';
+
+// Extrae la palabra/concepto real de una carta de mímica ("🎭 MÍMICA: X — Sin
+// hablar...") para poder mandarla en privado solo a quien actúa. Si no hace
+// match (formato inesperado), devuelve null y se cae al comportamiento normal
+// (mostrar la carta entera, mejor que romper el juego).
+export function extractMimicaWord(content: string): string | null {
+    const m = content.match(/MÍMICA:\s*([^—]+?)\s*(?:—|$)/i);
+    return m ? m[1].trim() : null;
+}
+
+// Texto que ve TODA la mesa en la pantalla compartida cuando sale una carta de
+// mímica: framing genérico sin la palabra, que solo le llega al actor por su
+// móvil (buzón privado, ver SpectatorView.tsx / PartyGame.tsx).
+export function maskMimicaCard(content: string, actorName?: string): string {
+    const who = actorName ? actorName : 'A quien le toque';
+    return `🎭 MÍMICA: ${who} tiene que representar algo — solo esa persona ve la palabra en su móvil. El resto, ¡a adivinar sin hablar! Si no adivinan en 30s, bebe 2.`;
+}
 
 // Tipos de carta donde tiene sentido que CADA móvil conectado responda desde el
 // suyo (flujo tipo Kahoot) en vez de leerse en voz alta / actuarse por un jugador.
@@ -135,6 +152,7 @@ export function detectCardKind(content: string): CardKind {
     if (c.startsWith('⚔️') || c.includes('duelo')) return 'duelo';
     if (c.startsWith('🇪🇸') || c.includes('españa:')) return 'espana';
     if (c.startsWith('🔤') || c.includes('categorías')) return 'categorias';
+    if (c.startsWith('🎭') || c.includes('mímica') || c.includes('mimica')) return 'mimica';
     if (c.startsWith('🌶️') || c.includes('picante') || c.includes('beso') || c.includes('lamer')) return 'picante';
     if (c.includes('norma:') || c.startsWith('📜')) return 'norma';
     if (c.startsWith('🎯') || c.includes('reto:') || c.includes('{player}')) return 'reto';
@@ -158,6 +176,7 @@ const KIND_CONFIG: Record<CardKind, {
     duelo:          { bg: 'from-red-900 via-rose-950 to-slate-950',       accent: '#ef4444', emoji: '⚔️', label: 'DUELO',         textDark: false, showDrinkButtons: false },
     espana:         { bg: 'from-red-800 via-yellow-900 to-slate-950',     accent: '#ef4444', emoji: '🇪🇸', label: 'ESPAÑA',       textDark: false, showDrinkButtons: true },
     categorias:     { bg: 'from-cyan-800 via-blue-900 to-slate-950',      accent: '#06b6d4', emoji: '🔤', label: 'CATEGORÍAS',    textDark: false, showDrinkButtons: false },
+    mimica:         { bg: 'from-fuchsia-900 via-purple-950 to-slate-950', accent: '#d946ef', emoji: '🎭', label: 'MÍMICA',        textDark: false, showDrinkButtons: false },
     generic:        { bg: 'from-indigo-900 via-purple-950 to-slate-950',  accent: '#6366f1', emoji: '🎲', label: 'MEGAMIX',       textDark: false, showDrinkButtons: false },
 };
 
@@ -172,9 +191,16 @@ export const CardDisplay = React.memo(({
     content, type = 'common', onClick, onSuccess, onFail,
     gameMode, players, currentPlayer, round = 1, onAIUpdate
 }: CardDisplayProps) => {
-    const cleanText = sanitizeCardText(content);
-    const timeLimitSeconds = extractTimeLimitSeconds(content);
     const kind = detectCardKind(content);
+    // Mímica: la pantalla compartida (host/mesa) NUNCA debe mostrar la palabra
+    // real — solo quien actúa la recibe en privado por su móvil (buzón
+    // privateFor, ver PartyGame.tsx / SpectatorView.tsx). Si no hay
+    // currentPlayer (p. ej. mazo en modo local sin jugador activo claro), se
+    // enmascara igualmente para no chafar la mecánica.
+    const cleanText = kind === 'mimica'
+        ? maskMimicaCard(content, currentPlayer?.name)
+        : sanitizeCardText(content);
+    const timeLimitSeconds = extractTimeLimitSeconds(content);
     const baseConfig = KIND_CONFIG[kind];
     const rarityOverride = type !== 'common' ? RARITY_OVERRIDE[type] : {};
     const cfg = { ...baseConfig, ...rarityOverride };
@@ -446,6 +472,26 @@ export const CardDisplay = React.memo(({
                                     style={{ maxHeight: '35vh', overflowY: 'auto' }}>
                                     {processDrinkingMultiplier(cleanText, round)}
                                 </p>
+
+                                {/* Mímica en un solo dispositivo (modo local sin móviles conectados):
+                                    no hay otra forma de enseñarle la palabra solo al actor que un
+                                    botón que solo se pulsa/mantiene a propósito, de espaldas al resto. */}
+                                {kind === 'mimica' && (
+                                    <div className="mt-3 flex justify-center">
+                                        {!isRevealed ? (
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); setIsRevealed(true); }}
+                                                className="rounded-xl border border-fuchsia-400/40 bg-fuchsia-500/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-fuchsia-200 hover:bg-fuchsia-500/20"
+                                            >
+                                                👁 Solo quien actúa: ver palabra
+                                            </button>
+                                        ) : (
+                                            <span className="rounded-xl border border-fuchsia-400/40 bg-fuchsia-500/15 px-4 py-2 text-sm font-black text-white">
+                                                {extractMimicaWord(content) || 'Error al leer la palabra'}
+                                            </span>
+                                        )}
+                                    </div>
+                                )}
 
                                 {/* Sentencia del Juez */}
                                 {judgeRuling && (

@@ -233,102 +233,33 @@ export const useGameContent = (mode: GameMode, currentIndex: number, currentPlay
 
         switch (mode) {
             case 'megamix':
+                // Todo el contenido (base + oleadas V4/V5/V5b/V5c + plantillas
+                // generadas) está fusionado dentro de los pools tipados que usa
+                // getStructuredMegamix (ver src/data/gameContent.ts). Antes, solo
+                // las primeras 500 cartas pasaban por el algoritmo de alternancia
+                // G/I ponderada; el resto eran arrays crudos concatenados sin
+                // estructura, así que una partida larga degeneraba en un bloque
+                // desordenado. Ahora TODO pasa por el mismo algoritmo, con un count
+                // alto para cubrir sesiones largas (los punteros por tipo reciclan
+                // con módulo, así que no hay riesgo de bucle infinito ni de
+                // quedarnos sin cartas: ver getStructuredMegamix ~línea 6105+).
                 modeContent = [
-                    ...getStructuredMegamix(500, playersCount),
-                    // Actualización post-verano 2026 (oleadas 1 y 2) + contenido reconectado
-                    ...retosV5, ...retosV5b,
-                    ...duelosV5, ...duelosV5b,
+                    ...getStructuredMegamix(2500, playersCount),
                     ...moreTorneoRetos,
-                    ...[...yoNuncaV5, ...yoNuncaV5b, ...yoNuncaV5c].map(q => `🙈 ${q}`),
-                    ...moreYoNunca.map(q => `🙈 ${q}`),
-                    ...[...picanteV5, ...picanteV5b, ...picanteV5c].map(q => `🌶️ ${q}`),
-                    ...morePicante.map(q => `🌶️ ${q}`),
-                    ...[...votacionV5, ...votacionV5b, ...votacionV5c].map(q => `🗳️ ${q}`),
-                    ...moreVotacion.map(q => `🗳️ ${q}`),
-                    // OLEADA 3 — 6 tipos de carta nuevos
-                    ...manosArribaV5,
-                    ...elRankingV5,
-                    ...escenaV5,
-                    ...dosVerdadesV5,
-                    ...elMovilV5,
-                    ...diezSegundosV5,
-                    ...retosV5c,
-                    ...cadenaV5c,
-                    ...enLaCamaV5c.map(q => `🛌 ${q}`),
-                    // OLEADA 4 — cartas generadas por plantilla (miles)
-                    ...genYoNunca.map(q => `🙈 ${q}`),
-                    ...genCadena, ...genCategorias,
-                    ...genCulturaChupistica, ...genDiezSegundos,
-                    ...genVotacion, ...genManosArriba, ...genTodosALaVez, ...genRanking,
-                    ...genEnLaCama, ...genRetos, ...genVerdadOBebe,
-                    ...genEscena, ...genMovil, ...genDosVerdades,
-                    ...genQuePrefieres, ...genParanoia,
-                    ...clasicoV5, ...clasicoV5b,
-                    ...moreClasico,
-                    ...[...enLaCamaV5, ...enLaCamaV5b].map(q => `🛌 ${q}`),
-                    ...moreEnLaCama.map(q => `🛌 ${q}`),
-                    ...[...espanaV5, ...espanaV5b].map(q => `🇪🇸 ${q}`),
-                    ...moreEspana.map(q => `🇪🇸 ${q}`),
-                    ...moreMimica.map(q => `🎭 ${q}`),
-                    ...[...normasV5, ...normasV5b].map(q => `NORMA: ${q.replace(/^NORMA:\s*/i, '')}`),
-                    ...moreNormas.map(q => `NORMA: ${q.replace(/^NORMA:\s*/i, '')}`),
-                    ...moreSalseo,
+                    ...importedCustomRetos,
                 ];
                 break;
             case 'clasico':
-                modeContent = shuffleArray([
-                    ...clasico,
-                    ...clasicoExtra,
-                    ...clasicoExtra2,
-                    ...clasicoExtra3,
-                    ...yoNunca.map(q => `🙈 ${q}`),
-                    ...yoNuncaExtra.map(q => `🙈 ${q}`),
-                    ...yoNuncaExtra2.map(q => `🙈 ${q}`),
-                    ...yoNuncaExtra3.map(q => `🙈 ${q}`),
-                    ...picante.map(q => `🌶️ ${q}`),
-                    ...picanteExtra.map(q => `🌶️ ${q}`),
-                    ...picanteExtra2.map(q => `🌶️ ${q}`),
-                    ...picanteExtra3.map(q => `🌶️ ${q}`),
-                    ...pacovers.map(q => `🇪🇸 ${q}`),
-                    ...pacoversExtra.map(q => `🇪🇸 ${q}`),
-                    ...pacoversExtra2.map(q => `🇪🇸 ${q}`),
-                    ...pacoversExtra3.map(q => `🇪🇸 ${q}`),
-                    ...quienEsMasProbable.map(q => `🗳️ ${q}`),
-                    ...masProbableExtra.map(q => `🗳️ ${q}`),
-                    ...quienEsMasProbableExtra2.map(q => `🗳️ ${q}`),
-                    ...masProbableExtra3.map(q => `🗳️ ${q}`),
-                    ...enLaCamaY.map(q => `🛌 ${q}`),
-                    ...enLaCamaYExtra.map(q => `🛌 ${q}`),
-                    ...enLaCamaYExtra2.map(q => `🛌 ${q}`),
-                    ...enLaCamaYExtra3.map(q => `🛌 ${q}`),
-                    ...categoriasLetras.map(q => `🔤 ${q}`),
-                    ...categoriasLetrasExtra.map(q => `🔤 ${q}`),
-                    ...categoriasLetrasExtra2.map(q => `🔤 ${q}`),
-                    ...categoriasLetrasExtra3.map(q => `🔤 ${q}`),
-                    ...categoriasReto.map(q => `🎯 ${q}`),
-                    ...categoriasRetoExtra.map(q => `🎯 ${q}`),
-                    ...categoriasRetoExtra2.map(q => `🎯 ${q}`),
-                    ...categoriasRetoExtra3.map(q => `🎯 ${q}`),
-                    ...espanaExtra3.map(q => `🇪🇸 ${q}`),
-                    ...normasRonda.map(q => `NORMA: ${q}`),
+                // Mismo algoritmo estructurado que 'megamix', pero restringido a los
+                // tipos "clásicos" (sin mímica, duelos, trivia express, humor negro,
+                // cadena ni grupal — ese es el sabor diferenciado de este modo).
+                modeContent = [
+                    ...getStructuredMegamix(2500, playersCount, {
+                        generalKeys: ['yoNunca', 'picante', 'enLaCama', 'masProbable', 'pacovers', 'espana'],
+                        individualKeys: ['retos', 'categorias', 'clasico'],
+                    }),
                     ...importedCustomRetos,
-                    ...megamixRetosV4,
-                    ...yoNuncaV4.map(q => `🙈 ${q}`),
-                    ...picanteV4.map(q => `🌶️ ${q}`),
-                    ...votacionV4.map(q => `🗳️ ${q}`),
-                    ...normasV4.map(q => `NORMA: ${q.replace(/^📜\s*NORMA:\s*/i, '')}`),
-                    ...duelosV4,
-                    ...cadenasV4,
-                    ...clasicoV5, ...clasicoV5b,
-                    ...moreClasico,
-                    ...retosV5, ...retosV5b, ...retosV5c, ...cadenaV5c,
-                    ...diezSegundosV5, ...dosVerdadesV5,
-                    ...genCadena, ...genCategorias, ...genCulturaChupistica, ...genDiezSegundos, ...genRetos,
-                    ...[...normasV5, ...normasV5b].map(q => `NORMA: ${q.replace(/^NORMA:\s*/i, '')}`),
-                    ...moreNormas.map(q => `NORMA: ${q.replace(/^NORMA:\s*/i, '')}`),
-                    ...[...enLaCamaV5, ...enLaCamaV5b].map(q => `🛌 ${q}`),
-                    ...moreEnLaCama.map(q => `🛌 ${q}`),
-                ]);
+                ];
                 break;
             case 'yo_nunca':
             case 'yo_nunca_equipos':
