@@ -15,6 +15,10 @@ interface KahootVoteSessionProps {
   // activa el tiempo completo y se reparten puntos por velocidad de acierto.
   mode?: 'standard' | 'fastest_finger' | 'speed_race';
   onRaceComplete?: (ranking: RaceRankEntry[]) => void;
+  // En modo local (un solo dispositivo, isHost forzado a true para dar
+  // autoridad sobre el cronómetro/revelado) el anfitrión también es el
+  // único jugador posible, así que debe poder votar igualmente.
+  allowHostVote?: boolean;
 }
 
 export interface RaceRankEntry {
@@ -59,10 +63,14 @@ export function KahootVoteSession({
   onResult,
   onRaceComplete,
   mode = 'standard',
+  allowHostVote = false,
 }: KahootVoteSessionProps) {
   const [votes, setVotes] = useState<Record<string, number>>({});
   const [myVote, setMyVote] = useState<string | null>(null);
-  const [phase, setPhase] = useState<'countdown' | 'voting' | 'results'>(mode === 'fastest_finger' ? 'countdown' : 'voting');
+  // 'ready': pantalla de lectura antes de arrancar el reloj — el anfitrión
+  // pulsa Play cuando el grupo ya ha leído la pregunta/opciones. fastest_finger
+  // conserva su propio countdown corto de "¡Atentos!" (3-2-1), no necesita ready.
+  const [phase, setPhase] = useState<'ready' | 'countdown' | 'voting' | 'results'>(mode === 'fastest_finger' ? 'countdown' : 'ready');
   const [timeLeft, setTimeLeft] = useState(mode === 'fastest_finger' ? 3 : mode === 'speed_race' ? RACE_DURATION : VOTE_DURATION);
   const [totalVoters, setTotalVoters] = useState(0);
   const [fastestWinner, setFastestWinner] = useState<{ name: string, time: number } | null>(null);
@@ -124,6 +132,7 @@ export function KahootVoteSession({
         .on('broadcast', { event: 'start_voting' }, () => {
           if (!isHost) {
             setPhase('voting');
+            setTimeLeft(mode === 'speed_race' ? RACE_DURATION : VOTE_DURATION);
             startTimeRef.current = Date.now();
           }
         })
@@ -131,13 +140,6 @@ export function KahootVoteSession({
           if (unmounted) return;
           if (status === 'SUBSCRIBED') {
             retryCountRef.current = 0;
-            // speed_race arranca en 'voting' directamente (sin countdown) — el host
-            // sincroniza el instante de inicio con todos los móviles conectados para
-            // que el tiempo de reacción sea comparable entre todos.
-            if (isHost && mode === 'speed_race' && startTimeRef.current === 0) {
-              startTimeRef.current = Date.now();
-              channel?.send({ type: 'broadcast', event: 'start_voting', payload: {} });
-            }
           } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
             // Reconexión básica: móvil bloqueado o red perdida un instante
             if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current);
@@ -168,11 +170,24 @@ export function KahootVoteSession({
     };
   }, [roomId, mode, correctAnswer, isHost, onResult]);
 
-  // Countdown timer (host only)
-  useEffect(() => {
+  // Arranca la votación: el anfitrión pulsa Play en la pantalla 'ready' una vez
+  // el grupo ha leído la pregunta, y se sincroniza a todos los móviles conectados.
+  const startVoting = useCallback(() => {
     if (!isHost) return;
+    setPhase('voting');
+    setTimeLeft(mode === 'speed_race' ? RACE_DURATION : VOTE_DURATION);
+    startTimeRef.current = Date.now();
+    channelRef.current?.send({ type: 'broadcast', event: 'start_voting', payload: {} });
+  }, [isHost, mode]);
 
-    if (phase === 'countdown') {
+  // Cronómetro: el countdown corto de fastest_finger ("¡Atentos! 3-2-1") sigue
+  // siendo exclusivo del anfitrión (autoridad sobre cuándo arranca la ronda).
+  // El reloj de 'voting' corre en TODOS los dispositivos de forma independiente
+  // (cada uno sincronizado por el mismo start_voting), para que no se quede
+  // clavado en los móviles de los espectadores — solo el anfitrión dispara el
+  // revelado automático al llegar a 0, para no duplicar el broadcast.
+  useEffect(() => {
+    if (phase === 'countdown' && isHost) {
       timerRef.current = setInterval(() => {
         setTimeLeft(prev => {
           if (prev <= 1) {
@@ -191,7 +206,7 @@ export function KahootVoteSession({
         setTimeLeft(prev => {
           if (prev <= 1) {
             clearInterval(timerRef.current!);
-            revealResults();
+            if (isHost) revealResults();
             return 0;
           }
           return prev - 1;
@@ -202,8 +217,10 @@ export function KahootVoteSession({
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [isHost, phase, mode]);
 
+  const canVote = !isHost || allowHostVote;
+
   const castVote = useCallback(async (target: string) => {
-    if (myVote || phase !== 'voting' || !channelRef.current) return;
+    if (myVote || phase !== 'voting' || !channelRef.current || !canVote) return;
     setMyVote(target);
 
     // En fastest_finger y speed_race medimos el tiempo de reacción desde el inicio
@@ -216,7 +233,7 @@ export function KahootVoteSession({
       event: 'vote_cast',
       payload: { voter: voterName, target, timestamp: Date.now(), reactionTime } as VotePayload,
     });
-  }, [myVote, phase, mode]);
+  }, [myVote, phase, mode, canVote]);
 
   const revealResults = useCallback(async () => {
     setPhase('results');
@@ -281,7 +298,41 @@ export function KahootVoteSession({
       </div>
 
       <AnimatePresence mode="wait">
-        {phase === 'countdown' ? (
+        {phase === 'ready' ? (
+          <motion.div
+            key="ready"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="flex flex-col items-center justify-center flex-1 w-full gap-6"
+          >
+            <div className="w-full max-w-2xl rounded-[24px] border border-yellow-400/20 bg-yellow-400/8 p-5">
+              <p className="text-center text-base font-semibold leading-relaxed text-white sm:text-lg">
+                {question}
+              </p>
+            </div>
+            <div className="w-full max-w-2xl grid grid-cols-2 gap-3 sm:grid-cols-2 opacity-60 pointer-events-none">
+              {options.map((option, idx) => {
+                const color = PLAYER_COLORS[idx % PLAYER_COLORS.length];
+                return (
+                  <div key={option} className={`rounded-[20px] border-2 p-4 ${color.bg} ${color.border} ${color.text}`}>
+                    <p className="text-center text-sm font-bold leading-tight break-words max-w-full">{option}</p>
+                  </div>
+                );
+              })}
+            </div>
+            {isHost ? (
+              <button
+                onClick={startVoting}
+                className="rounded-2xl bg-emerald-400 px-10 py-4 text-lg font-black text-black hover:bg-emerald-300 transition shadow-[0_0_30px_rgba(16,185,129,0.4)]"
+              >
+                ▶ Empezar ({mode === 'speed_race' ? RACE_DURATION : VOTE_DURATION}s)
+              </button>
+            ) : (
+              <p className="text-sm text-muted-foreground animate-pulse">Esperando a que el anfitrión empiece...</p>
+            )}
+          </motion.div>
+        ) : phase === 'countdown' ? (
           <motion.div
             key="countdown"
             initial={{ scale: 0.5, opacity: 0 }}
@@ -315,7 +366,7 @@ export function KahootVoteSession({
                   <Users className="h-3.5 w-3.5" />
                   <span>{totalVoters} voto{totalVoters !== 1 ? 's' : ''}</span>
                 </div>
-                {phase === 'voting' && !myVote && !isHost && (
+                {phase === 'voting' && !myVote && canVote && (
                   <span className="text-yellow-300 font-semibold animate-pulse">¡Vota ahora!</span>
                 )}
                 {myVote && phase === 'voting' && (
@@ -354,13 +405,13 @@ export function KahootVoteSession({
             <motion.button
               key={option}
               layout
-              whileHover={phase === 'voting' && !myVote && !isHost ? { scale: 1.02 } : {}}
-              whileTap={phase === 'voting' && !myVote && !isHost ? { scale: 0.97 } : {}}
-              onClick={() => phase === 'voting' && !isHost && castVote(option)}
-              disabled={phase === 'voting' && (!!myVote || isHost)}
+              whileHover={phase === 'voting' && !myVote && canVote ? { scale: 1.02 } : {}}
+              whileTap={phase === 'voting' && !myVote && canVote ? { scale: 0.97 } : {}}
+              onClick={() => phase === 'voting' && canVote && castVote(option)}
+              disabled={phase === 'voting' && (!!myVote || !canVote)}
               className={`relative overflow-hidden rounded-[20px] border-2 p-4 transition-all
                 ${color.bg} ${color.border} ${color.text}
-                ${phase === 'voting' && !myVote && !isHost ? 'cursor-pointer hover:opacity-90' : 'cursor-default'}
+                ${phase === 'voting' && !myVote && canVote ? 'cursor-pointer hover:opacity-90' : 'cursor-default'}
                 ${myVote === option ? 'ring-2 ring-white ring-offset-2 ring-offset-[#0a0a14]' : ''}
                 ${isWinner ? 'ring-4 ring-yellow-400 ring-offset-2 ring-offset-[#0a0a14] scale-105' : ''}
                 ${phase === 'results' && correctAnswer && option !== correctAnswer ? 'opacity-40' : ''}

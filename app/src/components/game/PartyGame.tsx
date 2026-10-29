@@ -3200,6 +3200,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                   : undefined
               }
               isHost={isHost || !isMultiplayer}
+              allowHostVote={!isMultiplayer}
               onClose={() => {
                 setShowKahoot({ active: false, mode: 'standard' });
               }}
