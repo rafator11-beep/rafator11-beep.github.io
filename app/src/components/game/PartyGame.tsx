@@ -818,6 +818,18 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
   const launchDebate = useCallback(() => {
     if (players.length < 3) return; // hacen falta al menos juez + 1 por bando
+    // Nunca lanzar un debate si ya hay otro overlay a pantalla completa activo
+    // (Impostor, Duelo, Trivia, Juego de bebida, Captain Pass, Votación, Virus,
+    // Podium, Resumen de ronda, Torneo, etc.) — si no, se solapan visualmente.
+    if (
+      gameState.showTrivia || gameState.showDrinkingGame || gameState.showImpostor ||
+      gameState.showDuel || gameState.showVoting || gameState.showCaptainPass ||
+      gameState.showVirusAlert || gameState.showCaptainSelection || gameState.showMimica ||
+      gameState.showImpostorWord || showKahoot.active || showPodium || showRoundSummary ||
+      showYoNuncaResponse || showRetoOutcome || showTorneoRound
+    ) {
+      return;
+    }
     const { topic, aFavorHints, enContraHints } = debateTopics[Math.floor(Math.random() * debateTopics.length)];
     // El juez sale de entre quienes NO son el capitán/anfitrión de turno —
     // excluido de entrada del pool, así no hace falta re-sortear. El resto
@@ -834,7 +846,24 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     const teamB = shuffled.slice(half).map(p => ({ id: p.id, name: p.name }));
     setDebateVerdict(null);
     setDebateSession({ topic, aFavorHints, enContraHints, teamA, teamB, judge });
-  }, [players, gameState.captainId, currentPlayer]);
+  }, [
+    players, gameState.captainId, currentPlayer, gameState.showTrivia, gameState.showDrinkingGame,
+    gameState.showImpostor, gameState.showDuel, gameState.showVoting, gameState.showCaptainPass,
+    gameState.showVirusAlert, gameState.showCaptainSelection, gameState.showMimica,
+    gameState.showImpostorWord, showKahoot.active, showPodium, showRoundSummary,
+    showYoNuncaResponse, showRetoOutcome, showTorneoRound,
+  ]);
+
+  // Usado tanto para ocultar el botón "Debate" como para bloquear launchDebate:
+  // evita que el host dispare un debate mientras cualquier otro overlay a
+  // pantalla completa ya está activo (causa real de solapamientos en móvil).
+  const isAnyFullscreenOverlayActive = (
+    gameState.showTrivia || gameState.showDrinkingGame || gameState.showImpostor ||
+    gameState.showDuel || gameState.showVoting || gameState.showCaptainPass ||
+    gameState.showVirusAlert || gameState.showCaptainSelection || gameState.showMimica ||
+    gameState.showImpostorWord || showKahoot.active || showPodium || showRoundSummary ||
+    showYoNuncaResponse || showRetoOutcome || showTorneoRound
+  );
 
   // Siempre tenemos un room ID para que los espectadores puedan unirse, incluso en local.
   // Prioridad: roomId real de multijugador > el que ya se generó en PlayerSetup (sala de
@@ -1965,7 +1994,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               ⚡ Trivia en carrera
             </button>
           )}
-          {(isHost || !isMultiplayer) && !showKahoot.active && !debateSession && players.length >= 3 && (
+          {(isHost || !isMultiplayer) && !showKahoot.active && !debateSession && !isAnyFullscreenOverlayActive && players.length >= 3 && (
             <button
               onClick={launchDebate}
               title="Debate: dos jugadores defienden posturas opuestas de un tema random y el resto vota quién ha ganado"
