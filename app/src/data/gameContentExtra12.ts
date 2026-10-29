@@ -378,7 +378,7 @@ export const retosExtra12: string[] = [
   "Reto: {player} describe en orden de la A a la Z algún rasgo físico de cada persona del grupo hasta donde llegues o bebe 2. 🍻",
   "Reto: {player} canta el estribillo de la última canción que hayas escuchado o bebe 2. 🍻",
   "Reto: {player} lee en voz alta el último correo electrónico que hayas recibido o bebe 2. 🍻",
-  "Reto: {player} haz una foto artística de tu bebida y súbela a Instagram stories con el hashtag #beep o bebe 2. 🍻",
+  "Reto: {player} deja que el grupo elija la pose y la frase que escribes en tu próxima story de Instagram (la tienes que publicar ahí mismo) o bebe 2. 🍻",
   "Reto: {player} intenta tocar tu nariz con la lengua o bebe 1. 🍺",
   "Reto: {player} di los nombres de los 5 últimos presidentes del gobierno español o bebe 3. 🥃",
   "Reto: {player} muéstrale al grupo tu cara de 'acabo de ver algo horrible' durante 10 segundos o bebe 1. 🍺",
@@ -480,7 +480,7 @@ export const retosExtra12: string[] = [
   "Reto: {player} di en qué año se creó WhatsApp, Instagram y TikTok o bebe 2. 🍻",
   "Reto: {player} señala a la persona del grupo con quien más horas pasarías atrapado/a en un ascensor o bebe 1. 🍺",
   "Reto: {player} cuenta en 20 segundos si alguna vez hiciste algo por presión del grupo que no querías hacer, o bebe 2. 🍻",
-  "Reto: {player} haz una foto al cielo raso (o al techo) y súbela a tu estado de WhatsApp con el emoji que mejor defina la noche o bebe 2. 🍻",
+  "Reto: {player} deja tu móvil al grupo durante 1 minuto para que suban a tu estado de WhatsApp lo primero vergonzoso que encuentren en tu galería o bebe 3. 🥃",
 ];
 
 // ── VOTACIONES ────────────────────────────────────────────────────────────────

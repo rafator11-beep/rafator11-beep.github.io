@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { QRCodeSVG } from 'qrcode.react';
-import { Wifi, Eye, Smartphone, X, RefreshCw, UserCircle2, Copy, Users } from 'lucide-react';
+import { Wifi, Eye, Smartphone, X, RefreshCw, UserCircle2, Copy, Users, Sparkles, Send } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { KahootVoteSession } from '@/components/game/KahootVoteSession';
 import { createPortal } from 'react-dom';
@@ -231,12 +231,203 @@ export function SpectatorQRPanel({ roomId, currentCard, currentPlayer, players, 
   );
 }
 
+// ── SALA DE ESPERA: panel QR para PlayerSetup, ANTES de empezar la partida ─
+// Mismo patrón visual que SpectatorQRPanel, pero sin carta/kahoot todavía:
+// muestra quién se ha conectado desde su móvil y las propuestas de tema que
+// manden, para que el anfitrión elija una con un toque.
+export function WaitingRoomQRPanel({ roomId, players, onUseTheme }: {
+  roomId: string;
+  players: string[];
+  onUseTheme: (theme: string) => void;
+}) {
+  const spectatorUrl = `${window.location.origin}${window.location.pathname}?room=${roomId}&spectator=true`;
+
+  const [joinedNames, setJoinedNames] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<{ name: string; theme: string }[]>([]);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const playersRef = useRef<string[]>(players);
+  playersRef.current = players;
+
+  useEffect(() => {
+    if (!roomId) return;
+    const channel = supabase.channel(`spectator:${roomId}`)
+      .on('broadcast', { event: 'spectator_ready' }, () => {
+        channel.send({ type: 'broadcast', event: 'waiting_room', payload: { players: playersRef.current } });
+      })
+      .on('broadcast', { event: 'spectator_identified' }, (payload) => {
+        const name = (payload.payload as { name?: string })?.name;
+        if (!name) return;
+        setJoinedNames(prev => prev.includes(name) ? prev : [...prev, name]);
+      })
+      .on('broadcast', { event: 'theme_suggested' }, (payload) => {
+        const { name, theme } = (payload.payload as { name?: string; theme?: string }) || {};
+        if (!theme) return;
+        setSuggestions(prev => [...prev.filter(s => s.name !== name), { name: name || '???', theme }]);
+      })
+      .subscribe();
+    channelRef.current = channel;
+    return () => { supabase.removeChannel(channel); channelRef.current = null; };
+  }, [roomId]);
+
+  // Reenvía la lista de jugadores añadidos cada vez que cambia, para que quien
+  // ya está en la sala de espera vea crecer la lista sin tener que recargar.
+  useEffect(() => {
+    if (!roomId) return;
+    channelRef.current?.send({ type: 'broadcast', event: 'waiting_room', payload: { players } });
+  }, [roomId, players]);
+
+  const [showQR, setShowQR] = useState(false);
+
+  return (
+    <>
+      <button
+        onClick={() => setShowQR(true)}
+        className="relative flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white/70 transition hover:bg-white/10 hover:text-white"
+        title="Sala de espera (QR)"
+      >
+        <Smartphone className="h-3.5 w-3.5" />
+        <span className="hidden sm:inline">QR sala de espera</span>
+        {joinedNames.length > 0 && (
+          <span className="flex items-center gap-1 rounded-full bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-bold text-emerald-300">
+            <Users className="h-2.5 w-2.5" />
+            {joinedNames.length}
+          </span>
+        )}
+        {suggestions.length > 0 && (
+          <span className="flex items-center gap-1 rounded-full bg-cyan-500/20 px-1.5 py-0.5 text-[10px] font-bold text-cyan-300">
+            <Sparkles className="h-2.5 w-2.5" />
+            {suggestions.length}
+          </span>
+        )}
+      </button>
+
+      {typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {showQR && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[999] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+              onClick={() => setShowQR(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.85, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.85, y: 20 }}
+                onClick={(e) => e.stopPropagation()}
+                className="relative w-full max-w-sm rounded-[32px] border border-white/10 bg-[#0f0f1a] p-6 shadow-2xl max-h-[90vh] overflow-y-auto"
+              >
+                <button
+                  onClick={() => setShowQR(false)}
+                  className="absolute right-4 top-4 rounded-xl p-2 text-white/40 hover:bg-white/10 hover:text-white"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+
+                <div className="mb-5 flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[hsl(var(--accent)/0.15)]">
+                    <Smartphone className="h-5 w-5 text-[hsl(var(--accent))]" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                      Sala de espera
+                    </p>
+                    <h2 className="text-base font-bold text-white">Que se unan antes de empezar</h2>
+                  </div>
+                </div>
+
+                <div className="flex justify-center rounded-2xl bg-white p-4">
+                  <QRCodeSVG
+                    value={spectatorUrl}
+                    size={200}
+                    bgColor="#ffffff"
+                    fgColor="#0f0f1a"
+                    level="M"
+                  />
+                </div>
+
+                <p className="mt-4 text-center text-sm leading-6 text-muted-foreground">
+                  Escanea con la cámara para entrar en la sala de espera y proponer un tema
+                </p>
+
+                <button
+                  onClick={() => copyToClipboard(spectatorUrl, 'Enlace copiado')}
+                  className="mt-4 flex w-full items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-left transition hover:bg-white/10 active:scale-[0.98]"
+                >
+                  <Wifi className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
+                  <p className="min-w-0 flex-1 truncate text-xs text-muted-foreground font-mono">{spectatorUrl}</p>
+                  <Copy className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                </button>
+
+                {/* Quién ya está dentro con su móvil */}
+                <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-3">
+                  <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                    <Users className="h-3 w-3" />
+                    Conectados desde el móvil ({joinedNames.length})
+                  </p>
+                  {joinedNames.length === 0 ? (
+                    <p className="text-xs text-muted-foreground/70">Nadie se ha identificado todavía — en cuanto escaneen, aparecerá aquí.</p>
+                  ) : (
+                    <div className="flex flex-wrap gap-1.5">
+                      {joinedNames.map(name => (
+                        <span key={name} className="flex items-center gap-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-1 text-xs font-semibold text-emerald-300">
+                          <UserCircle2 className="h-3 w-3" />
+                          {name}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Propuestas de tema que han mandado desde los móviles */}
+                <div className="mt-3 rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-3">
+                  <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-cyan-300">
+                    <Sparkles className="h-3 w-3" />
+                    Temas propuestos ({suggestions.length})
+                  </p>
+                  {suggestions.length === 0 ? (
+                    <p className="text-xs text-muted-foreground/70">Nadie ha propuesto un tema todavía.</p>
+                  ) : (
+                    <div className="flex flex-col gap-1.5">
+                      {suggestions.map((s, i) => (
+                        <div key={`${s.name}-${i}`} className="flex items-center justify-between gap-2 rounded-xl bg-white/5 border border-white/10 px-2.5 py-1.5">
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-xs font-semibold text-white">{s.theme}</p>
+                            <p className="text-[10px] text-muted-foreground">propuesto por {s.name}</p>
+                          </div>
+                          <button
+                            onClick={() => onUseTheme(s.theme)}
+                            className="shrink-0 rounded-lg bg-cyan-500/20 border border-cyan-500/40 px-2.5 py-1 text-[10px] font-bold uppercase text-cyan-300 hover:bg-cyan-500/30 active:scale-95"
+                          >
+                            Usar
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
+    </>
+  );
+}
+
 // ── SPECTATOR MODE: pantalla de solo lectura para móvil ───────────────────
 export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
   const [cardState, setCardState] = useState<CardState | null>(null);
   const [connected, setConnected] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
-  
+
+  // Estado de la SALA DE ESPERA (antes de que empiece la partida): lo manda
+  // WaitingRoomQRPanel desde PlayerSetup. En cuanto llega el primer card_update
+  // de verdad, cardState deja de ser null y esto ya no se usa más.
+  const [waitingState, setWaitingState] = useState<{ players: string[] } | null>(null);
+
   const [myPlayerName, setMyPlayerName] = useState<string | null>(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('beep_spectator_name') || null;
@@ -244,13 +435,31 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
     return null;
   });
 
+  // Nombre libre mientras el anfitrión todavía no ha añadido a nadie (sala de
+  // espera sin roster todavía) — no hay una lista de la que elegir.
+  const [freeNameInput, setFreeNameInput] = useState('');
+
+  // Propuesta de tema para la fiesta, enviada desde la sala de espera.
+  const [themeInput, setThemeInput] = useState('');
+  const [themeSent, setThemeSent] = useState(false);
+
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   const handleSelectPlayer = (p: string) => {
+    if (!p.trim()) return;
     setMyPlayerName(p);
     localStorage.setItem('beep_spectator_name', p);
     // Avisa al anfitrión para que lo vea en su lista de "conectados desde el móvil".
     channelRef.current?.send({ type: 'broadcast', event: 'spectator_identified', payload: { name: p } });
+  };
+
+  const handleSendThemeSuggestion = () => {
+    const theme = themeInput.trim();
+    if (!theme || !myPlayerName) return;
+    channelRef.current?.send({ type: 'broadcast', event: 'theme_suggested', payload: { name: myPlayerName, theme } });
+    setThemeSent(true);
+    setTimeout(() => setThemeSent(false), 2500);
+    setThemeInput('');
   };
 
   // Cuánto llevamos esperando respuesta del anfitrión (para el mensaje de ayuda).
@@ -270,6 +479,15 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
         if (waitingInterval) { clearInterval(waitingInterval); waitingInterval = null; }
         setCardState(payload.payload as CardState);
         setLastUpdate(new Date());
+        setConnected(true);
+      })
+      .on('broadcast', { event: 'waiting_room' }, (payload) => {
+        // Todavía no ha empezado la partida (estamos en PlayerSetup), pero el
+        // anfitrión está ahí y nos manda quién se ha añadido hasta ahora.
+        gotData = true;
+        if (retryInterval) { clearInterval(retryInterval); retryInterval = null; }
+        if (waitingInterval) { clearInterval(waitingInterval); waitingInterval = null; }
+        setWaitingState(payload.payload as { players: string[] });
         setConnected(true);
       })
       .subscribe((status) => {
@@ -318,7 +536,7 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
   // Así desde el primer segundo lees la partida como esa persona y puedes
   // participar en cuanto te toque, no solo cuando salta un voto concreto.
   if (!myPlayerName) {
-    const roster = cardState?.players || [];
+    const roster = cardState?.players || waitingState?.players || [];
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-[#0a0a14] p-4">
         <div className="mb-6 flex items-center gap-3">
@@ -349,19 +567,41 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
               ))}
             </div>
           </div>
+        ) : connected ? (
+          // Todavía no hay ni un jugador añadido por el anfitrión — déjale
+          // escribir su propio nombre para entrar ya a la sala de espera.
+          <div className="w-full max-w-md rounded-[24px] border border-fuchsia-500/30 bg-fuchsia-500/10 p-5 backdrop-blur-md">
+            <p className="mb-3 text-center text-sm font-semibold text-fuchsia-200">
+              El anfitrión todavía no ha añadido a nadie. Escribe tu nombre para entrar en la sala de espera:
+            </p>
+            <div className="flex gap-2">
+              <input
+                value={freeNameInput}
+                onChange={(e) => setFreeNameInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleSelectPlayer(freeNameInput); }}
+                placeholder="Tu nombre..."
+                className="flex-1 rounded-xl bg-black/30 border border-white/10 px-3 py-2 text-sm text-white placeholder-white/30 focus:outline-none focus:border-fuchsia-500/50"
+              />
+              <button
+                onClick={() => handleSelectPlayer(freeNameInput)}
+                disabled={!freeNameInput.trim()}
+                className="rounded-xl bg-fuchsia-500/20 border border-fuchsia-500/40 px-4 py-2 text-sm font-bold text-fuchsia-200 hover:bg-fuchsia-500/30 disabled:opacity-40"
+              >
+                Entrar
+              </button>
+            </div>
+          </div>
         ) : (
           <div className="flex flex-col items-center gap-4 text-center max-w-xs">
             <div className="flex h-20 w-20 items-center justify-center rounded-full border border-white/10 bg-white/5">
               <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
-            <p className="text-muted-foreground">
-              {connected ? 'Esperando la lista de jugadores...' : 'Conectando a la sala...'}
-            </p>
+            <p className="text-muted-foreground">Conectando a la sala...</p>
             {waitingSeconds >= 8 && (
               <p className="text-xs text-amber-300/80 leading-5">
                 Está tardando más de lo normal. Comprueba que en el móvil que creó la
-                partida la partida ya está en marcha (no solo en la pantalla de
-                configurar jugadores) — en cuanto lo esté, esto se actualiza solo.
+                partida sigue abierta la app en la pantalla de añadir jugadores — en
+                cuanto lo esté, esto se actualiza solo.
               </p>
             )}
           </div>
@@ -371,6 +611,98 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
           <button
             onClick={onClose}
             className="mt-8 rounded-2xl border border-white/10 bg-white/5 px-6 py-2.5 text-sm font-semibold text-white/60 hover:bg-white/10"
+          >
+            Salir
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  // ── Sala de espera: ya elegiste nombre, pero la partida todavía no ha
+  // empezado (no ha llegado ningún card_update real todavía). Deja proponer
+  // un tema para la fiesta mientras se espera. En cuanto el anfitrión empiece
+  // la partida, cardState dejará de ser null y esta pantalla desaparece sola.
+  if (!cardState) {
+    const roster = waitingState?.players || [];
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-[#0a0a14] p-4">
+        <div className="mb-6 flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[hsl(var(--primary)/0.2)]">
+            <Users className="h-5 w-5 text-[hsl(var(--primary))]" />
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Sala {roomId}</p>
+            <h1 className="text-lg font-bold text-white">Sala de espera</h1>
+          </div>
+        </div>
+
+        <div className="mb-4 flex items-center justify-between w-full max-w-md rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5">
+          <span className="text-xs font-semibold text-emerald-300">Jugando como: {myPlayerName}</span>
+          <button
+            onClick={() => { setMyPlayerName(null); localStorage.removeItem('beep_spectator_name'); }}
+            className="text-[10px] uppercase tracking-wider text-emerald-400/60 hover:text-emerald-300 transition"
+          >
+            Cambiar
+          </button>
+        </div>
+
+        <div className="w-full max-w-md rounded-[24px] border border-white/10 bg-white/5 p-5 mb-4">
+          <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+            <Users className="h-3 w-3" />
+            Ya en la sala ({roster.length})
+          </p>
+          {roster.length === 0 ? (
+            <p className="text-xs text-muted-foreground/70">Esperando a que el anfitrión añada jugadores...</p>
+          ) : (
+            <div className="flex flex-wrap gap-1.5">
+              {roster.map(name => (
+                <span key={name} className="flex items-center gap-1 rounded-full bg-white/10 border border-white/15 px-2.5 py-1 text-xs font-semibold text-white">
+                  <UserCircle2 className="h-3 w-3" />
+                  {name}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="w-full max-w-md rounded-[24px] border border-cyan-500/30 bg-cyan-500/10 p-5">
+          <div className="mb-2 flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-cyan-300" />
+            <h2 className="text-sm font-bold text-white">Propón un tema para la fiesta</h2>
+          </div>
+          <p className="mb-3 text-xs text-cyan-200/70">
+            Ej: "Boda de Rafa", "Cumpleaños", "Cotilleos de oficina"... el anfitrión verá tu propuesta y podrá usarla.
+          </p>
+          <div className="flex gap-2">
+            <input
+              value={themeInput}
+              onChange={(e) => setThemeInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleSendThemeSuggestion(); }}
+              placeholder="Escribe tu propuesta..."
+              className="flex-1 rounded-xl bg-black/30 border border-white/10 px-3 py-2 text-sm text-white placeholder-white/30 focus:outline-none focus:border-cyan-500/50"
+            />
+            <button
+              onClick={handleSendThemeSuggestion}
+              disabled={!themeInput.trim()}
+              className="flex items-center gap-1.5 rounded-xl bg-cyan-500/20 border border-cyan-500/40 px-4 py-2 text-sm font-bold text-cyan-200 hover:bg-cyan-500/30 disabled:opacity-40"
+            >
+              <Send className="h-3.5 w-3.5" />
+            </button>
+          </div>
+          {themeSent && (
+            <p className="mt-2 text-xs font-semibold text-cyan-300">¡Enviado! El anfitrión ya lo puede ver 🎉</p>
+          )}
+        </div>
+
+        <p className="mt-6 text-xs text-muted-foreground">
+          {connected ? 'Esperando a que empiece la partida...' : 'Conectando a la sala...'}
+        </p>
+
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="mt-6 rounded-2xl border border-white/10 bg-white/5 px-6 py-2.5 text-sm font-semibold text-white/60 hover:bg-white/10"
           >
             Salir
           </button>

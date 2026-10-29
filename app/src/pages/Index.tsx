@@ -61,6 +61,14 @@ function GameAppInner() {
   // Multiplayer State
   const [roomId, setRoomId] = useState<string | null>(null);
   const [isHost, setIsHost] = useState(false);
+  // Código de "sala de espera" para el QR de PlayerSetup en modo LOCAL (sin
+  // multijugador real todavía). Se genera UNA vez al entrar a player-setup y
+  // se reutiliza tal cual cuando empieza la partida (PartyGame ya no genera
+  // uno nuevo), para que quien escaneó el QR antes de empezar siga conectado
+  // sin tener que volver a escanear nada.
+  const [waitingRoomId, setWaitingRoomId] = useState<string | null>(null);
+  // roomId real (multijugador) si existe, o el de la sala de espera local.
+  const effectiveSpectatorRoomId = roomId || waitingRoomId;
   const [pendingTeamMembers, setPendingTeamMembers] = useState<any[]>([]);
 
   // We need auth context for economy checks
@@ -227,6 +235,7 @@ function GameAppInner() {
       const newGame = await createGame(mode);
       setGameId(newGame.id);
       setIsTeamMode(mode === 'yo_nunca_equipos');
+      if (!roomId) setWaitingRoomId(Math.random().toString(36).substring(2, 8).toUpperCase());
       setScreen('player-setup');
     } catch (err) {
       console.error('Error creating game:', err);
@@ -244,6 +253,7 @@ function GameAppInner() {
       const newGame = await createGame(pendingMode);
       setGameId(newGame.id);
       setIsTeamMode(teamPlay);
+      if (!roomId) setWaitingRoomId(Math.random().toString(36).substring(2, 8).toUpperCase());
       setScreen('player-setup');
     } catch (err) {
       console.error('Error creating game:', err);
@@ -273,6 +283,7 @@ function GameAppInner() {
     } else {
       setScreen('mode-select');
       setGameId(null);
+      setWaitingRoomId(null);
     }
   };
 
@@ -288,6 +299,7 @@ function GameAppInner() {
     setActiveTab('inicio');
     setGameId(null);
     setRoomId(null);
+    setWaitingRoomId(null);
     setIsHost(false);
     setIsTeamMode(false);
     setSelectedModeForOptions(null);
@@ -445,7 +457,7 @@ function GameAppInner() {
       case 'playing':
         return (
           <Suspense fallback={<div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white font-arcade animate-pulse"><Loader2 className="w-12 h-12 animate-spin mb-4 text-primary" /> INICIANDO PARTIDA...</div>}>
-            <GamePlay onExit={handleExit} isTeamMode={isTeamMode} roomId={roomId} isHost={isHost} />
+            <GamePlay onExit={handleExit} isTeamMode={isTeamMode} roomId={roomId} isHost={isHost} spectatorRoomId={effectiveSpectatorRoomId} />
           </Suspense>
         );
 
@@ -550,7 +562,7 @@ function GameAppInner() {
       case 'player-setup':
         return (
           <Suspense fallback={<div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white"><Loader2 className="w-8 h-8 animate-spin text-primary" /> Preparando a los jugadores...</div>}>
-            <PlayerSetup onStart={handleStartGame} onBack={handleBack} isTeamMode={isTeamMode} isMultiplayer={!!roomId} roomId={roomId} />
+            <PlayerSetup onStart={handleStartGame} onBack={handleBack} isTeamMode={isTeamMode} isMultiplayer={!!roomId} roomId={roomId} spectatorRoomId={effectiveSpectatorRoomId} />
           </Suspense>
         );
 

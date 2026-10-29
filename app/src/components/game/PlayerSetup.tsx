@@ -27,6 +27,7 @@ import AddPlayerModal from '@/components/AddPlayerModal';
 import { TASTE_CHIPS } from '@/data/tasteQuestionsContent';
 import { copyInviteLink } from '@/utils/clipboard';
 import { Heart } from 'lucide-react';
+import { WaitingRoomQRPanel } from '@/components/game/SpectatorView';
 
 // Wrapper to avoid prop drilling issues or valid types
 const ChatEmbed = ({ roomId, playerName }: { roomId: string, playerName: string }) => (
@@ -39,9 +40,14 @@ interface PlayerSetupProps {
   isTeamMode?: boolean;
   isMultiplayer?: boolean;
   roomId?: string | null;
+  // Código de sala para el QR de "sala de espera" (ver WaitingRoomQRPanel más
+  // abajo). Es el mismo roomId de multijugador si lo hay, o un código local
+  // generado ya en el padre (Index.tsx) antes de llegar aquí, que seguirá
+  // siendo válido cuando empiece la partida de verdad.
+  spectatorRoomId?: string | null;
 }
 
-export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMultiplayer, roomId }: PlayerSetupProps) {
+export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMultiplayer, roomId, spectatorRoomId }: PlayerSetupProps) {
   const isMobile = useIsMobile();
   const { game, players, teams, addPlayer, removePlayer, createTeam, assignPlayerToTeam, startGame } = useGameContext();
   const { savedPlayers, savePlayer } = useSavedPlayers();
@@ -337,6 +343,16 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
               )}
             </div>
           </div>
+          {spectatorRoomId && (
+            <WaitingRoomQRPanel
+              roomId={spectatorRoomId}
+              players={players.map(p => p.name)}
+              onUseTheme={(theme) => {
+                setPartyTheme(theme);
+                toast.success('Tema aplicado desde la sala de espera 🎉');
+              }}
+            />
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">

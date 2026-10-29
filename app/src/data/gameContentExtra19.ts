@@ -11,7 +11,7 @@ export const retosExtra19: string[] = [
   "{player}, convence al grupo de que tu hobby más raro es genial en menos de 30 segundos",
   "{player}, canta el estribillo de la última canción que escuchaste — si no recuerdas, bebe 3",
   "{player}, di un trabalenguas sin equivocarte 3 veces seguidas o bebe por cada fallo",
-  "{player}, haz una foto de perfil de Instagram digna con los objetos que tienes a mano ahora mismo",
+  "{player}, haz una foto de perfil de Instagram digna con los objetos que tienes a mano ahora mismo — el grupo vota si la subirías de verdad o si deberías beber 2",
   "{player}, llama a alguien de tu familia y dile que has ganado un concurso de televisión",
   "{player}, imita el sonido de 3 animales diferentes y el grupo adivina cuáles son",
   "{player}, crea un anuncio publicitario de 20 segundos para el objeto más cercano que tienes",

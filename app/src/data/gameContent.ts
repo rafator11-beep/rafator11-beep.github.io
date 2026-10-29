@@ -54,6 +54,7 @@ import { impostorRounds } from './impostorContent';
 import { duelos } from './duelosContent';
 // ── HUMOR NEGRO ──
 import { yoNuncaHumorNegro, picanteHumorNegro } from './humorNegroContent';
+import { escenariosDiaADia } from './triviaConocimientoContent';
 import { GENERAL_TYPE_WEIGHTS, INDIVIDUAL_TYPE_WEIGHTS, MAX_CONSECUTIVE_SAME_TYPE } from '@/config/cardWeights';
 // ── MEGA CONTENT EXPANSION (2024-2026) ──
 import { yoNuncaInfancia } from './gameContentMega1';
@@ -6251,6 +6252,8 @@ export function getStructuredMegamix(count: number, playersCount: number = 4): s
   const clasicoPool = cleanDeckPool([...clasico, ...(clasicoExtra || []), ...(clasicoExtra2 || []), ...(clasicoExtra3 || []), ...(clasicoExtra5 || []), ...(clasicoExtra9 || []), ...(clasicoExtra10 || []), ...(clasicoExtra11 || []), ...(clasicoExtra11b || []), ...(clasicoExtra11c || []),
     // ── EXTRA 17 ──
     ...clasicoExtra17,
+    // ── ESCENARIOS DEL DÍA A DÍA ──
+    ...escenariosDiaADia,
   ]);
   const clasicoItems = getRandomItems(clasicoPool, clasicoPool.length);
   const clasicoCards = clasicoItems.map(q => addDrinking(q, Math.random() < 0.5 ? 'leve' : 'grupo'));

@@ -24,6 +24,8 @@ import { useRanking } from '@/hooks/useRanking';
 import { useGameContext } from '@/contexts/GameContext';
 import { CardDisplay, sanitizeCardText, detectCardKind, INTERACTIVE_CARD_KINDS } from '@/components/game/CardDisplay';
 import { cultureQuestions, type CultureQuestion } from '@/data/cultureQuestions';
+import { triviaPrimaria, triviaESO, triviaBachillerato, triviaVidaCotidiana } from '@/data/triviaConocimientoContent';
+import { debateTopics } from '@/data/debateTopics';
 import type { RaceRankEntry } from '@/components/game/KahootVoteSession';
 import { detectRarity } from '@/lib/godDeck';
 import { sfx } from '@/lib/sfx';
@@ -297,6 +299,12 @@ interface PartyGameProps {
   isMultiplayer?: boolean;
   isHost?: boolean;
   roomId?: string | null;
+  // Código de sala de espera generado ya en PlayerSetup (QR escaneado ANTES
+  // de empezar la partida). Si viene, lo reutilizamos para que los móviles
+  // que ya estaban conectados no tengan que volver a escanear nada. Si no
+  // viene (p. ej. algún flujo antiguo), se sigue generando uno nuevo aquí
+  // como hasta ahora.
+  spectatorRoomId?: string | null;
 }
 
 // New Bottom Profiles Component with Virus Support and Captain XP Controls
@@ -399,7 +407,7 @@ const PlayerProfilesBottom = ({ players, currentPlayer, scores, playerViruses = 
   );
 };
 
-export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false, roomId = null }: PartyGameProps) {
+export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false, roomId = null, spectatorRoomId: spectatorRoomIdProp = null }: PartyGameProps) {
   const {
     currentPlayer,
     players,
@@ -783,14 +791,54 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
   // Trivia de cultura general en carrera: pregunta elegida manualmente (botón del host),
   // independiente de currentQuestion para no interferir con el flujo normal del juego.
   const [speedRaceQuestion, setSpeedRaceQuestion] = useState<CultureQuestion | null>(null);
+  // Pool ampliado: cultura general + "sabes más que..." (primaria/ESO/Bachillerato)
+  // + información útil del día a día — encaja perfecto con el formato de carrera.
+  const speedRacePool = useMemo(() => [
+    ...cultureQuestions, ...triviaPrimaria, ...triviaESO, ...triviaBachillerato, ...triviaVidaCotidiana,
+  ], []);
   const launchSpeedRaceTrivia = useCallback(() => {
-    const q = cultureQuestions[Math.floor(Math.random() * cultureQuestions.length)];
+    const q = speedRacePool[Math.floor(Math.random() * speedRacePool.length)];
     setSpeedRaceQuestion(q);
     setShowKahoot({ active: true, mode: 'speed_race' });
-  }, []);
-  
-  // Siempre tenemos un room ID para que los espectadores puedan unirse, incluso en local
-  const spectatorRoomId = useRef<string>(roomId || Math.random().toString(36).substring(2, 8).toUpperCase()).current;
+  }, [speedRacePool]);
+
+  // Carta de Debate: el jugador de turno defiende "A favor" y otro jugador
+  // random defiende "En contra" de un tema sacado del banco de debateTopics.
+  // Tras el tiempo de debate, el resto del grupo vota al ganador vía Kahoot.
+  const [debateSession, setDebateSession] = useState<{
+    topic: string;
+    playerA: { id: string; name: string };
+    playerB: { id: string; name: string };
+  } | null>(null);
+  const [debateTimeLeft, setDebateTimeLeft] = useState(30);
+
+  const launchDebate = useCallback(() => {
+    if (players.length < 2) return;
+    const topic = debateTopics[Math.floor(Math.random() * debateTopics.length)];
+    const playerA = currentPlayer || players[0];
+    const candidates = players.filter(p => p.id !== playerA.id);
+    const playerB = candidates[Math.floor(Math.random() * candidates.length)];
+    setDebateSession({
+      topic,
+      playerA: { id: playerA.id, name: playerA.name },
+      playerB: { id: playerB.id, name: playerB.name },
+    });
+    setDebateTimeLeft(30);
+  }, [players, currentPlayer]);
+
+  // Cuenta atrás visual del debate (solo informativa, no cierra nada automáticamente)
+  useEffect(() => {
+    if (!debateSession || showKahoot.active) return;
+    if (debateTimeLeft <= 0) return;
+    const t = setTimeout(() => setDebateTimeLeft(prev => prev - 1), 1000);
+    return () => clearTimeout(t);
+  }, [debateSession, debateTimeLeft, showKahoot.active]);
+
+  // Siempre tenemos un room ID para que los espectadores puedan unirse, incluso en local.
+  // Prioridad: roomId real de multijugador > el que ya se generó en PlayerSetup (sala de
+  // espera, para que quien escaneó el QR antes de empezar no tenga que volver a escanear) >
+  // uno nuevo como último recurso.
+  const spectatorRoomId = useRef<string>(roomId || spectatorRoomIdProp || Math.random().toString(36).substring(2, 8).toUpperCase()).current;
 
   // Save game to history
   const hasSavedRef = useRef(false);
@@ -1876,16 +1924,22 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                 mode: showKahoot.mode,
                 question: showKahoot.mode === 'speed_race' && speedRaceQuestion
                   ? speedRaceQuestion.question
+                  : debateSession
+                  ? `¿Quién ha ganado el debate? — "${debateSession.topic}"`
                   : (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion
                   ? currentQuestion.question
                   : sanitizeCardText(currentText || ''),
                 options: showKahoot.mode === 'speed_race' && speedRaceQuestion
                   ? speedRaceQuestion.options
+                  : debateSession
+                  ? [debateSession.playerA.name, debateSession.playerB.name]
                   : (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion
                   ? currentQuestion.options
                   : players.map(p => p.name),
                 correctAnswer: showKahoot.mode === 'speed_race' && speedRaceQuestion
                   ? speedRaceQuestion.options[speedRaceQuestion.correctIndex]
+                  : debateSession
+                  ? undefined
                   : (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion
                   ? currentQuestion.options[currentQuestion.correctIndex]
                   : undefined
@@ -1899,6 +1953,15 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow flex items-center gap-1 hover:brightness-110 transition-all"
             >
               ⚡ Trivia en carrera
+            </button>
+          )}
+          {(isHost || !isMultiplayer) && !showKahoot.active && !debateSession && players.length >= 2 && (
+            <button
+              onClick={launchDebate}
+              title="Debate: dos jugadores defienden posturas opuestas de un tema random y el resto vota quién ha ganado"
+              className="bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow flex items-center gap-1 hover:brightness-110 transition-all"
+            >
+              🗣️ Debate
             </button>
           )}
         </div>
@@ -3003,6 +3066,50 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
         {/* Eliminado el indicador legacy CARTA {X} duplicado */}
 
+        {/* DEBATE INTRO: tema + debatientes + cronómetro visual, antes de lanzar la votación */}
+        <AnimatePresence>
+          {debateSession && !showKahoot.active && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center gap-6 p-6 text-center"
+            >
+              <span className="text-xs font-black uppercase tracking-widest text-fuchsia-400">🗣️ Debate</span>
+              <h2 className="text-xl sm:text-3xl font-black text-white max-w-xl">{debateSession.topic}</h2>
+              <div className="flex items-center gap-4 sm:gap-8">
+                <div className="flex flex-col items-center gap-1">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400">A favor</span>
+                  <span className="text-lg sm:text-2xl font-black text-white">{debateSession.playerA.name}</span>
+                </div>
+                <span className="text-white/40 font-black">VS</span>
+                <div className="flex flex-col items-center gap-1">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-red-400">En contra</span>
+                  <span className="text-lg sm:text-2xl font-black text-white">{debateSession.playerB.name}</span>
+                </div>
+              </div>
+              <div className="text-4xl font-black text-white/80 tabular-nums">{debateTimeLeft}s</div>
+              {(isHost || !isMultiplayer) && (
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    className="border-white/20 text-white/70"
+                    onClick={() => setDebateSession(null)}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    className="bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white font-black"
+                    onClick={() => setShowKahoot({ active: true, mode: 'standard' })}
+                  >
+                    Lanzar votación
+                  </Button>
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* KAHOOT MODAL */}
         <AnimatePresence>
           {showKahoot.active && (
@@ -3012,6 +3119,8 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               question={
                 showKahoot.mode === 'speed_race' && speedRaceQuestion
                   ? speedRaceQuestion.question
+                  : debateSession
+                  ? `¿Quién ha ganado el debate? — "${debateSession.topic}"`
                   : (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion
                   ? currentQuestion.question
                   : sanitizeCardText(currentText || '')
@@ -3019,6 +3128,8 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               options={
                 showKahoot.mode === 'speed_race' && speedRaceQuestion
                   ? speedRaceQuestion.options
+                  : debateSession
+                  ? [debateSession.playerA.name, debateSession.playerB.name]
                   : (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion
                   ? currentQuestion.options
                   : players.map(p => p.name)
@@ -3026,12 +3137,17 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               correctAnswer={
                 showKahoot.mode === 'speed_race' && speedRaceQuestion
                   ? speedRaceQuestion.options[speedRaceQuestion.correctIndex]
+                  : debateSession
+                  ? undefined
                   : (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion
                   ? currentQuestion.options[currentQuestion.correctIndex]
                   : undefined
               }
               isHost={isHost || !isMultiplayer}
-              onClose={() => setShowKahoot({ active: false, mode: 'standard' })}
+              onClose={() => {
+                setShowKahoot({ active: false, mode: 'standard' });
+                setDebateSession(null);
+              }}
               onRaceComplete={(ranking: RaceRankEntry[]) => {
                 // Reparte puntos reales a cada jugador según su puesto en el ranking
                 // de velocidad de acierto (el más rápido se lleva más puntos).
@@ -3044,13 +3160,27 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                 setShowKahoot({ active: false, mode: 'standard' });
               }}
               onResult={(winner, votes) => {
+                // Carta de Debate: el ganador se lleva unos puntos extra y
+                // reparte un par de tragos. No forma parte del flujo normal
+                // de cartas, así que no avanzamos el mazo con handleNext().
+                if (debateSession) {
+                  const wPlayer = players.find(p => p.name === winner);
+                  if (wPlayer) {
+                    handleAdjustXP(wPlayer.id, 10);
+                    confetti();
+                    toast.success(`🗣️ ${winner} ha ganado el debate — ¡reparte 2 tragos!`);
+                  }
+                  setDebateSession(null);
+                  setShowKahoot({ active: false, mode: 'standard' });
+                  return;
+                }
                 if (!((gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion)) {
                   const wPlayer = players.find(p => p.name === winner);
                   if (wPlayer) handleAdjustXP(wPlayer.id, 5);
                 }
                 setGameState(prev => ({ ...prev, votingSelections: [] }));
                 setShowKahoot({ active: false, mode: 'standard' });
-                
+
                 // Si estamos en trivia, hay que procesar la respuesta
                 if ((gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion) {
                   const correctOpt = currentQuestion.options[currentQuestion.correctIndex];

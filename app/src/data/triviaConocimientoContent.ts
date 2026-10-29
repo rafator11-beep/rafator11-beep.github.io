@@ -1,0 +1,152 @@
+// Trivia "sabes más que..." — varios niveles de dificultad reconocibles para un público español,
+// pensada para que la gente piense y se pique un poco entre amigos. Contenido verificado,
+// evitando datos que caduquen rápido (cifras exactas de impuestos, etc. formuladas de forma conceptual).
+
+export interface TriviaQuestion {
+  question: string;
+  options: string[];
+  correctIndex: number;
+  category: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+}
+
+// ── NIVEL PRIMARIA: "¿sabes más que un niño de primaria?" ──
+export const triviaPrimaria: TriviaQuestion[] = [
+  { question: "¿Cuánto es 7 x 8?", options: ["54", "56", "63", "48"], correctIndex: 1, category: "primaria", difficulty: 'easy' },
+  { question: "¿Cuánto es 9 x 6?", options: ["54", "56", "45", "63"], correctIndex: 0, category: "primaria", difficulty: 'easy' },
+  { question: "¿Cuál es la capital de España?", options: ["Barcelona", "Sevilla", "Madrid", "Valencia"], correctIndex: 2, category: "primaria", difficulty: 'easy' },
+  { question: "¿Cuál es la capital de Francia?", options: ["Lyon", "Marsella", "París", "Niza"], correctIndex: 2, category: "primaria", difficulty: 'easy' },
+  { question: "¿Cuántos continentes hay?", options: ["4", "5", "6", "7"], correctIndex: 2, category: "primaria", difficulty: 'easy' },
+  { question: "¿Qué animal es el rey de la selva?", options: ["Tigre", "León", "Elefante", "Gorila"], correctIndex: 1, category: "primaria", difficulty: 'easy' },
+  { question: "¿Cuántas patas tiene una araña?", options: ["6", "8", "10", "4"], correctIndex: 1, category: "primaria", difficulty: 'easy' },
+  { question: "¿De qué color se obtiene mezclando azul y amarillo?", options: ["Morado", "Verde", "Naranja", "Rosa"], correctIndex: 1, category: "primaria", difficulty: 'easy' },
+  { question: "¿Cuántos días tiene una semana?", options: ["5", "6", "7", "8"], correctIndex: 2, category: "primaria", difficulty: 'easy' },
+  { question: "¿Cuál es el planeta más cercano al Sol?", options: ["Venus", "Mercurio", "Marte", "Tierra"], correctIndex: 1, category: "primaria", difficulty: 'easy' },
+  { question: "¿Cuánto es 12 x 3?", options: ["36", "32", "24", "40"], correctIndex: 0, category: "primaria", difficulty: 'easy' },
+  { question: "¿Cuál es el océano que baña las costas de Galicia?", options: ["Mediterráneo", "Índico", "Atlántico", "Pacífico"], correctIndex: 2, category: "primaria", difficulty: 'easy' },
+  { question: "¿Qué animal pone huevos y da leche... espera, cuál de estos pone huevos?", options: ["Vaca", "Gallina", "Cabra", "Oveja"], correctIndex: 1, category: "primaria", difficulty: 'easy' },
+  { question: "¿Cuántos lados tiene un hexágono?", options: ["5", "6", "7", "8"], correctIndex: 1, category: "primaria", difficulty: 'easy' },
+  { question: "¿Cuál es la moneda que se usa en España?", options: ["Peseta", "Euro", "Libra", "Dólar"], correctIndex: 1, category: "primaria", difficulty: 'easy' },
+  { question: "¿Qué órgano del cuerpo bombea la sangre?", options: ["Pulmón", "Hígado", "Corazón", "Riñón"], correctIndex: 2, category: "primaria", difficulty: 'easy' },
+  { question: "¿Cuántos meses del año tienen 31 días?", options: ["5", "6", "7", "8"], correctIndex: 2, category: "primaria", difficulty: 'easy' },
+  { question: "¿Cuál es la capital de Portugal?", options: ["Oporto", "Lisboa", "Faro", "Braga"], correctIndex: 1, category: "primaria", difficulty: 'easy' },
+  { question: "¿Cuánto es 15 - 7?", options: ["6", "7", "8", "9"], correctIndex: 2, category: "primaria", difficulty: 'easy' },
+  { question: "¿En qué estación del año caen las hojas de los árboles?", options: ["Primavera", "Verano", "Otoño", "Invierno"], correctIndex: 2, category: "primaria", difficulty: 'easy' },
+  { question: "¿Cuál es el río más largo de España?", options: ["Ebro", "Tajo", "Duero", "Guadalquivir"], correctIndex: 1, category: "primaria", difficulty: 'easy' },
+];
+
+// ── NIVEL ESO (12-16 años) ──
+export const triviaESO: TriviaQuestion[] = [
+  { question: "¿En qué año llegó Cristóbal Colón a América?", options: ["1490", "1492", "1498", "1500"], correctIndex: 1, category: "eso", difficulty: 'medium' },
+  { question: "¿Quién escribió 'El Lazarillo de Tormes'?", options: ["Se desconoce el autor (es anónimo)", "Miguel de Cervantes", "Lope de Vega", "Francisco de Quevedo"], correctIndex: 0, category: "eso", difficulty: 'medium' },
+  { question: "¿Quién escribió 'Don Quijote de la Mancha'?", options: ["Lope de Vega", "Miguel de Cervantes", "Calderón de la Barca", "Garcilaso de la Vega"], correctIndex: 1, category: "eso", difficulty: 'medium' },
+  { question: "¿Qué grupo de poetas españoles incluye a Lorca, Alberti y Miguel Hernández (aproximadamente)?", options: ["Generación del 98", "Generación del 27", "Modernismo", "Romanticismo"], correctIndex: 1, category: "eso", difficulty: 'medium' },
+  { question: "¿Cuál es el símbolo químico del oxígeno?", options: ["Ox", "O2", "O", "Og"], correctIndex: 2, category: "eso", difficulty: 'medium' },
+  { question: "¿Cuál es el símbolo químico del sodio?", options: ["So", "S", "Na", "Sd"], correctIndex: 2, category: "eso", difficulty: 'medium' },
+  { question: "¿Cuántos huesos tiene aproximadamente el cuerpo humano adulto?", options: ["186", "206", "226", "246"], correctIndex: 1, category: "eso", difficulty: 'medium' },
+  { question: "¿En qué año empezó la Primera Guerra Mundial?", options: ["1910", "1914", "1918", "1920"], correctIndex: 1, category: "eso", difficulty: 'medium' },
+  { question: "¿En qué año terminó la Segunda Guerra Mundial?", options: ["1943", "1945", "1947", "1950"], correctIndex: 1, category: "eso", difficulty: 'medium' },
+  { question: "¿Quién fue el primer rey de la España unificada tras la unión de Castilla y Aragón?", options: ["Carlos I", "Felipe II", "Los Reyes Católicos (Isabel y Fernando)", "Alfonso X"], correctIndex: 2, category: "eso", difficulty: 'medium' },
+  { question: "¿Cuánto es la raíz cuadrada de 144?", options: ["11", "12", "13", "14"], correctIndex: 1, category: "eso", difficulty: 'medium' },
+  { question: "¿Cuánto es 15% de 200?", options: ["20", "25", "30", "35"], correctIndex: 2, category: "eso", difficulty: 'medium' },
+  { question: "¿Cómo se llama la unidad básica de la materia según la química?", options: ["Molécula", "Átomo", "Célula", "Neutrón"], correctIndex: 1, category: "eso", difficulty: 'medium' },
+  { question: "¿Cuál es el órgano responsable de filtrar la sangre y producir la orina?", options: ["Hígado", "Páncreas", "Riñón", "Vejiga"], correctIndex: 2, category: "eso", difficulty: 'medium' },
+  { question: "'To be or not to be' pertenece a qué obra de Shakespeare", options: ["Macbeth", "Romeo y Julieta", "Hamlet", "Otelo"], correctIndex: 2, category: "eso", difficulty: 'medium' },
+  { question: "¿Cómo se dice 'biblioteca' en inglés?", options: ["Bookstore", "Library", "Bookshop", "Librarian"], correctIndex: 1, category: "eso", difficulty: 'easy' },
+  { question: "¿En qué siglo tuvo lugar la Revolución Francesa?", options: ["XVII", "XVIII", "XIX", "XX"], correctIndex: 1, category: "eso", difficulty: 'medium' },
+  { question: "¿Qué dinastía gobernaba España cuando se produjo la Guerra de Sucesión Española?", options: ["Los Austrias", "Los Borbones (inicio de la dinastía)", "Los Trastámara", "Los Habsburgo portugueses"], correctIndex: 1, category: "eso", difficulty: 'hard' },
+  { question: "¿Qué proceso realizan las plantas para producir energía a partir de la luz del sol?", options: ["Respiración", "Fotosíntesis", "Fermentación", "Transpiración"], correctIndex: 1, category: "eso", difficulty: 'easy' },
+  { question: "¿Cuál es la fórmula química del agua?", options: ["CO2", "H2O", "O2", "NaCl"], correctIndex: 1, category: "eso", difficulty: 'easy' },
+  { question: "¿Quién pintó 'Las Meninas'?", options: ["Francisco de Goya", "Diego Velázquez", "El Greco", "Francisco de Zurbarán"], correctIndex: 1, category: "eso", difficulty: 'medium' },
+  { question: "¿Qué imperio conquistó Hernán Cortés en América?", options: ["Imperio Inca", "Imperio Maya", "Imperio Azteca", "Imperio Tolteca"], correctIndex: 2, category: "eso", difficulty: 'medium' },
+  { question: "¿En qué año se proclamó la Segunda República Española?", options: ["1923", "1931", "1936", "1939"], correctIndex: 1, category: "eso", difficulty: 'medium' },
+  { question: "¿Cuánto es 2 elevado a 5 (2^5)?", options: ["16", "25", "32", "64"], correctIndex: 2, category: "eso", difficulty: 'medium' },
+  { question: "¿Qué gas es el principal responsable del efecto invernadero producido por la actividad humana?", options: ["Oxígeno", "Nitrógeno", "Dióxido de carbono", "Hidrógeno"], correctIndex: 2, category: "eso", difficulty: 'easy' },
+];
+
+// ── NIVEL BACHILLERATO (16-18 años) ──
+export const triviaBachillerato: TriviaQuestion[] = [
+  { question: "¿Qué filósofo es el autor de 'Crítica de la razón pura'?", options: ["Hegel", "Kant", "Nietzsche", "Descartes"], correctIndex: 1, category: "bachillerato", difficulty: 'hard' },
+  { question: "¿Qué filósofo griego fue maestro de Aristóteles?", options: ["Sócrates", "Platón", "Heráclito", "Parménides"], correctIndex: 1, category: "bachillerato", difficulty: 'medium' },
+  { question: "¿A qué corriente filosófica pertenece Jean-Paul Sartre, con su idea de que 'la existencia precede a la esencia'?", options: ["Racionalismo", "Empirismo", "Existencialismo", "Positivismo"], correctIndex: 2, category: "bachillerato", difficulty: 'hard' },
+  { question: "¿Qué filósofo escribió 'Así habló Zaratustra' y la idea del 'superhombre'?", options: ["Schopenhauer", "Nietzsche", "Kierkegaard", "Marx"], correctIndex: 1, category: "bachillerato", difficulty: 'hard' },
+  { question: "En la alegoría de la caverna de Platón, ¿qué representan las sombras en la pared?", options: ["La verdad absoluta", "El mundo de las ideas", "Las apariencias / el mundo sensible", "La razón pura"], correctIndex: 2, category: "bachillerato", difficulty: 'hard' },
+  { question: "¿En qué año empezó la Guerra Civil Española?", options: ["1931", "1936", "1939", "1945"], correctIndex: 1, category: "bachillerato", difficulty: 'medium' },
+  { question: "¿En qué año terminó la Guerra Civil Española?", options: ["1936", "1937", "1939", "1941"], correctIndex: 2, category: "bachillerato", difficulty: 'medium' },
+  { question: "¿Qué evento histórico se considera el inicio de la Guerra Fría, tras la Segunda Guerra Mundial?", options: ["La Guerra de Corea", "La caída de Berlín", "El Telón de Acero y la división de Europa", "La crisis de los misiles de Cuba"], correctIndex: 2, category: "bachillerato", difficulty: 'hard' },
+  { question: "¿Qué unidad mide la cantidad de sustancia en química?", options: ["Gramo", "Mol", "Litro", "Joule"], correctIndex: 1, category: "bachillerato", difficulty: 'hard' },
+  { question: "Según la segunda ley de Newton, ¿qué fórmula relaciona fuerza, masa y aceleración?", options: ["F = m / a", "F = m + a", "F = m x a", "F = a / m"], correctIndex: 2, category: "bachillerato", difficulty: 'medium' },
+  { question: "¿Qué tipo de enlace químico comparte electrones entre átomos de forma más o menos equitativa?", options: ["Enlace iónico", "Enlace covalente", "Enlace metálico", "Puente de hidrógeno"], correctIndex: 1, category: "bachillerato", difficulty: 'hard' },
+  { question: "¿Qué autor de la Generación del 98 escribió 'Niebla' y acuñó el término 'nivola'?", options: ["Pío Baroja", "Azorín", "Miguel de Unamuno", "Ramiro de Maeztu"], correctIndex: 2, category: "bachillerato", difficulty: 'hard' },
+  { question: "¿Qué obra de Federico García Lorca narra una boda marcada por una pasión prohibida y acaba en tragedia?", options: ["La casa de Bernarda Alba", "Bodas de sangre", "Yerma", "Mariana Pineda"], correctIndex: 1, category: "bachillerato", difficulty: 'medium' },
+  { question: "En economía, ¿qué término describe la subida generalizada y sostenida de los precios?", options: ["Deflación", "Inflación", "Estanflación", "Devaluación"], correctIndex: 1, category: "bachillerato", difficulty: 'easy' },
+  { question: "¿Qué institución europea fija los tipos de interés de referencia de la zona euro?", options: ["La Comisión Europea", "El Banco Central Europeo (BCE)", "El Parlamento Europeo", "El Banco Mundial"], correctIndex: 1, category: "bachillerato", difficulty: 'medium' },
+  { question: "¿Qué ley de la física establece que la energía no se crea ni se destruye, solo se transforma?", options: ["Ley de la gravedad", "Primera ley de la termodinámica (conservación de la energía)", "Ley de Ohm", "Principio de Arquímedes"], correctIndex: 1, category: "bachillerato", difficulty: 'medium' },
+  { question: "¿Qué proceso biológico describe la variación de las especies a lo largo del tiempo según Darwin?", options: ["Mutación espontánea", "Selección natural / evolución", "Clonación", "Metamorfosis"], correctIndex: 1, category: "bachillerato", difficulty: 'easy' },
+  { question: "¿Qué tratado puso fin oficialmente a la Primera Guerra Mundial?", options: ["Tratado de Westfalia", "Tratado de Versalles", "Tratado de Utrecht", "Tratado de Yalta"], correctIndex: 1, category: "bachillerato", difficulty: 'medium' },
+  { question: "¿Cuál es la derivada de x² respecto a x?", options: ["x", "2x", "x²", "2"], correctIndex: 1, category: "bachillerato", difficulty: 'medium' },
+  { question: "¿Qué corriente literaria del siglo XIX se caracteriza por el exceso de sentimiento, la pasión y la rebeldía individual?", options: ["Realismo", "Romanticismo", "Naturalismo", "Neoclasicismo"], correctIndex: 1, category: "bachillerato", difficulty: 'medium' },
+  { question: "¿Qué filósofo defendió el contrato social y la idea de que el hombre nace bueno y la sociedad lo corrompe?", options: ["Thomas Hobbes", "John Locke", "Jean-Jacques Rousseau", "Montesquieu"], correctIndex: 2, category: "bachillerato", difficulty: 'hard' },
+  { question: "¿Qué significa el término 'PIB' en economía?", options: ["Producto Interior Bruto", "Precio Index Base", "Planificación Industrial Básica", "Producto Interno Básico"], correctIndex: 0, category: "bachillerato", difficulty: 'easy' },
+  { question: "¿Qué dictador gobernó España entre el final de la Guerra Civil y 1975?", options: ["Primo de Rivera", "Francisco Franco", "José Antonio Primo de Rivera", "Juan Carlos I"], correctIndex: 1, category: "bachillerato", difficulty: 'easy' },
+  { question: "¿En qué año se aprobó la actual Constitución Española?", options: ["1975", "1977", "1978", "1981"], correctIndex: 2, category: "bachillerato", difficulty: 'medium' },
+  { question: "¿Qué reacción química libera energía en forma de luz y calor al combinarse una sustancia con oxígeno?", options: ["Oxidación", "Combustión", "Fotosíntesis", "Electrólisis"], correctIndex: 1, category: "bachillerato", difficulty: 'medium' },
+];
+
+// ── VIDA COTIDIANA / INFORMACIÓN ÚTIL (cosas que un adulto debería saber) ──
+export const triviaVidaCotidiana: TriviaQuestion[] = [
+  { question: "¿Qué es el IRPF?", options: ["Un impuesto sobre el consumo", "El Impuesto sobre la Renta de las Personas Físicas, que grava los ingresos", "Una cotización voluntaria a la Seguridad Social", "Un impuesto que solo pagan las empresas"], correctIndex: 1, category: "vida-cotidiana", difficulty: 'easy' },
+  { question: "¿Qué significa que el IRPF sea 'progresivo'?", options: ["Que todos pagan el mismo porcentaje", "Que el porcentaje aumenta a medida que suben los ingresos, por tramos", "Que solo lo pagan los autónomos", "Que baja cada año automáticamente"], correctIndex: 1, category: "vida-cotidiana", difficulty: 'medium' },
+  { question: "¿Qué diferencia principal hay entre ser autónomo y ser asalariado?", options: ["No hay ninguna diferencia legal", "El autónomo cotiza y gestiona sus propios impuestos y no tiene jefe directo; el asalariado trabaja por cuenta de una empresa que le retiene y cotiza por él", "El asalariado paga más impuestos siempre", "El autónomo no puede contratar a nadie nunca"], correctIndex: 1, category: "vida-cotidiana", difficulty: 'easy' },
+  { question: "¿Qué es el euríbor?", options: ["Un impuesto europeo", "El tipo de interés medio al que los bancos europeos se prestan dinero entre sí, usado como referencia en muchas hipotecas", "Una tasa que cobra Hacienda por cambiar de banco", "El tipo de cambio del euro frente al dólar"], correctIndex: 1, category: "vida-cotidiana", difficulty: 'medium' },
+  { question: "En una hipoteca a tipo variable, ¿qué suele pasar con la cuota si sube el euríbor?", options: ["La cuota baja", "La cuota se mantiene siempre igual", "La cuota tiende a subir", "El banco absorbe la diferencia sin coste"], correctIndex: 2, category: "vida-cotidiana", difficulty: 'easy' },
+  { question: "¿Qué es el periodo de carencia en una hipoteca o préstamo?", options: ["El tiempo en que no se paga ningún interés", "Un periodo en el que solo se pagan intereses (o incluso nada), sin amortizar capital", "El tiempo que tarda el banco en aprobar el préstamo", "El plazo para reclamar un error del banco"], correctIndex: 1, category: "vida-cotidiana", difficulty: 'hard' },
+  { question: "¿Qué es el término amortizado en relación a un préstamo?", options: ["El interés que se cobra", "La parte del capital prestado que ya se ha devuelto", "La comisión por cancelación", "El seguro asociado al préstamo"], correctIndex: 1, category: "vida-cotidiana", difficulty: 'medium' },
+  { question: "En un contrato de alquiler, ¿qué es habitualmente la 'fianza'?", options: ["Un regalo al casero", "Una cantidad (normalmente un mes de renta) que se deposita como garantía y se devuelve al terminar el contrato si todo está en orden", "El primer mes de alquiler adelantado sin devolución", "Un impuesto municipal"], correctIndex: 1, category: "vida-cotidiana", difficulty: 'easy' },
+  { question: "Si tienes un contrato indefinido y te despiden sin causa justificada ('despido improcedente'), ¿qué suele corresponderte?", options: ["Nada, es decisión de la empresa", "Una indemnización, y según el caso la opción de readmisión", "Solo el paro, nunca indemnización", "Un mes de salario fijo sin excepciones"], correctIndex: 1, category: "vida-cotidiana", difficulty: 'medium' },
+  { question: "¿Qué es el periodo de prueba en un contrato de trabajo?", options: ["Un tiempo en el que no se cobra sueldo", "Un plazo inicial en el que empresa o trabajador pueden rescindir el contrato con más facilidad, para comprobar si el puesto encaja", "El tiempo que tarda en llegar la primera nómina", "Un derecho exclusivo de la empresa para despedir sin indemnización en cualquier momento del contrato"], correctIndex: 1, category: "vida-cotidiana", difficulty: 'easy' },
+  { question: "¿Qué significa 'IVA' en una factura?", options: ["Impuesto sobre el Valor Añadido, un impuesto al consumo que se añade al precio del producto o servicio", "Un recargo exclusivo de las eléctricas", "Un impuesto que solo pagan las empresas, nunca los particulares", "Interés Variable Anual de un préstamo"], correctIndex: 0, category: "vida-cotidiana", difficulty: 'easy' },
+  { question: "En una factura de la luz, ¿qué es el 'término de potencia'?", options: ["Lo que se paga por la energía realmente consumida en kWh", "Lo que se paga por tener contratada una capacidad máxima de electricidad disponible, se consuma o no", "Un impuesto exclusivo del gobierno central", "El coste del mantenimiento del contador"], correctIndex: 1, category: "vida-cotidiana", difficulty: 'medium' },
+  { question: "¿Qué diferencia hay entre una tarifa de luz fija y una indexada?", options: ["No hay ninguna diferencia real", "La fija mantiene el mismo precio durante el contrato; la indexada varía según el precio del mercado eléctrico hora a hora o día a día", "La indexada siempre es más barata", "La fija solo existe para empresas"], correctIndex: 1, category: "vida-cotidiana", difficulty: 'medium' },
+  { question: "Ante una quemadura leve, ¿cuál es el primer gesto recomendado?", options: ["Aplicar hielo directamente sobre la piel", "Enfriar la zona con agua corriente fría (no helada) durante varios minutos", "Poner pasta de dientes", "Reventar cualquier ampolla que aparezca"], correctIndex: 1, category: "vida-cotidiana", difficulty: 'easy' },
+  { question: "Si alguien se está atragantando y no puede hablar ni toser, ¿qué maniobra de primeros auxilios se recomienda?", options: ["Darle agua para que lo trague", "La maniobra de Heimlich (compresiones abdominales)", "Hacerle vomitar con el dedo", "Golpearle solo en la cabeza"], correctIndex: 1, category: "vida-cotidiana", difficulty: 'easy' },
+  { question: "¿Qué significa la posición lateral de seguridad en primeros auxilios?", options: ["Tumbar a la persona boca arriba con las piernas elevadas", "Colocar a una persona inconsciente que respira de lado, para evitar que se ahogue con sus propios vómitos o la lengua", "Sentar a la persona con la cabeza entre las piernas", "Ponerla boca abajo completamente"], correctIndex: 1, category: "vida-cotidiana", difficulty: 'medium' },
+  { question: "¿Cuántos días de vacaciones anuales mínimas marca con carácter general el Estatuto de los Trabajadores en España?", options: ["20 días naturales", "22 días laborables", "30 días naturales", "15 días laborables"], correctIndex: 2, category: "vida-cotidiana", difficulty: 'medium' },
+  { question: "¿Qué es el 'finiquito' al terminar un contrato de trabajo?", options: ["Una multa que paga el trabajador", "El documento y pago que liquida las cantidades pendientes (días trabajados, vacaciones no disfrutadas, etc.) al finalizar la relación laboral", "Un préstamo de la empresa", "Un seguro médico adicional"], correctIndex: 1, category: "vida-cotidiana", difficulty: 'easy' },
+  { question: "¿Qué es la 'base reguladora' a efectos de prestaciones como el paro o la jubilación?", options: ["El sueldo bruto del último mes sin más", "Una cantidad calculada a partir de las cotizaciones de un periodo de tiempo, que sirve de referencia para calcular la prestación", "El salario mínimo interprofesional", "Un tipo fijo igual para todos los trabajadores"], correctIndex: 1, category: "vida-cotidiana", difficulty: 'hard' },
+  { question: "¿Qué cubre básicamente un seguro de responsabilidad civil del hogar?", options: ["Solo los robos dentro de la vivienda", "Los daños que tú o tu vivienda puedan causar accidentalmente a terceros (por ejemplo, una gotera al vecino)", "Exclusivamente incendios", "Solo el contenido asegurado de la propia casa"], correctIndex: 1, category: "vida-cotidiana", difficulty: 'medium' },
+  { question: "Si firmas como avalista de un préstamo de otra persona, ¿qué implica?", options: ["Nada, es solo un trámite simbólico", "Que si esa persona no paga, el banco puede reclamarte a ti la deuda", "Que te conviertes en cotitular del dinero prestado", "Que recibes parte del dinero prestado automáticamente"], correctIndex: 1, category: "vida-cotidiana", difficulty: 'easy' },
+  { question: "¿Qué es la TAE de un préstamo o tarjeta?", options: ["El tipo de interés simple sin más", "La Tasa Anual Equivalente, que incluye el interés más comisiones y gastos, y permite comparar productos financieros entre sí", "El total a devolver en el primer año únicamente", "Un impuesto que cobra Hacienda sobre los préstamos"], correctIndex: 1, category: "vida-cotidiana", difficulty: 'medium' },
+  { question: "¿Qué significa pagar algo 'a plazos revolving' con una tarjeta de crédito?", options: ["Es lo mismo que pagar a plazos sin interés", "Es un crédito que se renueva cada mes y suele generar intereses altos si solo se paga una cuota mínima, pudiendo alargar mucho la deuda", "Es una forma de ahorro automático", "Es obligatorio en todas las tarjetas de débito"], correctIndex: 1, category: "vida-cotidiana", difficulty: 'hard' },
+  { question: "¿Qué es el 'tramo mínimo exento' (o mínimo personal) del IRPF, dicho de forma conceptual?", options: ["Un impuesto adicional que se paga siempre", "La parte de los ingresos que, por debajo de cierto umbral y ciertas circunstancias personales, no tributa", "El total que se puede desgravar por vivienda", "Un recargo que se aplica a las rentas más bajas"], correctIndex: 1, category: "vida-cotidiana", difficulty: 'hard' },
+  { question: "¿Qué quiere decir que un contrato de alquiler esté 'actualizado según el IPC' (o un índice similar)?", options: ["Que la renta nunca puede subir", "Que la renta puede revisarse cada año según la evolución de un índice de referencia pactado, dentro de los límites legales vigentes", "Que el inquilino decide la subida cada año", "Que el precio del alquiler lo fija el banco"], correctIndex: 1, category: "vida-cotidiana", difficulty: 'medium' },
+];
+
+// ── ESCENARIOS DEL DÍA A DÍA (retos/preguntas de situaciones cotidianas con las que identificarse) ──
+export const escenariosDiaADia: string[] = [
+  "Reto: {player}, interpreta la notificación de tu jefe un domingo por la tarde preguntando 'una cosilla rápida'. Si el grupo no se identifica, bebes 2.",
+  "Pregunta: {player}, cuenta la excusa más absurda que has dado para no ir a trabajar un día que simplemente no te apetecía.",
+  "Reto: {player}, lee en voz alta, como si fuera un comunicado oficial, el típico mensaje del grupo de WhatsApp familiar reenviando una cadena falsa. Si no suena real, bebes 2.",
+  "Pregunta: {player}, ¿cuál ha sido la frase más incómoda que te ha soltado tu casero o casera alguna vez?",
+  "Reto: {player}, finge que estás respondiendo a un match de una app de citas que lleva 3 días sin contestar. Si no suena desesperado de verdad, reparte 2.",
+  "Pregunta: {player}, cuenta la vez que confundiste el chat del grupo de trabajo con el de los amigos y por poco mandaste algo que no debías.",
+  "Reto: {player}, imita a tu compañero de piso pidiéndote, por quinta vez este mes, que le dejes algo de dinero hasta fin de mes. Si no hace gracia, bebes 2.",
+  "Pregunta: {player}, ¿alguna vez te has hecho el dormido o el 'sin cobertura' en el transporte público para no ceder el asiento o no saludar a alguien? Cuéntalo.",
+  "Reto: {player}, da la típica excusa de 'se me ha pasado la notificación' de forma que suene mínimamente creíble. Si nadie te cree, bebes 2.",
+  "Pregunta: {player}, cuenta la anécdota más surrealista que te haya pasado en un piso compartido con desconocidos.",
+  "Reto: {player}, responde en directo, como si fuera real, al típico mensaje del grupo familiar preguntando 'para cuándo los niños'. Si no suena diplomático, bebes 2.",
+  "Pregunta: {player}, ¿qué rollo te has tenido que inventar alguna vez para librarte de quedar con alguien de una app de citas que daba mal rollo?",
+  "Reto: {player}, lee el típico aviso pasivo-agresivo que alguien deja pegado en la nevera de un piso compartido ('por favor, lavad vuestros platos'). El grupo decide si suena auténtico.",
+  "Pregunta: {player}, cuenta la vez que tu jefe te mandó un audio de 3 minutos para decir algo que cabía en una frase.",
+  "Reto: {player}, interpreta la llamada de 'número desconocido' que en realidad es el banco para venderte un seguro que no has pedido. Si no suena pesado de verdad, bebes 2.",
+  "Pregunta: {player}, ¿cuál es la cosa más rara que ha pasado alguna vez en el grupo de WhatsApp del portal o la comunidad de vecinos?",
+  "Reto: {player}, escribe en 10 segundos la respuesta perfecta y pasivo-agresiva a un 'vistos' sin contestar de hace tres días. Si no cuela, reparte 2.",
+  "Pregunta: {player}, cuenta alguna vez que fingiste entender algo en una reunión de trabajo sin tener ni idea de lo que se estaba hablando.",
+  "Reto: {player}, imita al típico pasajero del autobús o metro que habla alto por el móvil como si estuviera solo en casa. Si el grupo no se identifica, bebes 2.",
+  "Pregunta: {player}, ¿has usado alguna vez una foto de hace años en una app de citas? Cuenta cuánto se nota.",
+  "Reto: {player}, da el discurso que darías a tu casero si subiera el alquiler sin avisar y sin motivo. Si no suena indignado de verdad, bebes 2.",
+  "Pregunta: {player}, cuenta la mentira más tonta que le has dicho a tu jefe para salir antes un viernes.",
+  "Reto: {player}, lee en voz alta un mensaje típico de spam/estafa de 'has ganado un premio' con la máxima emoción falsa posible. Si no convence, bebes 2.",
+  "Pregunta: {player}, ¿alguna vez te ha tocado hacer de árbitro en una discusión de piso compartido sobre quién no limpia? Cuenta cómo acabó.",
+  "Reto: {player}, interpreta el mensaje de voz típico de un familiar mayor del grupo de WhatsApp que dura 4 minutos para decir 'llámame'. Si no hace reír, reparte 2.",
+];

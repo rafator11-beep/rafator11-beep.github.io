@@ -21,9 +21,10 @@ interface GamePlayProps {
   isTeamMode?: boolean;
   roomId?: string | null;
   isHost?: boolean;
+  spectatorRoomId?: string | null;
 }
 
-export function GamePlay({ onExit, isTeamMode = false, roomId = null, isHost = false }: GamePlayProps) {
+export function GamePlay({ onExit, isTeamMode = false, roomId = null, isHost = false, spectatorRoomId = null }: GamePlayProps) {
   const {
     game,
     players,
@@ -173,6 +174,7 @@ export function GamePlay({ onExit, isTeamMode = false, roomId = null, isHost = f
           isMultiplayer={!!roomId}
           isHost={isHost}
           roomId={roomId}
+          spectatorRoomId={spectatorRoomId}
         />
       </Suspense>
     );

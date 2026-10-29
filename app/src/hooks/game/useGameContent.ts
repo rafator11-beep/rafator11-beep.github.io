@@ -45,6 +45,7 @@ import { customPartyRetos as importedCustomRetos } from '@/data/customPartyRetos
 import { footballQuestions } from '@/data/footballQuestionsNew';
 import { cultureQuestions } from '@/data/cultureQuestions';
 import { cultureQuestionsNew2025 } from '@/data/cultureQuestionsNew2025';
+import { triviaPrimaria, triviaESO, triviaBachillerato, triviaVidaCotidiana } from '@/data/triviaConocimientoContent';
 import { buildGodDeck } from '@/lib/godDeck';
 import { rememberQuizIds } from '@/lib/recentContent';
 import { sanitizeCardText } from '../../components/game/CardDisplay';
@@ -384,7 +385,7 @@ export const useGameContent = (mode: GameMode, currentIndex: number, currentPlay
         // Pre-load first trivia question synchronously to avoid 'Cargando pregunta' flash
         if (mode === 'trivia_futbol' || mode === 'cultura') {
             const isFootball = mode === 'trivia_futbol';
-            const sourceQuestions = (isFootball ? footballQuestions : [...cultureQuestions, ...cultureQuestionsNew2025]) as any[];
+            const sourceQuestions = (isFootball ? footballQuestions : [...cultureQuestions, ...cultureQuestionsNew2025, ...triviaPrimaria, ...triviaESO, ...triviaBachillerato, ...triviaVidaCotidiana]) as any[];
             if (sourceQuestions && sourceQuestions.length > 0) {
                 const shuffled = shuffleArray(sourceQuestions);
                 setCurrentQuestion(shuffled[0]);
@@ -398,7 +399,7 @@ export const useGameContent = (mode: GameMode, currentIndex: number, currentPlay
         setQuestionNumber(prev => prev + 1);
 
         const isFootball = mode === 'trivia_futbol';
-        const sourceQuestions = (isFootball ? footballQuestions : [...cultureQuestions, ...cultureQuestionsNew2025]) as any[];
+        const sourceQuestions = (isFootball ? footballQuestions : [...cultureQuestions, ...cultureQuestionsNew2025, ...triviaPrimaria, ...triviaESO, ...triviaBachillerato, ...triviaVidaCotidiana]) as any[];
 
         // Safety check
         if (!sourceQuestions || sourceQuestions.length === 0) {
@@ -421,7 +422,7 @@ export const useGameContent = (mode: GameMode, currentIndex: number, currentPlay
 
     const loadSpecificQuestion = useCallback((category: 'futbol' | 'cultura') => {
         const isFootball = category === 'futbol';
-        const sourceQuestions = (isFootball ? footballQuestions : [...cultureQuestions, ...cultureQuestionsNew2025]) as any[];
+        const sourceQuestions = (isFootball ? footballQuestions : [...cultureQuestions, ...cultureQuestionsNew2025, ...triviaPrimaria, ...triviaESO, ...triviaBachillerato, ...triviaVidaCotidiana]) as any[];
 
         // Safety check
         if (!sourceQuestions || sourceQuestions.length === 0) {
