@@ -2620,15 +2620,19 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                 </div>
               </motion.button>
               
-              <button 
-                onClick={() => { 
-                  if (isMultiplayer && !isHost) return; 
-                  // Advance without awarding any XP since it was skipped
-                  handleNext(); 
+              <button
+                onClick={() => {
+                  if (isMultiplayer && !isHost) return;
+                  // Antes esto llamaba a handleNext() — exactamente lo mismo que el
+                  // botón "Siguiente turno" de arriba, así que saltar una carta que
+                  // no gustaba costaba el turno igual que completarla. Ahora solo
+                  // cambia de carta (performTurnAdvance con skipPlayerAdvance=true):
+                  // el mismo jugador se queda su turno y prueba con otra.
+                  performTurnAdvance(true);
                 }}
                 className="text-white/40 text-[10px] font-bold uppercase tracking-widest text-center py-2 hover:text-white/80 transition-colors mx-auto active:scale-95"
               >
-                ⏭️ Saltar esta carta
+                ⏭️ No me gusta, otra carta
               </button>
             </div>
           )}
