@@ -3,11 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Loader2, Volume2, VolumeX, CheckCircle2, XCircle } from 'lucide-react';
 import { generateAIChallenge } from '@/lib/aiService';
 import { toast } from 'sonner';
-import { 
-    isGeminiConfigured, 
-    geminiResolveDispute, 
-    geminiGenerateCustomPunishment 
+import {
+    isGeminiConfigured,
+    geminiResolveDispute,
+    geminiGenerateCustomPunishment
 } from '@/services/geminiClient';
+import { CountdownRing } from './CountdownRing';
+import { extractTimeLimitSeconds } from '@/utils/timeLimit';
 
 // ── TTS ───────────────────────────────────────────────────────────────────────
 function useTTS(text: string) {
@@ -171,6 +173,7 @@ export const CardDisplay = React.memo(({
     gameMode, players, currentPlayer, round = 1, onAIUpdate
 }: CardDisplayProps) => {
     const cleanText = sanitizeCardText(content);
+    const timeLimitSeconds = extractTimeLimitSeconds(content);
     const kind = detectCardKind(content);
     const baseConfig = KIND_CONFIG[kind];
     const rarityOverride = type !== 'common' ? RARITY_OVERRIDE[type] : {};
@@ -356,6 +359,13 @@ export const CardDisplay = React.memo(({
                             {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                         </motion.button>
                     </div>
+
+                    {/* ── RELOJ: cartas "en N segundos" — antes había que contar de memoria ── */}
+                    {timeLimitSeconds && (
+                        <div className="flex justify-center mb-2">
+                            <CountdownRing seconds={timeLimitSeconds} resetKey={content} size={64} />
+                        </div>
+                    )}
 
                     {/* ── PLAYER PILL ── */}
                     {displayPlayer && (

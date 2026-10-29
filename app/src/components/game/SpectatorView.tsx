@@ -6,6 +6,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { KahootVoteSession } from '@/components/game/KahootVoteSession';
 import { createPortal } from 'react-dom';
 import { copyToClipboard } from '@/utils/clipboard';
+import { CountdownRing } from './CountdownRing';
+import { extractTimeLimitSeconds } from '@/utils/timeLimit';
 
 interface SpectatorViewProps {
   roomId: string;
@@ -46,29 +48,31 @@ interface CardState {
     mode?: 'standard' | 'fastest_finger' | 'speed_race';
   };
   privateFor?: Record<string, PrivateForPlayer>;
+  debateInfo?: { topic: string; teamA: string[]; teamB: string[] };
   cardIndex: number;
   timestamp: number;
 }
 
 // ── HOST MODE: muestra el QR y emite cartas ────────────────────────────────
-export function SpectatorQRPanel({ roomId, currentCard, currentPlayer, players, kahootConfig, privateFor }: {
+export function SpectatorQRPanel({ roomId, currentCard, currentPlayer, players, kahootConfig, privateFor, debateInfo }: {
   roomId: string;
   currentCard: string;
   currentPlayer: string;
   players: string[];
   kahootConfig?: any;
   privateFor?: Record<string, PrivateForPlayer>;
+  debateInfo?: { topic: string; teamA: string[]; teamB: string[] };
 }) {
   const spectatorUrl = `${window.location.origin}${window.location.pathname}?room=${roomId}&spectator=true`;
 
   // Siempre con el último estado a mano (sin esperar a un efecto) para poder
   // responder al instante cuando alguien se conecta a mitad de partida.
   const latestPayloadRef = useRef<CardState>({
-    text: currentCard, playerName: currentPlayer, players, kahootConfig, privateFor,
+    text: currentCard, playerName: currentPlayer, players, kahootConfig, privateFor, debateInfo,
     cardIndex: Date.now(), timestamp: Date.now(),
   });
   latestPayloadRef.current = {
-    text: currentCard, playerName: currentPlayer, players, kahootConfig, privateFor,
+    text: currentCard, playerName: currentPlayer, players, kahootConfig, privateFor, debateInfo,
     cardIndex: latestPayloadRef.current.cardIndex, timestamp: Date.now(),
   };
 
@@ -117,7 +121,7 @@ export function SpectatorQRPanel({ roomId, currentCard, currentPlayer, players, 
       event: 'card_update',
       payload: latestPayloadRef.current,
     });
-  }, [roomId, currentCard, currentPlayer, players, kahootConfig, privateFor]);
+  }, [roomId, currentCard, currentPlayer, players, kahootConfig, privateFor, debateInfo]);
 
   const [showQR, setShowQR] = useState(false);
 
@@ -834,6 +838,27 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
         </div>
       )}
 
+      {/* Debate en curso: tema + equipos + el mismo reloj que ve el anfitrión */}
+      {cardState?.debateInfo && !cardState?.kahootConfig && (
+        <div className="mb-4 w-full max-w-md rounded-[24px] border border-fuchsia-500/30 bg-fuchsia-500/10 p-4 text-center">
+          <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-fuchsia-300">🗣️ Debate por equipos</p>
+          <p className="mb-3 text-sm font-bold text-white">{cardState.debateInfo.topic}</p>
+          <div className="mb-3 flex justify-center">
+            <CountdownRing seconds={30} resetKey={cardState.debateInfo.topic} size={64} />
+          </div>
+          <div className="flex items-start justify-center gap-4 text-xs">
+            <div>
+              <p className="font-black uppercase text-emerald-400">A favor</p>
+              <p className="text-white/80">{cardState.debateInfo.teamA.join(', ')}</p>
+            </div>
+            <div>
+              <p className="font-black uppercase text-red-400">En contra</p>
+              <p className="text-white/80">{cardState.debateInfo.teamB.join(', ')}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {myPlayerName && (
         <div className="mb-4 flex items-center justify-between w-full max-w-md rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5">
           <span className="text-xs font-semibold text-emerald-300">
@@ -874,6 +899,16 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
 
             {/* Card */}
             <div className="rounded-[28px] border border-white/10 bg-gradient-to-br from-[#1a1a2e] to-[#16213e] p-6 shadow-2xl">
+              {/* Reloj: igual que en la pantalla del anfitrión, para que también
+                  se vea desde el móvil cuántos segundos quedan */}
+              {(() => {
+                const t = extractTimeLimitSeconds(cardState.text);
+                return t ? (
+                  <div className="mb-3 flex justify-center">
+                    <CountdownRing seconds={t} resetKey={cardState.timestamp} size={56} />
+                  </div>
+                ) : null;
+              })()}
               <p className="text-center text-lg font-semibold leading-relaxed text-white">
                 {cardState.text}
               </p>

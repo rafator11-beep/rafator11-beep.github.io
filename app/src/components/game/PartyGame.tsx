@@ -51,6 +51,7 @@ import { TournamentBracket } from '@/components/game/TournamentBracket';
 import { ChatComponent } from '@/components/multiplayer/ChatComponent';
 import { PeerBubbles } from '@/components/multiplayer/PeerBubbles';
 import { SpectatorQRPanel } from '@/components/game/SpectatorView';
+import { CountdownRing } from '@/components/game/CountdownRing';
 import { KahootVoteSession } from '@/components/game/KahootVoteSession';
 
 // Subcomponents (assuming they exist or are imported)
@@ -802,37 +803,30 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     setShowKahoot({ active: true, mode: 'speed_race' });
   }, [speedRacePool]);
 
-  // Carta de Debate: el jugador de turno defiende "A favor" y otro jugador
-  // random defiende "En contra" de un tema sacado del banco de debateTopics.
-  // Tras el tiempo de debate, el resto del grupo vota al ganador vía Kahoot.
+  // Carta de Debate: TODO el grupo se reparte en dos bandos aleatorios (no
+  // solo 2 personas) que defienden un tema random del banco debateTopics.
+  // Tras el tiempo de debate, el resto vota qué bando ha ganado vía Kahoot.
   const [debateSession, setDebateSession] = useState<{
     topic: string;
-    playerA: { id: string; name: string };
-    playerB: { id: string; name: string };
+    teamA: { id: string; name: string }[];
+    teamB: { id: string; name: string }[];
   } | null>(null);
-  const [debateTimeLeft, setDebateTimeLeft] = useState(30);
 
   const launchDebate = useCallback(() => {
     if (players.length < 2) return;
     const topic = debateTopics[Math.floor(Math.random() * debateTopics.length)];
-    const playerA = currentPlayer || players[0];
-    const candidates = players.filter(p => p.id !== playerA.id);
-    const playerB = candidates[Math.floor(Math.random() * candidates.length)];
-    setDebateSession({
-      topic,
-      playerA: { id: playerA.id, name: playerA.name },
-      playerB: { id: playerB.id, name: playerB.name },
-    });
-    setDebateTimeLeft(30);
-  }, [players, currentPlayer]);
+    const shuffled = [...players].sort(() => Math.random() - 0.5);
+    const half = Math.ceil(shuffled.length / 2);
+    const teamA = shuffled.slice(0, half).map(p => ({ id: p.id, name: p.name }));
+    const teamB = shuffled.slice(half).map(p => ({ id: p.id, name: p.name }));
+    setDebateSession({ topic, teamA, teamB });
+  }, [players]);
 
-  // Cuenta atrás visual del debate (solo informativa, no cierra nada automáticamente)
-  useEffect(() => {
-    if (!debateSession || showKahoot.active) return;
-    if (debateTimeLeft <= 0) return;
-    const t = setTimeout(() => setDebateTimeLeft(prev => prev - 1), 1000);
-    return () => clearTimeout(t);
-  }, [debateSession, debateTimeLeft, showKahoot.active]);
+  const debateTeamLabel = (team: { name: string }[]): string => {
+    const names = team.map(p => p.name);
+    if (names.length === 1) return names[0];
+    return `${names.slice(0, -1).join(', ')} y ${names[names.length - 1]}`;
+  };
 
   // Siempre tenemos un room ID para que los espectadores puedan unirse, incluso en local.
   // Prioridad: roomId real de multijugador > el que ya se generó en PlayerSetup (sala de
@@ -1920,6 +1914,11 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               currentPlayer={currentPlayer?.name || ''} 
               players={players.map(p => p.name)}
               privateFor={showPodium ? podiumPrivateFor : (gameState.showImpostorWarning || gameState.showImpostor) ? gameState.impostorPrivateFor : undefined}
+              debateInfo={debateSession ? {
+                topic: debateSession.topic,
+                teamA: debateSession.teamA.map(p => p.name),
+                teamB: debateSession.teamB.map(p => p.name),
+              } : undefined}
               kahootConfig={showKahoot.active ? {
                 mode: showKahoot.mode,
                 question: showKahoot.mode === 'speed_race' && speedRaceQuestion
@@ -1932,7 +1931,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                 options: showKahoot.mode === 'speed_race' && speedRaceQuestion
                   ? speedRaceQuestion.options
                   : debateSession
-                  ? [debateSession.playerA.name, debateSession.playerB.name]
+                  ? [debateTeamLabel(debateSession.teamA), debateTeamLabel(debateSession.teamB)]
                   : (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion
                   ? currentQuestion.options
                   : players.map(p => p.name),
@@ -3075,20 +3074,24 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               exit={{ opacity: 0 }}
               className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center gap-6 p-6 text-center"
             >
-              <span className="text-xs font-black uppercase tracking-widest text-fuchsia-400">🗣️ Debate</span>
+              <span className="text-xs font-black uppercase tracking-widest text-fuchsia-400">🗣️ Debate por equipos</span>
               <h2 className="text-xl sm:text-3xl font-black text-white max-w-xl">{debateSession.topic}</h2>
               <div className="flex items-center gap-4 sm:gap-8">
-                <div className="flex flex-col items-center gap-1">
+                <div className="flex flex-col items-center gap-1 max-w-[150px]">
                   <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400">A favor</span>
-                  <span className="text-lg sm:text-2xl font-black text-white">{debateSession.playerA.name}</span>
+                  {debateSession.teamA.map(p => (
+                    <span key={p.id} className="text-sm sm:text-lg font-black text-white">{p.name}</span>
+                  ))}
                 </div>
                 <span className="text-white/40 font-black">VS</span>
-                <div className="flex flex-col items-center gap-1">
+                <div className="flex flex-col items-center gap-1 max-w-[150px]">
                   <span className="text-[10px] font-black uppercase tracking-wider text-red-400">En contra</span>
-                  <span className="text-lg sm:text-2xl font-black text-white">{debateSession.playerB.name}</span>
+                  {debateSession.teamB.map(p => (
+                    <span key={p.id} className="text-sm sm:text-lg font-black text-white">{p.name}</span>
+                  ))}
                 </div>
               </div>
-              <div className="text-4xl font-black text-white/80 tabular-nums">{debateTimeLeft}s</div>
+              <CountdownRing seconds={30} resetKey={debateSession.topic} size={88} />
               {(isHost || !isMultiplayer) && (
                 <div className="flex gap-3">
                   <Button
@@ -3129,7 +3132,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                 showKahoot.mode === 'speed_race' && speedRaceQuestion
                   ? speedRaceQuestion.options
                   : debateSession
-                  ? [debateSession.playerA.name, debateSession.playerB.name]
+                  ? [debateTeamLabel(debateSession.teamA), debateTeamLabel(debateSession.teamB)]
                   : (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion
                   ? currentQuestion.options
                   : players.map(p => p.name)
