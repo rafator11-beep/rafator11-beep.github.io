@@ -37,3 +37,13 @@ export const INDIVIDUAL_TYPE_WEIGHTS: Record<string, number> = {
 // su propia secuencia (general o individual van intercaladas, así que esto se
 // aplica por separado a cada una).
 export const MAX_CONSECUTIVE_SAME_TYPE = 2;
+
+// Cada cuántas cartas del mazo entra cada evento (ocupan el hueco de carta
+// general). Si dos coinciden, el de menor prioridad se retrasa al siguiente
+// hueco general. Prioridad: impostor > torneo > norma > especial.
+export const TRIGGER_INTERVALS = {
+  impostor: 20,
+  torneo: 15,
+  norma: 25,
+  especial: 10, // trivia fútbol/cultura, duelo, virus
+} as const;

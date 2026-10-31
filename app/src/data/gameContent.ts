@@ -55,7 +55,7 @@ import { duelos } from './duelosContent';
 // ── HUMOR NEGRO ──
 import { yoNuncaHumorNegro, picanteHumorNegro } from './humorNegroContent';
 import { escenariosDiaADia } from './triviaConocimientoContent';
-import { GENERAL_TYPE_WEIGHTS, INDIVIDUAL_TYPE_WEIGHTS, MAX_CONSECUTIVE_SAME_TYPE } from '@/config/cardWeights';
+import { GENERAL_TYPE_WEIGHTS, INDIVIDUAL_TYPE_WEIGHTS, MAX_CONSECUTIVE_SAME_TYPE, TRIGGER_INTERVALS } from '@/config/cardWeights';
 // ── MEGA CONTENT EXPANSION (2024-2026) ──
 import { yoNuncaInfancia } from './gameContentMega1';
 import { yoNuncaInstituto } from './gameContentMega2';
@@ -6801,7 +6801,7 @@ export function getStructuredMegamix(
   // cada turno se elige el TIPO con probabilidad proporcional a su peso
   // (src/config/cardWeights.ts), evitando que el mismo tipo salga más de
   // MAX_CONSECUTIVE_SAME_TYPE veces seguidas dentro de su propia secuencia.
-  type TypedPool = { key: string; cards: string[]; ptr: number };
+  type TypedPool = { key: string; cards: string[]; ptr: number; weight?: number };
   const exclude = options?.exclude;
   const makeTypedPool = (key: string, cards: string[]): TypedPool => {
     const cleaned = cleanDeckPool(cards);
@@ -6840,6 +6840,37 @@ export function getStructuredMegamix(
     if (pool.cards.length > 0) individualTypes.push(pool);
   }
 
+  // ── Reclasificación ──────────────────────────────────────────────────────
+  // El hueco donde cae una carta lo decide su tipo, pero si avanza el turno lo
+  // decide isIndividualCard(). Hay tipos con cartas "del otro lado" (picante o
+  // humor negro con {player}, "Si llevas reloj..., reparte" en clasico), que
+  // rompían el patrón G/I. Esas cartas se mueven a un pool del lado correcto,
+  // con un peso equivalente a la exposición que tenían en su tipo original.
+  function splitMisfits(types: TypedPool[], weights: Record<string, number>, belongs: (c: string) => boolean) {
+    const misfits: string[] = [];
+    let movedWeight = 0;
+    for (const t of types) {
+      const keep = t.cards.filter(belongs);
+      const moved = t.cards.length - keep.length;
+      if (moved === 0) continue;
+      movedWeight += (t.weight ?? weights[t.key] ?? 1) * (moved / t.cards.length);
+      misfits.push(...t.cards.filter(c => !belongs(c)));
+      t.cards = keep;
+    }
+    return { misfits, movedWeight };
+  }
+  const fromGeneral = splitMisfits(generalTypes, GENERAL_TYPE_WEIGHTS, c => !isIndividualCard(c));
+  const fromIndividual = splitMisfits(individualTypes, INDIVIDUAL_TYPE_WEIGHTS, isIndividualCard);
+  if (fromGeneral.misfits.length > 0) {
+    individualTypes.push({ ...makeTypedPool('reclasificadas', fromGeneral.misfits), weight: fromGeneral.movedWeight });
+  }
+  if (fromIndividual.misfits.length > 0) {
+    generalTypes.push({ ...makeTypedPool('reclasificadas', fromIndividual.misfits), weight: fromIndividual.movedWeight });
+  }
+  for (const types of [generalTypes, individualTypes]) {
+    for (let i = types.length - 1; i >= 0; i--) if (types[i].cards.length === 0) types.splice(i, 1);
+  }
+
   function pickWeightedType(types: TypedPool[], weights: Record<string, number>, lastKeys: string[]): TypedPool {
     const blocked = lastKeys.length >= MAX_CONSECUTIVE_SAME_TYPE
       && lastKeys.slice(-MAX_CONSECUTIVE_SAME_TYPE).every(k => k === lastKeys[lastKeys.length - 1])
@@ -6847,7 +6878,7 @@ export function getStructuredMegamix(
       : null;
     const candidates = blocked ? types.filter(t => t.key !== blocked) : types;
     const pool = candidates.length > 0 ? candidates : types;
-    const w = pool.map(t => weights[t.key] ?? 1);
+    const w = pool.map(t => t.weight ?? weights[t.key] ?? 1);
     const total = w.reduce((a, b) => a + b, 0);
     let r = Math.random() * total;
     for (let i = 0; i < pool.length; i++) {
@@ -6905,33 +6936,26 @@ export function getStructuredMegamix(
 
   const deck: string[] = [];
 
-  // Patrón [G, I]: 1 general (toda la mesa) + 1 individual (jugador activo) por ciclo
-  // Inyecciones: TORNEO cada 15 cartas, IMPOSTOR cada 20, NORMA cada 25, ESPECIAL cada 10
-  const GENERALS_PER_TURN = 1;
+  // Patrón [G, I]: 1 general (toda la mesa) + 1 individual (jugador activo) por ciclo.
+  // Los eventos ocupan el hueco GENERAL y se programan por vencimiento (cada
+  // TRIGGER_INTERVALS cartas). Antes se usaba deck.length % N, pero el hueco
+  // general siempre cae en posición par, así que los intervalos impares (15, 25)
+  // solo se cumplían la mitad de las veces y las coincidencias se perdían.
+  // Ahora un evento que coincide con otro se retrasa al siguiente hueco general.
+  const nonImpostorSpecials = specialTriggers.filter(t => t !== "TRIGGER:IMPOSTOR");
+  const events = [
+    { every: TRIGGER_INTERVALS.impostor, due: TRIGGER_INTERVALS.impostor, next: () => "TRIGGER:IMPOSTOR" },
+    { every: TRIGGER_INTERVALS.torneo, due: TRIGGER_INTERVALS.torneo, next: () => torneoTriggers[torneoPtr++ % torneoTriggers.length] },
+    { every: TRIGGER_INTERVALS.norma, due: TRIGGER_INTERVALS.norma, next: () => globalNormas[normaPtr++ % globalNormas.length] },
+    { every: TRIGGER_INTERVALS.especial, due: TRIGGER_INTERVALS.especial, next: () => nonImpostorSpecials[triggerPtr++ % nonImpostorSpecials.length] },
+  ];
   while (deck.length < count) {
-    // 1 carta GENERAL (toda la mesa participa, NO avanza jugador)
-    for (let g = 0; g < GENERALS_PER_TURN && deck.length < count; g++) {
-      if (deck.length > 0 && deck.length % 20 === 0) {
-        deck.push("TRIGGER:IMPOSTOR");
-        if (deck.length >= count) break;
-        continue;
-      } else if (deck.length > 0 && deck.length % 15 === 0) {
-        deck.push(torneoTriggers[torneoPtr % torneoTriggers.length]);
-        torneoPtr++;
-        if (deck.length >= count) break;
-        continue;
-      } else if (deck.length > 0 && deck.length % 25 === 0) {
-        deck.push(globalNormas[normaPtr % globalNormas.length]);
-        normaPtr++;
-        if (deck.length >= count) break;
-        continue;
-      } else if (deck.length > 0 && deck.length % 10 === 0) {
-        const filtered = specialTriggers.filter(t => t !== "TRIGGER:IMPOSTOR");
-        deck.push(filtered[triggerPtr % filtered.length]);
-        triggerPtr++;
-        if (deck.length >= count) break;
-        continue;
-      }
+    // 1 carta GENERAL (toda la mesa participa, NO avanza jugador) — o un evento si toca
+    const event = events.find(e => deck.length >= e.due);
+    if (event) {
+      deck.push(event.next());
+      event.due += event.every;
+    } else {
       deck.push(drawGeneralCard());
     }
     // 1 carta INDIVIDUAL (jugador activo actúa, SÍ avanza turno)

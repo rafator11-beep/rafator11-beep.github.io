@@ -11,7 +11,6 @@ const CLASICO_OPTS = {
 };
 
 const isTrigger = (c: string) => c.startsWith('TRIGGER:') || c.startsWith('📜');
-const share = (cards: string[], pred: (c: string) => boolean) => cards.filter(pred).length / Math.max(1, cards.length);
 const oddSlots = (deck: string[]) => deck.filter((_, i) => i % 2 === 1);
 const evenSlots = (deck: string[]) => deck.filter((c, i) => i % 2 === 0 && !isTrigger(c));
 
@@ -62,10 +61,16 @@ describe('getStructuredMegamix', () => {
     expect(deck.filter(c => c === 'TRIGGER:TORNEO' || c === 'TRIGGER:MEGATORNEO').length).toBeGreaterThan(4);
   });
 
-  it('alterna general / individual', () => {
-    expect(share(oddSlots(deck), isIndividualCard)).toBeGreaterThan(0.9);
-    // Margen: algunas cartas de picante/humor negro llevan {player} y cuentan como individuales
-    expect(share(evenSlots(deck), c => !isIndividualCard(c))).toBeGreaterThan(0.75);
+  it('alterna general / individual sin excepciones (cartas reclasificadas)', () => {
+    expect(oddSlots(deck).filter(c => !isIndividualCard(c))).toEqual([]);
+    expect(evenSlots(deck).filter(isIndividualCard)).toEqual([]);
+  });
+
+  it('respeta los intervalos de eventos aunque sean impares o coincidan', () => {
+    const n = (re: RegExp) => deck.filter(c => re.test(c)).length;
+    expect(n(/^TRIGGER:(MEGA)?TORNEO$/)).toBeGreaterThanOrEqual(30); // cada 15 → ~33
+    expect(n(/^📜 NORMA/)).toBeGreaterThanOrEqual(18);              // cada 25 → ~20
+    expect(n(/^TRIGGER:(TRIVIA_|DUELO|VIRUS)/)).toBeGreaterThanOrEqual(45); // cada 10 → ~50
   });
 
   it('respeta los tipos permitidos (modo clásico)', () => {
@@ -128,12 +133,12 @@ describe('useGameContent', () => {
   it('megamix: no baraja el mazo estructurado (antes se perdía la alternancia)', async () => {
     const deck = (await loadDeck('megamix')).slice(0, 400);
     expect(deck[20]).toBe('TRIGGER:IMPOSTOR');
-    expect(share(oddSlots(deck), isIndividualCard)).toBeGreaterThan(0.9);
+    expect(oddSlots(deck).filter(c => !isIndividualCard(c))).toEqual([]);
   });
 
   it('clásico: tampoco baraja', async () => {
     const deck = (await loadDeck('clasico')).slice(0, 400);
-    expect(share(oddSlots(deck), isIndividualCard)).toBeGreaterThan(0.85);
+    expect(oddSlots(deck).filter(c => !isIndividualCard(c))).toEqual([]);
   });
 
   it('no mete objetos crudos como cartas', async () => {
