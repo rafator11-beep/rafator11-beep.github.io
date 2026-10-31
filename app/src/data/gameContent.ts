@@ -6126,7 +6126,15 @@ export function isIndividualCard(cardText: string): boolean {
 export function getStructuredMegamix(
   count: number,
   playersCount: number = 4,
-  options?: { generalKeys?: string[]; individualKeys?: string[] },
+  options?: {
+    generalKeys?: string[];
+    individualKeys?: string[];
+    /** Pools adicionales (clave → cartas); su peso sale de GENERAL_/INDIVIDUAL_TYPE_WEIGHTS. */
+    extraGeneral?: Record<string, string[]>;
+    extraIndividual?: Record<string, string[]>;
+    /** Cartas a dejar fuera (p. ej. las votadas negativamente). */
+    exclude?: (card: string) => boolean;
+  },
 ): string[] {
   function cleanDeckPool(items: any[]): string[] {
     const seen = new Set<string>();
@@ -6242,6 +6250,8 @@ export function getStructuredMegamix(
     ...salseoNuevo.filter(s => s.toLowerCase().startsWith('yo nunca')),
   ]);
   const yoNuncaItems = getRandomItems(yoNuncaPool, yoNuncaPool.length);
+  // Algunas frases ya traen "Yo nunca" delante: se quita para no duplicar el prefijo.
+  const stripYoNunca = (q: string) => q.replace(/^yo nunca(\.{3})?\s*/i, '');
   // Cartas ya formadas (texto completo con prefijo propio): no se envuelven de
   // nuevo en "🙈 Yo nunca... X", se añaden tal cual al pool final del tipo.
   const yoNuncaPreformed = cleanDeckPool([
@@ -6250,11 +6260,11 @@ export function getStructuredMegamix(
     ...[...yoNuncaV5, ...yoNuncaV5b, ...yoNuncaV5c].map(q => `🙈 ${q}`),
     ...genYoNunca.map(q => `🙈 ${q}`),
     // moreYoNunca son continuaciones (duplican yoNuncaPool pero cleanDeckPool dedupea)
-    ...moreYoNunca.map(q => `🙈 Yo nunca... ${q}`),
+    ...moreYoNunca.map(q => `🙈 Yo nunca... ${stripYoNunca(q)}`),
     ...moreSalseo.filter(s => s.startsWith('🙈')),
   ]);
   const yoNuncaCards = [
-    ...yoNuncaItems.map(q => addDrinking(`🙈 Yo nunca... ${q}`, Math.random() < 0.4 ? 'medio' : 'leve')),
+    ...yoNuncaItems.map(q => addDrinking(`🙈 Yo nunca... ${stripYoNunca(q)}`, Math.random() < 0.4 ? 'medio' : 'leve')),
     ...yoNuncaPreformed.map(q => addDrinking(q, Math.random() < 0.4 ? 'medio' : 'leve')),
   ];
 
@@ -6792,7 +6802,13 @@ export function getStructuredMegamix(
   // (src/config/cardWeights.ts), evitando que el mismo tipo salga más de
   // MAX_CONSECUTIVE_SAME_TYPE veces seguidas dentro de su propia secuencia.
   type TypedPool = { key: string; cards: string[]; ptr: number };
-  const makeTypedPool = (key: string, cards: string[]): TypedPool => ({ key, cards: shuffleArray(cleanDeckPool(cards)), ptr: 0 });
+  const exclude = options?.exclude;
+  const makeTypedPool = (key: string, cards: string[]): TypedPool => {
+    const cleaned = cleanDeckPool(cards);
+    const kept = exclude ? cleaned.filter(c => !exclude(c)) : cleaned;
+    // Si el filtro vaciara el tipo entero, mejor repetir cartas que perder el tipo.
+    return { key, cards: shuffleArray(kept.length > 0 ? kept : cleaned), ptr: 0 };
+  };
 
   const generalTypes: TypedPool[] = [
     makeTypedPool('yoNunca', yoNuncaCards),           // 🙈
@@ -6815,6 +6831,14 @@ export function getStructuredMegamix(
     makeTypedPool('duelos', duelosCards),               // ⚔️
     makeTypedPool('clasico', clasicoCards),             // Reto: / Cultura Chupística
   ].filter(t => t.cards.length > 0 && (!options?.individualKeys || options.individualKeys.includes(t.key)));
+  for (const [key, cards] of Object.entries(options?.extraGeneral ?? {})) {
+    const pool = makeTypedPool(key, cards);
+    if (pool.cards.length > 0) generalTypes.push(pool);
+  }
+  for (const [key, cards] of Object.entries(options?.extraIndividual ?? {})) {
+    const pool = makeTypedPool(key, cards);
+    if (pool.cards.length > 0) individualTypes.push(pool);
+  }
 
   function pickWeightedType(types: TypedPool[], weights: Record<string, number>, lastKeys: string[]): TypedPool {
     const blocked = lastKeys.length >= MAX_CONSECUTIVE_SAME_TYPE
@@ -6916,7 +6940,9 @@ export function getStructuredMegamix(
     }
   }
 
-  return cleanDeckPool(deck.slice(0, count));
+  // Sin deduplicar: los pools ya vienen limpios y los TRIGGER/NORMA se repiten
+  // a propósito. Deduplicar aquí los dejaba en 1 de cada y descuadraba el patrón G/I.
+  return deck.slice(0, count);
 }
 
 function shuffleArray<T>(array: T[]): T[] {

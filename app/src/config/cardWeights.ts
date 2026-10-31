@@ -16,6 +16,8 @@ export const GENERAL_TYPE_WEIGHTS: Record<string, number> = {
   pacovers: 1.0,
   espana: 0.5,
   mimica: 0.9,
+  // customPartyRetos ("Si has..., bebe"): pocas cartas, peso bajo para no repetirlas.
+  customRetos: 0.05,
 };
 
 // Tipos INDIVIDUAL (actúa el jugador activo, sí avanza el turno):
@@ -26,6 +28,9 @@ export const INDIVIDUAL_TYPE_WEIGHTS: Record<string, number> = {
   categorias: 0.6,
   duelos: 1.0,
   clasico: 0.9,
+  // Pool extra que useGameContent inyecta (antes iba suelto al final del mazo
+  // y solo aparecía gracias al shuffle global). Peso ≈ su cuota original.
+  torneoRetos: 0.25,
 };
 
 // Máximo de veces que un mismo tipo puede salir de forma consecutiva dentro de

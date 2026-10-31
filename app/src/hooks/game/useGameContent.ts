@@ -140,7 +140,7 @@ function buildTasteCards(players: Player[]): string[] {
 // Mezcla cartas de gustos en el mazo a un ritmo fijo (cada ~16 cartas), en vez
 // de simplemente concatenarlas y dejar que se diluyan en un pool de miles de
 // cartas (donde casi nunca saldrían). Si tasteCards está vacío, devuelve deck igual.
-function interleaveTasteCards(deck: string[], tasteCards: string[]): string[] {
+export function interleaveTasteCards(deck: string[], tasteCards: string[]): string[] {
     if (tasteCards.length === 0) return deck;
     const shuffledTastes = shuffleArray(tasteCards);
     const out: string[] = [];
@@ -161,6 +161,29 @@ function normalizeDeckEntries(items: any[]): string[] {
         .map(item => typeof item === 'string' ? item : String(item ?? ''))
         .map(item => item.replace(/\s+/g, ' ').trim())
         .filter(item => item.length > 0 && item !== 'undefined' && item !== 'null');
+}
+
+// customPartyRetos son objetos { id, text }: antes se metían tal cual en el
+// mazo y salían como la carta "[object Object]".
+const customRetoTexts = importedCustomRetos.map(r => r.text);
+
+export function isStructuredMode(mode: string): boolean {
+    return mode === 'megamix' || mode === 'clasico';
+}
+
+function readVoteScores(category: string): Record<string, number> {
+    try {
+        const raw = localStorage.getItem('fiesta-party-votes');
+        return (raw && JSON.parse(raw)?.[category]) || {};
+    } catch {
+        return {};
+    }
+}
+
+// Mismo umbral que applyVoteWeights: con -3 o menos la carta deja de salir.
+function isDownvoted(category: string): (card: string) => boolean {
+    const scores = readVoteScores(category);
+    return card => (scores[card] || 0) <= -3;
 }
 
 function applyVoteWeights(items: string[], category: string): string[] {
@@ -243,23 +266,22 @@ export const useGameContent = (mode: GameMode, currentIndex: number, currentPlay
                 // alto para cubrir sesiones largas (los punteros por tipo reciclan
                 // con módulo, así que no hay riesgo de bucle infinito ni de
                 // quedarnos sin cartas: ver getStructuredMegamix ~línea 6105+).
-                modeContent = [
-                    ...getStructuredMegamix(2500, playersCount),
-                    ...moreTorneoRetos,
-                    ...importedCustomRetos,
-                ];
+                modeContent = getStructuredMegamix(2500, playersCount, {
+                    extraGeneral: { customRetos: customRetoTexts },
+                    extraIndividual: { torneoRetos: moreTorneoRetos },
+                    exclude: isDownvoted(mode),
+                });
                 break;
             case 'clasico':
                 // Mismo algoritmo estructurado que 'megamix', pero restringido a los
                 // tipos "clásicos" (sin mímica, duelos, trivia express, humor negro,
                 // cadena ni grupal — ese es el sabor diferenciado de este modo).
-                modeContent = [
-                    ...getStructuredMegamix(2500, playersCount, {
-                        generalKeys: ['yoNunca', 'picante', 'enLaCama', 'masProbable', 'pacovers', 'espana'],
-                        individualKeys: ['retos', 'categorias', 'clasico'],
-                    }),
-                    ...importedCustomRetos,
-                ];
+                modeContent = getStructuredMegamix(2500, playersCount, {
+                    generalKeys: ['yoNunca', 'picante', 'enLaCama', 'masProbable', 'pacovers', 'espana'],
+                    individualKeys: ['retos', 'categorias', 'clasico'],
+                    extraGeneral: { customRetos: customRetoTexts },
+                    exclude: isDownvoted(mode),
+                });
                 break;
             case 'yo_nunca':
             case 'yo_nunca_equipos':
@@ -289,10 +311,18 @@ export const useGameContent = (mode: GameMode, currentIndex: number, currentPlay
             const tasteCards = buildTasteCards(players);
             cleanedContent = interleaveTasteCards(cleanedContent, tasteCards);
         }
-        const weighted = normalizeDeckEntries(applyVoteWeights(cleanedContent, mode));
-        // Baraja + manda al fondo lo visto en partidas recientes (frescura entre sesiones)
         const sessionSize = Math.max(18, playersCount * 12);
-        const rotated = rotateByRecent(shuffleArray(weighted), mode, sessionSize);
+        let rotated: string[];
+        if (isStructuredMode(mode)) {
+            // El orden YA es la partida (patrón G/I + triggers espaciados): barajar
+            // aquí deshacía todo el algoritmo. Los votos se aplican dentro del
+            // generador (exclude) y los pools se barajan en cada partida.
+            rotated = cleanedContent;
+        } else {
+            const weighted = normalizeDeckEntries(applyVoteWeights(cleanedContent, mode));
+            // Baraja + manda al fondo lo visto en partidas recientes (frescura entre sesiones)
+            rotated = rotateByRecent(shuffleArray(weighted), mode, sessionSize);
+        }
         setContent(rotated);
         rememberSession(rotated, mode, sessionSize);
 
