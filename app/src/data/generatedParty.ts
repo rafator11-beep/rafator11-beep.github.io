@@ -959,7 +959,7 @@ export const genParanoia: string[] = uniq(
 );
 
 // Todo junto, por si se quiere un único pool
-export const generatedAll: string[] = [
+const generatedAll: string[] = [
   ...genYoNunca, ...genCadena, ...genCategorias, ...genCulturaChupistica, ...genDiezSegundos,
   ...genVotacion, ...genManosArriba, ...genTodosALaVez, ...genRanking, ...genEnLaCama,
   ...genRetos, ...genVerdadOBebe, ...genEscena, ...genMovil, ...genDosVerdades,

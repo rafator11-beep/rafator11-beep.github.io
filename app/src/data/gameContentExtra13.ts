@@ -181,15 +181,3 @@ export const cadenasV4: string[] = [
   "🔗 CADENA: Ingredientes de pizza. Sin repetir. El que falle bebe.",
   "🔗 CADENA: Artistas de Spotify. Sin repetir. Modo difícil.",
 ];
-
-export const allV4Content = {
-  megamix: megamixRetosV4,
-  yo_nunca: yoNuncaV4,
-  picante: picanteV4,
-  votacion: votacionV4,
-  normas: normasV4,
-  duelos: duelosV4,
-  cadenas: cadenasV4,
-};
-
-export const V4_CONTENT_COUNT = Object.values(allV4Content).reduce((sum, arr) => sum + arr.length, 0);
