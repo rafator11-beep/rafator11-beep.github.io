@@ -14,7 +14,8 @@ export function YoNuncaResponse({ players, cardText, onConfirm }: Props) {
   const toggle = (id: string) => {
     setSelected(prev => {
       const s = new Set(prev);
-      s.has(id) ? s.delete(id) : s.add(id);
+      if (s.has(id)) s.delete(id);
+      else s.add(id);
       return s;
     });
   };
@@ -23,7 +24,7 @@ export function YoNuncaResponse({ players, cardText, onConfirm }: Props) {
   const cleanText = cardText
     .replace(/^🙈\s*/, '')
     .replace(/^Yo nunca\.\.\.?\s*/i, '')
-    .replace(/\s*[🍺🍻🥃].*$/s, '')
+    .replace(/\s*[🍺🍻🥃].*$/su, '')
     .trim();
 
   const count = selected.size;

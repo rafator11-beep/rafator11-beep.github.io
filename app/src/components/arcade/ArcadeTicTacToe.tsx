@@ -64,7 +64,7 @@ export function ArcadeTicTacToe({ roomId, playerId, onClose }: ArcadeTicTacToePr
                         }
                     });
 
-                    startGame(
+                    startGameRef.current(
                         iAmX ? effectivePlayerId : payload.playerId,
                         hostSymbol
                     );
@@ -74,11 +74,11 @@ export function ArcadeTicTacToe({ roomId, playerId, onClose }: ArcadeTicTacToePr
                 if (!mySymbol) { // Guest receives assignments
                     const sym = payload.xPlayerId === effectivePlayerId ? 'X' : 'O';
                     setMySymbol(sym);
-                    startGame(payload.starterId, sym);
+                    startGameRef.current(payload.starterId, sym);
                 }
             })
             .on('broadcast', { event: 'make_move' }, ({ payload }) => {
-                handleRemoteMove(payload.index, payload.symbol, payload.nextTurnId);
+                handleRemoteMoveRef.current(payload.index, payload.symbol, payload.nextTurnId);
             })
             .on('broadcast', { event: 'timeout_loss' }, ({ payload }) => {
                 setWinner(payload.winnerId);
@@ -92,7 +92,7 @@ export function ArcadeTicTacToe({ roomId, playerId, onClose }: ArcadeTicTacToePr
                         setTimeout(() => {
                             setRemotePlayerReady(true);
                             setMySymbol('X');
-                            startGame(effectivePlayerId, 'X');
+                            startGameRef.current(effectivePlayerId, 'X');
                         }, 1000);
                     } else {
                         channel.send({
@@ -117,6 +117,8 @@ export function ArcadeTicTacToe({ roomId, playerId, onClose }: ArcadeTicTacToePr
         setCurrentTurnStr(starterId);
         resetTurnTimer(starterId, assignedSymbol);
     };
+    const startGameRef = useRef(startGame);
+    startGameRef.current = startGame;
 
     const resetTurnTimer = (whoId: string, _mySym: string) => {
         if (timerRef.current) clearInterval(timerRef.current);
@@ -154,6 +156,8 @@ export function ArcadeTicTacToe({ roomId, playerId, onClose }: ArcadeTicTacToePr
             return newBoard;
         });
     };
+    const handleRemoteMoveRef = useRef(handleRemoteMove);
+    handleRemoteMoveRef.current = handleRemoteMove;
 
     // Bot move simulation
     useEffect(() => {
@@ -162,7 +166,7 @@ export function ArcadeTicTacToe({ roomId, playerId, onClose }: ArcadeTicTacToePr
                 const emptyCells = board.map((c, i) => c === null ? i : -1).filter(i => i !== -1);
                 if (emptyCells.length > 0) {
                     const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-                    handleRemoteMove(randomCell, mySymbol === 'X' ? 'O' : 'X', effectivePlayerId);
+                    handleRemoteMoveRef.current(randomCell, mySymbol === 'X' ? 'O' : 'X', effectivePlayerId);
                 }
             }, 1000 + Math.random() * 1000); // 1-2s bot delay
             return () => clearTimeout(timer);
@@ -206,7 +210,7 @@ export function ArcadeTicTacToe({ roomId, playerId, onClose }: ArcadeTicTacToePr
         ];
 
         let foundWinner: PlayerSymbol | null = null;
-        for (let line of winningLines) {
+        for (const line of winningLines) {
             const [a, b, c] = line;
             if (newBoard[a] && newBoard[a] === newBoard[b] && newBoard[a] === newBoard[c]) {
                 foundWinner = newBoard[a];

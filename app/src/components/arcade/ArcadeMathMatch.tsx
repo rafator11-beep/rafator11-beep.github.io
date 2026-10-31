@@ -43,7 +43,7 @@ const generateProblem = (): MathProblem => {
     }
 
     // Generate 3 wrong options close to answer
-    let options = [ans];
+    const options = [ans];
     while (options.length < 4) {
         const mix = ans + (Math.floor(Math.random() * 21) - 10);
         if (!options.includes(mix) && mix > 0) {

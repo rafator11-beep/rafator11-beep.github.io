@@ -19,6 +19,7 @@ export function AnimatedCount({ value, duration = 2, className = "", prefix = ""
     });
 
     return () => controls.stop();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- animar desde el valor mostrado actual; depender de él reiniciaría la animación en cada frame
   }, [value, duration]);
 
   return (

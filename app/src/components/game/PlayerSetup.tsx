@@ -143,6 +143,7 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
         doAdd();
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- auto-añadir solo cuando cambia la lista; isLoading/addPlayer no deben relanzarlo
   }, [players.length, savedPlayers]);
 
   // BRIDGE: Listen for room_participants

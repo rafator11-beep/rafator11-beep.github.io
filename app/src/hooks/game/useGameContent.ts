@@ -324,6 +324,7 @@ export const useGameContent = (mode: GameMode, currentIndex: number, currentPlay
                 setQuestionNumber(1);
             }
         }
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- playersCount ya resume lo que importa de players
     }, [mode, reshuffleKey, playersCount]);
 
     const loadNextQuestion = useCallback(() => {

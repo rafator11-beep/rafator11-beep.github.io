@@ -22,7 +22,7 @@ export function CountdownRing({ seconds, resetKey, size = 56 }: { seconds: numbe
       if (left <= 0) clearInterval(interval);
     }, 100);
     return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [resetKey, seconds]);
 
   const pct = seconds > 0 ? remaining / seconds : 0;

@@ -159,6 +159,7 @@ export function ParchisGame({ roomId, isHost, onExit, localPlayerName, localPlay
                 }
             }
         }
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- turno del bot: se dispara por cambio de turno/dados, no por cada pieza
     }, [gameState.currentTurn, gameState.status, gameState.dice.length, rolling, gameState.winner]);
 
     const handleGameEnd = async (winnerColor: PlayerColor) => {

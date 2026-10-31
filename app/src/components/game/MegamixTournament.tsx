@@ -540,6 +540,7 @@ export function MegamixTournament({ players, onWinner, onClose, addScore, onStat
       setCurrentMatchIdx(firstActive);
       setShowDuel(true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- solo al montar el bracket
   }, []);
 
   // Espeja el estado del bracket hacia el padre (PartyGame) cada vez que

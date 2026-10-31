@@ -64,7 +64,7 @@ export function calculateNextPosition(piece: ParchisPiece, steps: number): { sta
     }
 
     if (piece.state === 'board') {
-        let currentPos = piece.position;
+        const currentPos = piece.position;
         const enterGoalLimit = BOARD_CONFIG[piece.color].enterGoalAfter;
 
         // Check if it crosses the goal entry

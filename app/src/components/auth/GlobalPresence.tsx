@@ -29,6 +29,7 @@ export function GlobalPresence() {
     const playerRanking = useMemo(() => {
         const all = loadLocalRankings();
         return all.find(r => r.player_name.toLowerCase() === localPlayerName.toLowerCase()) || null;
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- myProfile fuerza a releer el ranking local cuando cambia el perfil
     }, [localPlayerName, myProfile]);
 
     const classification = useMemo(() => classifyPlayer(playerRanking), [playerRanking]);
@@ -52,7 +53,6 @@ export function GlobalPresence() {
                 let count = 0;
 
                 for (const id in newState) {
-                    // @ts-ignore
                     const presenceArray = newState[id];
                     count += presenceArray.length;
                     if (presenceArray[0]) {

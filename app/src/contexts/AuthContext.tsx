@@ -1,4 +1,4 @@
-﻿import React, { createContext, useContext, useEffect, useState } from 'react';
+﻿import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { supabase, isSupabaseConfigured } from '@/integrations/supabase/client';
 import { loadLocalRankings, saveLocalRankings } from '@/utils/localRanking';
 
@@ -76,7 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             .then(({ data: { session } }: any) => {
                 setUser(session?.user ?? null);
                 if (session?.user) {
-                    fetchProfile(session.user.id);
+                    fetchProfileRef.current(session.user.id);
                 }
             })
             .catch(() => {
@@ -88,7 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
             setUser(session?.user ?? null);
             if (session?.user) {
-                fetchProfile(session.user.id);
+                fetchProfileRef.current(session.user.id);
             } else {
                 setProfile(null);
                 setIsLoading(false);
@@ -129,6 +129,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setIsLoading(false);
         }
     };
+    const fetchProfileRef = useRef(fetchProfile);
+    fetchProfileRef.current = fetchProfile;
 
     const createDefaultProfile = async (userId: string, username?: string, avatarUrl?: string) => {
         const initialLocal = loadLocalRankings()[0] || { coins: 100, gems: 10 };

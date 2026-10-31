@@ -605,6 +605,7 @@ export function MegaBoardGame({ onExit, localPlayerName, localPlayerAvatar }: Me
       tilesMeshRef.current = null;
       playerMeshesRef.current = {};
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- la escena 3D se monta una vez por tablero; el resto se actualiza vía refs
   }, [use3D, board.length]);
 
   // Sync player target positions when players state changes

@@ -19,7 +19,7 @@ const NUM_BOMBS = 5;
 
 // Generate fixed bomb indices for a match
 const generateBombs = () => {
-    let bombs = new Set<number>();
+    const bombs = new Set<number>();
     while (bombs.size < NUM_BOMBS) {
         bombs.add(Math.floor(Math.random() * GRID_SIZE));
     }
@@ -93,7 +93,7 @@ export function ArcadeMinesweeper({ roomId, playerId, onClose }: ArcadeMinesweep
                 }
             })
             .on('broadcast', { event: 'click_cell' }, ({ payload }) => {
-                handleRemoteClick(payload.index, payload.playerId);
+                handleRemoteClickRef.current(payload.index, payload.playerId);
             })
             .subscribe((status) => {
                 if (status === 'SUBSCRIBED') {
@@ -132,6 +132,8 @@ export function ArcadeMinesweeper({ roomId, playerId, onClose }: ArcadeMinesweep
             setCurrentTurnId(effectivePlayerId);
         }
     };
+    const handleRemoteClickRef = useRef(handleRemoteClick);
+    handleRemoteClickRef.current = handleRemoteClick;
 
     const handleCellClick = (index: number) => {
         if (phase !== 'playing' || currentTurnId !== effectivePlayerId || revealedCells[index]) return;
@@ -168,7 +170,7 @@ export function ArcadeMinesweeper({ roomId, playerId, onClose }: ArcadeMinesweep
             const chosen = safe.length && Math.random() > 0.22
                 ? safe[Math.floor(Math.random() * safe.length)]
                 : hidden[Math.floor(Math.random() * hidden.length)];
-            handleRemoteClick(chosen, 'remote');
+            handleRemoteClickRef.current(chosen, 'remote');
         }, 900 + Math.random() * 700);
 
         return () => clearTimeout(botMove);

@@ -17,6 +17,10 @@ interface ChatMessage {
 
 export function ChatComponent({ roomId, playerName }: { roomId: string, playerName: string }) {
     const [isOpen, setIsOpen] = useState(false);
+    // La suscripción vive todo lo que dure la sala; lee isOpen a través del ref
+    // para no quedarse con el valor del momento en que se suscribió.
+    const isOpenRef = useRef(isOpen);
+    isOpenRef.current = isOpen;
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [newMessage, setNewMessage] = useState('');
     const [hasUnread, setHasUnread] = useState(false);
@@ -57,10 +61,8 @@ export function ChatComponent({ roomId, playerName }: { roomId: string, playerNa
                     if (prev.some(m => m.id === payload.id)) return prev;
                     return [...prev, { ...payload, status: 'sent' }];
                 });
-                setHasUnread(prev => {
-                    // Update only if chat is closed or scrolled up
-                    return !isOpen;
-                });
+                // Update only if chat is closed
+                setHasUnread(!isOpenRef.current);
             })
             .subscribe();
 
@@ -84,7 +86,7 @@ export function ChatComponent({ roomId, playerName }: { roomId: string, playerNa
         if (isOpen) {
             scrollToBottom();
         }
-    }, [messages.length]);
+    }, [messages.length, isOpen]);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

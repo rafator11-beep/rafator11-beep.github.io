@@ -21,6 +21,11 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "@typescript-eslint/no-unused-vars": "off",
+      // Los catch vacíos se usan a propósito (localStorage, audio, vibración).
+      "no-empty": ["error", { allowEmptyCatch: true }],
+      // Con noImplicitAny desactivado, los any explícitos se tratan como deuda
+      // a ir bajando (aviso), no como error que bloquee el lint.
+      "@typescript-eslint/no-explicit-any": "warn",
     },
   },
 );

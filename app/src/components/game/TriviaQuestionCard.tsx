@@ -119,7 +119,7 @@ function TriviaQuestionCardContent({
       setTimeLeft(prev => {
         if (prev <= 1) {
           clearInterval(timer);
-          handleTimeUp();
+          handleTimeUpRef.current();
           return 0;
         }
         return prev - 1;
@@ -142,6 +142,8 @@ function TriviaQuestionCardContent({
       setTimeout(() => onAnswer(false, 0), 2000);
     }
   };
+  const handleTimeUpRef = useRef(handleTimeUp);
+  handleTimeUpRef.current = handleTimeUp;
 
   const handleSelectAnswer = (index: number) => {
     if (showResult || eliminatedOptions.includes(index) || hasHandledResult.current) return;

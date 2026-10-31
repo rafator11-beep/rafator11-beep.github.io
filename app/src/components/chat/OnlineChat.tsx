@@ -9,7 +9,7 @@ type ChatMsg = { id: string; name: string; text: string; ts: number };
 function safeId() {
   // Safari / iOS can fail on crypto.randomUUID in some contexts.
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const c: any = globalThis.crypto;
     if (c?.randomUUID) return c.randomUUID();
   } catch {

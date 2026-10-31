@@ -59,7 +59,7 @@ export function ArcadeTapRace({ roomId, playerId, onClose }: ArcadeTapRaceProps)
                 }
             })
             .on('broadcast', { event: 'start_game' }, () => {
-                startCountdown();
+                startCountdownRef.current();
             })
             .subscribe((status) => {
                 if (status === 'SUBSCRIBED') {
@@ -105,6 +105,8 @@ export function ArcadeTapRace({ roomId, playerId, onClose }: ArcadeTapRaceProps)
             }
         }, 1000);
     };
+    const startCountdownRef = useRef(startCountdown);
+    startCountdownRef.current = startCountdown;
 
     const startGameplay = () => {
         setPhase('playing');

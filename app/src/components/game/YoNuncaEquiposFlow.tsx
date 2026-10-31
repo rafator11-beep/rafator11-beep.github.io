@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Check, X, ShieldQuestion, Users, Trophy, AlertTriangle, RefreshCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -48,7 +48,7 @@ export function YoNuncaEquiposFlow({
         if (phase !== 'idle' && (!targetTeamId || !targetTeam)) {
             console.warn("YoNuncaEquiposFlow: Missing target team for active phase. Recovering to idle.");
             toast.error("Error en flujo de equipos. Reiniciando...");
-            finishFlow();
+            finishFlowRef.current();
         }
     }, [phase, targetTeamId, targetTeam]);
 
@@ -170,6 +170,8 @@ export function YoNuncaEquiposFlow({
         setShowPassScreen(true);
         onNext();
     };
+    const finishFlowRef = useRef(finishFlow);
+    finishFlowRef.current = finishFlow;
 
     if (phase === 'idle' || !targetTeam) return null;
 

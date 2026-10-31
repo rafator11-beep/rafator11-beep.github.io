@@ -104,6 +104,8 @@ export function LobbyScreen({ onJoin, onBack, initialMode, initialWaiting = fals
     const code = Math.random().toString(36).substring(2, 6).toUpperCase();
     onJoin(code, true, initialMode);
   };
+  const createRoomRef = useRef(createRoom);
+  createRoomRef.current = createRoom;
   // Moved handleJoinSubmit above useEffect to avoid hoisting issues (Bug 31)
   const handleJoinSubmit = async (codeOverride?: string) => {
     const codeToJoin = codeOverride || roomCode;
@@ -126,6 +128,8 @@ export function LobbyScreen({ onJoin, onBack, initialMode, initialWaiting = fals
     onJoin(codeToJoin.toUpperCase(), false);
     setIsWaiting(true);
   };
+  const handleJoinSubmitRef = useRef(handleJoinSubmit);
+  handleJoinSubmitRef.current = handleJoinSubmit;
 
   const copyInviteLink = () => {
     const url = `${window.location.origin}?room=${roomCode}`;
@@ -141,7 +145,7 @@ export function LobbyScreen({ onJoin, onBack, initialMode, initialWaiting = fals
 
     if (initialMode && !isWaiting) {
       window.history.replaceState({}, '', window.location.pathname);
-      createRoom();
+      createRoomRef.current();
       return;
     }
 
@@ -152,10 +156,10 @@ export function LobbyScreen({ onJoin, onBack, initialMode, initialWaiting = fals
       if (!currentPlayer) {
         onJoin(roomParam.toUpperCase(), false);
       } else {
-        handleJoinSubmit(roomParam.toUpperCase());
+        handleJoinSubmitRef.current(roomParam.toUpperCase());
       }
     }
-  }, [initialMode, currentPlayer, isWaiting, loading, handleJoinSubmit, onJoin]);
+  }, [initialMode, currentPlayer, isWaiting, loading, onJoin]);
 
   return (
     <div className="premium-screen min-h-screen px-4 py-5 md:px-6 md:py-8">

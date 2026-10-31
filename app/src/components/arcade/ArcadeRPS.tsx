@@ -116,7 +116,7 @@ export function ArcadeRPS({ roomId, playerId, onClose }: ArcadeRPSProps) {
             setPhase('reveal');
             setTimeout(() => {
                 setPhase('result');
-                calculateWinner(myChoice, remoteChoice);
+                calculateWinnerRef.current(myChoice, remoteChoice);
             }, 2000);
         }
     }, [myChoice, remoteChoice, phase]);
@@ -135,6 +135,8 @@ export function ArcadeRPS({ roomId, playerId, onClose }: ArcadeRPSProps) {
             setWinner('remote');
         }
     };
+    const calculateWinnerRef = useRef(calculateWinner);
+    calculateWinnerRef.current = calculateWinner;
 
     return (
         <div className="absolute inset-0 z-50 bg-slate-900 flex flex-col text-white user-select-none">

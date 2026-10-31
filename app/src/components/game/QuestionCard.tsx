@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Timer, CheckCircle2, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -26,7 +26,7 @@ export function QuestionCard({ question, onAnswer, timeLimit = 30, playerName }:
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          handleTimeUp();
+          handleTimeUpRef.current();
           return 0;
         }
         return prev - 1;
@@ -43,6 +43,8 @@ export function QuestionCard({ question, onAnswer, timeLimit = 30, playerName }:
       setTimeout(() => onAnswer(false), 2000);
     }
   };
+  const handleTimeUpRef = useRef(handleTimeUp);
+  handleTimeUpRef.current = handleTimeUp;
 
   const handleSelectAnswer = (answer: string) => {
     if (showResult) return;

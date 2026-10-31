@@ -968,6 +968,6 @@ const generatedAll: string[] = [
 
 // Conteo en consola solo en dev
 if (typeof import.meta !== 'undefined' && (import.meta as any).env?.DEV) {
-  // eslint-disable-next-line no-console
+   
   console.log('[generatedParty] cartas generadas:', generatedAll.length);
 }

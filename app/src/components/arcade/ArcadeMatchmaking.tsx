@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { globalNetwork } from './engine/NetworkManager';
 import { motion } from 'framer-motion';
@@ -11,8 +11,11 @@ interface MatchmakingProps {
 export function ArcadeMatchmaking({ onConnected }: MatchmakingProps) {
   const [roomId, setRoomId] = useState<string | null>(null);
   const [status, setStatus] = useState<'IDLE' | 'HOSTING' | 'JOINING' | 'CONNECTED'>('IDLE');
-  
-  const isMobile = window.innerWidth <= 768; // Estimación simple de si somos el host o quien une
+  const onConnectedRef = useRef(onConnected);
+  onConnectedRef.current = onConnected;
+
+  // Estimación simple de si somos el host o quien une (se fija al montar)
+  const [isMobile] = useState(() => window.innerWidth <= 768);
   const urlParams = new URLSearchParams(window.location.search);
   const joinParam = urlParams.get('join_arcade');
 
@@ -31,13 +34,13 @@ export function ArcadeMatchmaking({ onConnected }: MatchmakingProps) {
 
     globalNetwork.onConnected(() => {
       setStatus('CONNECTED');
-      setTimeout(() => onConnected(globalNetwork.isHost), 500); 
+      setTimeout(() => onConnectedRef.current(globalNetwork.isHost), 500); 
     });
 
     return () => {
       // Al salir de matchmaking si no conectamos (lo limpia el componente superior en unmount general)
     };
-  }, [joinParam]);
+  }, [joinParam, isMobile]);
 
   const handleHost = async () => {
     setStatus('HOSTING');

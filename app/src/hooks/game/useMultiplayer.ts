@@ -16,6 +16,12 @@ export function useMultiplayer(
     const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const retryCountRef = useRef(0);
     const unmountedRef = useRef(false);
+    // Los handlers del canal leen siempre la versión más reciente del callback
+    // (si no, se quedan con la del render en que se creó la suscripción).
+    const onGameStateUpdateRef = useRef(onGameStateUpdate);
+    onGameStateUpdateRef.current = onGameStateUpdate;
+    const onGuestActionRef = useRef(onGuestAction);
+    onGuestActionRef.current = onGuestAction;
 
     useEffect(() => {
         if (!roomId || !playerName) return;
@@ -42,12 +48,12 @@ export function useMultiplayer(
             ch
                 .on('broadcast', { event: 'game_state' }, ({ payload }) => {
                     if (!isHost) {
-                        onGameStateUpdate(payload);
+                        onGameStateUpdateRef.current(payload);
                     }
                 })
                 .on('broadcast', { event: 'guest_action' }, ({ payload }) => {
-                    if (isHost && onGuestAction) {
-                        onGuestAction(payload);
+                    if (isHost && onGuestActionRef.current) {
+                        onGuestActionRef.current(payload);
                     }
                 })
                 .on('presence', { event: 'sync' }, () => {

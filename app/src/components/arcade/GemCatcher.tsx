@@ -53,7 +53,7 @@ export function GemCatcher({ onAddGems }: GemCatcherProps) {
             }, spawnRate);
 
         } else if (isPlaying && timeLeft === 0) {
-            endGame();
+            endGameRef.current();
         }
 
         return () => {
@@ -88,6 +88,8 @@ export function GemCatcher({ onAddGems }: GemCatcherProps) {
             toast.error(`Fin del tiempo. Puntuación muy baja (${score}).`);
         }
     };
+    const endGameRef = useRef(endGame);
+    endGameRef.current = endGame;
 
     const handleCatch = (id: string, type: 'gem' | 'bomb') => {
         if (!isPlaying) return;

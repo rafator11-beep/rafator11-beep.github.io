@@ -147,12 +147,14 @@ export function PokerRoom({ onExit, roomId, isHost: isHostParam }: PokerRoomProp
             });
         }
     };
+    const broadcastStateRef = useRef(broadcastState);
+    broadcastStateRef.current = broadcastState;
 
     // Heartbeat for Online Sync (Host only)
     useEffect(() => {
         if (!isHost || !roomId || pokerState.status === 'waiting') return;
         const interval = setInterval(() => {
-            broadcastState(pokerState);
+            broadcastStateRef.current(pokerState);
         }, 5000);
         return () => clearInterval(interval);
     }, [isHost, roomId, pokerState]);
@@ -180,46 +182,47 @@ export function PokerRoom({ onExit, roomId, isHost: isHostParam }: PokerRoomProp
                 if (difficulty === 'easy') {
                     // Easy: folds 35% of the time when there's a bet, otherwise calls
                     if (toCall > 0 && roll < 0.35) {
-                        handleAction('fold', 0, currentTurnPlayer.id);
+                        handleActionRef.current('fold', 0, currentTurnPlayer.id);
                     } else if (toCall > 0) {
-                        handleAction('call', toCall, currentTurnPlayer.id);
+                        handleActionRef.current('call', toCall, currentTurnPlayer.id);
                     } else {
-                        handleAction('check', 0, currentTurnPlayer.id);
+                        handleActionRef.current('check', 0, currentTurnPlayer.id);
                     }
                 } else if (difficulty === 'medium') {
                     // Medium: sometimes raises, rarely folds
                     if (toCall > 0 && toCall > myChips * 0.5 && roll < 0.25) {
-                        handleAction('fold', 0, currentTurnPlayer.id);
+                        handleActionRef.current('fold', 0, currentTurnPlayer.id);
                     } else if (toCall > 0) {
-                        handleAction('call', toCall, currentTurnPlayer.id);
+                        handleActionRef.current('call', toCall, currentTurnPlayer.id);
                     } else if (roll < 0.25 && myChips > currentBet + 20) {
                         // Raise sometimes when no bet
                         const raiseAmt = Math.min(Math.floor(pot * 0.5) + 10, myChips);
-                        handleAction('raise', raiseAmt, currentTurnPlayer.id);
+                        handleActionRef.current('raise', raiseAmt, currentTurnPlayer.id);
                     } else {
-                        handleAction('check', 0, currentTurnPlayer.id);
+                        handleActionRef.current('check', 0, currentTurnPlayer.id);
                     }
                 } else {
                     // Hard: aggressive — raises often, bluffs, rarely folds
                     if (toCall > 0 && toCall > myChips * 0.7 && roll < 0.1) {
-                        handleAction('fold', 0, currentTurnPlayer.id);
+                        handleActionRef.current('fold', 0, currentTurnPlayer.id);
                     } else if (toCall > 0 && roll < 0.4 && myChips > toCall + 30) {
                         // Re-raise
                         const reRaise = toCall + Math.min(Math.floor(pot * 0.6) + 20, myChips - toCall);
-                        handleAction('raise', reRaise, currentTurnPlayer.id);
+                        handleActionRef.current('raise', reRaise, currentTurnPlayer.id);
                     } else if (toCall > 0) {
-                        handleAction('call', toCall, currentTurnPlayer.id);
+                        handleActionRef.current('call', toCall, currentTurnPlayer.id);
                     } else if (roll < 0.45 && myChips > 30) {
                         // Aggressive open raise
                         const raiseAmt = Math.min(Math.floor(pot * 0.75) + 15, myChips);
-                        handleAction('raise', raiseAmt, currentTurnPlayer.id);
+                        handleActionRef.current('raise', raiseAmt, currentTurnPlayer.id);
                     } else {
-                        handleAction('check', 0, currentTurnPlayer.id);
+                        handleActionRef.current('check', 0, currentTurnPlayer.id);
                     }
                 }
             }, 600 + Math.random() * 800); // SPED UP BOT THINKING
             return () => clearTimeout(timer);
         }
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- el bot decide una vez por turno con el bote de ese momento
     }, [pokerState.current_turn, isHost, pokerState.status, pokerState.current_bet, players]);
 
     // Realtime Sync & Authoritative Host Loop
@@ -253,7 +256,7 @@ export function PokerRoom({ onExit, roomId, isHost: isHostParam }: PokerRoomProp
                     setMyCards(payload.cards);
                 })
                 .on('broadcast', { event: 'poker_action' }, ({ payload }) => {
-                    if (isHost) handleAction(payload.action, payload.amount, payload.playerId);
+                    if (isHost) handleActionRef.current(payload.action, payload.amount, payload.playerId);
                 })
                 .subscribe();
 
@@ -290,8 +293,8 @@ export function PokerRoom({ onExit, roomId, isHost: isHostParam }: PokerRoomProp
         setPokerState((prev: any) => {
             let nextStatus = prev.status;
             let nextCommunity = [...(prev.community_cards || [])];
-            let nextDeck = [...(prev.deck || [])];
-            let nextPot = prev.pot + amount;
+            const nextDeck = [...(prev.deck || [])];
+            const nextPot = prev.pot + amount;
             let nextPlayerBets = { ...prev.player_bets, [actingId]: (prev.player_bets[actingId] || 0) + amount };
             let nextCurrentBet = Math.max(prev.current_bet, nextPlayerBets[actingId]);
             let nextLastAggressive = (action === 'raise') ? actingId : prev.last_aggressive_player;
@@ -318,7 +321,7 @@ export function PokerRoom({ onExit, roomId, isHost: isHostParam }: PokerRoomProp
                 }, 1000);
             }
 
-            let nextIndex = (currentIndex + 1) % remainingActive.length;
+            const nextIndex = (currentIndex + 1) % remainingActive.length;
             let nextTurnId = remainingActive[nextIndex]?.id || null;
 
             // Check if betting round is over
@@ -379,6 +382,8 @@ export function PokerRoom({ onExit, roomId, isHost: isHostParam }: PokerRoomProp
             return newState;
         });
     };
+    const handleActionRef = useRef(handleAction);
+    handleActionRef.current = handleAction;
 
     const resolveShowdown = (state: any, forcedWinnerId?: string) => {
         if (!isHost) return;

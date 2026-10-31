@@ -77,7 +77,7 @@ export function ArcadeRussianRoulette({ roomId, playerId, onClose }: ArcadeRussi
                 }
             })
             .on('broadcast', { event: 'shoot' }, ({ payload }) => {
-                handleRemoteShoot(payload.nextTurnId, payload.died);
+                handleRemoteShootRef.current(payload.nextTurnId, payload.died);
             })
             .subscribe((status) => {
                 if (status === 'SUBSCRIBED') {
@@ -123,6 +123,8 @@ export function ArcadeRussianRoulette({ roomId, playerId, onClose }: ArcadeRussi
             setIsShooting(false);
         }, 800);
     };
+    const handleRemoteShootRef = useRef(handleRemoteShoot);
+    handleRemoteShootRef.current = handleRemoteShoot;
 
     const handleShoot = () => {
         if (isShooting || phase !== 'playing' || currentTurnId !== effectivePlayerId) return;

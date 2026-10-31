@@ -47,6 +47,10 @@ function useWindowSize() {
 }
 
 export function PeerBubbles({ roomId, playerId, onClose, onStreamsChange, onLocalStream }: PeerBubblesProps) {
+    const onStreamsChangeRef = useRef(onStreamsChange);
+    onStreamsChangeRef.current = onStreamsChange;
+    const onLocalStreamRef = useRef(onLocalStream);
+    onLocalStreamRef.current = onLocalStream;
     const [localStream, setLocalStream] = useState<MediaStream | null>(null);
     const [remoteStreams, setRemoteStreams] = useState<PeerData[]>([]);
     const [isMuted, setIsMuted] = useState(false);
@@ -75,7 +79,7 @@ export function PeerBubbles({ roomId, playerId, onClose, onStreamsChange, onLoca
                     localVideoRef.current.srcObject = stream;
                     localVideoRef.current.muted = true;
                 }
-                if (onLocalStream) onLocalStream(stream);
+                onLocalStreamRef.current?.(stream);
             } catch (err) {
                 console.error("Error accessing media:", err);
                 setError("No se pudo acceder a la cámara/micrófono");
@@ -136,7 +140,7 @@ export function PeerBubbles({ roomId, playerId, onClose, onStreamsChange, onLoca
                         // Prevent duplicates
                         if (prev.find(p => p.peerId === targetPeerId)) return prev;
                         const next = [...prev, { peerId: targetPeerId, stream: event.streams[0] }];
-                        if (onStreamsChange) onStreamsChange(next);
+                        onStreamsChangeRef.current?.(next);
                         return next;
                     });
                 }
@@ -173,7 +177,7 @@ export function PeerBubbles({ roomId, playerId, onClose, onStreamsChange, onLoca
             }
             setRemoteStreams(prev => {
                 const next = prev.filter(p => p.peerId !== targetPeerId);
-                if (onStreamsChange) onStreamsChange(next);
+                onStreamsChangeRef.current?.(next);
                 return next;
             });
         };

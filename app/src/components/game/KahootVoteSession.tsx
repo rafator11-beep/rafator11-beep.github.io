@@ -206,7 +206,7 @@ export function KahootVoteSession({
         setTimeLeft(prev => {
           if (prev <= 1) {
             clearInterval(timerRef.current!);
-            if (isHost) revealResults();
+            if (isHost) revealResultsRef.current();
             return 0;
           }
           return prev - 1;
@@ -244,6 +244,8 @@ export function KahootVoteSession({
       payload: {},
     });
   }, []);
+  const revealResultsRef = useRef(revealResults);
+  revealResultsRef.current = revealResults;
 
   // Determine winner
   const winner = Object.entries(votes).sort((a, b) => b[1] - a[1])[0]?.[0];

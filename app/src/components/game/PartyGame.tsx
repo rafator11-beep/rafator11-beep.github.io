@@ -143,7 +143,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           lastShake = now;
           const overlayActive = gameState.showTrivia || gameState.showDuel || gameState.showImpostor || gameState.showMimica || gameState.showVoting;
           if (!overlayActive && !isMultiplayer) {
-            handleNext();
+            handleNextRef.current();
             if (navigator.vibrate) navigator.vibrate(60);
           }
         }
@@ -190,7 +190,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     if (players.length > 0 && !gameState.captainId && !gameState.showCaptainSelection && (mode === 'megamix' || mode === 'clasico')) {
       setGameState(prev => ({ ...prev, showCaptainSelection: true }));
     }
-  }, [players, gameState.captainId, mode]);
+  }, [players, gameState.captainId, gameState.showCaptainSelection, mode, setGameState]);
 
   const handleAdjustXP = (playerId: string, delta: number) => {
     addScore(playerId, delta);
@@ -386,7 +386,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         return () => { clearTimeout(timer); };
       }
     }
-  }, [currentIndex, isHost, mode, getCurrentContent, setGameState, performTurnAdvance,
+  }, [currentIndex, isHost, mode, getCurrentContent, setGameState, performTurnAdvance, players.length,
     gameState.showVirusAlert, gameState.showTrivia, gameState.showDuel,
     gameState.showImpostor, gameState.showMimica, gameState.currentNorma]);
 
@@ -412,12 +412,14 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
       toast.info("¡RONDA 1: Norma Global + Virus activados!");
     }
-  }, [gameState.round, currentIndex, mode, applyRandomVirus, players.length]);
+  }, [gameState.round, currentIndex, mode, applyRandomVirus, players.length, setGameState]);
 
   // Effect to broadcast state when Host changes things
+  const broadcastStateRef = useRef(broadcastState);
+  broadcastStateRef.current = broadcastState;
   useEffect(() => {
     if (isMultiplayer && isHost) {
-      broadcastState({
+      broadcastStateRef.current({
         mode,
         currentIndex,
         gameState,
@@ -427,7 +429,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         gameId: game?.id // BROADCAST GAME ID
       });
     }
-  }, [currentIndex, gameState, isHost, isMultiplayer, mode]);
+  }, [currentIndex, gameState, isHost, isMultiplayer, mode, currentPlayer?.id, currentQuestion, game?.id]);
 
   // Round Change Alert
   useEffect(() => {
@@ -441,10 +443,12 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
   }, [game?.current_round]);
 
   // TRACK BRUTAL STATS (Card Based)
+  const getCurrentContentRef = useRef(getCurrentContent);
+  getCurrentContentRef.current = getCurrentContent;
   useEffect(() => {
     if (!currentPlayer?.id) return;
 
-    const txt = getCurrentContent();
+    const txt = getCurrentContentRef.current();
     const type = currentQuestion?.type || detectRarity(txt);
 
     if (type === 'common' || type === 'rare') return;
@@ -471,7 +475,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       return prev;
     });
 
-  }, [currentIndex, currentPlayer?.id, currentQuestion]);
+  }, [currentIndex, currentPlayer?.id, currentQuestion, setBrutalCounts]);
 
   const { updateMultiplePlayers, rankings } = useRanking();
 
@@ -968,6 +972,8 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
   // `players` por Realtime (nueva referencia de array aunque el contenido no cambie)
   // re-ejecuta este efecto y reinicia el overlay (duelo/virus/impostor) ya abierto.
   const handledTriggerIndexRef = useRef<number>(-1);
+  const getMemorySummaryRef = useRef(getMemorySummary);
+  getMemorySummaryRef.current = getMemorySummary;
   useEffect(() => {
     if (!currentText || currentText === 'Siguiente carta' || currentText === 'Cargando pregunta...') return;
 
@@ -979,11 +985,9 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       const triggerType = triggerParts[1];
 
       if (triggerType === 'TRIVIA_FUTBOL') {
-        // @ts-ignore
         loadSpecificQuestion?.('futbol');
         setGameState(prev => ({ ...prev, showTrivia: true }));
       } else if (triggerType === 'TRIVIA_CULTURA') {
-        // @ts-ignore
         loadSpecificQuestion?.('cultura');
         setGameState(prev => ({ ...prev, showTrivia: true }));
       } else if (triggerType === 'VIRUS') {
@@ -1117,7 +1121,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         }
       } else if (triggerType === 'TORNEO') {
         if (players.length >= 2 && !showTorneoRound) {
-          buildTorneoMatch(gameEvents, DUEL_POOL, getMemorySummary()).then(match => {
+          buildTorneoMatch(gameEvents, DUEL_POOL, getMemorySummaryRef.current()).then(match => {
             if (match) {
               setTorneoMatch(match);
               setShowTorneoRound(true);
@@ -1153,7 +1157,8 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       }
     }
 
-  }, [currentText, currentIndex, advanceTurn, applyRandomVirus, currentPlayer, players, setGameState, loadSpecificQuestion, showTorneoRound, buildTorneoMatch, gameEvents, setTorneoMatch]); // Mejora 1: Correct dependencies
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- gameState solo se lee (round, tipos); depender de él re-ejecutaría el detector en cada cambio de estado
+  }, [currentText, currentIndex, advanceTurn, applyRandomVirus, currentPlayer, players, setGameState, loadSpecificQuestion, showTorneoRound, buildTorneoMatch, gameEvents, setTorneoMatch]);
 
   // ── Inyección de carta IA cada 10 cartas + Auto-Torneo cada 10 turnos ─────
   useEffect(() => {
@@ -1197,7 +1202,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       // [P0 VALIDATION] Ensure we have teams and participants
       if (teams.length < 2) {
         if (isHost) toast.error("Se necesitan al menos 2 equipos para este modo.");
-        handleNext();
+        handleNextRef.current();
         return;
       }
 
@@ -1214,10 +1219,10 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       } else {
         // [STABILITY] If current player has no team, move on to avoid block
         console.warn("YoNuncaEquipos: Current player has no team. Skipping.");
-        handleNext();
+        handleNextRef.current();
       }
     }
-  }, [mode, currentText, gameState.yoNuncaEquiposPhase, currentPlayer, teams.length]);
+  }, [mode, currentText, gameState.yoNuncaEquiposPhase, currentPlayer, teams.length, isHost, setGameState]);
 
   // Handle Virus Expiration Notifications
   const prevVirusesRef = useRef(playerViruses);
@@ -1299,6 +1304,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       });
       setShowRoundSummary(true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- cierre de ronda: solo al cambiar ronda/marcador; saveGameToHistory y compañía se recrean en cada render
   }, [gameOver, showRoundSummary, gameState.round, scores, players]);
 
   return (
@@ -1932,16 +1938,6 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
       {/* Main Content Area */}
       <main className={`flex-1 flex flex-col items-center justify-center p-4 relative transition-opacity duration-300 ${isMultiplayer && !isHost && (currentPlayer?.id !== localPlayerId) ? 'opacity-80 pointer-events-none' : ''}`}>
-        {/* Turn Blocker Overlay */}
-        {isMultiplayer && !isHost && false && (
-          <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-auto">
-            <div className="bg-gradient-to-r from-black/80 to-slate-900/80 text-white px-6 py-3 rounded-full backdrop-blur-md border border-white/10 animate-pulse shadow-2xl skew-x-[-10deg]">
-              <span className="font-bold text-yellow-500 mr-2">⏳ ESPERANDO A:</span>
-              <span className="font-mono text-xl">{currentPlayer?.name.toUpperCase()}</span>
-            </div>
-          </div>
-        )}
-
         {/* Turn Flash Overlay */}
         <TurnFlash
           playerName={currentPlayer?.name || ''}

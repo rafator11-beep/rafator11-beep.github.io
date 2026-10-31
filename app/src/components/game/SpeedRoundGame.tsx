@@ -65,7 +65,7 @@ export function SpeedRoundGame({ onExit, players }: SpeedRoundGameProps) {
       setTimeLeft(prev => {
         if (prev <= 1) {
           clearInterval(timerRef.current!);
-          handleAnswer(-1); // timeout
+          handleAnswerRef.current(-1); // timeout
           return 0;
         }
         return prev - 1;
@@ -112,6 +112,8 @@ export function SpeedRoundGame({ onExit, players }: SpeedRoundGameProps) {
       }
     }, 1200);
   }, [selectedAnswer, questions, currentIndex, combo, bestCombo, timeLeft]);
+  const handleAnswerRef = useRef(handleAnswer);
+  handleAnswerRef.current = handleAnswer;
 
   const currentQ = questions[currentIndex];
   const progress = questions.length > 0 ? ((currentIndex) / questions.length) * 100 : 0;

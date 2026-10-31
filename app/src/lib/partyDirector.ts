@@ -10,7 +10,7 @@
  * imports existentes (ver src/services/geminiClient.ts).
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any -- firmas heredadas de la antigua capa de IA */
+ 
 import { impostorRounds } from '@/data/impostorContent';
 
 // ─── Utilidades ────────────────────────────────────────────────────────────

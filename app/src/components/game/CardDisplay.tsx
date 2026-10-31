@@ -352,7 +352,7 @@ export const CardDisplay = React.memo(({
                         {/* TTS */}
                         <motion.button
                             whileTap={{ scale: 0.88 }}
-                            onClick={e => { e.stopPropagation(); speaking ? cancel() : speak(); }}
+                            onClick={e => { e.stopPropagation(); if (speaking) cancel(); else speak(); }}
                             className="p-2.5 rounded-2xl bg-white/10 border border-white/15 text-white"
                         >
                             {speaking ? <VolumeX className="w-4 h-4 text-red-400" /> : <Volume2 className="w-4 h-4" />}

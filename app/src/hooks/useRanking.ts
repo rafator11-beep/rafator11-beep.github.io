@@ -349,7 +349,7 @@ export function useRanking() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [fetchRankings]);
+  }, [fetchRankings, instanceId]);
 
   const updatePlayerScore = async (
     playerName: string,

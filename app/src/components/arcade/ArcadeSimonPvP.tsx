@@ -56,7 +56,7 @@ export function ArcadeSimonPvP({ roomId, playerId, onClose }: ArcadeSimonPvPProp
             })
             .on('broadcast', { event: 'start_game' }, ({ payload }) => {
                 setSequence(payload.initialSequence);
-                startCountdown(payload.initialSequence);
+                startCountdownRef.current(payload.initialSequence);
             })
             .on('broadcast', { event: 'died' }, () => {
                 setWinner(effectivePlayerId);
@@ -103,6 +103,8 @@ export function ArcadeSimonPvP({ roomId, playerId, onClose }: ArcadeSimonPvPProp
             playSequence(seq);
         }, 3000);
     };
+    const startCountdownRef = useRef(startCountdown);
+    startCountdownRef.current = startCountdown;
 
     const playSequence = async (seq: ColorCode[]) => {
         setPhase('observing');

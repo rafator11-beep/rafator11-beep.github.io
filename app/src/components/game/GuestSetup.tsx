@@ -33,6 +33,7 @@ export function GuestSetup({ onJoin, onBack }: GuestSetupProps) {
     if (profile?.avatar_url && !avatarUrl) {
        setAvatarUrl(profile.avatar_url);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- solo rellenar con el perfil cuando llega, sin pisar lo que el usuario escriba
   }, [profile]);
 
   const [detectedGameMode, setDetectedGameMode] = useState<string | null>(null);
