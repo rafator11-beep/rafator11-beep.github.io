@@ -48,7 +48,7 @@ export function GlobalPresence() {
         roomOne
             .on('presence', { event: 'sync' }, () => {
                 const newState = roomOne.presenceState();
-                const users = [];
+                const users: any[] = [];
                 let count = 0;
 
                 for (const id in newState) {

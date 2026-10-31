@@ -109,7 +109,7 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
     try {
       await addPlayer(name, avatarUrl || undefined);
       if (!name.toLowerCase().includes('bot')) {
-        savePlayer(name, avatarUrl);
+        savePlayer(name, avatarUrl ?? null);
       }
     } catch (err) {
       console.error('Error adding player:', err);

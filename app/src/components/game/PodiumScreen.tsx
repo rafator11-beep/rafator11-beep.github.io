@@ -108,7 +108,7 @@ interface PodiumPlayer {
   id: string;
   name: string;
   score: number;
-  avatar_url?: string;
+  avatar_url?: string | null;
 }
 
 interface TrackingData {

@@ -240,7 +240,7 @@ export function GamePlay({ onExit, isTeamMode = false, roomId = null, isHost = f
           </Button>
           <div>
             <h1 className="text-xl font-bold flex items-center gap-2">
-              {modeInfo.icon} {modeInfo.name}
+              {modeInfo?.icon} {modeInfo?.name}
             </h1>
             <p className="text-sm text-muted-foreground">
               Ronda {game.current_round}
@@ -296,7 +296,7 @@ export function GamePlay({ onExit, isTeamMode = false, roomId = null, isHost = f
           <Scoreboard
             players={players}
             teams={teams}
-            showTeams={modeInfo.teamBased}
+            showTeams={modeInfo?.teamBased}
             currentPlayerId={currentPlayer?.id}
           />
 

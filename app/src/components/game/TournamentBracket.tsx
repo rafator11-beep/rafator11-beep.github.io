@@ -9,7 +9,7 @@ import { motion } from 'framer-motion';
 export interface BracketPlayer {
   id: string;
   name: string;
-  avatar_url?: string;
+  avatar_url?: string | null;
 }
 
 export interface BracketMatch {

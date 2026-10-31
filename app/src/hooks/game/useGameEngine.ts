@@ -30,7 +30,7 @@ export interface GameState {
   showNormaGlobal?: boolean; // Norma global overlay
   showBocaCerrada?: boolean;
   currentBocaCerrada?: string | null;
-  virusPlayerId: string | null;
+  virusPlayerId?: string | null;
 
   // Data for specific screens
   currentDrinkingGame: any | null;
@@ -45,7 +45,7 @@ export interface GameState {
   impostorData?: {
     currentImpostorReal: string | null;
     currentImpostorFake: string | null;
-    impostorPlayerId: string | null;
+    impostorPlayerId?: string | null;
   };
   // IDs de TODOS los impostores de la ronda actual (puede haber más de 1 según
   // el número de jugadores) y el "buzón" con el rol+palabra que le toca ver a
@@ -81,7 +81,7 @@ export interface GameState {
 export interface TournamentBracketPlayerSnap {
   id: string;
   name: string;
-  avatar_url?: string;
+  avatar_url?: string | null;
 }
 
 export interface TournamentBracketMatchSnap {

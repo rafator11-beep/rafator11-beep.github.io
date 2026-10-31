@@ -32,7 +32,7 @@ export function ArcadeTicTacToe({ roomId, playerId, onClose }: ArcadeTicTacToePr
     const [timeLeft, setTimeLeft] = useState(3);
 
     const channelRef = useRef<any>(null);
-    const timerRef = useRef<NodeJS.Timeout>(null);
+    const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     // Sync network
     useEffect(() => {
@@ -205,7 +205,7 @@ export function ArcadeTicTacToe({ roomId, playerId, onClose }: ArcadeTicTacToePr
             [0, 4, 8], [2, 4, 6]           // diagonals
         ];
 
-        let foundWinner = null;
+        let foundWinner: PlayerSymbol | null = null;
         for (let line of winningLines) {
             const [a, b, c] = line;
             if (newBoard[a] && newBoard[a] === newBoard[b] && newBoard[a] === newBoard[c]) {

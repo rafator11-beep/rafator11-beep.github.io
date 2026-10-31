@@ -5,7 +5,7 @@ import { Crown, ChevronLeft, X } from 'lucide-react';
 interface Player {
   id: string;
   name: string;
-  avatar_url?: string;
+  avatar_url?: string | null;
 }
 
 type CaptainCmd = 'drink' | 'virus' | 'norma' | 'all' | 'double' | null;

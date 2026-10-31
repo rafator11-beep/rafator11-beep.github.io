@@ -30,7 +30,7 @@ export function useMultiplayer(
 
             setConnectionStatus('JOINING');
 
-            channel = supabase.channel(`room:${roomId}`, {
+            const ch = supabase.channel(`room:${roomId}`, {
                 config: {
                     presence: {
                         key: playerId || playerName,
@@ -38,7 +38,8 @@ export function useMultiplayer(
                 },
             });
 
-            channel
+            channel = ch;
+            ch
                 .on('broadcast', { event: 'game_state' }, ({ payload }) => {
                     if (!isHost) {
                         onGameStateUpdate(payload);

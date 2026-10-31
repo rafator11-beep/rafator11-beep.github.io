@@ -223,7 +223,7 @@ export function useGame(gameId: string | null) {
     return data;
   };
 
-  const addPlayer = async (name: string, avatarUrl?: string) => {
+  const addPlayer = async (name: string, avatarUrl?: string | null) => {
     // If offline, we might generate ID locally if gameId is present in local context
     if (!isSupabaseConfigured) {
       if (!game) throw new Error('No active game found locally');

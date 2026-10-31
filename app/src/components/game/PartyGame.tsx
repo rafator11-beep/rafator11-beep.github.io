@@ -596,7 +596,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           name: p.name,
           score: scores[p.id] || 0,
           won: winner && p.id === winner.id,
-          avatarUrl: p.avatar_url,
+          avatarUrl: p.avatar_url ?? undefined,
           gameMode: mode,
           brutalMeta: brutalCounts ? brutalCounts[p.id] : undefined
         })));
@@ -1962,7 +1962,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
             <p className="text-amber-200 text-sm font-bold flex-1 leading-tight line-clamp-2">
               {gameState.currentNorma.replace(/NORMA:\s*/i, '').replace(/📜\s*/g, '')}
             </p>
-            {gameState.currentNormaTurnsRemaining > 0 && (
+            {(gameState.currentNormaTurnsRemaining ?? 0) > 0 && (
               <span className="text-amber-400 text-[10px] font-black shrink-0 bg-amber-500/20 px-2 py-0.5 rounded-full">
                 {gameState.currentNormaTurnsRemaining}T
               </span>
@@ -2432,7 +2432,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
             players={players}
             teams={teams}
             onNext={handleNext}
-            localPlayerId={localPlayerId}
+            localPlayerId={localPlayerId ?? undefined}
             isHost={isHost}
             isMultiplayer={isMultiplayer}
             addScore={addScore}

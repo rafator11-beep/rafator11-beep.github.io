@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 interface TurnFlashProps {
   playerName: string;
-  avatarUrl?: string;
+  avatarUrl?: string | null;
   playerIndex: number;
   visible: boolean;
   onDismiss: () => void;

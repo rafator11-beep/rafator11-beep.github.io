@@ -6933,7 +6933,7 @@ function shuffleArray<T>(array: T[]): T[] {
 // Get megamix with trivia questions interspersed
 export function getMegamixWithTrivia(allPools) {
   const categories = Object.keys(allPools);
-  let lastCategory = null;
+  let lastCategory: string | null = null;
 
   return function getNextMegaMix() {
     const available = categories.filter(c => c !== lastCategory);

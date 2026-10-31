@@ -28,7 +28,7 @@ export function ArcadeQuickDraw({ roomId, playerId, onClose }: ArcadeQuickDrawPr
 
     const channelRef = useRef<any>(null);
     const drawStartTimeRef = useRef<number>(0);
-    const timeoutRef = useRef<NodeJS.Timeout>(null);
+    const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => {
         if (!effectivePlayerId) return;
