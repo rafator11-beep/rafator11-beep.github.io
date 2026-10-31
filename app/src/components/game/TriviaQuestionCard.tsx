@@ -26,7 +26,48 @@ interface TriviaQuestionCardProps {
 
 type Comodin = '50:50' | 'publico' | 'llamada';
 
-export function TriviaQuestionCard({
+// La pantalla de carga vive en su propio componente para que la tarjeta real
+// (llena de hooks) solo se monte con una pregunta válida y nunca cambie el
+// orden de hooks entre renders.
+export function TriviaQuestionCard(props: TriviaQuestionCardProps) {
+  const { question, onAnswer } = props;
+  const hasOptions = !!question && Array.isArray(question.options) && question.options.length > 0;
+  const onAnswerRef = useRef(onAnswer);
+  onAnswerRef.current = onAnswer;
+
+  // Auto-skip after 3 seconds to avoid permanent loading screen
+  useEffect(() => {
+    if (hasOptions) return;
+    const autoSkipTimer = setTimeout(() => onAnswerRef.current(false, 0), 3000);
+    return () => clearTimeout(autoSkipTimer);
+  }, [hasOptions]);
+
+  if (!hasOptions) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="w-full max-w-sm mx-auto h-[75vh] min-h-[500px] flex flex-col items-center justify-center relative rounded-[2.5rem] overflow-hidden shadow-2xl bg-[url('/modern_bg.png')] bg-cover bg-center border border-white/10"
+      >
+        <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-md" />
+        <div className="relative z-10 flex flex-col items-center p-8 text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-800 flex items-center justify-center border-2 border-white/20">
+            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+            </div>
+            <h2 className="text-xl font-bold text-white mb-2">Cargando pregunta...</h2>
+            <p className="text-sm text-white/40 mb-3">Saltando automáticamente en 3s...</p>
+            <Button onClick={() => onAnswer(false, 0)} variant="ghost" size="sm" className="text-white bg-white/10 hover:bg-white/20 rounded-full px-6">
+            Saltar ahora
+            </Button>
+        </div>
+      </motion.div>
+    );
+  }
+
+  return <TriviaQuestionCardContent {...props} />;
+}
+
+function TriviaQuestionCardContent({
   question,
   onAnswer,
   playerName,
@@ -52,39 +93,6 @@ export function TriviaQuestionCard({
   const correctIndex = typeof question?.correctIndex === 'number' 
     ? Math.max(0, Math.min(question.correctIndex, options.length - 1)) 
     : 0;
-
-  // CRITICAL GUARD: Prevent .map of undefined crashes
-  // Auto-skip after 3 seconds to avoid permanent loading screen
-  useEffect(() => {
-    if (!question || !options || !Array.isArray(options) || options.length === 0) {
-      const autoSkipTimer = setTimeout(() => {
-        onAnswer(false, 0);
-      }, 3000);
-      return () => clearTimeout(autoSkipTimer);
-    }
-  }, [question, options]);
-
-  if (!question || !options || !Array.isArray(options) || options.length === 0) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-sm mx-auto h-[75vh] min-h-[500px] flex flex-col items-center justify-center relative rounded-[2.5rem] overflow-hidden shadow-2xl bg-[url('/modern_bg.png')] bg-cover bg-center border border-white/10"
-      >
-        <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-md" />
-        <div className="relative z-10 flex flex-col items-center p-8 text-center">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-800 flex items-center justify-center border-2 border-white/20">
-            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-            </div>
-            <h2 className="text-xl font-bold text-white mb-2">Cargando pregunta...</h2>
-            <p className="text-sm text-white/40 mb-3">Saltando automáticamente en 3s...</p>
-            <Button onClick={() => onAnswer(false, 0)} variant="ghost" size="sm" className="text-white bg-white/10 hover:bg-white/20 rounded-full px-6">
-            Saltar ahora
-            </Button>
-        </div>
-      </motion.div>
-    );
-  }
 
   // Reset state when the question changes
   useEffect(() => {

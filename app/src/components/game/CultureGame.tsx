@@ -106,7 +106,7 @@ export default function CultureGame() {
     }
   }, [currentPlayers, navigate]);
 
-  const useLifeline = useCallback((lifelineId: 'fifty' | 'hint' | 'change') => {
+  const applyLifeline = useCallback((lifelineId: 'fifty' | 'hint' | 'change') => {
     if (!currentPlayer || !currentQuestion) return;
 
     const playerLifelines = lifelines[currentPlayer.id];
@@ -318,7 +318,7 @@ export default function CultureGame() {
           {playerLifelines.map(lifeline => (
             <button
               key={lifeline.id}
-              onClick={() => useLifeline(lifeline.id)}
+              onClick={() => applyLifeline(lifeline.id)}
               disabled={lifeline.used || showResult}
               className={`flex flex-col items-center gap-1 p-3 rounded-xl transition-all ${
                 lifeline.used
