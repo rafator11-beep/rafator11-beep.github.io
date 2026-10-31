@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Trophy, AlertCircle, Video, VideoOff, Copy, Crown, Plus, Minus, EyeOff, Cast, TrendingUp, Music } from 'lucide-react';
+import { ArrowLeft, ArrowRight, AlertCircle, Video, VideoOff, Copy, Crown, Plus, Minus, EyeOff, Cast } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { isGeminiConfigured, geminiGenerateImpostorRound } from '@/services/geminiClient';
 import { toast } from 'sonner';
@@ -68,231 +68,18 @@ import { QuestionVote } from './QuestionVote';
 import { YoNuncaEquiposFlow } from './YoNuncaEquiposFlow';
 import { PodiumScreen, computePartyAwards } from './PodiumScreen';
 import confetti from 'canvas-confetti';
+import { XP } from './party/xp';
+import { DynamicBackground, VirusFlash, BocaCerradaOverlay } from './party/PartyVisuals';
+import { useScrambleText } from './party/useScrambleText';
+import { PlayerProfilesBottom } from './party/PlayerProfilesBottom';
+import { VotingOverlay } from './party/VotingOverlay';
+import { ChromecastModal } from './party/ChromecastModal';
+import { RankingDialog } from './party/RankingDialog';
+import { VirusAlertSheet } from './party/VirusAlertSheet';
+
+export { XP };
 
 
-// ─── XP Rewards (fuente única de verdad) ─────────────────────────────────────
-export const XP = {
-  RETO_DONE:        30,   // completar un reto individual
-  RETO_FAIL:         0,   // fallar reto (penalización es beber, no perder XP)
-  VERDAD_TOLD:      20,   // contar la verdad en "verdad o bebe"
-  VERDAD_DRINK:      5,   // pasar y beber (valentía al menos)
-  YO_NUNCA_YES:     12,   // haber hecho el yo nunca (honestidad)
-  YO_NUNCA_NO:       3,   // no haberlo hecho
-  VOTED_MOST:       15,   // ser señalado en votación (popularidad)
-  DUELO_WIN:        45,   // ganar un duelo
-  DUELO_LOSE:        8,   // perder duelo (consolación)
-  TORNEO_WIN:       80,   // ganar torneo
-  TORNEO_LOSE:      10,   // participar en torneo
-  IMPOSTOR_CAUGHT:  25,   // grupo detecta al impostor
-  IMPOSTOR_WIN:     60,   // impostor sobrevive sin ser detectado
-  NORMA_CUMPLIDA:   10,   // respetar norma activa hasta el final
-  CAPITAN_ACTION:   15,   // el capitán ejerce un comando
-  DRINK_BRAVE:       5,   // beber voluntariamente (valentía)
-} as const;
-
-// ─── Visual Improvements Sub-components ──────────────────────────────────────
-
-const RARITY_CONFIG = {
-  common: { orbLeft: 'rgba(99,102,241,0.08)', orbRight: 'rgba(139,92,246,0.08)', via: 'slate-900/50' },
-  rare: { orbLeft: 'rgba(59,130,246,0.18)', orbRight: 'rgba(99,102,241,0.15)', via: 'blue-950/40' },
-  legendary: { orbLeft: 'rgba(251,191,36,0.20)', orbRight: 'rgba(245,158,11,0.15)', via: 'amber-950/40' },
-  chaos: { orbLeft: 'rgba(239,68,68,0.22)', orbRight: 'rgba(220,38,38,0.15)', via: 'red-950/50' },
-  virus: { orbLeft: 'rgba(34,197,94,0.18)', orbRight: 'rgba(16,185,129,0.14)', via: 'green-950/40' },
-} as const;
-
-const DynamicBackground = ({ rarity }: { rarity: keyof typeof RARITY_CONFIG }) => {
-  const c = RARITY_CONFIG[rarity] ?? RARITY_CONFIG.common;
-  return (
-    <div className="fixed inset-0 z-0 pointer-events-none">
-      <div className={`absolute inset-0 bg-gradient-to-br from-slate-950 
-        via-${c.via} to-slate-950 transition-all duration-[800ms] ease-in-out`} />
-      <motion.div
-        className="absolute top-[-10%] left-[-10%] w-[45%] h-[45%] rounded-full blur-[120px]"
-        animate={{ backgroundColor: c.orbLeft }}
-        transition={{ duration: 0.8, ease: 'easeInOut' }}
-        style={{ backgroundColor: c.orbLeft }}
-      />
-      <motion.div
-        className="absolute bottom-[-10%] right-[-10%] w-[45%] h-[45%] rounded-full blur-[120px]"
-        animate={{ backgroundColor: c.orbRight }}
-        transition={{ duration: 0.8, ease: 'easeInOut', delay: 0.1 }}
-        style={{ backgroundColor: c.orbRight }}
-      />
-      <div className="absolute inset-0 opacity-[0.03] bg-[url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E')] bg-repeat" />
-    </div>
-  );
-};
-
-const AnimatedXP = ({ value, playerId }: { value: number; playerId: string }) => {
-  const prevRef = useRef(value);
-  const [popping, setPopping] = useState(false);
-  const [floater, setFloater] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (value > prevRef.current) {
-      const diff = value - prevRef.current;
-      setPopping(true);
-      setFloater(diff);
-      const t = setTimeout(() => { setPopping(false); setFloater(null); }, 1200);
-      prevRef.current = value;
-      return () => clearTimeout(t);
-    }
-    prevRef.current = value;
-  }, [value]);
-
-  return (
-    <div className="relative flex items-center justify-center">
-      <motion.span
-        className="text-[11px] font-black text-white px-2 py-0.5 rounded-full bg-white/5 border border-white/10 tabular-nums shadow-[0_0_10px_rgba(255,255,255,0.1)]"
-        animate={popping ? {
-          scale: [1, 1.4, 1],
-          color: ['#fff', '#10b981', '#fff'],
-          rotate: [0, -10, 10, 0]
-        } : { scale: 1 }}
-        transition={{ duration: 0.5, type: 'spring', stiffness: 400 }}
-      >
-        {value} <span className="text-[8px] opacity-60 ml-0.5 font-bold uppercase tracking-widest">XP</span>
-      </motion.span>
-      <AnimatePresence>
-        {floater !== null && (
-          <motion.span
-            key={`${playerId}-${value}-${floater}`}
-            className="absolute -top-10 text-[14px] font-black text-emerald-400 drop-shadow-[0_0_12px_rgba(16,185,129,1)] z-50 pointer-events-none"
-            initial={{ y: 20, opacity: 0, scale: 0.2, rotate: Math.random() * 20 - 10 }}
-            animate={{ y: -40, opacity: 1, scale: 1.5, rotate: Math.random() * 40 - 20 }}
-            exit={{ y: -60, opacity: 0, scale: 2 }}
-            transition={{ duration: 1, type: "spring", stiffness: 200, damping: 12 }}
-          >
-            +{floater}
-          </motion.span>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
-
-const TurnBanner = ({ playerName, isCaptain = false }: { playerName: string; isCaptain?: boolean }) => (
-  <motion.div
-    className="fixed top-24 left-0 right-0 z-[200] flex justify-center pointer-events-none px-4"
-    initial={{ y: -50, opacity: 0 }}
-    animate={{ y: 0, opacity: 1 }}
-    exit={{ y: -50, opacity: 0 }}
-    transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-  >
-    <div className={`backdrop-blur-2xl border-2 px-8 py-3 rounded-full flex items-center gap-3 ${
-      isCaptain
-        ? 'bg-amber-950/90 border-amber-400/70 shadow-[0_10px_40px_rgba(251,191,36,0.5)]'
-        : 'bg-slate-900/90 border-primary/50 shadow-[0_10px_40px_rgba(var(--primary-rgb),0.4)]'
-    }`}>
-      {isCaptain ? (
-        <Crown className="w-4 h-4 text-amber-400 fill-amber-400 animate-pulse" />
-      ) : (
-        <div className="w-2 h-2 rounded-full bg-primary animate-ping" />
-      )}
-      <span className={`text-[10px] font-black uppercase tracking-[0.3em] ${isCaptain ? 'text-amber-400' : 'text-primary/80'}`}>
-        {isCaptain ? 'TURNO DEL CAPITÁN' : 'Turno de'}
-      </span>
-      <span className={`font-black text-xl uppercase tracking-tighter ${isCaptain ? 'text-amber-300' : 'text-white'}`}>
-        {playerName}
-      </span>
-    </div>
-  </motion.div>
-);
-
-const VirusFlash = ({ show }: { show: boolean }) => (
-  <AnimatePresence>
-    {show && (
-      <motion.div
-        className="fixed inset-0 z-[160] pointer-events-none"
-        initial={{ opacity: 0, scale: 1.1 }}
-        animate={{
-          opacity: [0, 0.8, 0],
-          scale: [1.1, 1, 1],
-          backgroundColor: ['#22c55e', '#166534', '#22c55e']
-        }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
-      >
-        <div className="absolute inset-0 opacity-20 invert mix-blend-overlay" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }} />
-      </motion.div>
-    )}
-  </AnimatePresence>
-);
-
-const BocaCerradaOverlay = ({ text, playerName, onDone }: { text: string; playerName: string; onDone: () => void }) => {
-  const [holding, setHolding] = useState(false);
-  const [confirmed, setConfirmed] = useState(false);
-  return (
-    <div className="flex flex-col items-center gap-6 p-6 text-center">
-      <div className="text-5xl" style={{ filter: 'drop-shadow(0 0 15px rgba(168,85,247,0.8))' }}>🤐</div>
-      <div>
-        <p className="text-[9px] text-purple-400 font-black uppercase tracking-[0.4em] mb-1">BOCA CERRADA</p>
-        <p className="text-white font-black text-xl">{playerName}</p>
-        <p className="text-white/40 text-xs mt-0.5">debes decirlo con los labios cerrados</p>
-      </div>
-
-      <motion.button
-        onPointerDown={() => setHolding(true)}
-        onPointerUp={() => setHolding(false)}
-        onPointerLeave={() => setHolding(false)}
-        className="w-full min-h-[130px] rounded-2xl border-2 border-dashed border-purple-500/50 flex flex-col items-center justify-center gap-3 relative overflow-hidden select-none touch-none active:scale-[0.98] transition-transform"
-        style={{ background: holding ? 'rgba(168,85,247,0.15)' : 'rgba(0,0,0,0.4)' }}
-      >
-        <AnimatePresence mode="wait">
-          {!holding ? (
-            <motion.div key="locked" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center gap-2">
-              <EyeOff className="w-8 h-8 text-purple-400" />
-              <p className="text-purple-300 font-black text-[10px] uppercase tracking-widest">Mantén pulsado para ver</p>
-            </motion.div>
-          ) : (
-            <motion.div key="shown" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="px-4 text-center">
-              <p className="text-white font-black text-xl leading-snug">{text}</p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.button>
-
-      {!confirmed ? (
-        <button
-          onClick={() => setConfirmed(true)}
-          className="w-full py-4 rounded-2xl bg-white/10 border border-white/20 text-white font-black text-sm uppercase tracking-widest hover:bg-white/20 active:scale-95 transition-all"
-        >
-          Ya lo he dicho 🤐
-        </button>
-      ) : (
-        <button
-          onClick={onDone}
-          className="w-full py-4 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-black text-sm uppercase tracking-widest active:scale-95 transition-all shadow-lg"
-        >
-          El grupo lo adivina → Siguiente ▶
-        </button>
-      )}
-    </div>
-  );
-};
-
-function useScrambleText(target: string, active: boolean) {
-  const [display, setDisplay] = useState(target);
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#!';
-
-  useEffect(() => {
-    if (!active) { setDisplay(target); return; }
-    let iterations = 0;
-    const max = target.length * 3;
-    const t = setInterval(() => {
-      setDisplay(
-        target.split('').map((char, i) => {
-          if (i < Math.floor(iterations / 3)) return char;
-          return chars[Math.floor(Math.random() * chars.length)];
-        }).join('')
-      );
-      if (++iterations >= max) clearInterval(t);
-    }, 40);
-    return () => clearInterval(t);
-  }, [target, active]);
-
-  return display;
-}
 
 interface PartyGameProps {
   mode: GameMode;
@@ -308,105 +95,6 @@ interface PartyGameProps {
   spectatorRoomId?: string | null;
 }
 
-// New Bottom Profiles Component with Virus Support and Captain XP Controls
-const PlayerProfilesBottom = ({ players, currentPlayer, scores, playerViruses = [], mode, remoteStreams = [], captainId, onAdjustXP, drinkCounts = {} }: { players: any[], currentPlayer: any, scores: any, playerViruses?: any[], mode: GameMode, remoteStreams?: any[], captainId?: string | null, onAdjustXP?: (pid: string, delta: number) => void, drinkCounts?: Record<string, number> }) => {
-  const [editMode, setEditMode] = useState(false); // Mejora 10: Edit mode for mobile
-
-  return (
-    <div className="fixed bottom-0 left-0 right-0 h-28 md:h-32 bg-slate-950/60 backdrop-blur-[24px] border-t border-white/10 flex items-center justify-center px-6 gap-6 z-[100] overflow-x-auto no-scrollbar shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
-      {/* Edit Mode Toggle Button */}
-      {captainId && (
-        <button
-          onClick={() => setEditMode(e => !e)}
-          className={`absolute top-2 right-3 w-8 h-8 rounded-lg flex items-center justify-center text-xs transition-all z-[120] ${editMode ? 'bg-amber-500 text-black shadow-[0_0_10px_rgba(245,158,11,0.5)]' : 'bg-white/10 text-white/50'}`}
-        >
-          {editMode ? '✅' : '✏️'}
-        </button>
-      )}
-
-      <div className="flex items-center gap-4 md:gap-8">
-        {players.map((p) => {
-          const isTurn = currentPlayer?.id === p.id;
-          const hasVirus = playerViruses.some(v => v.playerId === p.id);
-          const isCaptain = captainId === p.id;
-          const showVirus = hasVirus && (mode === 'megamix' || mode === 'clasico');
-          const remotePeer = remoteStreams?.find(s => s.peerId === p.id);
-
-          return (
-            <div key={p.id} className="flex flex-col items-center gap-1 relative group shrink-0">
-              {/* Captain Controls Overlay: visible on hover (desktop) OR editMode (mobile) */}
-              <div className={`absolute -top-12 left-1/2 -translate-x-1/2 flex gap-3 transition-all duration-300 z-[110] ${editMode ? 'opacity-100 scale-100' : 'opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100'}`}>
-                <button
-                  onClick={() => onAdjustXP?.(p.id, -5)}
-                  className="w-10 h-10 rounded-xl bg-red-500/90 text-white flex items-center justify-center shadow-[0_0_15px_rgba(239,68,68,0.4)] border border-white/20 hover:bg-red-600 active:scale-90 transition-all font-bold"
-                >
-                  <Minus className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => onAdjustXP?.(p.id, 5)}
-                  className="w-10 h-10 rounded-xl bg-green-500/90 text-white flex items-center justify-center shadow-[0_0_15px_rgba(34,197,94,0.4)] border border-white/20 hover:bg-green-600 active:scale-90 transition-all font-bold"
-                >
-                  <Plus className="w-5 h-5" />
-                </button>
-              </div>
-
-              <motion.div
-                animate={{
-                  scale: isTurn ? 1.15 : 1,
-                  borderColor: isCaptain ? '#fbbf24' : (hasVirus ? '#22c55e' : (isTurn ? 'var(--primary)' : 'transparent')),
-                  boxShadow: isCaptain ? '0 0 20px #fbbf24' : (hasVirus ? '0 0 15px #22c55e' : (isTurn ? '0 0 15px var(--primary)' : 'none'))
-                }}
-                className={`w-14 h-14 md:w-16 md:h-16 rounded-[22px] bg-slate-800/40 backdrop-blur-2xl border flex items-center justify-center text-lg font-bold relative overflow-hidden transition-all duration-500 ${isTurn ? 'border-primary/60' : 'border-white/5 opacity-60 hover:opacity-100 hover:scale-105'}`}
-              >
-                {isCaptain && (
-                  <div className="absolute top-0 right-0 p-1 bg-amber-500 rounded-bl-lg z-10">
-                    <Crown className="w-3 h-3 text-black" />
-                  </div>
-                )}
-                {remotePeer ? (
-                  <video
-                    autoPlay
-                    playsInline
-                    muted={p.id === currentPlayer?.id}
-                    ref={el => { if (el && remotePeer.stream) el.srcObject = remotePeer.stream; }}
-                    className="w-full h-full object-cover"
-                  />
-                ) : p.avatar_url ? (
-                  <img src={p.avatar_url} alt={p.name} className="w-full h-full object-cover" />
-                ) : (
-                  <span className={isTurn ? 'text-primary' : (isCaptain ? 'text-amber-400' : 'text-white/80')}>{p.name[0].toUpperCase()}</span>
-                )}
-                {showVirus && (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute inset-0 bg-green-500/20 animate-pulse pointer-events-none flex items-center justify-center"
-                  >
-                    <div className="w-full h-full border-2 border-green-500/50 rounded-[22px]" />
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                      className="absolute inset-0 border-t-2 border-green-400/80 rounded-full opacity-40"
-                    />
-                  </motion.div>
-                )}
-              </motion.div>
-              <div className="flex flex-col items-center">
-                <span className={`text-[10px] font-black uppercase tracking-widest ${isTurn ? 'text-primary' : (isCaptain ? 'text-amber-400' : 'text-white/40')}`}>
-                  {p.name}
-                </span>
-                <AnimatedXP value={scores[p.id] || 0} playerId={p.id} />
-                {(drinkCounts[p.id] || 0) > 0 && (
-                  <span className="text-[9px] text-amber-400/80 font-black mt-0.5">🍺{drinkCounts[p.id]}</span>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
 
 export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false, roomId = null, spectatorRoomId: spectatorRoomIdProp = null }: PartyGameProps) {
   const {
@@ -1631,173 +1319,24 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       />
 
       {/* ── VOTING OVERLAY — inmersivo ── */}
-      {(() => {
-        const isVoting = !!currentText && (
-          (currentText.toLowerCase().includes('¿quién') && !currentText.toLowerCase().includes('yo nunca')) ||
-          currentText.toLowerCase().includes('¿qué dos jugadores') ||
-          currentText.toLowerCase().includes('¿qué tres jugadores') ||
-          currentText.toLowerCase().includes('votación:') ||
-          currentText.toLowerCase().includes('todos a la vez') ||
-          currentText.toLowerCase().includes('señalad al')
-        );
-        let maxVotes = 1;
-        if (currentText?.toLowerCase().includes('dos jugadores')) maxVotes = 2;
-        if (currentText?.toLowerCase().includes('tres jugadores')) maxVotes = 3;
-
-        return (
-          <AnimatePresence>
-            {isVoting && (
-              <motion.div
-                key="voting-overlay"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[150] flex flex-col"
-                style={{ background: 'linear-gradient(180deg, rgba(88,28,135,0.97) 0%, rgba(15,10,30,0.99) 100%)' }}
-              >
-                {/* Orbes de fondo */}
-                <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full blur-[100px]"
-                    style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.35) 0%, transparent 70%)' }} />
-                  <div className="absolute bottom-0 right-0 w-64 h-64 rounded-full blur-[80px]"
-                    style={{ background: 'radial-gradient(circle, rgba(244,63,94,0.25) 0%, transparent 70%)' }} />
-                </div>
-
-                {/* Header */}
-                <div className="relative z-10 px-5 pt-safe pt-6 pb-4 text-center flex flex-col items-center">
-                  <motion.div
-                    initial={{ y: -20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.1 }}
-                  >
-                    <span className="text-4xl">🗳️</span>
-                    <h2 className="text-xl font-black text-white mt-2 uppercase tracking-tight">
-                      {maxVotes > 1 ? `Elige a ${maxVotes}` : '¿Quién es?'}
-                    </h2>
-                    <p className="text-sm text-white/70 mt-1 leading-snug px-4 max-w-xs mx-auto">
-                      {sanitizeCardText(currentText || '')}
-                    </p>
-                  </motion.div>
-                  {(isHost || !isMultiplayer) && (
-                    <button
-                      onClick={() => setShowKahoot({ active: true, mode: 'standard' })}
-                      className="mt-3 bg-yellow-400 text-black px-4 py-1.5 rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg flex items-center gap-1.5 hover:bg-yellow-300 transition-all"
-                    >
-                      ⚡ Lanzar modo Kahoot
-                    </button>
-                  )}
-                </div>
-
-                {/* Player grid */}
-                <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-4">
-                  <div className={`grid gap-3 ${players.length <= 4 ? 'grid-cols-2' : 'grid-cols-3'}`}>
-                    {players.map((p, i) => {
-                      const isSelected = gameState.votingSelections?.includes(p.id);
-                      return (
-                        <motion.button
-                          key={p.id}
-                          initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                          transition={{ delay: 0.05 * i, type: 'spring', stiffness: 300, damping: 22 }}
-                          whileTap={{ scale: 0.93 }}
-                          onClick={() => {
-                            const currentSelections = gameState.votingSelections || [];
-                            if (maxVotes === 1) {
-                              handleAdjustXP(p.id, 5);
-                              trackVote(p.id);
-                              setGameState(prev => ({ ...prev, votingSelections: [] }));
-                              handleNext();
-                            } else {
-                              if (currentSelections.includes(p.id)) {
-                                setGameState(prev => ({ ...prev, votingSelections: currentSelections.filter(id => id !== p.id) }));
-                              } else if (currentSelections.length < maxVotes) {
-                                setGameState(prev => ({ ...prev, votingSelections: [...currentSelections, p.id] }));
-                              }
-                            }
-                          }}
-                          className="relative flex flex-col items-center gap-2 p-4 rounded-[1.5rem] transition-all"
-                          style={{
-                            background: isSelected ? 'rgba(139,92,246,0.35)' : 'rgba(255,255,255,0.06)',
-                            border: `2px solid ${isSelected ? 'rgba(139,92,246,0.8)' : 'rgba(255,255,255,0.10)'}`,
-                            boxShadow: isSelected ? '0 0 24px rgba(139,92,246,0.4)' : 'none',
-                          }}
-                        >
-                          {/* Avatar */}
-                          <motion.div
-                            animate={isSelected ? { scale: 1.1 } : { scale: 1 }}
-                            className="relative"
-                          >
-                            <div className="w-16 h-16 rounded-full overflow-hidden border-2"
-                              style={{ borderColor: isSelected ? '#8b5cf6' : 'rgba(255,255,255,0.2)' }}>
-                              {p.avatar_url ? (
-                                <img src={p.avatar_url} className="w-full h-full object-cover" />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center text-xl font-black text-white"
-                                  style={{ background: isSelected ? 'rgba(139,92,246,0.5)' : 'rgba(255,255,255,0.1)' }}>
-                                  {p.name.charAt(0).toUpperCase()}
-                                </div>
-                              )}
-                            </div>
-                            {isSelected && (
-                              <motion.div
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-violet-500 flex items-center justify-center"
-                              >
-                                <span className="text-white text-xs font-black">✓</span>
-                              </motion.div>
-                            )}
-                          </motion.div>
-                          <span className="text-xs font-black uppercase tracking-wider text-white truncate w-full text-center">
-                            {p.name}
-                          </span>
-                          <span className="text-[9px] text-white/40 font-bold">
-                            {scores[p.id] || 0} XP
-                          </span>
-                        </motion.button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Bottom actions */}
-                <div className="relative z-10 px-4 pb-safe pb-6 pt-3 border-t border-white/8 space-y-2">
-                  {maxVotes > 1 && (
-                    <motion.button
-                      whileTap={{ scale: 0.97 }}
-                      disabled={(gameState.votingSelections?.length || 0) < maxVotes}
-                      onClick={() => {
-                        const selections = gameState.votingSelections || [];
-                        selections.forEach(id => {
-                          handleAdjustXP(id, 5);
-                          trackVote(id);
-                        });
-                        setGameState(prev => ({ ...prev, votingSelections: [] }));
-                        handleNext();
-                      }}
-                      className="w-full py-4 rounded-2xl font-black text-white text-base uppercase tracking-widest transition-all disabled:opacity-40"
-                      style={{
-                        background: 'linear-gradient(135deg, #7c3aed, #db2777)',
-                        boxShadow: '0 8px 24px rgba(124,58,237,0.4)',
-                        touchAction: 'manipulation',
-                      }}
-                    >
-                      Confirmar ({gameState.votingSelections?.length || 0}/{maxVotes})
-                    </motion.button>
-                  )}
-                  <button
-                    onClick={handleNext}
-                    className="w-full py-2.5 rounded-2xl text-xs font-bold text-white/40 uppercase tracking-widest border border-white/10"
-                    style={{ touchAction: 'manipulation' }}
-                  >
-                    Saltar ⏭
-                  </button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        );
-      })()}
+      <VotingOverlay
+        currentText={currentText}
+        players={players}
+        scores={scores}
+        votingSelections={gameState.votingSelections || []}
+        onSelectionsChange={ids => setGameState(prev => ({ ...prev, votingSelections: ids }))}
+        canLaunchKahoot={isHost || !isMultiplayer}
+        onLaunchKahoot={() => setShowKahoot({ active: true, mode: 'standard' })}
+        onConfirm={ids => {
+          ids.forEach(id => {
+            handleAdjustXP(id, 5);
+            trackVote(id);
+          });
+          setGameState(prev => ({ ...prev, votingSelections: [] }));
+          handleNext();
+        }}
+        onSkip={handleNext}
+      />
 
       {/* Top Bar with Chromecast.
           Antes: [Atrás, Cast] | [Capitán] | [Siguiente, Finalizar, "Ronda N"] con
@@ -1869,64 +1408,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       </header>
 
       {/* CHROMECAST MODAL */}
-      <Dialog open={showChromecastModal} onOpenChange={setShowChromecastModal}>
-        <DialogContent className="sm:max-w-md bg-slate-900 border-primary/20 text-white rounded-3xl z-[150]">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-black text-center flex items-center justify-center gap-2">
-              <Cast className="w-6 h-6 text-primary" />
-              Compartir en la TV
-            </DialogTitle>
-            <DialogDescription className="sr-only">Instrucciones para compartir la pantalla en TV</DialogDescription>
-          </DialogHeader>
-          <div className="py-6 space-y-6">
-            <p className="text-center text-slate-300">
-              Para ver el juego en tu televisor, utiliza la función de transmitir (Cast/Screen Mirroring) integrada en tu dispositivo:
-            </p>
-
-            <div className="grid gap-4">
-              <div className="bg-slate-800/50 p-4 rounded-xl border border-white/5">
-                <h3 className="font-bold flex items-center gap-2 mb-2"><TrendingUp className="w-4 h-4 text-blue-400" /> Dispositivos Android</h3>
-                <ol className="text-sm text-slate-400 list-decimal list-inside space-y-1">
-                  <li>Desliza hacia abajo desde la parte superior de la pantalla.</li>
-                  <li>Toca <strong>Emitir</strong> o <strong>Enviar pantalla</strong>.</li>
-                  <li>Selecciona tu TV o Chromecast en la lista.</li>
-                </ol>
-              </div>
-
-              <div className="bg-slate-800/50 p-4 rounded-xl border border-white/5">
-                <h3 className="font-bold flex items-center gap-2 mb-2"><Music className="w-4 h-4 text-pink-400" /> Dispositivos Apple (iOS)</h3>
-                <ol className="text-sm text-slate-400 list-decimal list-inside space-y-1">
-                  <li>Abre el <strong>Centro de control</strong>.</li>
-                  <li>Toca el icono de <strong>Duplicar pantalla</strong>.</li>
-                  <li>Selecciona tu Apple TV o televisor compatible.</li>
-                </ol>
-              </div>
-            </div>
-
-            <Button
-              className="w-full bg-primary hover:bg-primary-600 text-white font-bold h-14 rounded-xl shadow-lg border-2 border-primary/50 text-lg flex items-center justify-center gap-2"
-              onClick={async () => {
-                try {
-                  if (typeof navigator !== 'undefined' && 'presentation' in navigator && (navigator as any).presentation?.defaultRequest) {
-                    await (navigator as any).presentation.defaultRequest.start();
-                  } else if (typeof navigator !== 'undefined' && navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
-                    await navigator.mediaDevices.getDisplayMedia({ video: true });
-                  } else {
-                    throw new Error("No API");
-                  }
-                  setShowChromecastModal(false);
-                } catch (e) {
-                  alert("Tu navegador no soporta el Chromecast directo. Usa el menú 'Compartir/Transmitir' o despliega las opciones de control en iOS/Android.");
-                  setShowChromecastModal(false);
-                }
-              }}
-            >
-              <Cast className="w-5 h-5" />
-              CONECTAR A LA TV 📺
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ChromecastModal open={showChromecastModal} onOpenChange={setShowChromecastModal} />
 
       {/* Active Norma Display for Megamix (If a rule is active, show it globally) */}
       {
@@ -2090,94 +1572,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         </Dialog>
 
         {/* Ranking Dialog with Real Classification */}
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm" className="bg-transparent border-white/20 text-xs gap-1">
-              <Trophy className="w-3 h-3 text-yellow-500" />
-              Ranking
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto bg-gradient-to-r from-slate-900/80 to-slate-800/80 border border-white/10">
-            <DialogHeader>
-              <DialogTitle>Clasificación General</DialogTitle>
-              <DialogDescription>
-                Puntuaciones actuales y estadísticas históricas de los jugadores.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-3 py-4">
-              {[...players].sort((a, b) => (scores[b.id] || 0) - (scores[a.id] || 0)).map((p, i) => {
-                // Get real stats from localStorage rankings
-                const allRankings = (() => { try { return JSON.parse(localStorage.getItem('fiesta-party-local-rankings-v1') || '[]'); } catch { return []; } })();
-                const playerRanking = allRankings.find((r: any) => r.player_name?.toLowerCase() === p.name?.toLowerCase());
-
-                // Import classification inline
-                const getTitle = (r: any) => {
-                  if (!r) return { title: 'Nuevo', emoji: '🌟', color: 'text-slate-400' };
-                  const won = r.games_won || 0;
-                  const played = r.games_played || 0;
-                  const level = r.level || 1;
-                  const streak = r.win_streak || 0;
-                  if (won >= 100 && level >= 30) return { title: 'Leyenda Suprema', emoji: '👑', color: 'text-yellow-400' };
-                  if (played >= 200) return { title: 'Dios del Party', emoji: '⚡', color: 'text-purple-400' };
-                  if (streak >= 15) return { title: 'El Inmortal', emoji: '🔥', color: 'text-red-400' };
-                  if (won >= 50) return { title: 'Máquina de Ganar', emoji: '🏆', color: 'text-yellow-400' };
-                  if (played >= 100) return { title: 'El Incombustible', emoji: '🛡️', color: 'text-slate-300' };
-                  if (played >= 50) return { title: 'Veterano', emoji: '🎖️', color: 'text-amber-500' };
-                  if (won >= 20) return { title: 'El Imparable', emoji: '💪', color: 'text-orange-400' };
-                  if (won >= 10) return { title: 'Promesa', emoji: '⭐', color: 'text-yellow-300' };
-                  if (played >= 15) return { title: 'Explorador', emoji: '🧭', color: 'text-teal-400' };
-                  if (played >= 5) return { title: 'Aprendiz', emoji: '📖', color: 'text-slate-300' };
-                  if (played >= 1) return { title: 'Recién Llegado', emoji: '👋', color: 'text-slate-400' };
-                  return { title: 'Nuevo', emoji: '🌟', color: 'text-slate-500' };
-                };
-
-                const info = getTitle(playerRanking);
-                const realGamesPlayed = playerRanking?.games_played || 0;
-                const realGamesWon = playerRanking?.games_won || 0;
-                const realStreak = playerRanking?.win_streak || 0;
-                const winRate = realGamesPlayed > 0 ? Math.round((realGamesWon / realGamesPlayed) * 100) : 0;
-
-                return (
-                  <div key={p.id} className="p-3 rounded-xl bg-gradient-to-r from-slate-800/80 to-slate-700/80 border border-white/5">
-                    {/* Player header */}
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <span className="font-black text-lg text-white/60 w-6">{i + 1}</span>
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-slate-800/80 to-slate-700/80 flex items-center justify-center text-xs font-bold overflow-hidden border border-white/10">
-                          {p.avatar_url ? <img src={p.avatar_url} className="w-full h-full object-cover" /> : p.name.substring(0, 2).toUpperCase()}
-                        </div>
-                        <div>
-                          <p className="font-bold text-sm leading-tight text-white">{p.name}</p>
-                          <p className={`text-[10px] font-bold ${info.color}`}>{info.emoji} {info.title}</p>
-                        </div>
-                      </div>
-                      <span className="font-black text-lg text-yellow-500">{scores[p.id] || 0}</span>
-                    </div>
-                    {/* Real stats */}
-                    <div className="grid grid-cols-4 gap-1.5 text-center">
-                      <div className="bg-gradient-to-r from-slate-800/80 to-slate-700/80 rounded-lg p-1.5">
-                        <p className="text-[10px] text-white/60">Partidas</p>
-                        <p className="text-xs font-bold text-white">{realGamesPlayed}</p>
-                      </div>
-                      <div className="bg-gradient-to-r from-slate-800/80 to-slate-700/80 rounded-lg p-1.5">
-                        <p className="text-[10px] text-white/60">Victorias</p>
-                        <p className="text-xs font-bold text-emerald-400">{realGamesWon}</p>
-                      </div>
-                      <div className="bg-gradient-to-r from-slate-800/80 to-slate-700/80 rounded-lg p-1.5">
-                        <p className="text-[10px] text-white/60">Racha</p>
-                        <p className="text-xs font-bold text-orange-400">🔥{realStreak}</p>
-                      </div>
-                      <div className="bg-gradient-to-r from-slate-800/80 to-slate-700/80 rounded-lg p-1.5">
-                        <p className="text-[10px] text-white/60">Win%</p>
-                        <p className={`text-xs font-bold ${winRate >= 50 ? 'text-green-400' : 'text-red-400'}`}>{winRate}%</p>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </DialogContent>
-        </Dialog>
+        <RankingDialog players={players} scores={scores} />
       </div>
 
       {/* Reveal Overlay (Mimica) with Long Press */}
@@ -3000,72 +2395,14 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         <VirusFlash show={virusFlash} />
 
         {/* VIRUS ALERT — sheet compacto desde abajo, con fondo que tapa el resto */}
-        <AnimatePresence>
-          {gameState.showVirusAlert && gameState.virusAlertData && !gameState.showCaptainSelection && (
-            <motion.div
-              key="virus-backdrop"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[245] bg-slate-950/88 backdrop-blur-md"
-            />
-          )}
-          {gameState.showVirusAlert && gameState.virusAlertData && !gameState.showCaptainSelection && (
-            <motion.div
-              key="virus-banner"
-              initial={{ opacity: 0, y: '100%' }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: '100%' }}
-              transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-              className="fixed inset-x-0 bottom-0 z-[250] px-4 pb-6 pt-2 flex justify-center"
-              style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}
-            >
-              <div className="w-full max-w-sm mx-auto bg-gradient-to-b from-green-950/98 to-slate-950/98 border-2 border-green-400/50 rounded-[2rem] p-5 shadow-[0_-8px_40px_rgba(34,197,94,0.25)] flex flex-col items-center gap-4">
-                {/* Handle */}
-                <div className="w-10 h-1 rounded-full bg-white/20 mb-1" />
-
-                <div className="flex items-center gap-4 w-full">
-                  <motion.span
-                    animate={{ scale: [1, 1.2, 1] }}
-                    transition={{ repeat: Infinity, duration: 1.8 }}
-                    className="text-4xl flex-shrink-0"
-                    style={{ filter: 'drop-shadow(0 0 12px rgba(34,197,94,0.8))' }}
-                  >🦠</motion.span>
-                  <div className="text-left">
-                    <p className="text-[9px] text-green-400 font-black uppercase tracking-[0.3em]">VIRUS DETECTADO</p>
-                    <p className="text-white font-black text-xl leading-tight">{gameState.virusAlertData.player?.name}</p>
-                    <p className="text-[10px] text-white/40">ha sido infectado</p>
-                  </div>
-                </div>
-
-                <div className="w-full bg-black/40 rounded-2xl px-4 py-3 border border-green-500/20 flex items-start gap-3">
-                  <div className="flex-1 text-left">
-                    <p className="text-green-300 font-black text-base leading-tight">
-                      {gameState.virusAlertData.virus?.virusName || gameState.virusAlertData.virus?.name}
-                    </p>
-                    <p className="text-white/60 text-sm leading-snug mt-1">
-                      {gameState.virusAlertData.virus?.virusDescription || gameState.virusAlertData.virus?.description}
-                    </p>
-                  </div>
-                  <span className="text-[10px] text-green-400/70 font-black uppercase bg-green-500/10 px-2 py-1 rounded-full border border-green-500/20 flex-shrink-0">
-                    {gameState.virusAlertData.virus?.turnsRemaining}T
-                  </span>
-                </div>
-
-                <button
-                  onClick={() => {
-                    setGameState(prev => ({ ...prev, showVirusAlert: false, virusAlertData: null }));
-                    performTurnAdvance();
-                  }}
-                  className="w-full py-4 rounded-2xl bg-green-500 hover:bg-green-400 text-black font-black text-base uppercase tracking-widest active:scale-95 transition-all shadow-lg"
-                  style={{ touchAction: 'manipulation' }}
-                >
-                  ENTENDIDO, APLICAR VIRUS ✓
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <VirusAlertSheet
+          show={!!gameState.showVirusAlert && !!gameState.virusAlertData && !gameState.showCaptainSelection}
+          data={gameState.virusAlertData}
+          onAcknowledge={() => {
+            setGameState(prev => ({ ...prev, showVirusAlert: false, virusAlertData: null }));
+            performTurnAdvance();
+          }}
+        />
 
         {/* Video Chat is now handled globally at Index.tsx level */}
 
