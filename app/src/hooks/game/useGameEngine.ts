@@ -3,6 +3,7 @@ import { Player, Team, GameMode } from '@/types/game';
 import { useGameContext } from '@/contexts/GameContext';
 import { readStorageJSON, writeStorageJSON } from '@/utils/storage';
 import type { NormaInfractions, NormaResult } from '@/utils/megamixNormas';
+import type { LiveTournament } from '@/utils/liveTournament';
 
 export interface GameState {
   phase: 'setup' | 'playing' | 'voting' | 'results' | 'minigame' | 'game_over';
@@ -88,35 +89,10 @@ export interface GameState {
   // Voting State
   votingSelections?: string[]; // Array of player IDs selected in voting mode
 
-  // Torneo Megamix — snapshot del bracket para que se vea en tiempo real en
-  // todos los móviles conectados (se reutiliza el canal de broadcastState ya
-  // existente: basta con que esto viva dentro de gameState).
-  tournamentBracket?: TournamentBracketSnapshot | null;
-}
-
-export interface TournamentBracketPlayerSnap {
-  id: string;
-  name: string;
-  avatar_url?: string | null;
-}
-
-export interface TournamentBracketMatchSnap {
-  id: string;
-  player1: TournamentBracketPlayerSnap | null;
-  player2: TournamentBracketPlayerSnap | null;
-  winner: TournamentBracketPlayerSnap | null;
-  isBye: boolean;
-  round: number;
-}
-
-export interface TournamentBracketSnapshot {
-  active: boolean;
-  stage: 'main' | 'repesca';
-  bracketNumber: number;
-  rounds: TournamentBracketMatchSnap[][];
-  currentRoundIdx: number;
-  currentMatchIdx: number;
-  champion: TournamentBracketPlayerSnap | null;
+  // Torneo vivo de Megamix, espejado aquí para que llegue por el canal de
+  // broadcastState ya existente a los invitados (lo ven en solo lectura).
+  liveTournament?: LiveTournament | null;
+  liveTournamentOpen?: boolean;
 }
 
 export const useGameEngine = (mode: GameMode) => {

@@ -56,22 +56,26 @@ import { vibe } from '@/lib/vibration';
 import { GameMode } from '@/types/game';
 import { duelos } from '@/data/duelosContent';
 import { impostorRounds } from '@/data/impostorContent';
-import { isIndividualCard, torneoRetos } from '@/data/gameContent';
-import { duelosV5 } from '@/data/updatePostVerano2026';
-import { duelosV5b } from '@/data/updatePostVerano2026_v2';
-import { moreTorneoRetos } from '@/data/extraContentIndex';
-
-// Pool de retos de duelo ampliado (base + post-verano + contenido reconectado)
-const DUEL_POOL: string[] = Array.from(
-  new Set([...torneoRetos, ...duelosV5, ...duelosV5b, ...moreTorneoRetos])
-);
+import { isIndividualCard } from '@/data/gameContent';
+import { DUEL_POOL, REPESCA_POOL } from '@/data/tournamentPools';
 import { YoNuncaResponse } from '@/components/game/YoNuncaResponse';
 import { RetoOutcome } from '@/components/game/RetoOutcome';
 import { useGameMemory, enrichChallengeWithAI } from '@/hooks/game/useGameMemory';
 import { useTorneoManager } from '@/hooks/game/useTorneoManager';
-import { TorneoRound } from '@/components/game/TorneoRound';
-import { MegamixTournament } from '@/components/game/MegamixTournament';
-import { TournamentBracket } from '@/components/game/TournamentBracket';
+import { LiveTournamentOverlay } from '@/components/game/party/LiveTournamentOverlay';
+import {
+  createTournament,
+  matchesPerTrigger,
+  recordWinner,
+  type BracketKind,
+  type LiveTournament,
+  type TournamentEvent,
+} from '@/utils/liveTournament';
+
+const pickTournamentReto = (kind: BracketKind) => {
+  const pool = kind === 'repesca' ? REPESCA_POOL : DUEL_POOL;
+  return pool[Math.floor(Math.random() * pool.length)];
+};
 import { TurnBanner } from '@/components/game/party/TurnBanner';
 import { NormaBanner } from '@/components/game/party/NormaBanner';
 import { NormaVerdict } from '@/components/game/party/NormaVerdict';
@@ -383,7 +387,6 @@ export function PartyGame({
     hasAiCard,
     peekAiCard,
     consumeAiCard,
-    getMemorySummary,
   } = useGameMemory(players);
   const [showYoNuncaResponse, setShowYoNuncaResponse] = useState(false);
   const [showRetoOutcome, setShowRetoOutcome] = useState(false);
@@ -392,20 +395,71 @@ export function PartyGame({
 
   // --- TORNEO SYSTEM ---
   const {
-    scores: torneoScores,
-    currentMatch: torneoMatch,
-    setCurrentMatch: setTorneoMatch,
-    buildMatch: buildTorneoMatch,
     recordWin: recordTorneoWin,
     triggerRoundAnalysis,
     roundComment,
     roundCommentVisible,
   } = useTorneoManager(players);
-  const [showTorneoRound, setShowTorneoRound] = useState(false);
-  const [showMegamixTournament, setShowMegamixTournament] = useState(false);
-  // Panel de bracket en vivo: visible/minimizable en cualquier móvil
-  // conectado (host o invitado) mientras haya un torneo Megamix activo.
-  const [bracketPanelOpen, setBracketPanelOpen] = useState(true);
+  // Torneo vivo: dura toda la partida y avanza 1-2 duelos cada vez que sale
+  // TRIGGER:TORNEO (ver src/utils/liveTournament.ts). tournamentStop = duelos
+  // que quedan en esta parada; null = no hay pantalla de torneo abierta.
+  const [liveTournament, setLiveTournament] = useState<LiveTournament | null>(null);
+  const liveTournamentRef = useRef<LiveTournament | null>(null);
+  const [tournamentStop, setTournamentStop] = useState<number | null>(null);
+  const showTorneoRound = tournamentStop !== null;
+
+  // Espejo en gameState: llega a los invitados del multijugador por el
+  // broadcast que ya existe, y lo ven en solo lectura.
+  const mirrorTournament = useCallback(
+    (t: LiveTournament | null, open: boolean) =>
+      setGameState((prev) => ({ ...prev, liveTournament: t, liveTournamentOpen: open })),
+    [setGameState]
+  );
+
+  const openTournamentStop = useCallback(() => {
+    let t = liveTournamentRef.current;
+    if (!t || t.finished) {
+      t = createTournament(
+        players.map((p) => p.id),
+        (t?.number ?? 0) + 1,
+        pickTournamentReto
+      );
+      toast(`🏆 ¡Empieza el torneo nº${t.number}!`, { duration: 2500 });
+    }
+    liveTournamentRef.current = t;
+    setLiveTournament(t);
+    setTournamentStop(matchesPerTrigger(players.length));
+    mirrorTournament(t, true);
+  }, [players, mirrorTournament]);
+
+  const handleTournamentResult = useCallback(
+    (matchId: string, winnerId: string): TournamentEvent[] => {
+      const t = liveTournamentRef.current;
+      if (!t) return [];
+      const match = t.brackets.flatMap((b) => b.matches).find((m) => m.id === matchId);
+      const { tournament, events } = recordWinner(t, matchId, winnerId, pickTournamentReto);
+      if (tournament === t || !match) return [];
+      liveTournamentRef.current = tournament;
+      setLiveTournament(tournament);
+      setTournamentStop((left) => (left === null ? null : left - 1));
+      mirrorTournament(tournament, true);
+
+      const loserId = winnerId === match.p1 ? match.p2 : match.p1;
+      const winner = players.find((p) => p.id === winnerId);
+      const loser = players.find((p) => p.id === loserId);
+      recordTorneoWin(winnerId, loserId);
+      if (winner) addScore(winner.id, XP.TORNEO_WIN);
+      if (loser) addScore(loser.id, XP.TORNEO_LOSE);
+      if (winner) addEvent('torneo_win', winner, loser?.name ?? 'torneo', gameState.round);
+      if (loser) addEvent('torneo_lose', loser, winner?.name ?? 'torneo', gameState.round);
+      for (const e of events) {
+        if (e.type === 'tournament_champion') addScore(e.playerId, XP.TORNEO_WIN * 2);
+      }
+      return events;
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- addScore/addEvent se recrean en cada render
+    [players, recordTorneoWin, gameState.round, mirrorTournament]
+  );
   // Track whether we've shown response UI for the current card index
   const respondedCardRef = useRef<number>(-1);
   // Count cards shown to know when to inject AI card
@@ -1305,8 +1359,6 @@ export function PartyGame({
   // `players` por Realtime (nueva referencia de array aunque el contenido no cambie)
   // re-ejecuta este efecto y reinicia el overlay (duelo/virus/impostor) ya abierto.
   const handledTriggerIndexRef = useRef<number>(-1);
-  const getMemorySummaryRef = useRef(getMemorySummary);
-  getMemorySummaryRef.current = getMemorySummary;
   useEffect(() => {
     if (!currentText || currentText === 'Siguiente carta' || currentText === 'Cargando pregunta...')
       return;
@@ -1473,23 +1525,11 @@ export function PartyGame({
           const timer = setTimeout(() => advanceTurn(true), 100);
           return () => clearTimeout(timer);
         }
-      } else if (triggerType === 'MEGATORNEO') {
-        if (players.length >= 2) {
-          setShowMegamixTournament(true);
-        } else {
-          const timer = setTimeout(() => advanceTurn(true), 100);
-          return () => clearTimeout(timer);
-        }
-      } else if (triggerType === 'TORNEO') {
+      } else if (triggerType === 'TORNEO' || triggerType === 'MEGATORNEO') {
+        // Ambos avanzan el mismo torneo vivo; antes TORNEO era un duelo
+        // suelto y MEGATORNEO abría el cuadro entero de golpe.
         if (players.length >= 2 && !showTorneoRound) {
-          buildTorneoMatch(gameEvents, DUEL_POOL, getMemorySummaryRef.current()).then((match) => {
-            if (match) {
-              setTorneoMatch(match);
-              setShowTorneoRound(true);
-            } else {
-              advanceTurn(true);
-            }
-          });
+          openTournamentStop();
         } else {
           const timer = setTimeout(() => advanceTurn(true), 100);
           return () => clearTimeout(timer);
@@ -1518,12 +1558,10 @@ export function PartyGame({
     setGameState,
     loadSpecificQuestion,
     showTorneoRound,
-    buildTorneoMatch,
-    gameEvents,
-    setTorneoMatch,
+    openTournamentStop,
   ]);
 
-  // ── Inyección de carta IA cada 10 cartas + Auto-Torneo cada 10 turnos ─────
+  // ── Inyección de carta IA cada 10 cartas ─────────────────────────────────
   useEffect(() => {
     if (mode !== 'megamix') return;
     aiCardInjectCountRef.current += 1;
@@ -1535,15 +1573,8 @@ export function PartyGame({
       consumeAiCard();
     }
 
-    // Auto-trigger torneo cada 10 turnos (offset de 5 para no coincidir con la carta IA)
-    if (count % 10 === 5 && players.length >= 2 && !showTorneoRound) {
-      buildTorneoMatch(gameEvents, DUEL_POOL, getMemorySummary()).then((match) => {
-        if (match) {
-          setTorneoMatch(match);
-          setShowTorneoRound(true);
-        }
-      });
-    }
+    // (Antes también saltaba un duelo suelto cada 10 cartas, encima de los
+    // TRIGGER:TORNEO del mazo. Ahora el torneo solo avanza con el mazo.)
 
     // Auto-trigger AI round analysis cada 10 turnos (offset de 8)
     if (count % 10 === 8 && gameEvents.length > 0) {
@@ -3352,115 +3383,35 @@ export function PartyGame({
           )}
       </AnimatePresence>
 
-      {/* ── TORNEO ROUND OVERLAY ── */}
+      {/* ── TORNEO VIVO: 1-2 duelos por parada, alternando llaves y repesca ── */}
       <AnimatePresence>
-        {showTorneoRound && torneoMatch && (
-          <TorneoRound
-            match={torneoMatch}
-            torneoScores={Object.fromEntries(
-              Object.entries(torneoScores).map(([id, s]) => [
-                id,
-                { wins: s.wins, losses: s.losses },
-              ])
-            )}
-            onWinner={(winnerId, loserId) => {
-              recordTorneoWin(winnerId, loserId);
-              setShowTorneoRound(false);
-              const winner = players.find((p) => p.id === winnerId);
-              const loser = players.find((p) => p.id === loserId);
-              if (winner) addScore(winner.id, XP.TORNEO_WIN);
-              if (loser) addScore(loser.id, XP.TORNEO_LOSE);
-              if (winner) addEvent('torneo_win', winner, loser?.name ?? 'torneo', gameState.round);
-              if (loser) addEvent('torneo_lose', loser, winner?.name ?? 'torneo', gameState.round);
-              toast.success(
-                `👑 ${winner?.name || 'Ganador'} gana el torneo — +${XP.TORNEO_WIN} XP · reparte 3 tragos!`,
-                { duration: 3000 }
-              );
-              advanceTurn(true);
-            }}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* ── TORNEO MEGAMIX COMPLETO (bracket KO) ── */}
-      <AnimatePresence>
-        {showMegamixTournament && players.length >= 2 && (
-          <MegamixTournament
+        {tournamentStop !== null && liveTournament && (
+          <LiveTournamentOverlay
+            tournament={liveTournament}
             players={players}
-            addScore={addScore}
-            onWinner={(winner, loser) => {
-              addEvent('torneo_win', winner, 'bracket_torneo', gameState.round);
-              toast.success(`👑 ${winner.name} elimina a ${loser.name} — reparte 3 tragos!`, {
-                duration: 2500,
-              });
-            }}
-            onClose={() => {
-              setShowMegamixTournament(false);
-              setGameState((prev) => ({ ...prev, tournamentBracket: null }));
+            matchesLeft={tournamentStop}
+            onResult={handleTournamentResult}
+            onDone={() => {
+              setTournamentStop(null);
+              mirrorTournament(liveTournamentRef.current, false);
               advanceTurn(true);
             }}
-            onStateChange={
-              isHost || !isMultiplayer
-                ? (snapshot) => {
-                    // Espejo del bracket en gameState: reutiliza el canal/broadcast
-                    // ya existente (useMultiplayer) para que todos los móviles
-                    // conectados vean el cuadro de eliminatorias en tiempo real.
-                    setGameState((prev) => ({
-                      ...prev,
-                      tournamentBracket: {
-                        active: snapshot.active,
-                        stage: snapshot.stage,
-                        bracketNumber: snapshot.bracketNumber,
-                        rounds: snapshot.rounds,
-                        currentRoundIdx: snapshot.currentRoundIdx,
-                        currentMatchIdx: snapshot.currentMatchIdx,
-                        champion: snapshot.champion
-                          ? {
-                              id: snapshot.champion.id,
-                              name: snapshot.champion.name,
-                              avatar_url: snapshot.champion.avatar_url,
-                            }
-                          : null,
-                      },
-                    }));
-                  }
-                : undefined
-            }
           />
         )}
+        {isMultiplayer &&
+          !isHost &&
+          gameState.liveTournamentOpen &&
+          gameState.liveTournament && (
+            <LiveTournamentOverlay
+              readOnly
+              tournament={gameState.liveTournament}
+              players={players}
+              matchesLeft={0}
+              onResult={() => []}
+              onDone={() => {}}
+            />
+          )}
       </AnimatePresence>
-
-      {/* ── BRACKET EN VIVO: visible en todo momento para todos los móviles
-          conectados mientras el torneo Megamix está en marcha, incluso
-          cuando el host está metido en la pantalla de duelo/votación ── */}
-      {gameState.tournamentBracket?.active && (
-        <div className="fixed bottom-4 left-1/2 z-[260] w-[min(92vw,420px)] -translate-x-1/2">
-          <div className="overflow-hidden rounded-2xl border border-amber-500/30 bg-slate-950/95 shadow-2xl backdrop-blur-md">
-            <button
-              onClick={() => setBracketPanelOpen((o) => !o)}
-              className="flex w-full items-center justify-between px-4 py-2.5 text-left"
-            >
-              <span className="text-xs font-black uppercase tracking-widest text-amber-400">
-                🏆 Bracket en vivo · Ronda {gameState.tournamentBracket.currentRoundIdx + 1}
-              </span>
-              <span className="text-xs text-white/40">
-                {bracketPanelOpen ? '▾ ocultar' : '▸ ver'}
-              </span>
-            </button>
-            {bracketPanelOpen && (
-              <div className="max-h-[42vh] overflow-y-auto px-3 pb-3">
-                <TournamentBracket
-                  compact
-                  rounds={gameState.tournamentBracket.rounds}
-                  currentRoundIdx={gameState.tournamentBracket.currentRoundIdx}
-                  currentMatchIdx={gameState.tournamentBracket.currentMatchIdx}
-                  champion={gameState.tournamentBracket.champion}
-                />
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Podium Screen Overlay */}
       {showPodium && (
