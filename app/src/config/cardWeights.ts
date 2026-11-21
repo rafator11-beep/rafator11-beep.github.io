@@ -22,7 +22,7 @@ export const GENERAL_TYPE_WEIGHTS: Record<string, number> = {
   megamixEspañaGeneral: 1.0,
   // Núcleo de Megamix escrito a mano (src/data/megamixCore.ts).
   megamixYoNunca: 1.6,
-  megamixHumorNegro: 1.6,
+  megamixHumorNegro: 1.9,
   megamixVotaciones: 1.4,
   megamixTodos: 1.3,
   megamixAnecdotas: 1.0,
@@ -50,6 +50,7 @@ export const INDIVIDUAL_TYPE_WEIGHTS: Record<string, number> = {
   megamixDuelos: 1.0,
   megamixRetosDia: 1.2,
   megamixVerdadesPicantes: 0.8,
+  megamixHumorNegroTurno: 1.0,
   // Pool extra que useGameContent inyecta (antes iba suelto al final del mazo
   // y solo aparecía gracias al shuffle global). Peso ≈ su cuota original.
   torneoRetos: 0.25,
@@ -112,7 +113,8 @@ export const TYPE_INTENSITY: Record<string, Intensity> = {
   picante: 'fuerte',
   enLaCama: 'fuerte',
   humorNegro: 'fuerte',
-  megamixHumorNegro: 'fuerte',
+  // El humor negro nuevo no es sexual: sale durante toda la partida.
+  megamixHumorNegro: 'media',
   megamixPicante: 'fuerte',
   megamixVidaEspana: 'suave',
   // individuales
@@ -120,6 +122,7 @@ export const TYPE_INTENSITY: Record<string, Intensity> = {
   categorias: 'suave',
   clasico: 'suave',
   megamixVerdadesPicantes: 'fuerte',
+  megamixHumorNegroTurno: 'media',
 };
 
 export const PHASE_INTENSITY_MULTIPLIER: Record<

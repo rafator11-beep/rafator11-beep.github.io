@@ -116,8 +116,8 @@ describe('getStructuredMegamix', () => {
     expect(generals.filter(isEvent).length / generals.length).toBeLessThan(0.36);
   });
 
-  it('lo fuerte (picante, en la cama, humor negro) se guarda para el final', () => {
-    const strong = (c: string) => /^(🌶️|🛌|💀)/u.test(c);
+  it('lo fuerte (picante, en la cama) se guarda para el final', () => {
+    const strong = (c: string) => /^(🌶️|🛌)/u.test(c);
     let early = 0;
     let earlyTotal = 0;
     let late = 0;
