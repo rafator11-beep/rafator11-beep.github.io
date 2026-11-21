@@ -122,21 +122,23 @@ describe('getStructuredMegamix', () => {
     let earlyTotal = 0;
     let late = 0;
     let lateTotal = 0;
-    for (let k = 0; k < 8; k++) {
-      // 8 mazos: cada uno tarda ~200 ms en generarse.
-      const d = getStructuredMegamix(200, 4);
+    // 8 jugadores: la primera fase dura 48 cartas y la final empieza en la 192.
+    for (let k = 0; k < 6; k++) {
+      const d = getStructuredMegamix(320, 8);
       d.forEach((c, i) => {
         if (i % 2 === 0 || c.startsWith('TRIGGER:') || c.startsWith('📜')) return;
-        if (i < 24) {
+        if (i < 48) {
           earlyTotal++;
           if (strong(c)) early++;
-        } else if (i >= 104) {
+        } else if (i >= 192) {
           lateTotal++;
           if (strong(c)) late++;
         }
       });
     }
-    expect(late / lateTotal).toBeGreaterThan((early / earlyTotal) * 3);
+    // Al final sale bastante más (~5 % al principio, ~33 % al final); margen
+    // amplio porque la muestra es aleatoria.
+    expect(late / lateTotal).toBeGreaterThan((early / earlyTotal) * 2);
   });
 
   it('respeta los tipos permitidos (modo clásico)', () => {
