@@ -61,7 +61,7 @@ export function VirusAlertSheet({ show, data, onAcknowledge }: VirusAlertSheetPr
                 </p>
               </div>
               <span className="flex-shrink-0 rounded-full border border-green-500/20 bg-green-500/10 px-2 py-1 text-[10px] font-black uppercase text-green-400/70">
-                {data.virus?.turnsRemaining}T
+                {data.virus?.turnsRemaining} {data.virus?.turnsRemaining === 1 ? "ronda" : "rondas"}
               </span>
             </div>
 

@@ -80,6 +80,14 @@ import { TurnBanner } from '@/components/game/party/TurnBanner';
 import { NormaBanner } from '@/components/game/party/NormaBanner';
 import { NormaVerdict } from '@/components/game/party/NormaVerdict';
 import { BombOverlay } from '@/components/game/party/BombOverlay';
+import { VirusBanner } from '@/components/game/party/VirusBanner';
+import { VirusRoundReport } from '@/components/game/party/VirusRoundReport';
+import {
+  catchInfected,
+  roundsLabel,
+  tickVirusesForRound,
+  type VirusRoundReport as VirusRoundReportData,
+} from '@/utils/megamixViruses';
 import { getTurnInfo } from '@/utils/megamixTurn';
 import { isBombCard } from '@/utils/megamixBomb';
 import {
@@ -322,7 +330,7 @@ export function PartyGame({
     brutalCounts,
     setBrutalCounts, // Needed for overlay logic
     applyRandomVirus,
-    updateViruses,
+    setPlayerViruses,
     manageMegamixViruses, // Every 5 rounds virus cycle
   } = useGameEffects(mode, players);
 
@@ -1158,7 +1166,8 @@ export function PartyGame({
 
     // Normal flow
     if (mode === 'megamix' || mode === 'clasico') {
-      updateViruses();
+      // Los virus ya no se descuentan aquí (en cada carta): duran rondas y se
+      // descuentan al acabar cada ronda (ver el parte de virus más abajo).
 
       // Manage Megamix periodic events
       if (mode === 'megamix') {
@@ -1636,29 +1645,41 @@ export function PartyGame({
     setGameState,
   ]);
 
-  // Handle Virus Expiration Notifications
-  const prevVirusesRef = useRef(playerViruses);
+  // ── Virus por rondas ────────────────────────────────────────────────────
+  // Al acabar cada ronda se descuenta una ronda a cada infectado y sale el
+  // parte de virus (quién sigue y quién se cura). Antes se descontaba en cada
+  // carta y un virus de "3" duraba 3 cartas; el aviso de cura era un toast.
+  const [virusReport, setVirusReport] = useState<VirusRoundReportData | null>(null);
+  const prevRoundRef = useRef(gameState.round);
+  const playerVirusesRef = useRef(playerViruses);
+  playerVirusesRef.current = playerViruses;
   useEffect(() => {
-    const prev = prevVirusesRef.current;
-    const current = playerViruses;
+    const finished = prevRoundRef.current;
+    if (gameState.round <= finished) {
+      prevRoundRef.current = gameState.round;
+      return;
+    }
+    prevRoundRef.current = gameState.round;
+    const viruses = playerVirusesRef.current;
+    if (viruses.length === 0) return;
+    const report = tickVirusesForRound(viruses, finished);
+    setPlayerViruses(report.remaining);
+    setVirusReport(report);
+  }, [gameState.round, setPlayerViruses]);
 
-    // Find players who had a virus before but don't have it now
-    prev.forEach((oldVirus) => {
-      const stillHasVirus = current.some((v) => v.playerId === oldVirus.playerId);
-      if (!stillHasVirus) {
-        const pInfo = players.find((p) => p.id === oldVirus.playerId);
-        if (pInfo) {
-          toast(`¡VIRUS TERMINADO para ${pInfo.name}! 🟢`, {
-            description: 'Ya puedes dejar de cumplir el castigo.',
-            duration: 8000,
-            icon: '✅',
-          });
-        }
-      }
-    });
-
-    prevVirusesRef.current = current;
-  }, [playerViruses, players]);
+  const catchVirusPlayer = useCallback(
+    (playerId: string) => {
+      const player = players.find((p) => p.id === playerId);
+      setPlayerViruses((prev) => catchInfected(prev, playerId));
+      sfx.alarm();
+      vibe.alert();
+      toast(`🚨 ¡${player?.name ?? 'El infectado'} se ha saltado el virus!`, {
+        description: 'Bebe 1 y queda apuntado para cuando se cure.',
+        duration: 2500,
+      });
+    },
+    [players, setPlayerViruses]
+  );
 
   // Sound effects on rarity
   useEffect(() => {
@@ -1780,6 +1801,8 @@ export function PartyGame({
       />
 
       <BombOverlay open={bombOpen} onClose={() => setBombOpen(false)} />
+
+      <VirusRoundReport report={virusReport} players={players} onClose={() => setVirusReport(null)} />
 
       {/* Top Bar with Chromecast.
           Antes: [Atrás, Cast] | [Capitán] | [Siguiente, Finalizar, "Ronda N"] con
@@ -2074,7 +2097,7 @@ export function PartyGame({
                               {affectedPlayer?.name || 'Jugador'}
                             </span>
                             <span className="rounded-full bg-gradient-to-r from-purple-500/20 to-purple-600/20 px-2 py-0.5 text-xs text-purple-200">
-                              {v.turnsRemaining} turnos
+                              {roundsLabel(v.turnsRemaining)}
                             </span>
                           </div>
                           <p className="text-sm font-bold text-white">{v.virusName}</p>
@@ -2518,6 +2541,8 @@ export function PartyGame({
         />
 
         {/* Banner de norma activa */}
+        <VirusBanner viruses={playerViruses} players={players} onCatch={catchVirusPlayer} />
+
         {gameState.currentNorma && (
           <NormaBanner
             text={cleanNormaText(gameState.currentNorma)}

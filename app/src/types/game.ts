@@ -274,5 +274,8 @@ export interface PlayerVirus {
   playerId: string;
   virusName: string;
   virusDescription: string;
+  /** RONDAS que le quedan (se descuenta al acabar cada ronda, no en cada carta). */
   turnsRemaining: number;
+  /** Veces que han pillado al infectado incumpliendo el virus. */
+  caught?: number;
 }
