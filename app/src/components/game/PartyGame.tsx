@@ -58,7 +58,6 @@ import { duelos } from '@/data/duelosContent';
 import { impostorRounds } from '@/data/impostorContent';
 import { isIndividualCard } from '@/data/gameContent';
 import { DUEL_POOL, REPESCA_POOL } from '@/data/tournamentPools';
-import { YoNuncaResponse } from '@/components/game/YoNuncaResponse';
 import { RetoOutcome } from '@/components/game/RetoOutcome';
 import { useGameMemory, enrichChallengeWithAI } from '@/hooks/game/useGameMemory';
 import { useTorneoManager } from '@/hooks/game/useTorneoManager';
@@ -89,7 +88,7 @@ import {
   type VirusRoundReport as VirusRoundReportData,
 } from '@/utils/megamixViruses';
 import { getTurnInfo } from '@/utils/megamixTurn';
-import { isBombCard } from '@/utils/megamixBomb';
+import { bombTopicFromCard, isBombCard } from '@/utils/megamixBomb';
 import {
   addInfraction,
   cleanNormaText,
@@ -395,13 +394,11 @@ export function PartyGame({
     events: gameEvents,
     playerStats,
     addEvent,
-    addEvents,
     trackDrink: memoryTrackDrink,
     hasAiCard,
     peekAiCard,
     consumeAiCard,
   } = useGameMemory(players);
-  const [showYoNuncaResponse, setShowYoNuncaResponse] = useState(false);
   const [showRetoOutcome, setShowRetoOutcome] = useState(false);
   const [aiCardOverride, setAiCardOverride] = useState<string | null>(null);
   const [enrichedCardText, setEnrichedCardText] = useState<string | null>(null);
@@ -810,7 +807,6 @@ export function PartyGame({
       showKahoot.active ||
       showPodium ||
       showRoundSummary ||
-      showYoNuncaResponse ||
       showRetoOutcome ||
       showTorneoRound
     ) {
@@ -850,7 +846,6 @@ export function PartyGame({
     showKahoot.active,
     showPodium,
     showRoundSummary,
-    showYoNuncaResponse,
     showRetoOutcome,
     showTorneoRound,
   ]);
@@ -872,7 +867,6 @@ export function PartyGame({
     showKahoot.active ||
     showPodium ||
     showRoundSummary ||
-    showYoNuncaResponse ||
     showRetoOutcome ||
     showTorneoRound;
 
@@ -1002,34 +996,6 @@ export function PartyGame({
   const lastTapRef = useRef<number>(0);
   const isProcessingRef = useRef<boolean>(false);
 
-  // ── HANDLER: YO NUNCA response confirmed ──────────────────────────────────
-  const handleYoNuncaConfirm = useCallback(
-    (didItIds: string[]) => {
-      setShowYoNuncaResponse(false);
-      const cardText = getCurrentContent();
-      // Track each player who said yes
-      const allIds = players.map((p) => p.id);
-      const noIds = allIds.filter((id) => !didItIds.includes(id));
-      if (didItIds.length > 0) {
-        addEvents(
-          'yo_nunca_yes',
-          didItIds,
-          typeof cardText === 'string' ? cardText : '',
-          gameState.round
-        );
-        didItIds.forEach((id) => {
-          const p = players.find((pl) => pl.id === id);
-          if (p) addScore(p.id, XP.YO_NUNCA_YES);
-        });
-      }
-      noIds.forEach((id) => {
-        const p = players.find((pl) => pl.id === id);
-        if (p) addScore(p.id, XP.YO_NUNCA_NO);
-      });
-      performTurnAdvance(true); // global card → no player advance
-    },
-    [getCurrentContent, addEvents, gameState.round, players, addScore, performTurnAdvance]
-  );
 
   // ── HANDLER: Reto outcome ───────────────────────────────────────────────
   const handleRetoOutcome = useCallback(
@@ -1101,12 +1067,9 @@ export function PartyGame({
 
     // ── Intercepción de IA en Megamix para cartas individuales ────────────
     if (mode === 'megamix' && respondedCardRef.current !== currentIndex) {
+      // (Antes, tras cada Yo nunca salía "¿Quién lo ha hecho?" para marcar
+      // quién bebía: cortaba el ritmo y se quitó. Se pasa de carta y ya.)
       const txt = typeof cardText === 'string' ? cardText : '';
-      if (txt.startsWith('🙈')) {
-        respondedCardRef.current = currentIndex;
-        setShowYoNuncaResponse(true);
-        return;
-      }
       if (isIndividualCard(currentRawCard) && players.length > 0 && currentPlayer) {
         respondedCardRef.current = currentIndex;
         if (!txt.startsWith('⚔️')) {
@@ -1800,7 +1763,11 @@ export function PartyGame({
         onClose={() => setGameState((prev) => ({ ...prev, normaResult: null }))}
       />
 
-      <BombOverlay open={bombOpen} onClose={() => setBombOpen(false)} />
+      <BombOverlay
+        open={bombOpen}
+        topic={bombTopicFromCard(currentRawCard)}
+        onClose={() => setBombOpen(false)}
+      />
 
       <VirusRoundReport report={virusReport} players={players} onClose={() => setVirusReport(null)} />
 
@@ -3396,16 +3363,6 @@ export function PartyGame({
         </div>
       )}
 
-      {/* ── YO NUNCA RESPONSE OVERLAY ── */}
-      <AnimatePresence>
-        {showYoNuncaResponse && (
-          <YoNuncaResponse
-            players={players}
-            cardText={currentText}
-            onConfirm={handleYoNuncaConfirm}
-          />
-        )}
-      </AnimatePresence>
 
       {/* ── RETO OUTCOME OVERLAY ── (no mientras hay virus/torneo/impostor) */}
       <AnimatePresence>

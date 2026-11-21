@@ -10,6 +10,7 @@
 // deckLogic.test.ts comprueba que cada carta caiga en su lado.
 
 import { MEGAMIX_SPAIN_GENERAL, MEGAMIX_SPAIN_INDIVIDUAL } from '@/data/megamixSpain';
+import { BOMB_TOPICS_FIESTA, BOMB_TOPICS_SABER } from '@/utils/megamixBomb';
 
 // ─── 🙈 YO NUNCA del día a día (lo que hacemos sin darnos cuenta) ──────────
 export const MEGAMIX_YO_NUNCA: string[] = [
@@ -274,33 +275,15 @@ export const MEGAMIX_TODOS: string[] = [
 // ─── 💣 LA BOMBA (el móvil pasa de mano y explota cuando quiere) ──────────
 // La carta enseña el botón ACTIVAR (BombOverlay): tic-tac cada vez más rápido
 // y explosión a un tiempo que nadie conoce.
-const bomba = (tema: string, extra = '') =>
-  `💣 LA BOMBA — “${tema}”. Pulsad ACTIVAR y pasaos el móvil a la derecha diciendo uno cada uno${extra}. Explota cuando quiere: quien lo tenga en la mano, bebe 3.`;
+const bomba = (tema: string) =>
+  `💣 LA BOMBA — “${tema}”. Pulsad ACTIVAR y pasaos el móvil a la derecha diciendo uno cada uno. Explota cuando quiere: quien lo tenga en la mano, bebe 3.`;
 
 export const MEGAMIX_BOMBA: string[] = [
-  bomba('excusas para no ir a una boda'),
-  bomba('cosas que hay en un bar de pueblo'),
-  bomba('frases de madre', '; si repites, no puedes pasarlo'),
-  bomba('cosas que se dicen en el grupo de WhatsApp de la familia'),
-  bomba('cosas que hace un borracho en la cola del baño'),
-  bomba('marcas que hay en el Mercadona'),
-  bomba('cosas que no le dirías a tu suegra'),
-  bomba('cantantes españoles', '; el que repita se queda el móvil hasta que diga otro'),
-  bomba('excusas para llegar tarde al curro'),
-  bomba('cosas que hay en una despedida de soltero/a'),
-  bomba('provincias de España', ', sin repetir'),
-  bomba('cosas que se pierden en una noche de fiesta'),
-  bomba('motivos para cortar con alguien'),
-  bomba('series españolas'),
-  bomba('cosas que se hacen en un viaje de fin de curso'),
-  bomba('palabras que empiecen por P', ', sin repetir'),
-  bomba('cosas que hay en la maleta de un guiri'),
-  bomba('nombres de perro', ', sin repetir'),
-  bomba('cosas que se gritan en un partido de fútbol'),
-  bomba('cosas que solo pasan en las fiestas del pueblo'),
-  bomba('excusas para no pagar una ronda'),
-  bomba('cosas que tu abuela guarda “por si acaso”'),
-];
+  ...BOMB_TOPICS_FIESTA,
+  // Algunas de cultura básica también salen como carta (el resto, al elegir
+  // tema en "Otra ronda").
+  ...BOMB_TOPICS_SABER.slice(0, 12),
+].map((tema) => bomba(tema));
 
 // ─── 📖 ANÉCDOTAS: la mesa cuenta, vota y se ríe ─────────────────────────
 export const MEGAMIX_ANECDOTAS: string[] = [

@@ -5,7 +5,17 @@ import {
   cleanNormaText,
   normaVerdict,
 } from '@/utils/megamixNormas';
-import { bombTickInterval, isBombCard, randomBombDuration, BOMB_MIN_MS, BOMB_MAX_MS } from '@/utils/megamixBomb';
+import {
+  bombTickInterval,
+  bombTopicFromCard,
+  isBombCard,
+  pickTwoTopics,
+  randomBombDuration,
+  BOMB_MIN_MS,
+  BOMB_MAX_MS,
+  BOMB_TOPICS_FIESTA,
+  BOMB_TOPICS_SABER,
+} from '@/utils/megamixBomb';
 import { NormaBanner } from '@/components/game/party/NormaBanner';
 import { NormaVerdict } from '@/components/game/party/NormaVerdict';
 import { BombOverlay } from '@/components/game/party/BombOverlay';
@@ -86,6 +96,30 @@ describe('la bomba', () => {
       expect(isBombCard(card)).toBe(true);
       expect(card).toMatch(/ACTIVAR/);
     }
+  });
+
+  it('saca el tema de la carta y ofrece dos temas distintos (cultura + fiesta)', () => {
+    expect(bombTopicFromCard(MEGAMIX_BOMBA[0])).toBe(BOMB_TOPICS_FIESTA[0]);
+    for (let i = 0; i < 20; i++) {
+      const [saber, fiesta] = pickTwoTopics(['capitales de Europa']);
+      expect(BOMB_TOPICS_SABER).toContain(saber);
+      expect(BOMB_TOPICS_FIESTA).toContain(fiesta);
+      expect(saber).not.toBe('capitales de Europa');
+    }
+  });
+
+  it('tras el ¡BUM!, "Otra ronda" deja elegir tema y vuelve a hacer tic-tac con él', () => {
+    vi.useFakeTimers();
+    render(<BombOverlay open topic="frases de madre" onClose={() => {}} />);
+    expect(screen.getByText('frases de madre')).toBeTruthy();
+    act(() => vi.advanceTimersByTime(BOMB_MAX_MS + 2000));
+    fireEvent.click(screen.getByText('💣 Otra ronda'));
+    expect(screen.getByText('¿De qué va la siguiente?')).toBeTruthy();
+    const saberButton = screen.getByText(/Sabes más que un niño de primaria/).closest('button')!;
+    const chosen = saberButton.querySelector('span:last-child')!.textContent!;
+    fireEvent.click(saberButton);
+    expect(screen.getByText('¡Pasad el móvil!')).toBeTruthy();
+    expect(screen.getByText(chosen)).toBeTruthy();
   });
 
   it('explota sola y no se puede cerrar mientras hace tic-tac', () => {
