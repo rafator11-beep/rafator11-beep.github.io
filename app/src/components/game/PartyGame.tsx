@@ -289,6 +289,7 @@ export function PartyGame({
     usedQuestionIds,
     setUsedQuestionIds,
     getCurrentContent,
+    currentRawCard,
     getNextPreview,
     getMegamixPhaseForIndex,
   } = useGameContent(mode, currentIndex, currentPlayer?.name || 'Jugador', players.length, players);
@@ -969,7 +970,9 @@ export function PartyGame({
     const cardText = getCurrentContent();
     let isGlobal: boolean;
     if (mode === 'megamix') {
-      isGlobal = !isIndividualCard(typeof cardText === 'string' ? cardText : '');
+      // Sobre la carta sin sustituir: con {player} ya cambiado por el nombre,
+      // las cartas individuales solo por llevar {player} parecían generales.
+      isGlobal = !isIndividualCard(currentRawCard);
     } else {
       isGlobal =
         currentQuestion?.type === 'yo_nunca' ||
@@ -987,7 +990,7 @@ export function PartyGame({
         setShowYoNuncaResponse(true);
         return;
       }
-      if (isIndividualCard(txt) && players.length > 0 && currentPlayer) {
+      if (isIndividualCard(currentRawCard) && players.length > 0 && currentPlayer) {
         respondedCardRef.current = currentIndex;
         if (!txt.startsWith('⚔️')) {
           setShowRetoOutcome(true);
@@ -1183,23 +1186,25 @@ export function PartyGame({
     result = result.replace(/{player1}/g, currentPlayer.name);
 
     // Filter out the current player to get other players for random selections
-    const otherPlayers = players.filter((p) => p.id !== currentPlayer.id);
-    if (otherPlayers.length > 0) {
+    const others = players.filter((p) => p.id !== currentPlayer.id);
+    if (others.length > 0) {
+      // Antes {player2} era siempre el primero de la lista. Se rota por carta
+      // con un hash del índice (no Math.random: dentro del memo cambiaría el
+      // nombre en cada re-render de la misma carta).
+      const offset = (Math.imul(currentIndex + 1, 2654435761) >>> 0) % others.length;
+      const otherPlayers = [...others.slice(offset), ...others.slice(0, offset)];
       // Reemplazo secuencial: {player2}, {player3}, etc. con los otros jugadores
       otherPlayers.forEach((other, index) => {
         const placeholder = new RegExp(`\\{player${index + 2}\\}`, 'g');
         result = result.replace(placeholder, other.name);
       });
-      // Fallback para {player2} si se usó y no se reemplazó
-      const randomOther = otherPlayers[Math.floor(Math.random() * otherPlayers.length)];
-      result = result.replace(/{player2}/g, randomOther.name);
     } else {
       // Si no hay otros jugadores, usar un fallback descriptivo
       result = result.replace(/{player2}/g, 'otro jugador');
       result = result.replace(/{player3}/g, 'un tercer jugador');
     }
     return result;
-  }, [rawText, currentPlayer, players]);
+  }, [rawText, currentPlayer, players, currentIndex]);
 
   const safeCurrentText =
     currentText && currentText !== 'Siguiente carta' && currentText !== 'Cargando pregunta...'

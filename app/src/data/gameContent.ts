@@ -6916,6 +6916,20 @@ export function getMegamixContent(count: number): string[] {
  * GENERAL: todo lo demás (🙈 Yo nunca, 🌶️ Picante, 🇪🇸 Pacovers/España, 🗳️ Más probable,
  *          🙌 Todos, 🛌 En la cama, 🔗 Cadena, 🎭 Mímica, NORMA, TRIGGER)
  */
+// Varias capas de contenido añaden su emoji de tipo a cartas que ya traían uno
+// ("🎯 🎯 RETO", "🎯 ⏳ 10 SEGUNDOS"). Se conserva solo el último, que es el de
+// la carta original y el más específico.
+const LEADING_EMOJIS = /^(?:(?:\p{Regional_Indicator}{2}|\p{Extended_Pictographic}[️‍\p{Extended_Pictographic}]*)\s*)+/u;
+const EMOJI_TOKEN = /\p{Regional_Indicator}{2}|\p{Extended_Pictographic}[️‍\p{Extended_Pictographic}]*/gu;
+
+export function normalizeCardText(card: string): string {
+  const lead = card.match(LEADING_EMOJIS)?.[0];
+  if (!lead) return card;
+  const tokens = lead.match(EMOJI_TOKEN) ?? [];
+  if (tokens.length < 2) return card;
+  return `${tokens[tokens.length - 1]} ${card.slice(lead.length)}`;
+}
+
 export function isIndividualCard(cardText: string): boolean {
   if (!cardText || typeof cardText !== 'string') return false;
   const t = cardText.trim();
@@ -6992,29 +7006,17 @@ export function getStructuredMegamix(
     return cleaned;
   }
 
-  // Drinking suffixes by difficulty tier
-  const tragosLeves = [
-    ' 🍺 ¡Bebe 1 trago!',
-    ' 🍺 ¡Un traguito para ti!',
-    ' 🍺 Trago obligatorio.',
-    ' 🍺 Brinda con alguien y beben juntos.',
-    ' 🍺 El señalado bebe 1.',
-  ];
+  // Drinking suffixes by difficulty tier. Se pegan a cartas de cualquier tipo
+  // (Yo nunca, votación, reto…), así que no pueden hablar de "el perdedor",
+  // "el señalado" o "el más votado": en muchas cartas no hay ninguno.
+  const tragosLeves = [' 🍺 ¡Bebe 1 trago!', ' 🍺 ¡Un traguito!', ' 🍺 Trago obligatorio.'];
 
-  const tragosMedios = [
-    ' 🍻 ¡Bebe 2 tragos!',
-    ' 🍻 ¡Doble trago para el elegido!',
-    ' 🍻 Si te toca, 2 tragos.',
-    ' 🍻 El perdedor bebe 2.',
-    ' 🍻 El que más votos tenga, ¡bebe doble!',
-  ];
+  const tragosMedios = [' 🍻 ¡Bebe 2 tragos!', ' 🍻 Son 2 tragos.', ' 🍻 Doble trago, sin excusas.'];
 
   const tragosFuertes = [
     ' 🥃 ¡3 TRAGOS! ¡Sin excusas!',
-    ' 🥃 ¡TRIPLE TRAGO para el culpable!',
-    ' 🥃 El que pierda, ¡3 tragos largos!',
-    ' 🥃 Si no contestas, ¡3 tragos!',
-    ' 🥃 ¡Fondo! ¡Fondo! ¡Fondo!',
+    ' 🥃 ¡TRIPLE TRAGO!',
+    ' 🥃 ¡3 tragos largos!',
   ];
 
   const tragosGrupo = [
@@ -7339,6 +7341,9 @@ export function getStructuredMegamix(
       .replace(/^🔤\s*/i, '')
       .replace(/^Categorías:\s*/i, '')
       .trim();
+    // Las plantillas generadas ya vienen completas ("CATEGORÍAS — "x": por
+    // turnos…"); envolverlas otra vez duplicaba el título y las instrucciones.
+    if (/^CATEGOR[IÍ]AS\s*—/i.test(clean)) return addDrinking(`🔤 ${clean}`, 'reparte');
     return addDrinking(
       `🔤 CATEGORÍAS — "${clean}": Por turnos, cada jugador dice uno. El que repita o falle bebe`,
       'reparte'
@@ -7786,7 +7791,7 @@ export function getStructuredMegamix(
   type TypedPool = { key: string; cards: string[]; ptr: number; weight?: number };
   const exclude = options?.exclude;
   const makeTypedPool = (key: string, cards: string[]): TypedPool => {
-    const cleaned = cleanDeckPool(cards);
+    const cleaned = cleanDeckPool(cards.map(normalizeCardText));
     const kept = exclude ? cleaned.filter((c) => !exclude(c)) : cleaned;
     // Si el filtro vaciara el tipo entero, mejor repetir cartas que perder el tipo.
     return { key, cards: shuffleArray(kept.length > 0 ? kept : cleaned), ptr: 0 };

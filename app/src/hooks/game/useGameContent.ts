@@ -208,20 +208,28 @@ function buildTasteCards(players: Player[]): string[] {
   }
 }
 
+const isDeckEvent = (card: string) => card.startsWith('TRIGGER:') || card.startsWith('📜');
+
 // Mezcla cartas de gustos en el mazo a un ritmo fijo (cada ~16 cartas), en vez
 // de simplemente concatenarlas y dejar que se diluyan en un pool de miles de
 // cartas (donde casi nunca saldrían). Si tasteCards está vacío, devuelve deck igual.
+// Cada carta SUSTITUYE a la siguiente de su mismo lado (individual/general) y
+// que no sea un evento: insertarla desplazaba todo lo que venía detrás y
+// rompía la alternancia individual/general del mazo estructurado.
 export function interleaveTasteCards(deck: string[], tasteCards: string[]): string[] {
   if (tasteCards.length === 0) return deck;
   const shuffledTastes = shuffleArray(tasteCards);
-  const out: string[] = [];
+  const out = [...deck];
   const GAP = 16;
   let tPtr = 0;
-  for (let i = 0; i < deck.length; i++) {
-    out.push(deck[i]);
-    if ((i + 1) % GAP === 0) {
-      out.push(shuffledTastes[tPtr % shuffledTastes.length]);
+  for (let target = GAP; target < out.length; target += GAP) {
+    const taste = shuffledTastes[tPtr % shuffledTastes.length];
+    const individual = isIndividualCard(taste);
+    for (let j = target; j < out.length && j < target + GAP; j++) {
+      if (isDeckEvent(out[j]) || isIndividualCard(out[j]) !== individual) continue;
+      out[j] = taste;
       tPtr++;
+      break;
     }
   }
   return out;
@@ -640,22 +648,32 @@ export const useGameContent = (
     [usedQuestionIds]
   );
 
-  const currentText = useMemo(() => {
-    if (mode === 'trivia_futbol' || mode === 'cultura') {
-      return currentQuestion?.question || 'Cargando pregunta...';
-    }
-    if (content.length === 0) return 'Siguiente carta';
+  // Carta tal cual está en el mazo, con sus placeholders. Clasificarla
+  // (isIndividualCard) hay que hacerlo sobre esta: una vez sustituido
+  // {player} por el nombre, las cartas que solo eran individuales por llevar
+  // {player} parecían generales y el turno no pasaba.
+  const currentRawCard = useMemo(() => {
+    if (content.length === 0) return '';
     // Al agotar el mazo se re-baraja con otra semilla en cada vuelta, para
     // no repetir el mismo orden exacto (evita repeticiones en pantalla).
     const lap = Math.floor(currentIndex / content.length);
     const deck = lap === 0 ? content : seededShuffle(content, lap * 2654435761);
     const pos = currentIndex % content.length;
-    const validContent =
+    return (
       deck.slice(pos).find((item) => typeof item === 'string' && item.trim().length > 0) ||
-      deck.find((item) => typeof item === 'string' && item.trim().length > 0);
-    const resolved = validContent?.replace(/{player}/g, currentPlayerName) || 'Siguiente carta';
+      deck.find((item) => typeof item === 'string' && item.trim().length > 0) ||
+      ''
+    );
+  }, [content, currentIndex]);
+
+  const currentText = useMemo(() => {
+    if (mode === 'trivia_futbol' || mode === 'cultura') {
+      return currentQuestion?.question || 'Cargando pregunta...';
+    }
+    if (!currentRawCard) return 'Siguiente carta';
+    const resolved = currentRawCard.replace(/{player}/g, currentPlayerName);
     return noAlcohol ? transformCardForNoAlcohol(resolved) : resolved;
-  }, [content, currentIndex, currentPlayerName, mode, currentQuestion, noAlcohol]);
+  }, [currentRawCard, currentPlayerName, mode, currentQuestion, noAlcohol]);
 
   const getCurrentContent = useCallback(() => currentText, [currentText]);
 
@@ -679,6 +697,7 @@ export const useGameContent = (
     loadNextQuestion,
     loadSpecificQuestion: loadSpecificQuestion as (category: 'futbol' | 'cultura') => void,
     getCurrentContent,
+    currentRawCard,
     getNextPreview,
     getMegamixPhaseForIndex,
     questionNumber,

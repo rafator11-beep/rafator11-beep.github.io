@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
-import { getStructuredMegamix, isIndividualCard } from '@/data/gameContent';
+import { getStructuredMegamix, isIndividualCard, normalizeCardText } from '@/data/gameContent';
 import { interleaveTasteCards, useGameContent } from '@/hooks/game/useGameContent';
 import { MEGAMIX_SPAIN_GENERAL, MEGAMIX_SPAIN_INDIVIDUAL } from '@/data/megamixSpain';
 import {
@@ -100,6 +100,19 @@ describe('getStructuredMegamix', () => {
     expect(big.filter((c) => /yo nunca\.{3}\s*yo nunca/i.test(c))).toEqual([]);
   });
 
+  it('sin emojis de tipo duplicados ni categorías envueltas dos veces', () => {
+    const big = getStructuredMegamix(2500, 4);
+    const leadingEmojis = /^(?:(?:\p{Extended_Pictographic}️?)\s*){2,}/u;
+    expect(big.filter((c) => leadingEmojis.test(c))).toEqual([]);
+    expect(big.filter((c) => /CATEGOR[IÍ]AS[^"]*"CATEGOR[IÍ]AS/i.test(c))).toEqual([]);
+  });
+
+  it('sin finales de trago que hablan de perdedor o votos inexistentes', () => {
+    const big = getStructuredMegamix(2500, 4);
+    const appended = / 🍻 El perdedor bebe 2\.$| 🍻 El que más votos tenga| 🍺 El señalado bebe 1\.$| 🥃 El que pierda,/;
+    expect(big.filter((c) => appended.test(c))).toEqual([]);
+  });
+
   it('mezcla los pools extra como un tipo más', () => {
     const extra = getStructuredMegamix(600, 4, {
       generalKeys: ['yoNunca'],
@@ -126,6 +139,21 @@ describe('getStructuredMegamix', () => {
   });
 });
 
+// ─── normalizeCardText ───────────────────────────────────────────────────────
+
+describe('normalizeCardText', () => {
+  it.each([
+    ['🎯 🎯 RETO: baila', '🎯 RETO: baila'],
+    ['🗳️ 🗳️ ¿Quién es más probable…?', '🗳️ ¿Quién es más probable…?'],
+    ['🎯 ⏳ 10 SEGUNDOS: di 5 frutas', '⏳ 10 SEGUNDOS: di 5 frutas'],
+    ['🙈 Yo nunca he mentido', '🙈 Yo nunca he mentido'],
+    ['🇪🇸 Si has comido paella, bebe', '🇪🇸 Si has comido paella, bebe'],
+    ['TRIGGER:IMPOSTOR', 'TRIGGER:IMPOSTOR'],
+  ])('%s', (card, expected) => {
+    expect(normalizeCardText(card)).toBe(expected);
+  });
+});
+
 // ─── interleaveTasteCards ────────────────────────────────────────────────────
 
 describe('interleaveTasteCards', () => {
@@ -135,12 +163,25 @@ describe('interleaveTasteCards', () => {
     expect(interleaveTasteCards(deck, [])).toBe(deck);
   });
 
-  it('mete una carta de gustos cada 16 sin perder ninguna del mazo', () => {
+  it('mete una carta de gustos cada 16 sin cambiar el tamaño del mazo', () => {
     const out = interleaveTasteCards(deck, ['gusto']);
-    expect(out).toHaveLength(51);
+    expect(out).toHaveLength(48);
     expect(out[16]).toBe('gusto');
-    expect(out[33]).toBe('gusto');
-    expect(out.filter((c) => c !== 'gusto')).toEqual(deck);
+    expect(out[32]).toBe('gusto');
+  });
+
+  it('no rompe la alternancia individual / general ni pisa eventos', () => {
+    const structured = getStructuredMegamix(400, 4);
+    const tastes = ['🎯 GUSTOS: reto para Ana', '🙌 GUSTOS: todos señalan a Ana'];
+    const out = interleaveTasteCards(structured, tastes);
+    expect(out).toHaveLength(structured.length);
+    expect(out.filter((c) => tastes.includes(c)).length).toBeGreaterThan(15);
+    out.forEach((card, i) => {
+      if (isIndividualCard(structured[i]) !== isIndividualCard(card)) {
+        throw new Error(`hueco ${i} cambió de lado: ${structured[i]} → ${card}`);
+      }
+      if (structured[i].startsWith('TRIGGER:')) expect(card).toBe(structured[i]);
+    });
   });
 });
 
