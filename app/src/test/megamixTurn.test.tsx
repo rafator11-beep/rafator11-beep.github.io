@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, act } from '@testing-library/react';
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
 import { getTurnInfo } from '@/utils/megamixTurn';
 import { TurnBanner } from '@/components/game/party/TurnBanner';
 
@@ -37,10 +37,7 @@ describe('getTurnInfo', () => {
 });
 
 describe('TurnBanner', () => {
-  afterEach(() => vi.useRealTimers());
-
-  it('si el de turno no tiene el móvil conectado, a los segundos se lo lee el capitán', () => {
-    vi.useFakeTimers();
+  it('si el de turno no tiene el móvil conectado, el capitán se la lee al momento', () => {
     render(
       <TurnBanner
         turn={{ kind: 'individual', name: 'Ana', cardNumber: 1 }}
@@ -48,8 +45,6 @@ describe('TurnBanner', () => {
         captainName="Luis"
       />
     );
-    expect(screen.queryByText(/Luis, léesela/)).toBeNull();
-    act(() => vi.advanceTimersByTime(6000));
     expect(screen.getByText(/Luis, léesela en voz alta/)).toBeTruthy();
   });
 

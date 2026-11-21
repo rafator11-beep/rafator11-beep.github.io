@@ -1,10 +1,5 @@
-import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import type { TurnInfo } from '@/components/game/SpectatorView';
-
-// Segundos que se espera a que el jugador de turno mire su móvil antes de
-// pedirle al capitán que le lea la prueba en voz alta.
-const READ_ALOUD_AFTER_MS = 6000;
 
 interface Props {
   turn: TurnInfo | null;
@@ -13,18 +8,9 @@ interface Props {
   captainName?: string;
 }
 
+// Si el de turno no tiene la partida en su móvil (lo normal: muchas veces no
+// se conecta nadie), el capitán se la lee en voz alta desde ya, sin esperar.
 export function TurnBanner({ turn, connected, captainName }: Props) {
-  const [askCaptain, setAskCaptain] = useState(false);
-  const cardNumber = turn?.cardNumber;
-  const needsReader = turn?.kind === 'individual' && !connected;
-
-  useEffect(() => {
-    setAskCaptain(false);
-    if (!needsReader) return;
-    const t = setTimeout(() => setAskCaptain(true), READ_ALOUD_AFTER_MS);
-    return () => clearTimeout(t);
-  }, [cardNumber, needsReader]);
-
   if (!turn) return null;
 
   if (turn.kind === 'grupal') {
@@ -42,11 +28,8 @@ export function TurnBanner({ turn, connected, captainName }: Props) {
       🎯 Le toca a <b className="text-white">{turn.name}</b>
       {connected ? (
         <span className="text-fuchsia-200/70"> · 📱 mira tu móvil</span>
-      ) : askCaptain && captainName ? (
-        <span className="text-amber-200">
-          {' '}
-          · 📢 {isCaptainOwnTurn ? `${turn.name}, léela en voz alta` : `${captainName}, léesela en voz alta`}
-        </span>
+      ) : captainName && !isCaptainOwnTurn ? (
+        <span className="text-amber-200"> · 📢 {captainName}, léesela en voz alta</span>
       ) : null}
     </Pill>
   );

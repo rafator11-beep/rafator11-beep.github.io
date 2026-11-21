@@ -1240,12 +1240,15 @@ export function PartyGame({
     if (!safeCurrentText) return;
     if (!(isHost || !isMultiplayer)) return;
     if (showKahoot.active) return;
+    // Sin móviles conectados no hay quién vote desde el suyo: se queda la
+    // pantalla de elegir (VotingOverlay), donde se asigna el voto a mano.
+    if (joinedNames.length < 2) return;
     const kind = detectCardKind(safeCurrentText);
     if (!INTERACTIVE_CARD_KINDS.includes(kind)) return;
     if (autoKahootIndexRef.current === currentIndex) return;
     autoKahootIndexRef.current = currentIndex;
     setShowKahoot({ active: true, mode: 'standard' });
-  }, [safeCurrentText, currentIndex, showKahoot.active, isHost, isMultiplayer]);
+  }, [safeCurrentText, currentIndex, showKahoot.active, isHost, isMultiplayer, joinedNames.length]);
 
   // Mímica: la palabra real solo debe llegar al jugador activo, por su móvil
   // (buzón privado), NUNCA en la pantalla compartida — mismo patrón que el
