@@ -7,11 +7,38 @@ export interface MegamixMystery {
   hint: string;
 }
 
-export function getMegamixPhase(cardIndex: number): MegamixPhase {
-  if (cardIndex < 40) return 'Calienta motores';
-  if (cardIndex < 100) return 'La previa se anima';
-  if (cardIndex < 180) return 'Modo locura';
-  return 'Final épico';
+// Las fases van por RONDAS (cada jugador ha tenido su individual), no por
+// cartas: con 8 jugadores una ronda dura el doble que con 4.
+export const PHASE_START_ROUND: Record<MegamixPhase, number> = {
+  'Calienta motores': 1,
+  'La previa se anima': 4,
+  'Modo locura': 8,
+  'Final épico': 13,
+};
+
+export function getMegamixPhase(cardIndex: number, playersCount = 4): MegamixPhase {
+  const round = Math.floor(cardIndex / (2 * Math.max(2, playersCount))) + 1;
+  if (round >= PHASE_START_ROUND['Final épico']) return 'Final épico';
+  if (round >= PHASE_START_ROUND['Modo locura']) return 'Modo locura';
+  if (round >= PHASE_START_ROUND['La previa se anima']) return 'La previa se anima';
+  return 'Calienta motores';
+}
+
+// ─── Eventos al azar durante la partida ──────────────────────────────────
+// El mazo ya trae sus eventos (torneo, impostor, normas, duelos…). Lo que
+// salta al azar es poco y nunca pegado a otro evento.
+export const RUNTIME_EVENT_CHANCE = {
+  minijuego: 0.1,
+  capitan: 0.05,
+  // applyRandomVirus ya tira un 20 %: 0.25 × 0.20 = 5 % por carta.
+  virus: 0.25,
+} as const;
+
+/** Cartas mínimas desde el último evento para que pueda saltar otro al azar. */
+export const EVENT_COOLDOWN_CARDS = 4;
+
+export function canFireRuntimeEvent(currentIndex: number, lastEventIndex: number): boolean {
+  return currentIndex - lastEventIndex >= EVENT_COOLDOWN_CARDS;
 }
 
 export function getMegamixPhaseMeta(phase: MegamixPhase) {

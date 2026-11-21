@@ -114,8 +114,11 @@ import {
   GENERAL_TYPE_WEIGHTS,
   INDIVIDUAL_TYPE_WEIGHTS,
   MAX_CONSECUTIVE_SAME_TYPE,
-  TRIGGER_INTERVALS,
+  PHASE_INTENSITY_MULTIPLIER,
+  TYPE_INTENSITY,
+  triggerIntervals,
 } from '@/config/cardWeights';
+import { getMegamixPhase } from '@/utils/megamixExperience';
 // ── MEGA CONTENT EXPANSION (2024-2026) ──
 import { yoNuncaInfancia } from './gameContentMega1';
 import { yoNuncaInstituto } from './gameContentMega2';
@@ -7901,7 +7904,11 @@ export function getStructuredMegamix(
         : null;
     const candidates = blocked ? types.filter((t) => t.key !== blocked) : types;
     const pool = candidates.length > 0 ? candidates : types;
-    const w = pool.map((t) => t.weight ?? weights[t.key] ?? 1);
+    // Intensidad según la fase de la partida (deck.length = posición de la carta).
+    const mult = PHASE_INTENSITY_MULTIPLIER[getMegamixPhase(deck.length, playersCount)];
+    const w = pool.map(
+      (t) => (t.weight ?? weights[t.key] ?? 1) * mult[TYPE_INTENSITY[t.key] ?? 'media']
+    );
     const total = w.reduce((a, b) => a + b, 0);
     let r = Math.random() * total;
     for (let i = 0; i < pool.length; i++) {
@@ -7964,18 +7971,23 @@ export function getStructuredMegamix(
   // Patrón [I, G]: el jugador activo actúa primero y toda la mesa participa después.
   // Los eventos especiales ocupan el hueco general y se retrasan si coinciden.
   const nonImpostorSpecials = specialTriggers.filter((t) => t !== "TRIGGER:IMPOSTOR");
+  const every = triggerIntervals(playersCount);
   const events = [
-    { every: TRIGGER_INTERVALS.impostor, due: TRIGGER_INTERVALS.impostor, next: () => "TRIGGER:IMPOSTOR" },
-    { every: TRIGGER_INTERVALS.torneo, due: TRIGGER_INTERVALS.torneo, next: () => torneoTriggers[torneoPtr++ % torneoTriggers.length] },
-    { every: TRIGGER_INTERVALS.norma, due: TRIGGER_INTERVALS.norma, next: () => globalNormas[normaPtr++ % globalNormas.length] },
-    { every: TRIGGER_INTERVALS.especial, due: TRIGGER_INTERVALS.especial, next: () => nonImpostorSpecials[triggerPtr++ % nonImpostorSpecials.length] },
+    { every: every.impostor, due: every.impostor, next: () => "TRIGGER:IMPOSTOR" },
+    { every: every.torneo, due: every.torneo, next: () => torneoTriggers[torneoPtr++ % torneoTriggers.length] },
+    { every: every.norma, due: every.norma, next: () => globalNormas[normaPtr++ % globalNormas.length] },
+    { every: every.especial, due: every.especial, next: () => nonImpostorSpecials[triggerPtr++ % nonImpostorSpecials.length] },
   ];
+  // Respiro: después de un evento, el siguiente hueco general es una carta
+  // normal aunque haya otro evento pendiente (se retrasa al siguiente).
+  let lastGeneralWasEvent = false;
   while (deck.length < count) {
     deck.push(drawIndividualCard());
     if (deck.length >= count) break;
-    const event = events.find((e) => deck.length >= e.due);
+    const event = lastGeneralWasEvent ? undefined : events.find((e) => deck.length >= e.due);
     if (event) { deck.push(event.next()); event.due += event.every; }
     else { deck.push(drawGeneralCard()); }
+    lastGeneralWasEvent = !!event;
   }
   // Sin deduplicar: los pools ya vienen limpios y los TRIGGER/NORMA se repiten
   // a propósito. Deduplicar aquí los dejaba en 1 de cada y descuadraba el patrón G/I.

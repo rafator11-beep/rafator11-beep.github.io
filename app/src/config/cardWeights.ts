@@ -56,12 +56,71 @@ export const INDIVIDUAL_TYPE_WEIGHTS: Record<string, number> = {
 // aplica por separado a cada una).
 export const MAX_CONSECUTIVE_SAME_TYPE = 2;
 
-// Cada cuántas cartas del mazo entra cada evento (ocupan el hueco de carta
-// general). Si dos coinciden, el de menor prioridad se retrasa al siguiente
-// hueco general. Prioridad: impostor > torneo > norma > especial.
-export const TRIGGER_INTERVALS = {
-  impostor: 20,
-  torneo: 15,
-  norma: 25,
-  especial: 10, // trivia fútbol/cultura, duelo, virus
+// ─── Eventos del mazo ─────────────────────────────────────────────────────
+// Cada cuántas RONDAS entra cada evento (ocupan el hueco de carta general).
+// Una ronda = cada jugador ha tenido su individual = 2 × jugadores cartas.
+// Antes iba por cartas fijas (cada 10/15/20/25) y con 4 jugadores los eventos
+// se comían la mitad de las cartas grupales. Si dos coinciden, el de menor
+// prioridad se retrasa. Prioridad: impostor > torneo > norma > especial.
+export const TRIGGER_EVERY_ROUNDS = {
+  impostor: 5,
+  torneo: 2,
+  norma: 3,
+  especial: 4, // trivia fútbol/cultura, duelo, virus
 } as const;
+
+// Mínimo de cartas entre eventos del mismo tipo (con 2-3 jugadores una ronda
+// son muy pocas cartas).
+const TRIGGER_MIN_CARDS: Record<keyof typeof TRIGGER_EVERY_ROUNDS, number> = {
+  impostor: 30,
+  torneo: 14,
+  norma: 20,
+  especial: 16,
+};
+
+export type TriggerKind = keyof typeof TRIGGER_EVERY_ROUNDS;
+
+export function triggerIntervals(playersCount: number): Record<TriggerKind, number> {
+  const cardsPerRound = 2 * Math.max(2, playersCount);
+  const out = {} as Record<TriggerKind, number>;
+  for (const k of Object.keys(TRIGGER_EVERY_ROUNDS) as TriggerKind[]) {
+    out[k] = Math.max(TRIGGER_MIN_CARDS[k], TRIGGER_EVERY_ROUNDS[k] * cardsPerRound);
+  }
+  return out;
+}
+
+// ─── Intensidad por fases ─────────────────────────────────────────────────
+// Cada tipo tiene una intensidad; según la fase de la partida, su peso se
+// multiplica: al principio manda lo suave y lo picante casi no sale; al final
+// es al revés. Tipos sin entrada cuentan como 'media'.
+export type Intensity = 'suave' | 'media' | 'fuerte';
+
+export const TYPE_INTENSITY: Record<string, Intensity> = {
+  // generales
+  yoNunca: 'suave',
+  megamixYoNunca: 'suave',
+  megamixTodos: 'suave',
+  megamixQuizEspana: 'suave',
+  cadena: 'suave',
+  pacovers: 'suave',
+  espana: 'suave',
+  customRetos: 'suave',
+  picante: 'fuerte',
+  enLaCama: 'fuerte',
+  humorNegro: 'fuerte',
+  megamixHumorNegro: 'fuerte',
+  // individuales
+  triviaExpress: 'suave',
+  categorias: 'suave',
+  clasico: 'suave',
+};
+
+export const PHASE_INTENSITY_MULTIPLIER: Record<
+  'Calienta motores' | 'La previa se anima' | 'Modo locura' | 'Final épico',
+  Record<Intensity, number>
+> = {
+  'Calienta motores': { suave: 1.6, media: 1.0, fuerte: 0.25 },
+  'La previa se anima': { suave: 1.1, media: 1.2, fuerte: 0.8 },
+  'Modo locura': { suave: 0.7, media: 1.1, fuerte: 1.4 },
+  'Final épico': { suave: 0.5, media: 1.0, fuerte: 1.6 },
+};

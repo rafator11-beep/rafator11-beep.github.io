@@ -665,7 +665,7 @@ export const useGameContent = (
     return getMegamixMystery(nextBase);
   };
 
-  const getMegamixPhaseForIndex = () => getMegamixPhase(currentIndex);
+  const getMegamixPhaseForIndex = () => getMegamixPhase(currentIndex, playersCount);
 
   return {
     content,

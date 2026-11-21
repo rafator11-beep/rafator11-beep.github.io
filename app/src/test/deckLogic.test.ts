@@ -4,13 +4,14 @@ import { getStructuredMegamix, isIndividualCard, normalizeCardText } from '@/dat
 import { interleaveTasteCards, useGameContent } from '@/hooks/game/useGameContent';
 import { MEGAMIX_SPAIN_GENERAL, MEGAMIX_SPAIN_INDIVIDUAL } from '@/data/megamixSpain';
 import {
+  canFireRuntimeEvent,
   getMegamixPhase,
   getMegamixMystery,
   transformCardForNoAlcohol,
 } from '@/utils/megamixExperience';
 import { cardKey, loadSeenCards, markCardSeen } from '@/utils/seenCards';
 import { MEGAMIX_EXTRA_GENERAL, MEGAMIX_EXTRA_INDIVIDUAL } from '@/data/megamixCore';
-import { GENERAL_TYPE_WEIGHTS, INDIVIDUAL_TYPE_WEIGHTS } from '@/config/cardWeights';
+import { GENERAL_TYPE_WEIGHTS, INDIVIDUAL_TYPE_WEIGHTS, triggerIntervals } from '@/config/cardWeights';
 
 vi.mock('@/services/customThemeService', () => ({ fetchThemeCards: vi.fn(async () => []) }));
 
@@ -65,8 +66,8 @@ describe('getStructuredMegamix', () => {
   });
 
   it('mantiene los triggers repetidos (antes se deduplicaban a 1 de cada)', () => {
-    // Impostor en cada múltiplo de 20 → 24 en 500 cartas
-    expect(deck.filter((c) => c === 'TRIGGER:IMPOSTOR')).toHaveLength(24);
+    // Impostor cada 5 rondas (con 5 jugadores, cada 50 cartas) → ~10 en 500
+    expect(deck.filter((c) => c === 'TRIGGER:IMPOSTOR').length).toBeGreaterThanOrEqual(8);
     expect(
       deck.filter((c) => c === 'TRIGGER:TORNEO' || c === 'TRIGGER:MEGATORNEO').length
     ).toBeGreaterThan(4);
@@ -77,11 +78,59 @@ describe('getStructuredMegamix', () => {
     expect(oddSlots(deck).filter(isIndividualCard)).toEqual([]);
   });
 
-  it('respeta los intervalos de eventos aunque sean impares o coincidan', () => {
+  it('respeta los intervalos de eventos (por rondas, según jugadores)', () => {
+    const every = triggerIntervals(5);
     const n = (re: RegExp) => deck.filter((c) => re.test(c)).length;
-    expect(n(/^TRIGGER:(MEGA)?TORNEO$/)).toBeGreaterThanOrEqual(30); // cada 15 → ~33
-    expect(n(/^📜 NORMA/)).toBeGreaterThanOrEqual(18); // cada 25 → ~20
-    expect(n(/^TRIGGER:(TRIVIA_|DUELO|VIRUS)/)).toBeGreaterThanOrEqual(45); // cada 10 → ~50
+    // El respiro y las coincidencias retrasan alguno: margen de 2.
+    expect(n(/^TRIGGER:(MEGA)?TORNEO$/)).toBeGreaterThanOrEqual(Math.floor(500 / every.torneo) - 2);
+    expect(n(/^📜 NORMA/)).toBeGreaterThanOrEqual(Math.floor(500 / every.norma) - 2);
+    expect(n(/^TRIGGER:(TRIVIA_|DUELO|VIRUS)/)).toBeGreaterThanOrEqual(Math.floor(500 / every.especial) - 2);
+    expect(n(/^TRIGGER:IMPOSTOR$/)).toBeGreaterThanOrEqual(Math.floor(500 / every.impostor) - 2);
+  });
+
+  it('con más jugadores los eventos se espacian más (van por rondas)', () => {
+    const four = triggerIntervals(4);
+    const eight = triggerIntervals(8);
+    for (const k of Object.keys(four) as (keyof typeof four)[]) {
+      expect(eight[k]).toBeGreaterThan(four[k]);
+    }
+    // Con 2 jugadores no se disparan: hay un mínimo de cartas.
+    expect(triggerIntervals(2).torneo).toBeGreaterThanOrEqual(14);
+  });
+
+  it('nunca dos eventos seguidos y como mucho un tercio de las grupales', () => {
+    const big = getStructuredMegamix(2000, 4);
+    const isEvent = (c: string) => c.startsWith('TRIGGER:') || c.startsWith('📜');
+    const generals = big.filter((_, i) => i % 2 === 1);
+    generals.forEach((c, i) => {
+      if (i > 0 && isEvent(c) && isEvent(generals[i - 1])) {
+        throw new Error(`dos eventos seguidos en el hueco general ${i}: ${generals[i - 1]} → ${c}`);
+      }
+    });
+    expect(generals.filter(isEvent).length / generals.length).toBeLessThan(0.36);
+  });
+
+  it('lo fuerte (picante, en la cama, humor negro) se guarda para el final', () => {
+    const strong = (c: string) => /^(🌶️|🛌|💀)/u.test(c);
+    let early = 0;
+    let earlyTotal = 0;
+    let late = 0;
+    let lateTotal = 0;
+    for (let k = 0; k < 8; k++) {
+      // 8 mazos: cada uno tarda ~200 ms en generarse.
+      const d = getStructuredMegamix(200, 4);
+      d.forEach((c, i) => {
+        if (i % 2 === 0 || c.startsWith('TRIGGER:') || c.startsWith('📜')) return;
+        if (i < 24) {
+          earlyTotal++;
+          if (strong(c)) early++;
+        } else if (i >= 104) {
+          lateTotal++;
+          if (strong(c)) late++;
+        }
+      });
+    }
+    expect(late / lateTotal).toBeGreaterThan((early / earlyTotal) * 3);
   });
 
   it('respeta los tipos permitidos (modo clásico)', () => {
@@ -275,11 +324,20 @@ describe('useGameContent', () => {
 
 // ─── Megamix experience ──────────────────────────────────────────────────────
 describe('Megamix experience', () => {
-  it('progresa por las cuatro fases de la partida', () => {
-    expect(getMegamixPhase(0)).toBe('Calienta motores');
-    expect(getMegamixPhase(50)).toBe('La previa se anima');
-    expect(getMegamixPhase(120)).toBe('Modo locura');
-    expect(getMegamixPhase(200)).toBe('Final épico');
+  it('progresa por las cuatro fases de la partida, por rondas', () => {
+    // 4 jugadores: 8 cartas por ronda. Previa desde la ronda 4, locura desde
+    // la 8 y final desde la 13.
+    expect(getMegamixPhase(0, 4)).toBe('Calienta motores');
+    expect(getMegamixPhase(30, 4)).toBe('La previa se anima');
+    expect(getMegamixPhase(70, 4)).toBe('Modo locura');
+    expect(getMegamixPhase(120, 4)).toBe('Final épico');
+    // Con 8 jugadores la misma carta está en una fase más temprana.
+    expect(getMegamixPhase(70, 8)).toBe('La previa se anima');
+  });
+
+  it('los eventos al azar no saltan pegados a otro evento', () => {
+    expect(canFireRuntimeEvent(10, 8)).toBe(false);
+    expect(canFireRuntimeEvent(12, 8)).toBe(true);
   });
 
   it('devuelve pistas sin revelar el texto completo', () => {

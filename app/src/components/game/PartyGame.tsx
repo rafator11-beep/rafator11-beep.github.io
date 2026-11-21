@@ -116,7 +116,13 @@ import { VotingOverlay } from './party/VotingOverlay';
 import { ChromecastModal } from './party/ChromecastModal';
 import { RankingDialog } from './party/RankingDialog';
 import { VirusAlertSheet } from './party/VirusAlertSheet';
-import { getMegamixPhaseMeta, isNoAlcoholMode, setNoAlcoholMode } from '@/utils/megamixExperience';
+import {
+  canFireRuntimeEvent,
+  getMegamixPhaseMeta,
+  isNoAlcoholMode,
+  RUNTIME_EVENT_CHANCE,
+  setNoAlcoholMode,
+} from '@/utils/megamixExperience';
 
 export { XP };
 
@@ -309,7 +315,7 @@ export function PartyGame({
     getMegamixPhaseForIndex,
   } = useGameContent(mode, currentIndex, currentPlayer?.name || 'Jugador', players.length, players);
 
-  const { checkDrinkingGame, lastMiniTurnRef } = useDrinkingMicroGames(mode, 1); // players count logic improved
+  const { checkDrinkingGame } = useDrinkingMicroGames(mode, 1); // players count logic improved
 
   const {
     playerViruses,
@@ -317,7 +323,6 @@ export function PartyGame({
     setBrutalCounts, // Needed for overlay logic
     applyRandomVirus,
     updateViruses,
-    checkMegamixSpecialEvents,
     manageMegamixViruses, // Every 5 rounds virus cycle
   } = useGameEffects(mode, players);
 
@@ -462,6 +467,8 @@ export function PartyGame({
   );
   // Track whether we've shown response UI for the current card index
   const respondedCardRef = useRef<number>(-1);
+  // Carta en la que saltó el último evento al azar (minijuego, capitán, virus).
+  const lastRuntimeEventRef = useRef<number>(-100);
   // Count cards shown to know when to inject AI card
   const aiCardInjectCountRef = useRef(0);
 
@@ -1133,7 +1140,18 @@ export function PartyGame({
       return;
     }
 
-    if (checkDrinkingGame(currentIndex, currentPlayer?.name || 'Jugador', setGameState)) {
+    // Eventos al azar: pocos y nunca pegados a otro evento (del mazo o no).
+    const lastEvent = Math.max(lastRuntimeEventRef.current, handledTriggerIndexRef.current);
+    const canSurprise = mode !== 'megamix' || canFireRuntimeEvent(currentIndex, lastEvent);
+    const markSurprise = () => {
+      lastRuntimeEventRef.current = currentIndex;
+    };
+
+    if (
+      canSurprise &&
+      checkDrinkingGame(currentIndex, currentPlayer?.name || 'Jugador', setGameState)
+    ) {
+      markSurprise();
       performTurnAdvance(isGlobal);
       return;
     }
@@ -1162,7 +1180,8 @@ export function PartyGame({
         }
 
         // --- MEJORA: CAPTAIN DECISION RANDOM CHANCE ---
-        if (Math.random() < 0.15 && players.length > 2) {
+        if (canSurprise && Math.random() < RUNTIME_EVENT_CHANCE.capitan && players.length > 2) {
+          markSurprise();
           setGameState((prev) => ({ ...prev, showCaptainDecision: true }));
           return; // STOP: wait for captain decision
         }
@@ -1172,28 +1191,19 @@ export function PartyGame({
       }
 
       // 3. Apply Random Virus from current card - Priority 2
-      const virusResult = applyRandomVirus();
+      // En Megamix el mazo ya trae TRIGGER:VIRUS: aquí solo un 5 % extra.
+      const rollVirus =
+        mode !== 'megamix' || (canSurprise && Math.random() < RUNTIME_EVENT_CHANCE.virus);
+      const virusResult = rollVirus ? applyRandomVirus() : null;
       if (virusResult) {
+        markSurprise();
         setGameState((prev) => ({ ...prev, showVirusAlert: true, virusAlertData: virusResult }));
         return; // STOP: wait for user to accept virus
       }
 
-      // Check Megamix special events
-      if (
-        checkMegamixSpecialEvents(
-          currentIndex,
-          gameState.round,
-          currentPlayer,
-          usedQuestionIds,
-          setCurrentQuestion,
-          setUsedQuestionIds,
-          setGameState,
-          lastMiniTurnRef
-        )
-      ) {
-        performTurnAdvance(isGlobal);
-        return;
-      }
+      // (Antes aquí saltaban además impostor forzado cada 40 cartas,
+      // impostor/mímica cada 6 rondas, duelo al azar y trivia al azar: todo
+      // repetía lo que ya trae el mazo. Ahora los eventos los pone el mazo.)
     }
 
     performTurnAdvance(isGlobal);

@@ -1,12 +1,6 @@
-import { useState, useRef, MutableRefObject, useCallback } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { GameMode, PlayerVirus, Player } from '@/types/game';
 import { virusEffects } from '@/data/gameContent';
-import { impostorRounds } from '@/data/impostorContent';
-import { duelos } from '@/data/duelosContent';
-import { isGeminiConfigured, geminiGenerateImpostorRound } from '@/services/geminiClient';
-import { footballQuestions } from '@/data/footballQuestionsNew';
-import { cultureQuestions } from '@/data/cultureQuestions';
-import { getRandomMimica } from '@/data/mimicaContent';
 
 export const useGameEffects = (mode: GameMode, players: Player[]) => {
     const [playerViruses, setPlayerViruses] = useState<PlayerVirus[]>([]);
@@ -19,7 +13,6 @@ export const useGameEffects = (mode: GameMode, players: Player[]) => {
 
     // State for tracking periodic events
     const lastVirusRoundRef = useRef<number>(-1);
-    const lastImpostorIndexRef = useRef<number>(0);
 
     const applyRandomVirus = useCallback((force: boolean = false, specificPlayerId?: string) => {
         // If not forced, apply random chance
@@ -319,213 +312,6 @@ export const useGameEffects = (mode: GameMode, players: Player[]) => {
         return null;
     };
 
-    // Megamix Special Events (Impostor, Duelo, forced Trivia, Random Norma)
-    const checkMegamixSpecialEvents = (
-        currentIndex: number,
-        currentRound: number, // Added usage
-        currentPlayer: Player,
-        usedQuestionIds: Set<string>,
-        setCurrentQuestion: (q: any) => void,
-        setUsedQuestionIds: (ids: Set<string>) => void,
-        setGameState: (updater: (prev: any) => any) => void,
-        lastMiniTurnRef: MutableRefObject<Record<string, number>>
-    ) => {
-        if (mode !== 'megamix') return false;
-
-        // Force Impostor every 40 cards
-        if (currentIndex - lastImpostorIndexRef.current >= 40 && players.length >= 3) {
-            lastImpostorIndexRef.current = currentIndex;
-            const impostorPlayer = players[Math.floor(Math.random() * players.length)];
-            
-            // Set loading state first
-            setGameState((prev: any) => ({
-                ...prev,
-                showImpostorWarning: true,
-                impostorData: {
-                    impostorPlayerId: impostorPlayer.id,
-                    currentImpostorReal: 'Cargando palabra secreta...',
-                    currentImpostorFake: 'Cargando pista...',
-                    isLoading: true,
-                }
-            }));
-
-            if (isGeminiConfigured()) {
-                geminiGenerateImpostorRound().then(result => {
-                    if (result) {
-                        setGameState((prev: any) => ({
-                            ...prev,
-                            impostorData: {
-                                ...prev.impostorData,
-                                currentImpostorReal: `${result.category}: ${result.word}`,
-                                currentImpostorFake: `${result.category}: ${result.fakeWord} (${result.hint})`,
-                                isLoading: false,
-                            }
-                        }));
-                    } else {
-                        // Fallback static
-                        const randomImpostor = impostorRounds[Math.floor(Math.random() * impostorRounds.length)];
-                        setGameState((prev: any) => ({
-                            ...prev,
-                            impostorData: {
-                                ...prev.impostorData,
-                                currentImpostorReal: randomImpostor.normalQuestion || randomImpostor.category || '',
-                                currentImpostorFake: randomImpostor.impostorQuestion || randomImpostor.hint || '',
-                                isLoading: false,
-                            }
-                        }));
-                    }
-                }).catch(() => {
-                    const randomImpostor = impostorRounds[Math.floor(Math.random() * impostorRounds.length)];
-                    setGameState((prev: any) => ({
-                        ...prev,
-                        impostorData: {
-                            ...prev.impostorData,
-                            currentImpostorReal: randomImpostor.normalQuestion || randomImpostor.category || '',
-                            currentImpostorFake: randomImpostor.impostorQuestion || randomImpostor.hint || '',
-                            isLoading: false,
-                        }
-                    }));
-                });
-            } else {
-                const randomImpostor = impostorRounds[Math.floor(Math.random() * impostorRounds.length)];
-                setGameState((prev: any) => ({
-                    ...prev,
-                    impostorData: {
-                        ...prev.impostorData,
-                        currentImpostorReal: randomImpostor.normalQuestion || randomImpostor.category || '',
-                        currentImpostorFake: randomImpostor.impostorQuestion || randomImpostor.hint || '',
-                        isLoading: false,
-                    }
-                }));
-            }
-            return true;
-        }
-
-        const roll = Math.random();
-
-
-
-        // Special Megamix events: Impostor every 6 rounds (at start of round), Mimica also at alternate cycles
-        const isSpecialRoundTurn = currentRound > 0 && currentRound % 6 === 0 && (currentIndex % players.length === 0);
-
-        if (players.length >= 3 && isSpecialRoundTurn && mode === 'megamix') {
-            const specialCycle = Math.floor(currentRound / 6) % 3; // 3 types now: Impostor, Mimica, Impostor
-
-            if (specialCycle === 0 || specialCycle === 2) {
-                // Impostor
-                if (impostorRounds.length === 0) return false;
-                lastImpostorIndexRef.current = currentIndex; // Reset manual counter when cycle hits
-                const impostorPlayer = players[Math.floor(Math.random() * players.length)];
-                
-                // Set loading state first
-                setGameState((prev: any) => ({
-                    ...prev,
-                    showImpostorWarning: true, // Use warning screen for privacy
-                    impostorData: {
-                        impostorPlayerId: impostorPlayer.id,
-                        currentImpostorReal: 'Cargando palabra secreta...',
-                        currentImpostorFake: 'Cargando pista...',
-                        isLoading: true,
-                    }
-                }));
-
-                if (isGeminiConfigured()) {
-                    geminiGenerateImpostorRound().then(result => {
-                        if (result) {
-                            setGameState((prev: any) => ({
-                                ...prev,
-                                impostorData: {
-                                    ...prev.impostorData,
-                                    currentImpostorReal: `${result.category}: ${result.word}`,
-                                    currentImpostorFake: `${result.category}: ${result.fakeWord} (${result.hint})`,
-                                    isLoading: false,
-                                }
-                            }));
-                        } else {
-                            const randomImpostor = impostorRounds[Math.floor(Math.random() * impostorRounds.length)];
-                            setGameState((prev: any) => ({
-                                ...prev,
-                                impostorData: {
-                                    ...prev.impostorData,
-                                    currentImpostorReal: randomImpostor.normalQuestion || randomImpostor.category || '',
-                                    currentImpostorFake: randomImpostor.impostorQuestion || randomImpostor.hint || '',
-                                    isLoading: false,
-                                }
-                            }));
-                        }
-                    }).catch(() => {
-                        const randomImpostor = impostorRounds[Math.floor(Math.random() * impostorRounds.length)];
-                        setGameState((prev: any) => ({
-                            ...prev,
-                            impostorData: {
-                                ...prev.impostorData,
-                                currentImpostorReal: randomImpostor.normalQuestion || randomImpostor.category || '',
-                                currentImpostorFake: randomImpostor.impostorQuestion || randomImpostor.hint || '',
-                                isLoading: false,
-                            }
-                        }));
-                    });
-                } else {
-                    const randomImpostor = impostorRounds[Math.floor(Math.random() * impostorRounds.length)];
-                    setGameState((prev: any) => ({
-                        ...prev,
-                        impostorData: {
-                            ...prev.impostorData,
-                            currentImpostorReal: randomImpostor.normalQuestion || randomImpostor.category || '',
-                            currentImpostorFake: randomImpostor.impostorQuestion || randomImpostor.hint || '',
-                            isLoading: false,
-                        }
-                    }));
-                }
-            } else {
-                // Mimica
-                const randomMimica = getRandomMimica();
-                setGameState(prev => ({
-                    ...prev,
-                    showMimica: true,
-                    showMimicaReveal: true,
-                    currentMimicaText: randomMimica.text
-                }));
-            }
-
-            lastMiniTurnRef.current['impostor_round'] = currentIndex;
-            return true;
-        }
-
-        // Duelo
-        if (players.length >= 2 && roll >= 0.10 && roll < 0.22) {
-            const randomDuelo = duelos[Math.floor(Math.random() * duelos.length)];
-            const opponents = players.filter(p => p.id !== currentPlayer.id);
-            const opponent = opponents[Math.floor(Math.random() * opponents.length)];
-            setGameState((prev: any) => ({
-                ...prev,
-                showDuel: true,
-                currentDuelo: `${randomDuelo.name}: ${randomDuelo.description}`,
-                duelPlayers: [currentPlayer, opponent],
-            }));
-            return true;
-        }
-
-        // Forced Trivia
-        const playerTurnCount = Math.floor(currentIndex / Math.max(players.length, 1));
-        const forceTrivia = playerTurnCount > 0 && playerTurnCount % 6 === 0;
-
-        if (forceTrivia || (roll >= 0.88)) {
-            const isFootball = Math.random() > 0.5;
-            const shuffled = [...(isFootball ? footballQuestions : cultureQuestions)].sort(() => Math.random() - 0.5);
-            const availableQuestions = shuffled.filter(q => !usedQuestionIds.has(q.question));
-
-            if (availableQuestions.length > 0) {
-                const randomQ = availableQuestions[0];
-                setCurrentQuestion(randomQ);
-                setUsedQuestionIds(new Set([...usedQuestionIds, randomQ.question]));
-                setGameState((prev: any) => ({ ...prev, showTrivia: true }));
-                return true;
-            }
-        }
-
-        return false;
-    };
 
     return {
         playerViruses,
@@ -535,7 +321,6 @@ export const useGameEffects = (mode: GameMode, players: Player[]) => {
         setBrutalCounts,
         applyRandomVirus,
         updateViruses,
-        checkMegamixSpecialEvents,
         manageMegamixViruses,
         getPlayerVirus
     };

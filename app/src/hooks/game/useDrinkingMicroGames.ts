@@ -4,6 +4,7 @@ import { getRandomDrinkingGame, getRandomCascade, getRandomCoinGame, getRandomIm
 import { formatMimicaChallenge, getRandomMimica } from '@/data/mimicaContent';
 import { bocaCerradaChallenges } from '@/data/bocaCerradaContent';
 import { pickWeighted } from '@/lib/godDeck';
+import { RUNTIME_EVENT_CHANCE } from '@/utils/megamixExperience';
 
 export const useDrinkingMicroGames = (mode: GameMode, playersCount: number) => {
     const recentMiniRef = useRef<string[]>([]);
@@ -16,7 +17,8 @@ export const useDrinkingMicroGames = (mode: GameMode, playersCount: number) => {
     ): boolean => {
         if (mode !== 'megamix' && mode !== 'clasico') return false;
 
-        const triggerChance = mode === 'megamix' ? 0.30 : 0.22;
+        // Megamix: el mazo ya trae sus eventos; el minijuego al azar es la sorpresa, no la norma.
+        const triggerChance = mode === 'megamix' ? RUNTIME_EVENT_CHANCE.minijuego : 0.22;
         if (Math.random() > triggerChance) return false;
 
         const turn = currentIndex;
