@@ -31,6 +31,35 @@ const parseQuestion = (data: any): Question => ({
   correctAnswer: typeof data.correctAnswer === 'string' ? cleanGameText(data.correctAnswer) : data.correctAnswer
 });
 
+// Partidas que han nacido en local porque Supabase falló al crearlas (proyecto
+// caído, sin conexión…). Antes solo se miraba isSupabaseConfigured, así que
+// tras caer a local el resto de acciones (añadir jugador, equipos, cargar la
+// partida…) seguían intentando ir a Supabase y fallaban: sin conexión no se
+// podía ni añadir jugadores. Se guarda en localStorage para sobrevivir a una
+// recarga o a otro componente que monte useGame con el mismo id.
+const LOCAL_GAMES_KEY = 'beep_local_game_ids';
+
+function readLocalGameIds(): string[] {
+  try {
+    return JSON.parse(localStorage.getItem(LOCAL_GAMES_KEY) || '[]');
+  } catch {
+    return [];
+  }
+}
+
+export function markLocalGame(id: string): void {
+  try {
+    const ids = readLocalGameIds().filter((x) => x !== id);
+    localStorage.setItem(LOCAL_GAMES_KEY, JSON.stringify([id, ...ids].slice(0, 20)));
+  } catch {
+    /* sin persistencia: esta sesión sigue sabiéndolo por el ref */
+  }
+}
+
+export function isLocalGame(id: string | null | undefined): boolean {
+  return !!id && readLocalGameIds().includes(id);
+}
+
 export function useGame(gameId: string | null) {
   const [game, setGame] = useState<Game | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
@@ -51,9 +80,13 @@ export function useGame(gameId: string | null) {
     teams: []
   });
 
+  // ¿Esta partida va sin servidor? (no configurado, o creada en local al fallar)
+  const isOffline = () =>
+    !isSupabaseConfigured || isLocalGame(gameId) || isLocalGame(localGameState.current.game?.id);
+
   // Hydrate local state on mount
   useEffect(() => {
-    if (!isSupabaseConfigured) {
+    if (isOffline()) {
       const stored = localStorage.getItem('beep_local_session');
       if (stored) {
         try {
@@ -73,7 +106,7 @@ export function useGame(gameId: string | null) {
 
   // Persist local state on changes
   useEffect(() => {
-    if (!isSupabaseConfigured && game) {
+    if (isOffline() && game) {
       localStorage.setItem('beep_local_session', JSON.stringify({
         game,
         players,
@@ -88,7 +121,7 @@ export function useGame(gameId: string | null) {
       return;
     }
 
-    if (!isSupabaseConfigured) {
+    if (isOffline()) {
       // In offline mode, state is handled synchronously by actions, 
       // but we set loading false to unblock UI
       setLoading(false);
@@ -125,7 +158,7 @@ export function useGame(gameId: string | null) {
 
   // Realtime subscriptions
   useEffect(() => {
-    if (!gameId || !isSupabaseConfigured) return;
+    if (!gameId || isOffline()) return;
 
     const gameChannel = supabase
       .channel(`game-${gameId}`)
@@ -172,6 +205,9 @@ export function useGame(gameId: string | null) {
       updated_at: new Date().toISOString(),
       current_turn: 0
     };
+
+    // Se apunta como local: así el resto de acciones no intentan ir a Supabase.
+    markLocalGame(newGame.id);
 
     // Update local ref
     localGameState.current = { game: newGame, players: [], teams: [] };
@@ -225,7 +261,7 @@ export function useGame(gameId: string | null) {
 
   const addPlayer = async (name: string, avatarUrl?: string | null) => {
     // If offline, we might generate ID locally if gameId is present in local context
-    if (!isSupabaseConfigured) {
+    if (isOffline()) {
       if (!game) throw new Error('No active game found locally');
 
       // Mejora 4: Guard against duplicate names in offline mode (consistent with online)
@@ -301,7 +337,7 @@ export function useGame(gameId: string | null) {
   };
 
   const removePlayer = async (playerId: string) => {
-    if (!isSupabaseConfigured) {
+    if (isOffline()) {
       const updatedPlayers = players.filter(p => p.id !== playerId);
       setPlayers(updatedPlayers);
       localGameState.current.players = updatedPlayers;
@@ -313,7 +349,7 @@ export function useGame(gameId: string | null) {
   };
 
   const createTeam = async (name: string, color: string) => {
-    if (!isSupabaseConfigured) {
+    if (isOffline()) {
       if (!game) throw new Error("No game");
       const newTeam: Team = {
         id: uuidv4(),
@@ -343,7 +379,7 @@ export function useGame(gameId: string | null) {
   };
 
   const assignPlayerToTeam = async (playerId: string, teamId: string | null) => {
-    if (!isSupabaseConfigured) {
+    if (isOffline()) {
       const updatedPlayers = players.map(p =>
         p.id === playerId ? { ...p, team_id: teamId } : p
       );
@@ -361,7 +397,7 @@ export function useGame(gameId: string | null) {
   };
 
   const startGame = async () => {
-    if (!isSupabaseConfigured) {
+    if (isOffline()) {
       if (!game) return;
       const updatedGame = { ...game, status: 'playing' as const };
       setGame(updatedGame);
@@ -386,7 +422,7 @@ export function useGame(gameId: string | null) {
     // However, for 'trivia_futbol' and 'cultura', it does fetch from DB.
     // For now, we return null in offline mode to avoid crashes,
     // or could eventually mock it if we had local question JSON.
-    if (!isSupabaseConfigured) return null;
+    if (isOffline()) return null;
 
     if (!gameId || !game) return null;
 
@@ -445,7 +481,7 @@ export function useGame(gameId: string | null) {
   };
 
   const answerQuestion = async (questionId: string, playerId: string, wasCorrect: boolean) => {
-    if (!isSupabaseConfigured) return; // DB tracking disabled offline
+    if (isOffline()) return; // DB tracking disabled offline
 
     if (!gameId || !game) return;
 
@@ -486,7 +522,7 @@ export function useGame(gameId: string | null) {
 
   const updateTicTacToeBoard = async (row: number, col: number, playerId: string) => {
     // Tictactoe not fully supported offline yet, return
-    if (!isSupabaseConfigured) return;
+    if (isOffline()) return;
     if (!ticTacToeState) return;
 
     const newBoard = ticTacToeState.board.map((r, ri) =>
@@ -532,7 +568,7 @@ export function useGame(gameId: string | null) {
   };
 
   const nextTurn = async () => {
-    if (!isSupabaseConfigured) {
+    if (isOffline()) {
       if (!game) return;
       const nextTurnIndex = (game.current_turn + 1) % players.length;
       const updatedGame = { ...game, current_turn: nextTurnIndex };
@@ -566,7 +602,7 @@ export function useGame(gameId: string | null) {
   };
 
   const startNextRound = async () => {
-    if (!isSupabaseConfigured) {
+    if (isOffline()) {
       if (!game) return;
       const updatedGame = {
         ...game,
@@ -602,7 +638,7 @@ export function useGame(gameId: string | null) {
   };
 
   const endGame = async () => {
-    if (!isSupabaseConfigured) {
+    if (isOffline()) {
       if (!game) return;
       const updatedGame = { ...game, status: 'finished' as const };
       setGame(updatedGame);
