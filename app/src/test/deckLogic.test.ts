@@ -8,6 +8,7 @@ import {
   getMegamixMystery,
   transformCardForNoAlcohol,
 } from '@/utils/megamixExperience';
+import { cardKey, loadSeenCards, markCardSeen } from '@/utils/seenCards';
 
 vi.mock('@/services/customThemeService', () => ({ fetchThemeCards: vi.fn(async () => []) }));
 
@@ -136,6 +137,50 @@ describe('getStructuredMegamix', () => {
         expect(isIndividualCard(card)).toBe(false);
       }
     });
+  });
+});
+
+// ─── Memoria entre partidas ──────────────────────────────────────────────────
+
+describe('cartas vistas en partidas anteriores', () => {
+  beforeEach(() => localStorage.clear());
+
+  it('la clave ignora la coletilla de trago, que cambia en cada partida', () => {
+    expect(cardKey('🙈 Yo nunca he mentido 🍻 ¡Bebe 2 tragos!')).toBe(
+      cardKey('🙈 Yo nunca he mentido 🍺 ¡Un traguito!')
+    );
+    expect(cardKey('🙈 Yo nunca he mentido')).not.toBe(cardKey('🙈 Yo nunca he robado'));
+  });
+
+  it('markCardSeen recuerda por modo y no duplica', () => {
+    markCardSeen('megamix', '🎯 RETO: baila');
+    markCardSeen('megamix', '🎯 RETO: baila');
+    expect(loadSeenCards('megamix')('🎯 RETO: baila')).toBe(true);
+    expect(loadSeenCards('clasico')('🎯 RETO: baila')).toBe(false);
+    expect(JSON.parse(localStorage.getItem('beep_seen_cards')!).megamix).toHaveLength(1);
+  });
+
+  it('la partida siguiente empieza por cartas nuevas sin romper la alternancia', () => {
+    const first = getStructuredMegamix(300, 4);
+    const seenKeys = new Set(first.filter((c) => !isTrigger(c)).map(cardKey));
+    const second = getStructuredMegamix(300, 4, { seen: (c) => seenKeys.has(cardKey(c)) });
+
+    const repeated = second.filter((c) => !isTrigger(c) && seenKeys.has(cardKey(c)));
+    expect(repeated.length).toBeLessThan(5);
+    expect(evenSlots(second).filter((c) => !isIndividualCard(c))).toEqual([]);
+  });
+
+  it('un pool pequeño saca todas sus cartas nuevas antes de repetir una vista', () => {
+    const pool = MEGAMIX_SPAIN_INDIVIDUAL;
+    const seenHalf = new Set(pool.slice(0, 26).map(cardKey));
+    const deck = getStructuredMegamix(400, 4, {
+      individualKeys: [],
+      extraIndividual: { megamixEspañaIndividual: pool },
+      seen: (c) => seenHalf.has(cardKey(c)),
+    });
+    const fromPool = deck.filter((c) => pool.includes(c));
+    const firstStale = fromPool.findIndex((c) => seenHalf.has(cardKey(c)));
+    expect(firstStale).toBe(26);
   });
 });
 

@@ -6983,6 +6983,8 @@ export function getStructuredMegamix(
     extraIndividual?: Record<string, string[]>;
     /** Cartas a dejar fuera (p. ej. las votadas negativamente). */
     exclude?: (card: string) => boolean;
+    /** Cartas vistas en partidas anteriores: salen después de las nuevas de su tipo. */
+    seen?: (card: string) => boolean;
   }
 ): string[] {
   function cleanDeckPool(items: any[]): string[] {
@@ -7794,7 +7796,14 @@ export function getStructuredMegamix(
     const cleaned = cleanDeckPool(cards.map(normalizeCardText));
     const kept = exclude ? cleaned.filter((c) => !exclude(c)) : cleaned;
     // Si el filtro vaciara el tipo entero, mejor repetir cartas que perder el tipo.
-    return { key, cards: shuffleArray(kept.length > 0 ? kept : cleaned), ptr: 0 };
+    const pool = kept.length > 0 ? kept : cleaned;
+    // Las ya vistas en partidas anteriores van al final de SU tipo: el puntero
+    // recorre antes todo lo nuevo, sin quitar cartas ni tocar el patrón G/I.
+    const seen = options?.seen;
+    if (!seen) return { key, cards: shuffleArray(pool), ptr: 0 };
+    const fresh = pool.filter((c) => !seen(c));
+    const stale = pool.filter((c) => seen(c));
+    return { key, cards: [...shuffleArray(fresh), ...shuffleArray(stale)], ptr: 0 };
   };
 
   const generalTypes: TypedPool[] = [

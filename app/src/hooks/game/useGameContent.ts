@@ -144,6 +144,7 @@ import {
   isNoAlcoholMode,
   transformCardForNoAlcohol,
 } from '@/utils/megamixExperience';
+import { loadSeenCards, markCardSeen } from '@/utils/seenCards';
 
 // Clean Fisher-Yates shuffle
 function shuffleArray<T>(array: T[]): T[] {
@@ -322,33 +323,6 @@ function rememberSession(deck: string[], mode: string, sessionSize: number): voi
   }
 }
 
-function rotateStructuredByRecent(deck: string[], mode: string): string[] {
-  try {
-    const raw = localStorage.getItem(RECENT_KEY);
-    const seen: string[] = raw ? JSON.parse(raw)?.[mode] || [] : [];
-    if (seen.length === 0) return deck;
-
-    const seenSet = new Set(seen);
-    const rotatePool = (pool: string[]) => {
-      const fresh = pool.filter((card) => !seenSet.has(card));
-      const stale = pool.filter((card) => seenSet.has(card));
-      return [...shuffleArray(fresh), ...shuffleArray(stale)];
-    };
-
-    const individual = rotatePool(deck.filter((card) => isIndividualCard(card)));
-    const general = rotatePool(deck.filter((card) => !isIndividualCard(card)));
-    const out: string[] = [];
-
-    for (let i = 0; i < Math.max(individual.length, general.length); i++) {
-      if (individual[i]) out.push(individual[i]);
-      if (general[i]) out.push(general[i]);
-    }
-    return out;
-  } catch {
-    return deck;
-  }
-}
-
 export const useGameContent = (
   mode: GameMode,
   currentIndex: number,
@@ -397,6 +371,7 @@ export const useGameContent = (
             megamixEspañaIndividual: MEGAMIX_SPAIN_INDIVIDUAL,
           },
           exclude: isDownvoted(mode),
+          seen: loadSeenCards(mode),
         });
         break;
       case 'clasico':
@@ -408,6 +383,7 @@ export const useGameContent = (
           individualKeys: ['retos', 'categorias', 'clasico'],
           extraGeneral: { customRetos: customRetoTexts },
           exclude: isDownvoted(mode),
+          seen: loadSeenCards(mode),
         });
         break;
       case 'yo_nunca':
@@ -498,15 +474,17 @@ export const useGameContent = (
     if (isStructuredMode(mode)) {
       // El orden YA es la partida (patrón G/I + triggers espaciados): barajar
       // aquí deshacía todo el algoritmo. Los votos se aplican dentro del
-      // generador (exclude) y los pools se barajan en cada partida.
+      // generador (exclude) y los pools se barajan en cada partida. Lo visto
+      // en partidas anteriores lo ordena el generador (seen) y se apunta
+      // carta a carta según sale (efecto de markCardSeen, más abajo).
       rotated = cleanedContent;
     } else {
       const weighted = normalizeDeckEntries(applyVoteWeights(cleanedContent, mode));
       // Baraja + manda al fondo lo visto en partidas recientes (frescura entre sesiones)
       rotated = rotateByRecent(shuffleArray(weighted), mode, sessionSize);
+      rememberSession(rotated, mode, sessionSize);
     }
     setContent(rotated);
-    rememberSession(rotated, mode, sessionSize);
 
     // Reset used questions for fresh game
     setUsedQuestionIds(new Set());
@@ -665,6 +643,12 @@ export const useGameContent = (
       ''
     );
   }, [content, currentIndex]);
+
+  // Apunta cada carta que sale de verdad para que la próxima partida la deje
+  // para el final. Es idempotente: si el efecto corre dos veces no duplica.
+  useEffect(() => {
+    if (isStructuredMode(mode) && currentRawCard) markCardSeen(mode, currentRawCard);
+  }, [mode, currentRawCard]);
 
   const currentText = useMemo(() => {
     if (mode === 'trivia_futbol' || mode === 'cultura') {
