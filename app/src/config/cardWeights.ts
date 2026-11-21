@@ -85,8 +85,16 @@ const TRIGGER_MIN_CARDS: Record<keyof typeof TRIGGER_EVERY_ROUNDS, number> = {
 
 export type TriggerKind = keyof typeof TRIGGER_EVERY_ROUNDS;
 
+// El ritmo (eventos, fases, virus) se mide en "rondas de ritmo" de como mucho
+// 8 jugadores: con 24 personas una ronda real son 48 cartas y el torneo
+// saldría cada 96, el final épico no llegaría nunca y un virus de 3 rondas
+// duraría 150 cartas.
+export const PACE_MAX_PLAYERS = 8;
+export const pacePlayers = (playersCount: number) =>
+  Math.min(PACE_MAX_PLAYERS, Math.max(2, playersCount));
+
 export function triggerIntervals(playersCount: number): Record<TriggerKind, number> {
-  const cardsPerRound = 2 * Math.max(2, playersCount);
+  const cardsPerRound = 2 * pacePlayers(playersCount);
   const out = {} as Record<TriggerKind, number>;
   for (const k of Object.keys(TRIGGER_EVERY_ROUNDS) as TriggerKind[]) {
     out[k] = Math.max(TRIGGER_MIN_CARDS[k], TRIGGER_EVERY_ROUNDS[k] * cardsPerRound);

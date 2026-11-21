@@ -238,5 +238,6 @@ export function roundName(bracket: TBracket, level: number): string {
 
 /** Cuántos duelos se juegan cada vez que sale el torneo: más gente, más duelos. */
 export function matchesPerTrigger(playersCount: number): number {
+  if (playersCount >= 12) return 3;
   return playersCount >= 6 ? 2 : 1;
 }

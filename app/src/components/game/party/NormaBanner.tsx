@@ -67,7 +67,7 @@ export function NormaBanner({ text, turnsLeft, players, infractions, onReport }:
             <p className="mb-1.5 mt-2 text-center text-[11px] font-semibold text-amber-200/70">
               ¿Quién ha incumplido la norma?
             </p>
-            <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
+            <div className="grid max-h-56 grid-cols-2 gap-1.5 overflow-y-auto sm:grid-cols-3">
               {players.map((p) => (
                 <button
                   key={p.id}

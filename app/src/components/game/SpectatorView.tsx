@@ -1219,7 +1219,7 @@ function PhoneNormaBanner({
         </div>
       )}
       {picking && (
-        <div className="mt-2 grid grid-cols-2 gap-1.5">
+        <div className="mt-2 grid max-h-64 grid-cols-2 gap-1.5 overflow-y-auto">
           {roster
             .filter((name) => name !== myName)
             .map((name) => (

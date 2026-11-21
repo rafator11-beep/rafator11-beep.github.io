@@ -63,31 +63,6 @@ function readDuelKing(): { name: string; wins: number } | null {
   }
 }
 
-/** Frases-remate opcionales que enganchan la carta con el resto de la partida. */
-function weaveExtras(activeName: string, playerNames: string[]): string[] {
-  const out: string[] = [];
-  const norma = readActiveNorma();
-  if (norma && chance(0.28)) {
-    out.push(pick([
-      `(y sin saltarse la norma: ${norma.toLowerCase()})`,
-      `— ojo, que sigue la norma: ${norma.toLowerCase()}`,
-      `(la norma sigue en pie: ${norma.toLowerCase()})`,
-    ]));
-  }
-  const king = readDuelKing();
-  if (king && king.name !== activeName && chance(0.22)) {
-    out.push(pick([
-      `Y que ${king.name}, con ${king.wins} ${king.wins === 1 ? 'llave' : 'llaves'} de duelos, no se relaje.`,
-      `${king.name} manda en la liga de duelos, a ver si dura.`,
-    ]));
-  }
-  const theme = getPartyTheme();
-  if (theme && chance(0.25) && !out.some(x => x.toLowerCase().includes(theme.toLowerCase()))) {
-    out.push(`Rollo "${theme}" 😏`);
-  }
-  return out.slice(0, 2); // máx 2 remates para no hacer un tocho
-}
-
 // Compat: antes decían si había clave de IA. Ahora el motor es local y siempre
 // está disponible.
 export function isGeminiConfigured(): boolean {
@@ -128,72 +103,6 @@ export function toDirectorStats(raw: Record<string, any> | undefined | null): Di
   }));
 }
 
-/** Reconstruye estadísticas aproximadas desde el string resumen que arma
- *  useGameMemory ("Nombre: 3 tragos bebidos, 2 retos fallados | Otro: ..."). */
-export function parseStatsSummary(summary: string): DirectorStat[] {
-  if (!summary) return [];
-  return summary.split('|').map(chunk => {
-    const [rawName, ...rest] = chunk.split(':');
-    const body = rest.join(':');
-    const num = (re: RegExp) => {
-      const m = body.match(re);
-      return m ? parseInt(m[1], 10) : 0;
-    };
-    return {
-      name: (rawName || '').trim() || '¿?',
-      tragos: num(/(\d+)\s*tragos/),
-      fallados: num(/(\d+)\s*retos fallados/),
-      completados: num(/(\d+)\s*retos completados/),
-      yoNunca: num(/en\s*(\d+)\s*Yo Nunca/),
-      votos: num(/votado\s*(\d+)/),
-      duelosPerdidos: num(/(\d+)\s*duelos perdidos/),
-      duelosGanados: num(/(\d+)\s*duelos ganados/),
-      torneosGanados: num(/(\d+)\s*torneos ganados/),
-      torneosPerdidos: num(/(\d+)\s*torneos perdidos/),
-    };
-  });
-}
-
-// ─── Personajes de la noche (de dónde salen los piques) ───────────────────
-interface Cast {
-  drunk?: DirectorStat;   // más tragos
-  sober?: DirectorStat;   // menos tragos
-  loser?: DirectorStat;   // más retos fallados
-  champ?: DirectorStat;   // más victorias
-}
-function readCast(stats: DirectorStat[]): Cast {
-  if (stats.length === 0) return {};
-  const withTragos = stats.filter(s => s.tragos > 0);
-  const sorted = [...stats].sort((a, b) => b.tragos - a.tragos);
-  return {
-    drunk: withTragos.length ? sorted[0] : undefined,
-    sober: withTragos.length ? sorted[sorted.length - 1] : undefined,
-    loser: [...stats].sort((a, b) => b.fallados - a.fallados).find(s => s.fallados > 0),
-    champ: [...stats].sort(
-      (a, b) => (b.duelosGanados + b.torneosGanados + b.completados) - (a.duelosGanados + a.torneosGanados + a.completados)
-    ).find(s => s.duelosGanados + s.torneosGanados + s.completados > 0),
-  };
-}
-
-/** Frase de contexto que engancha la ronda con lo ocurrido. '' si no hay nada jugoso. */
-function pique(cast: Cast, active: string, others: string[]): string {
-  const opts: string[] = [];
-  if (cast.drunk && cast.drunk.tragos >= 3 && cast.drunk.name !== active)
-    opts.push(`🍻 ${cast.drunk.name} ya lleva ${cast.drunk.tragos} tragos, esto le va a pasar factura. `);
-  if (cast.drunk && cast.drunk.name === active && cast.drunk.tragos >= 3)
-    opts.push(`🍻 ${active}, con ${cast.drunk.tragos} tragos encima esto va a ser oro. `);
-  if (cast.loser && cast.loser.fallados >= 2)
-    opts.push(`😬 ${cast.loser.name} lleva ${cast.loser.fallados} retos fallados, a ver si rompe la racha. `);
-  if (cast.sober && cast.sober.tragos === 0)
-    opts.push(`👀 ${cast.sober.name} no ha bebido NADA todavía. Sospechoso. `);
-  if (cast.champ && cast.champ.name !== active)
-    opts.push(`👑 ${cast.champ.name} va sobrado esta noche, tocaría bajarle los humos. `);
-  if (others.length >= 1)
-    opts.push(`🔥 ${active} y ${pick(others)}, esto es entre vosotros. `);
-  if (opts.length === 0) return '';
-  return pick(opts);
-}
-
 // ─── Relleno de huecos de una carta ──────────────────────────────────────
 function fillSlots(text: string, active: string, players: string[], theme: string): string {
   const others = players.filter(p => p !== active);
@@ -219,24 +128,13 @@ export async function geminiEnrichChallenge(
   activePlayerName: string,
   callback?: string,
 ): Promise<string> {
-  const theme = getPartyTheme();
-  const cast = readCast(parseStatsSummary(playerStats));
-  const others = (playerNames || []).filter(n => n !== activePlayerName);
-
-  let out = fillSlots(challengeText, activePlayerName, playerNames || [], theme);
-
-  // Callback literal a algo que se respondió antes (~65 % si lo hay).
-  if (callback && chance(0.65)) {
-    out = `${callback} ${out}`;
-  } else if (chance(0.55)) {
-    // Si no, prefijo de salseo por estadísticas/rivalidades.
-    const p = pique(cast, activePlayerName, others);
-    if (p) out = p + out;
-  }
-  // El gran engranaje: engancha la carta con norma activa, liga de duelos y tema.
-  const extras = weaveExtras(activePlayerName, playerNames || []);
-  if (extras.length) out += ' ' + extras.join(' ');
-  return out;
+  // Solo se rellenan los huecos ({rival}, {otro}…). Antes además se pegaban
+  // delante recuerdos de otras cartas ("🔁 X ya rajó en «…», a ver ahora."),
+  // piques por estadísticas y detrás la norma activa/liga: la carta acababa
+  // con frases de varias cartas mezcladas y cortadas a medias.
+  void playerStats;
+  void callback;
+  return fillSlots(challengeText, activePlayerName, playerNames || [], getPartyTheme());
 }
 
 // ── 2. Sintetizar una carta nueva desde el estado de la partida ──────────

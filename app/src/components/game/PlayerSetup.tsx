@@ -97,7 +97,8 @@ export function PlayerSetup({ onStart, onBack, isTeamMode: forceTeamMode, isMult
   const isTeamMode = forceTeamMode !== undefined ? forceTeamMode : (modeInfo?.teamBased || false);
   const minPlayers = isTeamMode ? 4 : 2;
   const is1vs1 = !isTeamMode && (game?.mode === 'futbol' || game?.mode === 'cultura' || game?.mode === 'trivia_futbol' || game?.mode === 'tictactoe');
-  const maxPlayers = is1vs1 ? 2 : 20;
+  // 30: fiestas grandes (24+ personas) en un mismo móvil o con móviles por QR.
+  const maxPlayers = is1vs1 ? 2 : 30;
 
   const handleAddPlayer = async (name: string, avatarUrl?: string | null) => {
     if (players.length >= maxPlayers) {

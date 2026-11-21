@@ -1,3 +1,5 @@
+import { pacePlayers } from '@/config/cardWeights';
+
 export type MegamixPhase =
   'Calienta motores' | 'La previa se anima' | 'Modo locura' | 'Final épico';
 
@@ -16,8 +18,13 @@ export const PHASE_START_ROUND: Record<MegamixPhase, number> = {
   'Final épico': 13,
 };
 
+/** Ronda de ritmo (1, 2, 3…) en la que cae una carta; ver PACE_MAX_PLAYERS. */
+export function paceRound(cardIndex: number, playersCount: number): number {
+  return Math.floor(cardIndex / (2 * pacePlayers(playersCount))) + 1;
+}
+
 export function getMegamixPhase(cardIndex: number, playersCount = 4): MegamixPhase {
-  const round = Math.floor(cardIndex / (2 * Math.max(2, playersCount))) + 1;
+  const round = paceRound(cardIndex, playersCount);
   if (round >= PHASE_START_ROUND['Final épico']) return 'Final épico';
   if (round >= PHASE_START_ROUND['Modo locura']) return 'Modo locura';
   if (round >= PHASE_START_ROUND['La previa se anima']) return 'La previa se anima';

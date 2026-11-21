@@ -125,6 +125,7 @@ import { RankingDialog } from './party/RankingDialog';
 import { VirusAlertSheet } from './party/VirusAlertSheet';
 import {
   canFireRuntimeEvent,
+  paceRound,
   getMegamixPhaseMeta,
   isNoAlcoholMode,
   RUNTIME_EVENT_CHANCE,
@@ -543,7 +544,8 @@ export function PartyGame({
         return {
           ...prev,
           currentNorma: clean,
-          currentNormaTurnsRemaining: players.length > 0 ? players.length * 2 : 10,
+          // Dos vueltas de mesa, pero con tope: con 24 personas serían 48 turnos.
+          currentNormaTurnsRemaining: Math.min(16, Math.max(6, players.length * 2)),
           normaInfractions: {},
           normaResult: prev.currentNorma
             ? { text: prev.currentNorma, infractions: prev.normaInfractions ?? {} }
@@ -1389,7 +1391,7 @@ export function PartyGame({
         if (players.length >= 3) {
           // Nº de impostores según el grupo: con mesas grandes, 1 solo impostor
           // se encuentra demasiado rápido — escala a 2 a partir de 7 jugadores.
-          const impostorCount = players.length >= 7 ? 2 : 1;
+          const impostorCount = players.length >= 15 ? 3 : players.length >= 7 ? 2 : 1;
           const shuffled = [...players].sort(() => Math.random() - 0.5);
           const impostorIds = shuffled.slice(0, impostorCount).map((p) => p.id);
           const impostorPlayer = players.find((p) => p.id === impostorIds[0])!;
@@ -1612,23 +1614,26 @@ export function PartyGame({
   // Al acabar cada ronda se descuenta una ronda a cada infectado y sale el
   // parte de virus (quién sigue y quién se cura). Antes se descontaba en cada
   // carta y un virus de "3" duraba 3 cartas; el aviso de cura era un toast.
+  // Va por "ronda de ritmo" (como mucho 8 jugadores por ronda), no por la
+  // ronda real: con 24 personas un virus de 3 rondas duraría 150 cartas.
   const [virusReport, setVirusReport] = useState<VirusRoundReportData | null>(null);
-  const prevRoundRef = useRef(gameState.round);
+  const virusRound = paceRound(currentIndex, players.length);
+  const prevRoundRef = useRef(virusRound);
   const playerVirusesRef = useRef(playerViruses);
   playerVirusesRef.current = playerViruses;
   useEffect(() => {
     const finished = prevRoundRef.current;
-    if (gameState.round <= finished) {
-      prevRoundRef.current = gameState.round;
+    if (virusRound <= finished) {
+      prevRoundRef.current = virusRound;
       return;
     }
-    prevRoundRef.current = gameState.round;
+    prevRoundRef.current = virusRound;
     const viruses = playerVirusesRef.current;
     if (viruses.length === 0) return;
     const report = tickVirusesForRound(viruses, finished);
     setPlayerViruses(report.remaining);
     setVirusReport(report);
-  }, [gameState.round, setPlayerViruses]);
+  }, [virusRound, setPlayerViruses]);
 
   const catchVirusPlayer = useCallback(
     (playerId: string) => {

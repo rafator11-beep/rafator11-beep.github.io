@@ -54,6 +54,29 @@ export interface CardDisplayProps {
     onAIUpdate?: (newContent: string, newType: any) => void;
 }
 
+// ── A QUIÉN SE NOMBRA EN LA CARTA ─────────────────────────────────────────────
+// Antes salía el primer jugador cuyo nombre estuviera DENTRO del texto como
+// trozo ("asda" dentro de "asdasd", "Ana" dentro de "Anabel"), aunque la carta
+// fuera del jugador de turno. Ahora: el de turno si se le nombra; si no, el
+// nombre completo más largo que aparezca como palabra; si no, el de turno.
+const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+function namedInText(text: string, name: string): boolean {
+  return new RegExp(`(^|[^\\p{L}\\p{N}])${escapeRe(name)}($|[^\\p{L}\\p{N}])`, 'iu').test(text);
+}
+
+export function pickDisplayPlayer<P extends { name?: string }>(
+  text: string,
+  players: P[] | undefined,
+  currentPlayer: P | null | undefined
+): P | null {
+  if (currentPlayer?.name && namedInText(text, currentPlayer.name)) return currentPlayer;
+  const named = (players ?? [])
+    .filter((p) => p.name && namedInText(text, p.name))
+    .sort((a, b) => (b.name?.length ?? 0) - (a.name?.length ?? 0));
+  return named[0] ?? currentPlayer ?? null;
+}
+
 // ── SANITIZE ──────────────────────────────────────────────────────────────────
 export function sanitizeCardText(text: string): string {
     if (!text) return '';
@@ -267,8 +290,7 @@ export const CardDisplay = React.memo(({
         }
     };
 
-    const mentionedPlayer = players?.find(p => p.name && cleanText.toLowerCase().includes(p.name.toLowerCase())) || null;
-    const displayPlayer = mentionedPlayer || currentPlayer || null;
+    const displayPlayer = pickDisplayPlayer(cleanText, players, currentPlayer);
 
     const handleSuccess = (e: React.MouseEvent) => {
         e.stopPropagation();

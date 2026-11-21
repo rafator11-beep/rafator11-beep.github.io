@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Crown, Plus, Minus } from 'lucide-react';
 import { GameMode } from '@/types/game';
@@ -27,9 +27,22 @@ export const PlayerProfilesBottom = ({
   drinkCounts?: Record<string, number>;
 }) => {
   const [editMode, setEditMode] = useState(false); // Mejora 10: Edit mode for mobile
+  // Con mucha gente (24+) la barra no cabe: se alinea a la izquierda (centrada
+  // escondía a los primeros sin poder llegar a ellos) y se desplaza sola
+  // hasta el jugador de turno.
+  const barRef = useRef<HTMLDivElement>(null);
+  const crowded = players.length > 5;
+  useEffect(() => {
+    barRef.current
+      ?.querySelector<HTMLElement>('[data-turn="true"]')
+      ?.scrollIntoView?.({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  }, [currentPlayer?.id]);
 
   return (
-    <div className="no-scrollbar fixed bottom-0 left-0 right-0 z-[100] flex h-28 items-center justify-center gap-6 overflow-x-auto border-t border-white/10 bg-slate-950/60 px-6 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] backdrop-blur-[24px] md:h-32">
+    <div
+      ref={barRef}
+      className={`no-scrollbar fixed bottom-0 left-0 right-0 z-[100] flex h-28 items-center ${crowded ? 'justify-start' : 'justify-center'} gap-6 overflow-x-auto border-t border-white/10 bg-slate-950/60 px-6 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] backdrop-blur-[24px] md:h-32`}
+    >
       {/* Edit Mode Toggle Button */}
       {captainId && (
         <button
@@ -49,7 +62,11 @@ export const PlayerProfilesBottom = ({
           const remotePeer = remoteStreams?.find((s) => s.peerId === p.id);
 
           return (
-            <div key={p.id} className="group relative flex shrink-0 flex-col items-center gap-1">
+            <div
+              key={p.id}
+              data-turn={isTurn}
+              className="group relative flex shrink-0 flex-col items-center gap-1"
+            >
               {/* Captain Controls Overlay: visible on hover (desktop) OR editMode (mobile) */}
               <div
                 className={`absolute -top-12 left-1/2 z-[110] flex -translate-x-1/2 gap-3 transition-all duration-300 ${editMode ? 'scale-100 opacity-100' : 'scale-90 opacity-0 group-hover:scale-100 group-hover:opacity-100'}`}
