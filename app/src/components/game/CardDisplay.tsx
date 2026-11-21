@@ -345,7 +345,8 @@ export const CardDisplay = React.memo(({
                     exit={{ rotateY: 80, scale: 0.9, opacity: 0 }}
                     transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
                     style={{
-                        transformStyle: 'preserve-3d',
+                        // Sin preserve-3d: el contenedor de PartyGame ya gira en 3D y
+                        // anidar otro contexto 3D recortaba la cabecera en algunos móviles.
                         borderColor: resultState === 'success' ? '#22c55e'
                             : resultState === 'fail' ? '#ef4444'
                             : `${cfg.accent}40`,
@@ -381,18 +382,18 @@ export const CardDisplay = React.memo(({
                         </motion.button>
 
                         {/* Mode label + emoji */}
-                        <div className="flex flex-col items-center gap-1">
+                        <div className="flex min-w-0 flex-col items-center gap-1.5 px-2">
                             <motion.span
                                 key={`emoji-${content}`}
                                 initial={{ scale: 0, rotate: -20 }}
                                 animate={{ scale: 1, rotate: 0 }}
                                 transition={{ type: 'spring', stiffness: 400, damping: 14, delay: 0.05 }}
-                                className="text-4xl leading-none"
+                                className="text-3xl leading-none"
                                 style={{ filter: `drop-shadow(0 0 10px ${cfg.accent}80)` }}
                             >
                                 {cfg.emoji}
                             </motion.span>
-                            <span className="text-[9px] font-black uppercase tracking-[0.3em] text-white/60">
+                            <span className="whitespace-nowrap text-[10px] font-black uppercase tracking-[0.2em] text-white/70">
                                 {cfg.label}
                             </span>
                         </div>

@@ -79,6 +79,7 @@ import { TurnBanner } from '@/components/game/party/TurnBanner';
 import { NormaBanner } from '@/components/game/party/NormaBanner';
 import { NormaVerdict } from '@/components/game/party/NormaVerdict';
 import { BombOverlay } from '@/components/game/party/BombOverlay';
+import { TeamBattleOverlay } from '@/components/game/party/TeamBattleOverlay';
 import { VirusBanner } from '@/components/game/party/VirusBanner';
 import { VirusRoundReport } from '@/components/game/party/VirusRoundReport';
 import {
@@ -1293,6 +1294,7 @@ export function PartyGame({
   const captainName = players.find((p) => p.id === gameState.captainId)?.name;
   const [joinedNames, setJoinedNames] = useState<string[]>([]);
   const [bombOpen, setBombOpen] = useState(false);
+  const [teamBattleOpen, setTeamBattleOpen] = useState(false);
   const turnInfo = useMemo(
     () =>
       (mode === 'megamix' || mode === 'clasico') && !aiCardOverride
@@ -1518,6 +1520,13 @@ export function PartyGame({
           const timer = setTimeout(() => advanceTurn(true), 100);
           return () => clearTimeout(timer);
         }
+      } else if (triggerType === 'EQUIPOS') {
+        if (players.length >= 4) {
+          setTeamBattleOpen(true);
+        } else {
+          const timer = setTimeout(() => advanceTurn(true), 100);
+          return () => clearTimeout(timer);
+        }
       } else {
         // Unknown triggers - auto-skip to prevent getting stuck
         const timer = setTimeout(() => advanceTurn(true), 100);
@@ -1737,7 +1746,6 @@ export function PartyGame({
         mode={mode}
         remoteStreams={[]}
         captainId={gameState.captainId}
-        onAdjustXP={handleAdjustXP}
         drinkCounts={drinkCounts}
       />
 
@@ -1775,6 +1783,15 @@ export function PartyGame({
       />
 
       <VirusRoundReport report={virusReport} players={players} onClose={() => setVirusReport(null)} />
+
+      <TeamBattleOverlay
+        open={teamBattleOpen}
+        players={players}
+        onDone={() => {
+          setTeamBattleOpen(false);
+          advanceTurn(true);
+        }}
+      />
 
       {/* Top Bar with Chromecast.
           Antes: [Atrás, Cast] | [Capitán] | [Siguiente, Finalizar, "Ronda N"] con
@@ -1977,7 +1994,8 @@ export function PartyGame({
               }
             />
           )}
-          {(isHost || !isMultiplayer) && !showKahoot.active && (
+          {/* Trivia en carrera y debate necesitan móviles: sin ellos no hay quién responda o vote. */}
+          {(isHost || !isMultiplayer) && !showKahoot.active && joinedNames.length >= 2 && (
             <button
               onClick={launchSpeedRaceTrivia}
               title="Trivia de cultura general: todos los móviles conectados responden a la vez y se reparten puntos según velocidad de acierto"
@@ -1990,7 +2008,8 @@ export function PartyGame({
             !showKahoot.active &&
             !debateSession &&
             !isAnyFullscreenOverlayActive &&
-            players.length >= 3 && (
+            players.length >= 3 &&
+            joinedNames.length >= 2 && (
               <button
                 onClick={launchDebate}
                 title="Debate: dos jugadores defienden posturas opuestas de un tema random y el resto vota quién ha ganado"
@@ -2784,110 +2803,6 @@ export function PartyGame({
               >
                 ⏭️ No me gusta, otra carta
               </button>
-            </div>
-          )}
-
-        {/* CAPTAIN ACTION PANEL - Give/Take XP in real-time (movido debajo de la carta) */}
-        {!gameState.showTrivia &&
-          !gameState.showVoting &&
-          !gameState.showDuel &&
-          !gameState.showImpostor &&
-          !gameState.showMimica &&
-          !gameState.showImpostorWord &&
-          mode !== 'cultura' &&
-          mode !== 'trivia_futbol' && (
-            <div className="z-10 mb-2 mt-3 w-full max-w-md">
-              <div className="mb-2 flex items-center justify-between px-3">
-                <div className="flex items-center gap-1.5">
-                  <Crown className="h-3 w-3 text-amber-400" />
-                  <span className="text-[10px] font-black uppercase tracking-[0.25em] text-amber-400">
-                    Mesa del Capitán
-                  </span>
-                </div>
-                <span className="text-[9px] font-bold text-white/30">
-                  +{Math.min(50, 10 + Math.floor(gameState.round / 2) * 5)} / -
-                  {Math.max(
-                    5,
-                    Math.floor(Math.min(50, 10 + Math.floor(gameState.round / 2) * 5) / 2)
-                  )}{' '}
-                  XP
-                </span>
-              </div>
-              <div className="border-white/8 flex flex-wrap justify-center gap-2 rounded-2xl border bg-black/30 px-4 py-3 backdrop-blur-xl">
-                {players.map((p) => {
-                  const isCaptain = gameState.captainId === p.id;
-                  const isActive = currentPlayer?.id === p.id;
-                  const baseXP = 10 + Math.floor(gameState.round / 2) * 5;
-                  const rewardXP = Math.min(50, baseXP);
-                  const penaltyXP = Math.max(5, Math.floor(rewardXP / 2));
-                  return (
-                    <div key={p.id} className="flex flex-col items-center gap-1">
-                      <div className="flex items-center gap-1">
-                        {/* Minus */}
-                        <motion.button
-                          whileTap={{ scale: 0.8 }}
-                          disabled={isCaptain || (isMultiplayer && !isHost)}
-                          onClick={() => {
-                            if (isCaptain) {
-                              toast.error('El Capitán no puede penalizarse 👑');
-                              return;
-                            }
-                            handleAdjustXP(p.id, -penaltyXP);
-                            toast.error(`-${penaltyXP} XP ${p.name}`, { duration: 1200 });
-                          }}
-                          className="flex h-6 w-6 items-center justify-center rounded-lg bg-red-500/80 text-white transition-colors hover:bg-red-500 disabled:opacity-30"
-                        >
-                          <Minus className="h-3 w-3" />
-                        </motion.button>
-
-                        {/* Avatar */}
-                        <div
-                          className={`relative h-10 w-10 overflow-hidden rounded-xl border transition-all duration-200 ${isActive ? 'scale-110 border-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.4)]' : 'border-white/10'}`}
-                        >
-                          {p.avatar_url ? (
-                            <img
-                              src={p.avatar_url}
-                              className="h-full w-full object-cover"
-                              alt={p.name}
-                            />
-                          ) : (
-                            <div className="flex h-full w-full items-center justify-center bg-slate-800 text-xs font-black text-white/60">
-                              {p.name[0]}
-                            </div>
-                          )}
-                          {isCaptain && (
-                            <div className="absolute right-0 top-0 flex h-3 w-3 items-center justify-center rounded-bl bg-amber-500">
-                              <Crown className="h-2 w-2 text-black" />
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Plus */}
-                        <motion.button
-                          whileTap={{ scale: 0.8 }}
-                          disabled={isCaptain || (isMultiplayer && !isHost)}
-                          onClick={() => {
-                            if (isCaptain) {
-                              toast.error('El Capitán no puede auto-asignarse XP 👑');
-                              return;
-                            }
-                            handleAdjustXP(p.id, rewardXP);
-                            toast.success(`+${rewardXP} XP ${p.name} 🔥`, { duration: 1200 });
-                          }}
-                          className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-500/80 text-white transition-colors hover:bg-emerald-500 disabled:opacity-30"
-                        >
-                          <Plus className="h-3 w-3" />
-                        </motion.button>
-                      </div>
-                      <span
-                        className={`max-w-[56px] truncate text-center text-[9px] font-black uppercase ${isActive ? 'text-primary' : isCaptain ? 'text-amber-400' : 'text-white/30'}`}
-                      >
-                        {p.name}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
             </div>
           )}
 

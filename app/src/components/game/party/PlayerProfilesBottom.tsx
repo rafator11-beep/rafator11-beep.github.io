@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Crown, Plus, Minus } from 'lucide-react';
+import { Crown } from 'lucide-react';
 import { GameMode } from '@/types/game';
 import { AnimatedXP } from './PartyVisuals';
 
@@ -13,7 +13,6 @@ export const PlayerProfilesBottom = ({
   mode,
   remoteStreams = [],
   captainId,
-  onAdjustXP,
   drinkCounts = {},
 }: {
   players: any[];
@@ -23,10 +22,8 @@ export const PlayerProfilesBottom = ({
   mode: GameMode;
   remoteStreams?: any[];
   captainId?: string | null;
-  onAdjustXP?: (pid: string, delta: number) => void;
   drinkCounts?: Record<string, number>;
 }) => {
-  const [editMode, setEditMode] = useState(false); // Mejora 10: Edit mode for mobile
   // Con mucha gente (24+) la barra no cabe: se alinea a la izquierda (centrada
   // escondía a los primeros sin poder llegar a ellos) y se desplaza sola
   // hasta el jugador de turno.
@@ -43,16 +40,6 @@ export const PlayerProfilesBottom = ({
       ref={barRef}
       className={`no-scrollbar fixed bottom-0 left-0 right-0 z-[100] flex h-28 items-center ${crowded ? 'justify-start' : 'justify-center'} gap-6 overflow-x-auto border-t border-white/10 bg-slate-950/60 px-6 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] backdrop-blur-[24px] md:h-32`}
     >
-      {/* Edit Mode Toggle Button */}
-      {captainId && (
-        <button
-          onClick={() => setEditMode((e) => !e)}
-          className={`absolute right-3 top-2 z-[120] flex h-8 w-8 items-center justify-center rounded-lg text-xs transition-all ${editMode ? 'bg-amber-500 text-black shadow-[0_0_10px_rgba(245,158,11,0.5)]' : 'bg-white/10 text-white/50'}`}
-        >
-          {editMode ? '✅' : '✏️'}
-        </button>
-      )}
-
       <div className="flex items-center gap-4 md:gap-8">
         {players.map((p) => {
           const isTurn = currentPlayer?.id === p.id;
@@ -67,23 +54,6 @@ export const PlayerProfilesBottom = ({
               data-turn={isTurn}
               className="group relative flex shrink-0 flex-col items-center gap-1"
             >
-              {/* Captain Controls Overlay: visible on hover (desktop) OR editMode (mobile) */}
-              <div
-                className={`absolute -top-12 left-1/2 z-[110] flex -translate-x-1/2 gap-3 transition-all duration-300 ${editMode ? 'scale-100 opacity-100' : 'scale-90 opacity-0 group-hover:scale-100 group-hover:opacity-100'}`}
-              >
-                <button
-                  onClick={() => onAdjustXP?.(p.id, -5)}
-                  className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/20 bg-red-500/90 font-bold text-white shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all hover:bg-red-600 active:scale-90"
-                >
-                  <Minus className="h-5 w-5" />
-                </button>
-                <button
-                  onClick={() => onAdjustXP?.(p.id, 5)}
-                  className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/20 bg-green-500/90 font-bold text-white shadow-[0_0_15px_rgba(34,197,94,0.4)] transition-all hover:bg-green-600 active:scale-90"
-                >
-                  <Plus className="h-5 w-5" />
-                </button>
-              </div>
 
               <motion.div
                 animate={{

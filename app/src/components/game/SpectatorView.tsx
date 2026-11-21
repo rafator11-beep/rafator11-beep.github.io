@@ -190,10 +190,10 @@ export function SpectatorQRPanel({ roomId, currentCard, currentPlayer, players, 
       <button
         onClick={() => setShowQR(true)}
         className="relative flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white/70 transition hover:bg-white/10 hover:text-white"
-        title="Ver en móvil (QR)"
+        title="Invitar: los demás escanean el QR y juegan desde su móvil"
       >
         <Smartphone className="h-3.5 w-3.5" />
-        <span className="hidden sm:inline">QR</span>
+        <span>Invitar</span>
         {joinedNames.length > 0 && (
           <span className="flex items-center gap-1 rounded-full bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-bold text-emerald-300">
             <Users className="h-2.5 w-2.5" />
@@ -234,7 +234,7 @@ export function SpectatorQRPanel({ roomId, currentCard, currentPlayer, players, 
                     <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
                       Modo Espectador
                     </p>
-                    <h2 className="text-base font-bold text-white">Ver en tu móvil</h2>
+                    <h2 className="text-base font-bold text-white">Invita a la mesa</h2>
                   </div>
                 </div>
 
@@ -249,7 +249,7 @@ export function SpectatorQRPanel({ roomId, currentCard, currentPlayer, players, 
                 </div>
 
                 <p className="mt-4 text-center text-sm leading-6 text-muted-foreground">
-                  Escanea con la cámara del móvil para ver las cartas en tiempo real
+                  Que cada uno escanee con la cámara y elija su nombre: le avisará cuando le toque y podrá votar desde su móvil
                 </p>
 
                 <button

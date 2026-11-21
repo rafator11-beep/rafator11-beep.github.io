@@ -26,7 +26,7 @@ export const GENERAL_TYPE_WEIGHTS: Record<string, number> = {
   megamixVotaciones: 1.4,
   megamixTodos: 1.3,
   megamixAnecdotas: 1.0,
-  megamixBomba: 0.8,
+  megamixBomba: 1.4,
   megamixQuizEspana: 0.7,
   megamixPicante: 1.2,
   megamixVidaEspana: 1.4,
@@ -37,7 +37,8 @@ export const GENERAL_TYPE_WEIGHTS: Record<string, number> = {
 // Tipos INDIVIDUAL (actúa el jugador activo, sí avanza el turno):
 export const INDIVIDUAL_TYPE_WEIGHTS: Record<string, number> = {
   retos: 1.35,
-  verdadOBebe: 1.8,
+  // Había demasiadas verdades (~30 % de las individuales) entre todos los pools 🎤.
+  verdadOBebe: 1.0,
   triviaExpress: 0.45,
   categorias: 0.55,
   duelos: 1.15,
@@ -56,10 +57,10 @@ export const INDIVIDUAL_TYPE_WEIGHTS: Record<string, number> = {
   torneoRetos: 0.25,
 };
 
-// Máximo de veces que un mismo tipo puede salir de forma consecutiva dentro de
-// su propia secuencia (general o individual van intercaladas, así que esto se
-// aplica por separado a cada una).
-export const MAX_CONSECUTIVE_SAME_TYPE = 2;
+// Ventana de variedad: un tipo no vuelve a salir hasta que hayan salido otros
+// VARIETY_WINDOW tipos distintos de su lado (general o individual, que van
+// intercalados, así que se aplica por separado a cada uno).
+export const VARIETY_WINDOW = 4;
 
 // ─── Eventos del mazo ─────────────────────────────────────────────────────
 // Cada cuántas RONDAS entra cada evento (ocupan el hueco de carta general).

@@ -113,7 +113,7 @@ import { escenariosDiaADia } from './triviaConocimientoContent';
 import {
   GENERAL_TYPE_WEIGHTS,
   INDIVIDUAL_TYPE_WEIGHTS,
-  MAX_CONSECUTIVE_SAME_TYPE,
+  VARIETY_WINDOW,
   PHASE_INTENSITY_MULTIPLIER,
   TYPE_INTENSITY,
   triggerIntervals,
@@ -7815,8 +7815,8 @@ export function getStructuredMegamix(
   // carta dependía solo de cuántas cartas hubiera en el código fuente, no de
   // un peso real. Ahora cada tipo mantiene su propio array + puntero, y en
   // cada turno se elige el TIPO con probabilidad proporcional a su peso
-  // (src/config/cardWeights.ts), evitando que el mismo tipo salga más de
-  // MAX_CONSECUTIVE_SAME_TYPE veces seguidas dentro de su propia secuencia.
+  // (src/config/cardWeights.ts), sin repetir
+  // tipo antes de que hayan salido otros VARIETY_WINDOW distintos.
   type TypedPool = { key: string; cards: string[]; ptr: number; weight?: number };
   const exclude = options?.exclude;
   const makeTypedPool = (key: string, cards: string[]): TypedPool => {
@@ -7914,12 +7914,12 @@ export function getStructuredMegamix(
     weights: Record<string, number>,
     lastKeys: string[]
   ): TypedPool {
-    const blocked =
-      lastKeys.length >= MAX_CONSECUTIVE_SAME_TYPE &&
-      lastKeys.slice(-MAX_CONSECUTIVE_SAME_TYPE).every((k) => k === lastKeys[lastKeys.length - 1])
-        ? lastKeys[lastKeys.length - 1]
-        : null;
-    const candidates = blocked ? types.filter((t) => t.key !== blocked) : types;
+    // Ventana de variedad: un tipo no se repite hasta que salgan otros
+    // VARIETY_WINDOW distintos (antes solo se impedía 3 veces seguidas, y unos
+    // pocos tipos acaparaban la partida mientras otros casi no salían).
+    const windowSize = Math.min(VARIETY_WINDOW, Math.max(0, types.length - 2));
+    const recent = new Set(windowSize > 0 ? lastKeys.slice(-windowSize) : []);
+    const candidates = types.filter((t) => !recent.has(t.key));
     const pool = candidates.length > 0 ? candidates : types;
     // Intensidad según la fase de la partida (deck.length = posición de la carta).
     const mult = PHASE_INTENSITY_MULTIPLIER[getMegamixPhase(deck.length, playersCount)];
@@ -7943,7 +7943,7 @@ export function getStructuredMegamix(
     const card = type.cards[type.ptr % type.cards.length];
     type.ptr++;
     lastGeneralKeys.push(type.key);
-    if (lastGeneralKeys.length > MAX_CONSECUTIVE_SAME_TYPE + 1) lastGeneralKeys.shift();
+    if (lastGeneralKeys.length > VARIETY_WINDOW) lastGeneralKeys.shift();
     return card;
   }
 
@@ -7952,7 +7952,7 @@ export function getStructuredMegamix(
     const card = type.cards[type.ptr % type.cards.length];
     type.ptr++;
     lastIndividualKeys.push(type.key);
-    if (lastIndividualKeys.length > MAX_CONSECUTIVE_SAME_TYPE + 1) lastIndividualKeys.shift();
+    if (lastIndividualKeys.length > VARIETY_WINDOW) lastIndividualKeys.shift();
     return card;
   }
 
@@ -7962,6 +7962,8 @@ export function getStructuredMegamix(
     'TRIGGER:DUELO',
     'TRIGGER:IMPOSTOR',
     'TRIGGER:VIRUS',
+    // Guerra de equipos: la app hace los equipos (necesita al menos 4).
+    ...(playersCount >= 4 ? ['TRIGGER:EQUIPOS'] : []),
   ]);
 
   const torneoTriggers = shuffleArray([...Array(3).fill('TRIGGER:TORNEO'), 'TRIGGER:MEGATORNEO']);
