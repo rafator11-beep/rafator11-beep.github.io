@@ -81,6 +81,21 @@ export function KahootVoteSession({
   const startTimeRef = useRef<number>(0);
   const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const retryCountRef = useRef(0);
+  // Quién ha votado ya en esta votación: un recarga o un remontaje del móvil
+  // volvía a sumar el voto de la misma persona.
+  const votersRef = useRef<Set<string>>(new Set());
+  // Fase y reloj actuales a mano para contestar a un móvil que llega tarde.
+  const phaseRef = useRef(phase);
+  phaseRef.current = phase;
+  const timeLeftRef = useRef(timeLeft);
+  timeLeftRef.current = timeLeft;
+  const [myName] = useState(() => {
+    try {
+      return localStorage.getItem('beep_spectator_name');
+    } catch {
+      return null;
+    }
+  });
 
   // Initialize votes map
   useEffect(() => {
@@ -118,6 +133,10 @@ export function KahootVoteSession({
             ));
             setTotalVoters(prev => prev + 1);
           } else {
+            if (voter && voter !== 'Jugador Anónimo') {
+              if (votersRef.current.has(voter)) return;
+              votersRef.current.add(voter);
+            }
             setVotes(prev => ({
               ...prev,
               [target]: (prev[target] || 0) + 1,
@@ -129,17 +148,29 @@ export function KahootVoteSession({
           setPhase('results');
           if (timerRef.current) clearInterval(timerRef.current);
         })
-        .on('broadcast', { event: 'start_voting' }, () => {
+        .on('broadcast', { event: 'start_voting' }, (payload) => {
           if (!isHost) {
+            const remaining = (payload.payload as { remaining?: number } | undefined)?.remaining;
             setPhase('voting');
-            setTimeLeft(mode === 'speed_race' ? RACE_DURATION : VOTE_DURATION);
+            setTimeLeft(remaining ?? (mode === 'speed_race' ? RACE_DURATION : VOTE_DURATION));
             startTimeRef.current = Date.now();
+          }
+        })
+        // Un móvil que monta la votación tarde (llegó tarde el card_update o
+        // se reconectó) pregunta en qué punto va; antes se quedaba en "Esperando…".
+        .on('broadcast', { event: 'vote_sync_request' }, () => {
+          if (!isHost || !channel) return;
+          if (phaseRef.current === 'voting') {
+            channel.send({ type: 'broadcast', event: 'start_voting', payload: { remaining: timeLeftRef.current } });
+          } else if (phaseRef.current === 'results') {
+            channel.send({ type: 'broadcast', event: 'show_results', payload: {} });
           }
         })
         .subscribe((status) => {
           if (unmounted) return;
           if (status === 'SUBSCRIBED') {
             retryCountRef.current = 0;
+            if (!isHost) channel?.send({ type: 'broadcast', event: 'vote_sync_request', payload: {} });
           } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
             // Reconexión básica: móvil bloqueado o red perdida un instante
             if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current);
@@ -402,18 +433,22 @@ export function KahootVoteSession({
           const optionVotes = votes[option] || 0;
           const percentage = totalVoters > 0 ? Math.round((optionVotes / totalVoters) * 100) : 0;
           const isWinner = phase === 'results' && (correctAnswer ? option === correctAnswer : option === winner);
+          // En votaciones de opinión ("¿quién es más probable…?") no vale votarse a uno mismo.
+          const isSelf = !correctAnswer && !!myName && option === myName;
+          const selectable = phase === 'voting' && !myVote && canVote && !isSelf;
 
           return (
             <motion.button
               key={option}
               layout
-              whileHover={phase === 'voting' && !myVote && canVote ? { scale: 1.02 } : {}}
-              whileTap={phase === 'voting' && !myVote && canVote ? { scale: 0.97 } : {}}
-              onClick={() => phase === 'voting' && canVote && castVote(option)}
-              disabled={phase === 'voting' && (!!myVote || !canVote)}
+              whileHover={selectable ? { scale: 1.02 } : {}}
+              whileTap={selectable ? { scale: 0.97 } : {}}
+              onClick={() => selectable && castVote(option)}
+              disabled={phase === 'voting' && !selectable}
               className={`relative overflow-hidden rounded-[20px] border-2 p-4 transition-all
                 ${color.bg} ${color.border} ${color.text}
-                ${phase === 'voting' && !myVote && canVote ? 'cursor-pointer hover:opacity-90' : 'cursor-default'}
+                ${selectable ? 'cursor-pointer hover:opacity-90' : 'cursor-default'}
+                ${phase === 'voting' && isSelf ? 'opacity-30' : ''}
                 ${myVote === option ? 'ring-2 ring-white ring-offset-2 ring-offset-[#0a0a14]' : ''}
                 ${isWinner ? 'ring-4 ring-yellow-400 ring-offset-2 ring-offset-[#0a0a14] scale-105' : ''}
                 ${phase === 'results' && correctAnswer && option !== correctAnswer ? 'opacity-40' : ''}

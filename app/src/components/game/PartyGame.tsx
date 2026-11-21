@@ -72,6 +72,8 @@ import { useTorneoManager } from '@/hooks/game/useTorneoManager';
 import { TorneoRound } from '@/components/game/TorneoRound';
 import { MegamixTournament } from '@/components/game/MegamixTournament';
 import { TournamentBracket } from '@/components/game/TournamentBracket';
+import { TurnBanner } from '@/components/game/party/TurnBanner';
+import { getTurnInfo } from '@/utils/megamixTurn';
 
 import { ChatComponent } from '@/components/multiplayer/ChatComponent';
 import { PeerBubbles } from '@/components/multiplayer/PeerBubbles';
@@ -1210,6 +1212,23 @@ export function PartyGame({
     currentText && currentText !== 'Siguiente carta' && currentText !== 'Cargando pregunta...'
       ? currentText
       : '';
+
+  // De quién es la carta: individual → jugador de turno; grupal → el capitán.
+  // Se manda también a los móviles para que se ilumine el de quien le toca.
+  const captainName = players.find((p) => p.id === gameState.captainId)?.name;
+  const [joinedNames, setJoinedNames] = useState<string[]>([]);
+  const turnInfo = useMemo(
+    () =>
+      (mode === 'megamix' || mode === 'clasico') && !aiCardOverride
+        ? getTurnInfo({
+            rawCard: currentRawCard,
+            currentPlayerName: currentPlayer?.name,
+            captainName,
+            cardNumber: currentIndex,
+          })
+        : null,
+    [mode, aiCardOverride, currentRawCard, currentPlayer?.name, captainName, currentIndex]
+  );
   const rarity = aiCardOverride ? 'legendary' : detectRarity(currentText);
 
   // Auto-Kahoot: ciertas cartas (votación, trivia express) tienen más sentido
@@ -1798,6 +1817,8 @@ export function PartyGame({
               currentCard={safeCurrentText}
               currentPlayer={currentPlayer?.name || ''}
               players={players.map((p) => p.name)}
+              turn={turnInfo ?? undefined}
+              onJoinedChange={setJoinedNames}
               privateFor={
                 debateSession
                   ? {
@@ -2487,6 +2508,12 @@ export function PartyGame({
                     </motion.div>
                   )}
                 </div>
+
+                <TurnBanner
+                  turn={turnInfo}
+                  connected={!!turnInfo && joinedNames.includes(turnInfo.name)}
+                  captainName={captainName}
+                />
 
                 <motion.div
                   key={currentIndex}

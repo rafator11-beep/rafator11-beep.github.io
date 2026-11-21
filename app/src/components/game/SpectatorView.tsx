@@ -62,10 +62,19 @@ interface CardState {
   debateInfo?: { topic: string; teamA: string[]; teamB: string[]; aFavorHints: string[]; enContraHints: string[]; judgeName?: string };
   cardIndex: number;
   timestamp: number;
+  /** A quién le toca esta carta (individual) o quién la abre (grupal: el capitán). */
+  turn?: TurnInfo;
+}
+
+export interface TurnInfo {
+  kind: 'individual' | 'grupal';
+  name: string;
+  /** Índice de la carta en la partida: el móvil avisa una sola vez por carta. */
+  cardNumber: number;
 }
 
 // ── HOST MODE: muestra el QR y emite cartas ────────────────────────────────
-export function SpectatorQRPanel({ roomId, currentCard, currentPlayer, players, kahootConfig, privateFor, debateInfo, onDebateVerdict }: {
+export function SpectatorQRPanel({ roomId, currentCard, currentPlayer, players, kahootConfig, privateFor, debateInfo, onDebateVerdict, turn, onJoinedChange }: {
   roomId: string;
   currentCard: string;
   currentPlayer: string;
@@ -74,17 +83,20 @@ export function SpectatorQRPanel({ roomId, currentCard, currentPlayer, players, 
   privateFor?: Record<string, PrivateForPlayer>;
   debateInfo?: { topic: string; teamA: string[]; teamB: string[]; aFavorHints: string[]; enContraHints: string[]; judgeName?: string };
   onDebateVerdict?: (winner: 'A' | 'B', judgeName: string) => void;
+  turn?: TurnInfo;
+  /** Quién se ha identificado desde su móvil, para que la partida sepa a quién avisar. */
+  onJoinedChange?: (names: string[]) => void;
 }) {
   const spectatorUrl = `${window.location.origin}${window.location.pathname}?room=${roomId}&spectator=true`;
 
   // Siempre con el último estado a mano (sin esperar a un efecto) para poder
   // responder al instante cuando alguien se conecta a mitad de partida.
   const latestPayloadRef = useRef<CardState>({
-    text: currentCard, playerName: currentPlayer, players, kahootConfig, privateFor, debateInfo,
+    text: currentCard, playerName: currentPlayer, players, kahootConfig, privateFor, debateInfo, turn,
     cardIndex: Date.now(), timestamp: Date.now(),
   });
   latestPayloadRef.current = {
-    text: currentCard, playerName: currentPlayer, players, kahootConfig, privateFor, debateInfo,
+    text: currentCard, playerName: currentPlayer, players, kahootConfig, privateFor, debateInfo, turn,
     cardIndex: latestPayloadRef.current.cardIndex, timestamp: Date.now(),
   };
 
@@ -142,7 +154,14 @@ export function SpectatorQRPanel({ roomId, currentCard, currentPlayer, players, 
       event: 'card_update',
       payload: latestPayloadRef.current,
     });
-  }, [roomId, currentCard, currentPlayer, players, kahootConfig, privateFor, debateInfo]);
+    // turn va por sus campos: el objeto se recrea en cada render del anfitrión.
+  }, [roomId, currentCard, currentPlayer, players, kahootConfig, privateFor, debateInfo, turn?.kind, turn?.name, turn?.cardNumber]);
+
+  const onJoinedChangeRef = useRef(onJoinedChange);
+  onJoinedChangeRef.current = onJoinedChange;
+  useEffect(() => {
+    onJoinedChangeRef.current?.(joinedNames);
+  }, [joinedNames]);
 
   const [showQR, setShowQR] = useState(false);
 
@@ -571,6 +590,21 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
   // ¿Hay una prueba activa que necesita que esta persona responda (voto/trivia/rol secreto)?
   const needsParticipant = !!cardState?.kahootConfig || !!myPrivateMessage;
 
+  // ¿Esta carta es MÍA (me toca la individual o abro la grupal como capitán)?
+  const myTurn =
+    cardState?.turn && myPlayerName && cardState.turn.name === myPlayerName ? cardState.turn : null;
+  // Vibra una vez por carta: card_update llega muchas veces para la misma.
+  const vibratedForRef = useRef(-1);
+  useEffect(() => {
+    if (!myTurn || vibratedForRef.current === myTurn.cardNumber) return;
+    vibratedForRef.current = myTurn.cardNumber;
+    try {
+      navigator.vibrate?.(myTurn.kind === 'individual' ? [200, 80, 200] : [140]);
+    } catch {
+      /* sin vibración en este navegador */
+    }
+  }, [myTurn]);
+
   // ── Paso obligatorio de entrada: elegir quién eres ANTES de ver nada más.
   // Así desde el primer segundo lees la partida como esa persona y puedes
   // participar en cuanto te toque, no solo cuando salta un voto concreto.
@@ -990,6 +1024,28 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
             Cambiar
           </button>
         </div>
+      )}
+
+      {myTurn && (
+        <motion.div
+          key={`turn-${myTurn.cardNumber}`}
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className={`mb-4 w-full max-w-md animate-pulse rounded-[24px] border-2 p-4 text-center shadow-[0_0_40px_rgba(217,70,239,0.45)] ${
+            myTurn.kind === 'individual'
+              ? 'border-fuchsia-400 bg-fuchsia-500/20'
+              : 'border-amber-400 bg-amber-500/15 shadow-[0_0_40px_rgba(251,191,36,0.4)]'
+          }`}
+        >
+          <p className="text-2xl font-black uppercase tracking-wide text-white">
+            {myTurn.kind === 'individual' ? '🎯 ¡Te toca!' : '🎤 ¡Abres tú!'}
+          </p>
+          <p className="mt-1 text-sm font-semibold text-white/75">
+            {myTurn.kind === 'individual'
+              ? 'Esta prueba es tuya. Léela abajo.'
+              : 'Eres el capitán: lee la carta en voz alta y arranca la ronda.'}
+          </p>
+        </motion.div>
       )}
 
       {/* Card display — vista de narrador normal (no se oculta ni en modo participante,
