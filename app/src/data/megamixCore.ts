@@ -172,26 +172,35 @@ export const MEGAMIX_TODOS: string[] = [
   '🙌 TODOS A LA VEZ: a la de 3, señalad al que tiene más pinta de haberse liado con alguien de la mesa. El más señalado bebe 2 y lo niega… o no.',
 ];
 
-// ─── 💣 LA BOMBA (el móvil pasa de mano; el capitán decide cuándo explota) ─
+// ─── 💣 LA BOMBA (el móvil pasa de mano y explota cuando quiere) ──────────
+// La carta enseña el botón ACTIVAR (BombOverlay): tic-tac cada vez más rápido
+// y explosión a un tiempo que nadie conoce.
+const bomba = (tema: string, extra = '') =>
+  `💣 LA BOMBA — “${tema}”. Pulsad ACTIVAR y pasaos el móvil a la derecha diciendo uno cada uno${extra}. Explota cuando quiere: quien lo tenga en la mano, bebe 3.`;
+
 export const MEGAMIX_BOMBA: string[] = [
-  '💣 LA BOMBA — “excusas para no ir a una boda”. Pasad el móvil a la derecha diciendo una cada uno. El capitán cuenta en silencio y grita ¡BUM! cuando quiera (entre 5 y 20 segundos). Al que le pille con el móvil, bebe 3.',
-  '💣 LA BOMBA — “cosas que hay en un bar de pueblo”. Pasad el móvil diciendo una cada uno. El capitán grita ¡BUM! cuando le dé la gana. Quien tenga el móvil, bebe 3.',
-  '💣 LA BOMBA — “frases de madre”. Pasad el móvil diciendo una cada uno; si repites, no puedes pasarlo. El capitán grita ¡BUM! cuando quiera. Quien lo tenga, bebe 3.',
-  '💣 LA BOMBA — “cosas que se dicen en un grupo de WhatsApp familiar”. Móvil a la izquierda, una frase cada uno. ¡BUM! cuando el capitán quiera: quien lo tenga, bebe 3.',
-  '💣 LA BOMBA — “cosas que hace un borracho en la cola del baño”. Una cada uno pasando el móvil. ¡BUM! del capitán = el que lo tenga bebe 3.',
-  '💣 LA BOMBA — “marcas que hay en el Mercadona”. Pasad el móvil diciendo una. El capitán grita ¡BUM! entre 5 y 20 segundos. Quien lo tenga, bebe 3.',
-  '💣 LA BOMBA — “cosas que no le dirías a tu suegra”. Pasad el móvil diciendo una cada uno. ¡BUM! cuando quiera el capitán. Al que le pille, bebe 3.',
-  '💣 LA BOMBA — “cantantes españoles”. Móvil a la derecha. El que repita o tarde se queda el móvil hasta que diga uno. ¡BUM! del capitán: quien lo tenga, bebe 3.',
-  '💣 LA BOMBA — “excusas para llegar tarde al curro”. Una cada uno pasando el móvil. El capitán grita ¡BUM! cuando le parezca. Bebe 3 quien lo tenga.',
-  '💣 LA BOMBA — “cosas que hay en una despedida de soltero/a”. Pasad el móvil. ¡BUM! cuando el capitán quiera. Bebe 3 quien lo tenga.',
-  '💣 LA BOMBA — “provincias de España”. Pasad el móvil diciendo una cada uno, sin repetir. ¡BUM! del capitán: bebe 3 quien lo tenga y 1 quien haya repetido.',
-  '💣 LA BOMBA — “cosas que se pierden en una noche de fiesta”. Una cada uno pasando el móvil. ¡BUM! cuando quiera el capitán: bebe 3 quien lo tenga.',
-  '💣 LA BOMBA — “motivos para cortar con alguien”. Pasad el móvil, uno cada uno. ¡BUM! del capitán. Al que le explote, bebe 3 y el motivo más bestia reparte 2.',
-  '💣 LA BOMBA — “series españolas”. Pasad el móvil diciendo una. El capitán grita ¡BUM! cuando quiera. Quien lo tenga, bebe 3.',
-  '💣 LA BOMBA — “cosas que se hacen en un viaje de fin de curso”. Una cada uno. ¡BUM! cuando quiera el capitán: bebe 3 quien lo tenga.',
-  '💣 LA BOMBA DOBLE — “palabras que empiecen por P”. Dos móviles (o un móvil y un vaso vacío) dando vueltas en sentidos contrarios. ¡BUM! del capitán: beben 3 los dos que los tengan.',
-  '💣 LA BOMBA — “cosas que hay en la maleta de un guiri”. Pasad el móvil diciendo una. ¡BUM! cuando el capitán quiera. Quien lo tenga, bebe 3.',
-  '💣 LA BOMBA — “nombres de perro”. Móvil a la derecha, uno cada uno, sin repetir. ¡BUM! del capitán: quien lo tenga, bebe 3.',
+  bomba('excusas para no ir a una boda'),
+  bomba('cosas que hay en un bar de pueblo'),
+  bomba('frases de madre', '; si repites, no puedes pasarlo'),
+  bomba('cosas que se dicen en el grupo de WhatsApp de la familia'),
+  bomba('cosas que hace un borracho en la cola del baño'),
+  bomba('marcas que hay en el Mercadona'),
+  bomba('cosas que no le dirías a tu suegra'),
+  bomba('cantantes españoles', '; el que repita se queda el móvil hasta que diga otro'),
+  bomba('excusas para llegar tarde al curro'),
+  bomba('cosas que hay en una despedida de soltero/a'),
+  bomba('provincias de España', ', sin repetir'),
+  bomba('cosas que se pierden en una noche de fiesta'),
+  bomba('motivos para cortar con alguien'),
+  bomba('series españolas'),
+  bomba('cosas que se hacen en un viaje de fin de curso'),
+  bomba('palabras que empiecen por P', ', sin repetir'),
+  bomba('cosas que hay en la maleta de un guiri'),
+  bomba('nombres de perro', ', sin repetir'),
+  bomba('cosas que se gritan en un partido de fútbol'),
+  bomba('cosas que solo pasan en las fiestas del pueblo'),
+  bomba('excusas para no pagar una ronda'),
+  bomba('cosas que tu abuela guarda “por si acaso”'),
 ];
 
 // ─── 📖 ANÉCDOTAS: la mesa cuenta, vota y se ríe ─────────────────────────

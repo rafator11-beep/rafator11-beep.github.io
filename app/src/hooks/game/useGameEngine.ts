@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Player, Team, GameMode } from '@/types/game';
 import { useGameContext } from '@/contexts/GameContext';
 import { readStorageJSON, writeStorageJSON } from '@/utils/storage';
+import type { NormaInfractions, NormaResult } from '@/utils/megamixNormas';
 
 export interface GameState {
   phase: 'setup' | 'playing' | 'voting' | 'results' | 'minigame' | 'game_over';
@@ -14,6 +15,10 @@ export interface GameState {
   showVirusReveal: boolean;
   currentNorma: string | null;
   currentNormaTurnsRemaining?: number;
+  /** Veces que han pillado a cada jugador (por id) incumpliendo la norma activa. */
+  normaInfractions?: NormaInfractions;
+  /** Norma recién terminada, pendiente de mostrar su veredicto. */
+  normaResult?: NormaResult | null;
   showDuel: boolean;
   showVoting: boolean;
   showImpostor: boolean;
@@ -257,7 +262,16 @@ export const useGameEngine = (mode: GameMode) => {
             const nextTurns = (nextState.currentNormaTurnsRemaining ?? 0) - 1;
             nextState =
               nextTurns === 0
-                ? { ...nextState, currentNorma: null, currentNormaTurnsRemaining: 0 }
+                ? {
+                    ...nextState,
+                    currentNorma: null,
+                    currentNormaTurnsRemaining: 0,
+                    normaResult: {
+                      text: nextState.currentNorma,
+                      infractions: nextState.normaInfractions ?? {},
+                    },
+                    normaInfractions: {},
+                  }
                 : { ...nextState, currentNormaTurnsRemaining: nextTurns };
           }
 

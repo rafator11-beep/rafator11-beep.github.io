@@ -64,6 +64,8 @@ interface CardState {
   timestamp: number;
   /** A quién le toca esta carta (individual) o quién la abre (grupal: el capitán). */
   turn?: TurnInfo;
+  /** Norma activa, para verla y chivarse desde el móvil. */
+  norma?: NormaInfo;
 }
 
 export interface TurnInfo {
@@ -73,8 +75,15 @@ export interface TurnInfo {
   cardNumber: number;
 }
 
+export interface NormaInfo {
+  text: string;
+  turnsLeft: number;
+  /** Veces pillado por NOMBRE (la identidad en el móvil es por nombre). */
+  pillados: Record<string, number>;
+}
+
 // ── HOST MODE: muestra el QR y emite cartas ────────────────────────────────
-export function SpectatorQRPanel({ roomId, currentCard, currentPlayer, players, kahootConfig, privateFor, debateInfo, onDebateVerdict, turn, onJoinedChange }: {
+export function SpectatorQRPanel({ roomId, currentCard, currentPlayer, players, kahootConfig, privateFor, debateInfo, onDebateVerdict, turn, onJoinedChange, norma, onNormaReport }: {
   roomId: string;
   currentCard: string;
   currentPlayer: string;
@@ -86,17 +95,20 @@ export function SpectatorQRPanel({ roomId, currentCard, currentPlayer, players, 
   turn?: TurnInfo;
   /** Quién se ha identificado desde su móvil, para que la partida sepa a quién avisar. */
   onJoinedChange?: (names: string[]) => void;
+  norma?: NormaInfo;
+  /** Un móvil ha pillado a alguien (por nombre) incumpliendo la norma. */
+  onNormaReport?: (targetName: string) => void;
 }) {
   const spectatorUrl = `${window.location.origin}${window.location.pathname}?room=${roomId}&spectator=true`;
 
   // Siempre con el último estado a mano (sin esperar a un efecto) para poder
   // responder al instante cuando alguien se conecta a mitad de partida.
   const latestPayloadRef = useRef<CardState>({
-    text: currentCard, playerName: currentPlayer, players, kahootConfig, privateFor, debateInfo, turn,
+    text: currentCard, playerName: currentPlayer, players, kahootConfig, privateFor, debateInfo, turn, norma,
     cardIndex: Date.now(), timestamp: Date.now(),
   });
   latestPayloadRef.current = {
-    text: currentCard, playerName: currentPlayer, players, kahootConfig, privateFor, debateInfo, turn,
+    text: currentCard, playerName: currentPlayer, players, kahootConfig, privateFor, debateInfo, turn, norma,
     cardIndex: latestPayloadRef.current.cardIndex, timestamp: Date.now(),
   };
 
@@ -126,6 +138,10 @@ export function SpectatorQRPanel({ roomId, currentCard, currentPlayer, players, 
         const { winner, judgeName } = (payload.payload as { winner?: 'A' | 'B'; judgeName?: string }) || {};
         if (winner && judgeName) onDebateVerdictRef.current?.(winner, judgeName);
       })
+      .on('broadcast', { event: 'norma_report' }, (payload) => {
+        const target = (payload.payload as { target?: string })?.target;
+        if (target) onNormaReportRef.current?.(target);
+      })
       .subscribe();
     channelRef.current = channel;
     return () => { supabase.removeChannel(channel); channelRef.current = null; };
@@ -135,6 +151,10 @@ export function SpectatorQRPanel({ roomId, currentCard, currentPlayer, players, 
   // ser una nueva closure en cada render del anfitrión).
   const onDebateVerdictRef = useRef(onDebateVerdict);
   onDebateVerdictRef.current = onDebateVerdict;
+  const onNormaReportRef = useRef(onNormaReport);
+  onNormaReportRef.current = onNormaReport;
+  // La norma va como clave de texto: el objeto se recrea en cada render.
+  const normaKey = norma ? `${norma.text}|${norma.turnsLeft}|${JSON.stringify(norma.pillados)}` : '';
 
   // Reenvía el estado cada vez que cambia algo relevante (carta, jugadores, voto activo).
   // Si llega un privateFor NUEVO (objeto distinto al de la última vez — nueva
@@ -155,7 +175,7 @@ export function SpectatorQRPanel({ roomId, currentCard, currentPlayer, players, 
       payload: latestPayloadRef.current,
     });
     // turn va por sus campos: el objeto se recrea en cada render del anfitrión.
-  }, [roomId, currentCard, currentPlayer, players, kahootConfig, privateFor, debateInfo, turn?.kind, turn?.name, turn?.cardNumber]);
+  }, [roomId, currentCard, currentPlayer, players, kahootConfig, privateFor, debateInfo, turn?.kind, turn?.name, turn?.cardNumber, normaKey]);
 
   const onJoinedChangeRef = useRef(onJoinedChange);
   onJoinedChangeRef.current = onJoinedChange;
@@ -1026,6 +1046,21 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
         </div>
       )}
 
+      {cardState?.norma && (
+        <PhoneNormaBanner
+          norma={cardState.norma}
+          roster={cardState.players || []}
+          myName={myPlayerName}
+          onReport={(target) =>
+            channelRef.current?.send({
+              type: 'broadcast',
+              event: 'norma_report',
+              payload: { target, reporter: myPlayerName },
+            })
+          }
+        />
+      )}
+
       {myTurn && (
         <motion.div
           key={`turn-${myTurn.cardNumber}`}
@@ -1134,6 +1169,74 @@ export function SpectatorView({ roomId, onClose }: SpectatorViewProps) {
         >
           Salir
         </button>
+      )}
+    </div>
+  );
+}
+
+// Norma activa en el móvil: se ve siempre y cualquiera puede chivarse de
+// quién la ha incumplido (llega al anfitrión como "norma_report").
+function PhoneNormaBanner({
+  norma,
+  roster,
+  myName,
+  onReport,
+}: {
+  norma: NormaInfo;
+  roster: string[];
+  myName: string | null;
+  onReport: (target: string) => void;
+}) {
+  const [picking, setPicking] = useState(false);
+  const [sentTo, setSentTo] = useState<string | null>(null);
+  const caught = Object.entries(norma.pillados)
+    .filter(([, n]) => n > 0)
+    .sort((a, b) => b[1] - a[1]);
+
+  return (
+    <div className="mb-4 w-full max-w-md rounded-[20px] border border-amber-500/40 bg-amber-500/10 p-3">
+      <div className="flex items-center gap-2">
+        <span className="text-xl">📜</span>
+        <p className="flex-1 text-sm font-bold leading-tight text-amber-100">{norma.text}</p>
+        <button
+          type="button"
+          onClick={() => setPicking((v) => !v)}
+          className="shrink-0 rounded-xl border border-red-400/50 bg-red-500/20 px-3 py-2 text-xs font-black uppercase text-red-100 active:scale-95"
+        >
+          {picking ? 'Cerrar' : '🚨 ¡Pillado!'}
+        </button>
+      </div>
+      {sentTo && !picking && (
+        <p className="mt-1.5 text-[11px] font-semibold text-red-200">Has pillado a {sentTo} 😈</p>
+      )}
+      {caught.length > 0 && !picking && (
+        <div className="mt-1.5 flex flex-wrap gap-1">
+          {caught.map(([name, n]) => (
+            <span key={name} className="rounded-full bg-red-500/15 px-2 py-0.5 text-[10px] font-bold text-red-200">
+              {name} ×{n}
+            </span>
+          ))}
+        </div>
+      )}
+      {picking && (
+        <div className="mt-2 grid grid-cols-2 gap-1.5">
+          {roster
+            .filter((name) => name !== myName)
+            .map((name) => (
+              <button
+                key={name}
+                type="button"
+                onClick={() => {
+                  onReport(name);
+                  setSentTo(name);
+                  setPicking(false);
+                }}
+                className="rounded-xl border border-white/10 bg-white/5 px-2 py-2.5 text-sm font-bold text-white active:scale-95"
+              >
+                {name}
+              </button>
+            ))}
+        </div>
       )}
     </div>
   );

@@ -1,6 +1,6 @@
 import { useState, useRef, MutableRefObject, useCallback } from 'react';
 import { GameMode, PlayerVirus, Player } from '@/types/game';
-import { virusEffects, normasRonda } from '@/data/gameContent';
+import { virusEffects } from '@/data/gameContent';
 import { impostorRounds } from '@/data/impostorContent';
 import { duelos } from '@/data/duelosContent';
 import { isGeminiConfigured, geminiGenerateImpostorRound } from '@/services/geminiClient';
@@ -19,7 +19,6 @@ export const useGameEffects = (mode: GameMode, players: Player[]) => {
 
     // State for tracking periodic events
     const lastVirusRoundRef = useRef<number>(-1);
-    const lastNormaRoundRef = useRef<number>(-1);
     const lastImpostorIndexRef = useRef<number>(0);
 
     const applyRandomVirus = useCallback((force: boolean = false, specificPlayerId?: string) => {
@@ -320,36 +319,6 @@ export const useGameEffects = (mode: GameMode, players: Player[]) => {
         return null;
     };
 
-    // Manage Periodic Normas (Every 5 Rounds)
-    const manageMegamixNormas = (currentRound: number) => {
-        if (mode !== 'megamix') return null;
-
-        // Initial Norma Round 1
-        if (currentRound === 1 && lastNormaRoundRef.current === -1) {
-            lastNormaRoundRef.current = 1;
-            const randomNorma = normasRonda[Math.floor(Math.random() * normasRonda.length)];
-            return {
-                type: 'NORMA',
-                title: '¡NORMA INICIAL!',
-                message: randomNorma,
-                duration: players.length * 2
-            };
-        }
-
-        // Manage Periodic Normas (Every 6 Rounds)
-        if (currentRound > 1 && currentRound % 6 === 0 && currentRound !== lastNormaRoundRef.current) {
-            lastNormaRoundRef.current = currentRound;
-            const randomNorma = normasRonda[Math.floor(Math.random() * normasRonda.length)];
-            return {
-                type: 'NORMA',
-                title: '¡NUEVA NORMA!',
-                message: randomNorma,
-                duration: players.length * 2 // Lasts 2 full rounds
-            };
-        }
-        return null;
-    };
-
     // Megamix Special Events (Impostor, Duelo, forced Trivia, Random Norma)
     const checkMegamixSpecialEvents = (
         currentIndex: number,
@@ -434,7 +403,6 @@ export const useGameEffects = (mode: GameMode, players: Player[]) => {
 
         const roll = Math.random();
 
-        // Random Norma removed - now strict every 3 rounds via manageMegamixNormas
 
 
         // Special Megamix events: Impostor every 6 rounds (at start of round), Mimica also at alternate cycles
@@ -569,7 +537,6 @@ export const useGameEffects = (mode: GameMode, players: Player[]) => {
         updateViruses,
         checkMegamixSpecialEvents,
         manageMegamixViruses,
-        manageMegamixNormas,
         getPlayerVirus
     };
 };

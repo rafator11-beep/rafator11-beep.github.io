@@ -73,7 +73,16 @@ import { TorneoRound } from '@/components/game/TorneoRound';
 import { MegamixTournament } from '@/components/game/MegamixTournament';
 import { TournamentBracket } from '@/components/game/TournamentBracket';
 import { TurnBanner } from '@/components/game/party/TurnBanner';
+import { NormaBanner } from '@/components/game/party/NormaBanner';
+import { NormaVerdict } from '@/components/game/party/NormaVerdict';
+import { BombOverlay } from '@/components/game/party/BombOverlay';
 import { getTurnInfo } from '@/utils/megamixTurn';
+import { isBombCard } from '@/utils/megamixBomb';
+import {
+  addInfraction,
+  cleanNormaText,
+  DRINKS_PER_INFRACTION,
+} from '@/utils/megamixNormas';
 
 import { ChatComponent } from '@/components/multiplayer/ChatComponent';
 import { PeerBubbles } from '@/components/multiplayer/PeerBubbles';
@@ -306,7 +315,6 @@ export function PartyGame({
     updateViruses,
     checkMegamixSpecialEvents,
     manageMegamixViruses, // Every 5 rounds virus cycle
-    manageMegamixNormas, // Every 3 rounds norma
   } = useGameEffects(mode, players);
 
   const performTurnAdvance = useCallback(
@@ -458,6 +466,49 @@ export function PartyGame({
     }
   );
 
+  // Única forma de poner una norma en marcha. Si había otra activa, guarda su
+  // resultado para enseñar el veredicto (quién ha caído más) antes de seguir.
+  const activateNorma = useCallback(
+    (text: string) => {
+      const clean = cleanNormaText(text);
+      if (clean.length <= 5) return;
+      setGameState((prev) => {
+        if (prev.currentNorma === clean) return prev;
+        return {
+          ...prev,
+          currentNorma: clean,
+          currentNormaTurnsRemaining: players.length > 0 ? players.length * 2 : 10,
+          normaInfractions: {},
+          normaResult: prev.currentNorma
+            ? { text: prev.currentNorma, infractions: prev.normaInfractions ?? {} }
+            : prev.normaResult,
+        };
+      });
+    },
+    [players.length, setGameState]
+  );
+
+  // Alguien ha pillado a un jugador incumpliendo la norma (desde la pantalla
+  // o desde su móvil): bebe en el momento y se le apunta para el veredicto.
+  const reportNormaInfraction = useCallback(
+    (playerId: string) => {
+      const player = players.find((p) => p.id === playerId);
+      if (!player) return;
+      setGameState((prev) =>
+        prev.currentNorma
+          ? { ...prev, normaInfractions: addInfraction(prev.normaInfractions ?? {}, playerId) }
+          : prev
+      );
+      sfx.alarm();
+      vibe.alert();
+      toast(`🚨 ¡${player.name} ha caído!`, {
+        description: `Bebe ${DRINKS_PER_INFRACTION} y queda apuntado.`,
+        duration: 2500,
+      });
+    },
+    [players, setGameState]
+  );
+
   // Effect: Parse NORMA from content for Clasico/Megamix — auto-skip the card
   const normaAutoAdvanceRef = useRef(false);
   useEffect(() => {
@@ -474,16 +525,11 @@ export function PartyGame({
       typeof txt === 'string' &&
       (txt.toUpperCase().startsWith('NORMA:') || txt.toUpperCase().startsWith('NUEVA NORMA:'))
     ) {
-      const rule = txt.split(':')[1]?.trim() || txt;
+      const rule = cleanNormaText(txt);
 
       // Prevent infinite loop: Only update state if the norma actually changed
       if (gameState.currentNorma !== rule) {
-        setGameState((prev) => ({
-          ...prev,
-          currentNorma: rule,
-          showNormaGlobal: true,
-          currentNormaTurnsRemaining: players.length > 0 ? players.length * 2 : 10,
-        }));
+        activateNorma(rule);
         toast.success('¡Nueva Norma Activa!', { description: rule, duration: 4000 });
       }
 
@@ -508,7 +554,7 @@ export function PartyGame({
     getCurrentContent,
     setGameState,
     performTurnAdvance,
-    players.length,
+    activateNorma,
     gameState.showVirusAlert,
     gameState.showTrivia,
     gameState.showDuel,
@@ -532,18 +578,18 @@ export function PartyGame({
       // Get the virus first to include it in the single state update
       const randomVirus = applyRandomVirus(true);
 
+      // Sin norma al empezar: antes se forzaba "Prohibido decir nombres", que
+      // chocaba con el capitán leyendo las pruebas en voz alta. Las normas
+      // llegan con el mazo (📜 cada TRIGGER_INTERVALS.norma cartas).
       setGameState((prev) => ({
         ...prev,
-        showNormaGlobal: true,
-        currentNorma: 'Prohibido decir nombres de jugadores',
-        currentNormaTurnsRemaining: players.length * 2,
         // Integrate virus if assigned
         showVirusAlert: !!randomVirus,
         virusAlertData: randomVirus,
         virusPlayerId: randomVirus?.player?.id,
       }));
 
-      toast.info('¡RONDA 1: Norma Global + Virus activados!');
+      if (randomVirus) toast.info('¡RONDA 1: virus activado!');
     }
   }, [gameState.round, currentIndex, mode, applyRandomVirus, players.length, setGameState]);
 
@@ -1067,17 +1113,8 @@ export function PartyGame({
           return; // STOP: wait for captain decision
         }
 
-        const normaCycleEvent = manageMegamixNormas(gameState.round);
-        if (normaCycleEvent) {
-          setGameState((prev) => ({
-            ...prev,
-            showVirusCycleAlert: true,
-            virusCycleData: normaCycleEvent,
-            currentNorma: normaCycleEvent.message,
-            currentNormaTurnsRemaining: normaCycleEvent.duration,
-          }));
-          return; // STOP: wait for user to accept cycle event
-        }
+        // Las normas ya no llegan también por ciclo de rondas (además de las
+        // del mazo y la forzada del inicio): solo las del mazo.
       }
 
       // 3. Apply Random Virus from current card - Priority 2
@@ -1217,6 +1254,7 @@ export function PartyGame({
   // Se manda también a los móviles para que se ilumine el de quien le toca.
   const captainName = players.find((p) => p.id === gameState.captainId)?.name;
   const [joinedNames, setJoinedNames] = useState<string[]>([]);
+  const [bombOpen, setBombOpen] = useState(false);
   const turnInfo = useMemo(
     () =>
       (mode === 'megamix' || mode === 'clasico') && !aiCardOverride
@@ -1466,18 +1504,7 @@ export function PartyGame({
 
     // 2. Check for "Normas" (Rules) to persist them
     if (currentText.includes('NORMA:') || currentText.includes('📜')) {
-      const cleanNorma = currentText
-        .replace(/📜\s*/g, '')
-        .replace(/NORMA:\s*/gi, '')
-        .replace(/NUEVA\s*NORMA:\s*/gi, '')
-        .trim();
-      if (cleanNorma.length > 5) {
-        setGameState((prev) => ({
-          ...prev,
-          currentNorma: cleanNorma,
-          currentNormaTurnsRemaining: players.length * 2,
-        }));
-      }
+      activateNorma(currentText);
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps -- gameState solo se lee (round, tipos); depender de él re-ejecutaría el detector en cada cambio de estado
@@ -1704,6 +1731,15 @@ export function PartyGame({
         onSkip={handleNext}
       />
 
+      <NormaVerdict
+        result={gameState.normaResult}
+        players={players}
+        captainName={captainName}
+        onClose={() => setGameState((prev) => ({ ...prev, normaResult: null }))}
+      />
+
+      <BombOverlay open={bombOpen} onClose={() => setBombOpen(false)} />
+
       {/* Top Bar with Chromecast.
           Antes: [Atrás, Cast] | [Capitán] | [Siguiente, Finalizar, "Ronda N"] con
           justify-between en una sola fila — en móviles estrechos la última cifra
@@ -1822,6 +1858,21 @@ export function PartyGame({
               players={players.map((p) => p.name)}
               turn={turnInfo ?? undefined}
               onJoinedChange={setJoinedNames}
+              norma={
+                gameState.currentNorma
+                  ? {
+                      text: cleanNormaText(gameState.currentNorma),
+                      turnsLeft: gameState.currentNormaTurnsRemaining ?? 0,
+                      pillados: Object.fromEntries(
+                        players.map((p) => [p.name, gameState.normaInfractions?.[p.id] ?? 0])
+                      ),
+                    }
+                  : undefined
+              }
+              onNormaReport={(targetName) => {
+                const target = players.find((p) => p.name === targetName);
+                if (target) reportNormaInfraction(target.id);
+              }}
               privateFor={
                 debateSession
                   ? {
@@ -2427,21 +2478,13 @@ export function PartyGame({
 
         {/* Banner de norma activa */}
         {gameState.currentNorma && (
-          <motion.div
-            initial={{ opacity: 0, scaleX: 0.9 }}
-            animate={{ opacity: 1, scaleX: 1 }}
-            className="z-10 mx-auto mb-3 flex w-full max-w-md items-center gap-3 rounded-r-xl border-l-4 border-amber-500 bg-amber-500/15 px-3 py-2"
-          >
-            <span className="shrink-0 text-xl">📜</span>
-            <p className="line-clamp-2 flex-1 text-sm font-bold leading-tight text-amber-200">
-              {gameState.currentNorma.replace(/NORMA:\s*/i, '').replace(/📜\s*/g, '')}
-            </p>
-            {(gameState.currentNormaTurnsRemaining ?? 0) > 0 && (
-              <span className="shrink-0 rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-black text-amber-400">
-                {gameState.currentNormaTurnsRemaining}T
-              </span>
-            )}
-          </motion.div>
+          <NormaBanner
+            text={cleanNormaText(gameState.currentNorma)}
+            turnsLeft={gameState.currentNormaTurnsRemaining ?? 0}
+            players={players}
+            infractions={gameState.normaInfractions ?? {}}
+            onReport={reportNormaInfraction}
+          />
         )}
 
         {/* Mesa del Capitán + "¿Quién ha bebido?" se movieron debajo de la carta
@@ -2517,6 +2560,16 @@ export function PartyGame({
                   connected={!!turnInfo && joinedNames.includes(turnInfo.name)}
                   captainName={captainName}
                 />
+
+                {isBombCard(currentRawCard) && !aiCardOverride && (
+                  <button
+                    type="button"
+                    onClick={() => setBombOpen(true)}
+                    className="mx-auto mb-2 rounded-2xl border-2 border-red-400 bg-gradient-to-r from-red-600 to-orange-500 px-8 py-3 text-base font-black uppercase tracking-widest text-white shadow-[0_0_30px_rgba(239,68,68,0.5)] active:scale-95"
+                  >
+                    💣 Activar la bomba
+                  </button>
+                )}
 
                 <motion.div
                   key={currentIndex}

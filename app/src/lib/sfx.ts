@@ -70,6 +70,9 @@ export const sfx = {
   cursed: () => { try { beep(180, 600, 0.15); } catch { } },
   chaos: () => { try { beep(100, 800, 0.2); } catch { } },
   whoosh: () => { try { beep(880, 150, 0.05); beep(440, 300, 0.03); } catch { } },
+  tick: () => { try { beep(1250, 35, 0.06); } catch { } },
+  boom: () => { try { beep(70, 900, 0.25); beep(110, 500, 0.2); } catch { } },
+  alarm: () => { try { beep(990, 120, 0.09); setTimeout(() => beep(740, 160, 0.09), 130); } catch { } },
   success: () => {
     try {
       beep(523, 100);
