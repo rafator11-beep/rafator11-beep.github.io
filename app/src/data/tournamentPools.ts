@@ -2,13 +2,15 @@
 // LLAVES principales: duelos de todo tipo (físicos, de ingenio, de baile…).
 // REPESCA: "otro torneo de otra cosa": memoria, rapidez y suerte, para que
 // los eliminados sientan que juegan a otro juego.
-import { torneoRetos } from '@/data/gameContent';
+import { capDrinking, torneoRetos } from '@/data/gameContent';
 import { duelosV5 } from '@/data/updatePostVerano2026';
 import { duelosV5b } from '@/data/updatePostVerano2026_v2';
 import { moreTorneoRetos } from '@/data/extraContentIndex';
 
 export const DUEL_POOL: string[] = Array.from(
-  new Set([...torneoRetos, ...duelosV5, ...duelosV5b, ...moreTorneoRetos].map((s) => s.trim()))
+  new Set(
+    [...torneoRetos, ...duelosV5, ...duelosV5b, ...moreTorneoRetos].map((s) => capDrinking(s.trim()))
+  )
 ).filter(Boolean);
 
 export const REPESCA_POOL: string[] = [

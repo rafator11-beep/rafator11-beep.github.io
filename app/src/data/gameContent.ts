@@ -2465,7 +2465,7 @@ export const clasico: string[] = [
   'Ý Pacto de Sangre: Elige a un compañero. Cada vez que tú bebas, él bebe.',
   'Í Copa Gratis: Te invita el camarero/a porque le gustas. Manda 3 tragos a quien quieras.',
   '🚓 Redada: Viene la policía. Todos beben un trago rápido para disimular.',
-  '🚪 Salida de Emergencia: Te has agobiado. Sal al balcón o ventana y grita algo. Si no, bebes.',
+  '🚪 Salida de Emergencia: Te has agobiado. Sal un momento a la puerta y grita algo. Si no, bebes.',
   '🚌 Búho Perdido: Te has equivocado de autobús nocturno. Bebe 3 tragos por despiste.',
   '🤢 Jagger Mañanero: Te sienta fatal. Bebe un vaso de agua obligatorio.',
   '👑 Rey de la Pista: Elige una canción. Hasta que no suene, nadie puede beber.',
@@ -3843,7 +3843,7 @@ export const picante: string[] = [
   'Reto: Llama al quinto contacto de tu agenda y dile que te vas a casar mañana. Tienes que aguantar la broma 1 minuto.',
   'Reto: Haz 20 flexiones en mitad de la sala. Por cada una que no hagas, bebes un trago.',
   "Reto: Dale tu móvil al grupo: tienen permiso para subir la foto más vergonzosa de tu galería a tus 'Stories' de Instagram.",
-  "Reto: Tmate un 'chupito guarro': el grupo mezclar tres líquidos diferentes de la mesa. Fondo!",
+  'Reto: El grupo elige UNA bebida de la mesa para ti (nada de mezclas). Bebe 2 tragos de esa.',
   'Reto: Deja que el de tu izquierda te escriba algo con rotulador permanente en la frente. No puedes borrrtelo hasta mañana.',
   'Reto: Ponte en posición de plancha (plank) durante un minuto entero. Si caes, bebes 5 tragos.',
   'Reto: Manda un audio de 30 segundos a tu jefe o a un cliente fingiendo que estás en la selva (haz ruidos de animales).',
@@ -3948,7 +3948,7 @@ export const picante: string[] = [
   'Reto: Bebe un trago mientras haces el pino (o cabeza colgando del sofá).',
   'Reto: Haz 15 saltos de rana por todo el salón.',
   'Reto: Intenta hacer un nudo a un cordal o cuerda usando solo una mano.',
-  'Reto: Aguanta la respiración durante 40 segundos (si no puedes, bebe).',
+  'Reto: Aguanta 40 segundos a la pata coja (si no puedes, bebe).',
   'Reto: Haz 10 fondos de trceps usando el borde de una silla.',
   'Reto: Intenta encestar un papel en la papelera desde 3 metros. Si fallas, bebe.',
   'Reto: Camina sobre una línea imaginaria poniendo un pie justo delante del otro.',
@@ -4625,7 +4625,7 @@ export const masProbable: string[] = [
   'Reto: Llama al quinto contacto de tu agenda y dile que te vas a casar mañana. Tienes que aguantar la broma 1 minuto.',
   'Reto: Haz 20 flexiones en mitad de la sala. Por cada una que no hagas, bebes un trago.',
   "Reto: Dale tu móvil al grupo: tienen permiso para subir la foto más vergonzosa de tu galería a tus 'Stories' de Instagram.",
-  "Reto: Tómate un 'chupito guarro': el grupo mezclará tres líquidos diferentes de la mesa. ¡Fondo!",
+  'Reto: El grupo elige UNA bebida de la mesa para ti (nada de mezclas). Bebe 2 tragos de esa.',
   'Reto: Deja que el de tu izquierda te escriba algo con rotulador permanente en la frente. No puedes borrártelo hasta mañana.',
   'Reto: Ponte en posición de plancha (plank) durante un minuto entero. Si caes, bebes 5 tragos.',
   'Reto: Manda un audio de 30 segundos a tu jefe o a un cliente fingiendo que estás en la selva (haz ruidos de animales).',
@@ -4730,7 +4730,7 @@ export const masProbable: string[] = [
   'Reto: Bebe un trago mientras haces el pino (o cabeza colgando del sofá).',
   'Reto: Haz 15 saltos de rana por todo el salón.',
   'Reto: Intenta hacer un nudo a un cordal o cuerda usando solo una mano.',
-  'Reto: Aguanta la respiración durante 40 segundos (si no puedes, bebe).',
+  'Reto: Aguanta 40 segundos a la pata coja (si no puedes, bebe).',
   'Reto: Haz 10 fondos de tríceps usando el borde de una silla.',
   'Reto: Intenta encestar un papel en la papelera desde 3 metros. Si fallas, bebe.',
   'Reto: Camina sobre una línea imaginaria poniendo un pie justo delante del otro.',
@@ -6933,6 +6933,23 @@ export function normalizeCardText(card: string): string {
   return `${tokens[tokens.length - 1]} ${card.slice(lead.length)}`;
 }
 
+// Consumo con cabeza: ningún castigo obliga a beberse un vaso entero o a
+// hacer fondo. Se limita a 3-4 tragos. Va aquí (al montar el mazo) para que
+// cubra también contenido que entre en el futuro.
+const DRINK_CAPS: [RegExp, string][] = [
+  [/\b(beb(?:e|es|en|er)) (?:el |un |todo el )?vaso entero\b/gi, '$1 3 tragos'],
+  [/\bfondo blanco de tu bebida\b/gi, '4 tragos'],
+  [/\b(beb(?:e|es|en|er)) fondo\b/gi, '$1 4 tragos'],
+  [/¡fondo!/gi, '¡4 tragos!'],
+  [/\bfondo!/gi, '¡4 tragos!'],
+  [/,\s*fondo\./gi, ', 4 tragos.'],
+  [/\bfondo (por|de castigo)\b/gi, '4 tragos $1'],
+];
+
+export function capDrinking(card: string): string {
+  return DRINK_CAPS.reduce((text, [re, to]) => text.replace(re, to), card);
+}
+
 export function isIndividualCard(cardText: string): boolean {
   if (!cardText || typeof cardText !== 'string') return false;
   const t = cardText.trim();
@@ -7803,7 +7820,7 @@ export function getStructuredMegamix(
   type TypedPool = { key: string; cards: string[]; ptr: number; weight?: number };
   const exclude = options?.exclude;
   const makeTypedPool = (key: string, cards: string[]): TypedPool => {
-    const cleaned = cleanDeckPool(cards.map(normalizeCardText));
+    const cleaned = cleanDeckPool(cards.map((c) => capDrinking(normalizeCardText(c))));
     const kept = exclude ? cleaned.filter((c) => !exclude(c)) : cleaned;
     // Si el filtro vaciara el tipo entero, mejor repetir cartas que perder el tipo.
     const pool = kept.length > 0 ? kept : cleaned;
@@ -7959,7 +7976,7 @@ export function getStructuredMegamix(
       ...normasV5,
       ...normasV5b,
       ...moreNormas,
-    ].map((n) => `📜 NORMA: ${n.replace(/NORMA:|NORMA: |📜 |\\\./g, '').trim()}`)
+    ].map((n) => capDrinking(`📜 NORMA: ${n.replace(/NORMA:|NORMA: |📜 |\\\./g, '').trim()}`))
   );
 
   let triggerPtr = 0;

@@ -83,7 +83,7 @@ export const retosExtra19: string[] = [
 ];
 
 export const torneoRetos: string[] = [
-  "{player} vs {player2}: ¿Quién aguanta más tiempo con la cara metida en un vaso de agua fría?",
+  "{player} vs {player2}: ¿Quién aguanta más tiempo con un cubito de hielo en la mano? El primero que lo suelte, bebe 2.",
   "{player} vs {player2}: Batalla de baile — 30 segundos cada uno, el grupo vota quién ganó",
   "{player} vs {player2}: ¿Quién imita mejor al cantante que el grupo elija?",
   "{player} vs {player2}: Concurso de chistes malos — el que provoque menos risas bebe 3",

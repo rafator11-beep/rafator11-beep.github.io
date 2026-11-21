@@ -107,6 +107,26 @@ export const MEGAMIX_HUMOR_NEGRO: string[] = [
   '💀 ¿Quién de aquí tiene un móvil que, si se muriera mañana, debería borrar alguien antes que la familia? El más votado bebe 3.',
   '💀 Votad: ¿quién se quedaría con la mejor herencia en esta mesa? El más votado paga la próxima ronda… o bebe 3.',
   '💀 ¿Quién de aquí sobreviviría al Titanic quitándole la tabla a alguien? El más votado bebe 2 y dice a quién se la quitaría.',
+  '💀 EL VELATORIO: el capitán está “de cuerpo presente”. Por turnos, contad una anécdota suya como si ya no estuviera. Si se ríe, bebe él. Si nadie tiene anécdota, bebéis todos.',
+  '💀 ¿Quién de aquí acabaría siendo el fantasma más pesado de la historia? Votad. El más votado bebe 2 y dice a quién perseguiría.',
+  '💀 Todos a la vez: ¿quién de la mesa heredaría vuestras deudas sin rechistar? Señalad. El más señalado reparte 3, que se lo ha ganado.',
+  '💀 ¿Quién de aquí sería el primero en vender a la mesa por un plato de jamón? Votad. El más votado bebe 2 y dice por cuánto jamón.',
+  '💀 OBITUARIO: el de la izquierda del capitán escribe en voz alta el obituario del capitán en 15 segundos. Si es muy bonito, bebe el capitán por falso.',
+  '💀 ¿Quién de la mesa montaría un negocio de funerarias “low cost”? Votad. El más votado tiene 10 segundos para venderlo o bebe 3.',
+  '💀 Si mañana hubiera un apagón mundial, ¿quién de aquí duraría menos sin el móvil? El más votado bebe 2 y entrega el móvil una ronda.',
+  '💀 ¿A quién de la mesa le daría más igual ir a la cárcel si hay wifi? Votad. El más votado bebe 2.',
+  '💀 Todos a la vez: pulgar arriba si querríais que en vuestro funeral pusieran reguetón. Bebe la minoría.',
+  '💀 ¿Quién de aquí sería capaz de llegar tarde al juicio final? Votad. El más votado bebe 2 y pone la excusa.',
+  '💀 CADÁVER EXQUISITO: por turnos, cada uno añade una palabra a la frase “Aquí yace el capitán, que murió…”. El que rompa la frase o tarde, bebe 2.',
+  '💀 ¿Quién de aquí se haría un tatuaje en memoria de su ex… que sigue vivo? Votad. El más votado bebe 2.',
+  '💀 Votad: ¿quién de la mesa tiene más pinta de leer los mensajes de un muerto “para despedirse”? El más votado bebe 2.',
+  '💀 ¿Quién de aquí acabaría siendo el vecino que encuentran a los tres meses porque nadie le echó de menos? Votad. El más votado reparte 3 para que le hagáis caso.',
+  '💀 SOBREVIVIENTES: os quedáis aislados en una isla. Cada uno dice en 3 segundos a quién se comería primero. El más elegido bebe 3.',
+  '💀 ¿Quién de aquí pediría la cuenta en su propia boda para ver cuánto ha costado? Votad. El más votado bebe 2.',
+  '💀 Todos a la vez: ¿quién de la mesa os sustituiría antes si desaparecierais? Señalad a la de 3. El más señalado bebe 2 por traidor en potencia.',
+  '💀 LA NOTA DE DESPEDIDA: el capitán lee en voz alta la última nota de su móvil como si fuera su última voluntad. Si no la lee, bebe 3.',
+  '💀 ¿Quién de aquí haría un TikTok en el tanatorio? Votad. El más votado bebe 2 y explica qué baile haría.',
+  '💀 ¿Quién de la mesa tiene más pinta de haber escondido un cadáver en el congelador… de pizzas? Votad. El más votado bebe 2.',
 ];
 
 // ─── 🗳️ VOTACIONES con anécdota (el votado tiene que contar algo) ─────────
@@ -328,6 +348,129 @@ export const MEGAMIX_DUELOS: string[] = [
   '⚔️ DUELO: {player} contra {player2}. Decid platos típicos españoles por turnos. El primero que repita o falle, bebe 2.',
 ];
 
+// ─── 🌶️ PICANTE de mesa (para adultos, siempre con salida) ─────────────────
+// Nada obliga a tocar a nadie: lo físico solo si la otra persona dice que sí;
+// si no, quien lo pide bebe 1 y se sigue. Toda confesión se puede cambiar
+// por tragos.
+export const MEGAMIX_PICANTE: string[] = [
+  '🌶️ Yo nunca me he liado con alguien cuyo nombre no recordaba a la mañana siguiente. Bebe quien lo haya hecho.',
+  '🌶️ Yo nunca he mandado una foto subida de tono y me he arrepentido a los diez segundos. Bebe quien lo haya hecho.',
+  '🌶️ Yo nunca me he liado con alguien en una boda. Bebe quien lo haya hecho; si era de la familia de los novios, bebe 2.',
+  '🌶️ Yo nunca he fingido que me lo estaba pasando genial en la cama. Bebe quien lo haya hecho. Nadie pregunta con quién.',
+  '🌶️ Yo nunca he vuelto con un ex “solo esta noche”. Bebe quien lo haya hecho; si ha pasado más de una vez, bebe 3.',
+  '🌶️ Yo nunca me he liado con alguien de esta mesa. Bebe quien lo haya hecho. Si nadie bebe, el capitán lo duda en voz alta.',
+  '🌶️ Yo nunca he tenido una cita de app que ha durado menos que el primer cubata. Bebe quien lo haya hecho y cuenta el motivo en una frase.',
+  '🌶️ Yo nunca he mirado el móvil de alguien mientras dormía. Bebe quien lo haya hecho.',
+  '🌶️ Yo nunca he tenido un crush con el novio o la novia de un amigo. Bebe quien lo haya hecho; prohibido decir nombres.',
+  '🌶️ Yo nunca he dicho “estoy en el gimnasio” cuando estaba en la cama de otra persona. Bebe quien lo haya hecho.',
+  '🌶️ ¿Quién de la mesa tiene más peligro en una despedida de soltero/a? Votad. El más votado bebe 2 y cuenta la mejor que ha vivido.',
+  '🌶️ ¿Quién de aquí liga más sin proponérselo? Votad. El más votado bebe 2 y dice su truco.',
+  '🌶️ ¿Quién de la mesa tiene la peor reputación en el grupo de amigos… y la mejor anécdota? Votad. El más votado cuenta una o bebe 3.',
+  '🌶️ ¿Quién de aquí ha roto más corazones? Votad. El más votado bebe 2 y dice cuántos “aproximadamente”.',
+  '🌶️ ¿Quién de la mesa es más probable que acabe esta noche liándose con alguien? Votad. El más votado bebe 2; si pasa, bebe 3 mañana.',
+  '🌶️ Todos a la vez: a la de 3, decid cuántas parejas habéis tenido (o un número inventado). Si alguien coincide con otro, los dos beben 2.',
+  '🌶️ Todos a la vez: pulgar arriba si has tenido una cita a ciegas. Los de pulgar arriba beben 1 y el capitán elige a uno para contarla.',
+  '🌶️ Todos a la vez: ¿primera cita en un bar o en casa? Levantad la mano los de casa. Bebe la minoría.',
+  '🌶️ MANOS ARRIBA: levantad la mano si habéis dejado a alguien por WhatsApp. Los de la mano levantada beben 2. Los demás, 1 por mentirosos.',
+  '🌶️ EL ÍNDICE DE LIGUE: el capitán ordena a la mesa de más ligón/a a menos en 15 segundos. El primero reparte 2, el último bebe 2.',
+  '🌶️ CONFESIONARIO: el capitán dice “la cosa más rara que he hecho para ligar”. Todos la contáis en una frase o bebéis 2. La más rara reparte 3.',
+  '🌶️ Votad: ¿quién de aquí tiene el historial de búsquedas más subido de tono? El más votado bebe 2 o enseña las tres últimas búsquedas.',
+  '🌶️ ¿Quién de la mesa ha tenido la ruptura más dramática? Votad. El más votado la resume en 10 segundos o bebe 3.',
+  '🌶️ PIROPO CUTRE: por turnos, cada uno dice el piropo más cutre que le hayan dicho. El más cutre lo elige la mesa: ese reparte 2.',
+  '🌶️ ¿Quién de aquí es el más celoso? Votad. El más votado bebe 2 y dice qué le pone más celoso.',
+  '🌶️ Todos a la vez: señalad al que tiene más pinta de tener un perfil secreto en una app de ligar. El más señalado bebe 2.',
+  '🌶️ Yo nunca he dicho “te quiero” solo para que la otra persona dejara de hablar. Bebe quien lo haya hecho.',
+  '🌶️ Yo nunca me he enrollado con alguien para dar celos a otra persona. Bebe quien lo haya hecho.',
+  '🌶️ Yo nunca he tenido que esconderme o salir corriendo de la casa de alguien. Bebe quien lo haya hecho y cuenta cómo salió.',
+  '🌶️ Yo nunca he mentido sobre con cuántas personas he estado. Bebe quien lo haya hecho.',
+];
+
+// ─── 🇪🇸 VIDA EN ESPAÑA: pueblo, familia, curro, piso, fiestas ──────────────
+export const MEGAMIX_VIDA_ESPANA: string[] = [
+  '🏘️ PUEBLO: ¿quién de la mesa sería el alcalde de su pueblo en dos años? Votad. El más votado bebe 2 y promete algo.',
+  '🏘️ Yo nunca he vuelto de las fiestas del pueblo con algo que no era mío. Bebe quien lo haya hecho y di qué era.',
+  '🏘️ Todos a la vez: ¿verano en el pueblo o en la playa? Bebe la minoría. Los del pueblo dicen el nombre del suyo.',
+  '🏘️ ¿Quién de aquí tiene la peña más gamberra de su pueblo? Votad. El más votado cuenta la mejor liada o bebe 3.',
+  '🏘️ Yo nunca me he dormido en la verbena. Bebe quien lo haya hecho; si fue en una silla de plástico, bebe 2.',
+  '🏘️ Yo nunca he ido a la piscina municipal solo por ver a alguien. Bebe quien lo haya hecho.',
+  '👵 FAMILIA: ¿quién tiene la abuela que más le pregunta “¿y el novio/la novia pa’ cuándo?”. Votad. El más votado imita a su abuela o bebe 2.',
+  '👵 Todos a la vez: levantad la mano si estáis en un grupo de WhatsApp familiar silenciado. Los de la mano bajada beben 1 por pacientes.',
+  '👵 Yo nunca he tenido que dejar de hablar de política en una comida familiar. Bebe quien lo haya hecho; si acabó en bronca, bebe 2.',
+  '👵 ¿Quién de aquí es el favorito de su madre (y lo sabe)? Votad. El más votado reparte 2 como buen hijo.',
+  '👵 Yo nunca me he llevado táper de casa de mis padres el domingo. Bebe quien lo haya hecho. Bebe 2 si fue este domingo.',
+  '👵 NAVIDAD: el capitán dice una frase típica de una cena de Nochebuena. Si alguien la ha oído este año, bebe. Seguid por turnos hasta que alguien repita.',
+  '💼 CURRO: ¿quién de la mesa sería el peor jefe del mundo? Votad. El más votado bebe 2 y dice su primera norma como jefe.',
+  '💼 Yo nunca he fingido estar trabajando mientras veía una serie. Bebe quien lo haya hecho.',
+  '💼 Todos a la vez: ¿quién odia más los lunes? Señalad a la de 3. El más señalado bebe 2.',
+  '💼 Yo nunca he dicho “me ha surgido un imprevisto” para no ir a una cena de empresa. Bebe quien lo haya hecho.',
+  '💼 ¿Quién de aquí se ha liado con alguien del curro? Votad. El más votado confiesa en una frase o bebe 3.',
+  '💼 Yo nunca he contestado a un correo del jefe a las tantas para quedar bien. Bebe quien lo haya hecho.',
+  '🏠 PISO COMPARTIDO: ¿quién de la mesa sería el compañero de piso que no friega nunca? Votad. El más votado bebe 2.',
+  '🏠 Yo nunca he comido algo de la balda de la nevera de otro compañero. Bebe quien lo haya hecho.',
+  '🏠 Todos a la vez: ¿quién de la mesa sería capaz de pagar 900 € por una habitación en Madrid? Señalad. El más señalado bebe 2.',
+  '🏠 Yo nunca he dejado notitas pasivo-agresivas en el piso. Bebe quien lo haya hecho y di la mejor.',
+  '🎓 Yo nunca he copiado en un examen de la ESO. Bebe quien lo haya hecho; si te pillaron, bebe 2.',
+  '🎓 ¿Quién de aquí fue el empollón de clase? Votad. El más votado bebe 2 y dice su nota de selectividad.',
+  '🎓 Yo nunca he ido de Erasmus “a estudiar”. Bebe quien lo haya hecho y di la palabra que más usaste del idioma.',
+  '🎓 Todos a la vez: ¿quién se presentaría a un examen con resaca? Señalad. El más señalado bebe 2 y cuenta si le pasó.',
+  '🎉 FIESTAS: ¿San Fermín, Fallas, Feria de Abril o Carnaval de Cádiz? Todos a la vez: los que coincidáis con el capitán bebéis 1. El resto defiende la suya en 5 segundos.',
+  '🎉 Yo nunca me he atragantado con las uvas de Nochevieja. Bebe quien lo haya hecho. Bebe 2 quien no llegó a las doce.',
+  '🎉 ¿Quién de aquí sería el primero en acabar en la tele durante los Sanfermines? Votad. El más votado bebe 2.',
+  '🎉 Yo nunca he perdido a mis amigos en una fiesta y he acabado con desconocidos. Bebe quien lo haya hecho.',
+  '🛒 MERCADONA: todos a la vez, a la de 3, decid vuestro producto favorito del Mercadona. Los que coincidan beben 1; el más raro reparte 2.',
+  '🛒 Yo nunca he ido al súper en pijama. Bebe quien lo haya hecho.',
+  '🚆 Yo nunca he perdido el tren o el autobús por quedarme “cinco minutos más”. Bebe quien lo haya hecho.',
+  '🚆 ¿Quién de la mesa se dormiría en el AVE y acabaría en otra ciudad? Votad. El más votado bebe 2.',
+  '☀️ Todos a la vez: ¿siesta sí o siesta no? Bebe la minoría. Los de la siesta dicen cuánto duermen.',
+  '☀️ Yo nunca he cenado a las once de la noche y me ha parecido pronto. Bebe quien lo haya hecho.',
+  '📺 ¿Quién de aquí sería concursante de Pasapalabra… y quién de Supervivientes? Votad las dos. Los dos más votados beben 2.',
+  '📺 Yo nunca he visto las campanadas solo por ver el vestido de la presentadora. Bebe quien lo haya hecho.',
+  '⚽ Todos a la vez: ¿quién de la mesa se pica más con el fútbol? Señalad. El más señalado bebe 2 y dice su peor derrota.',
+  '⚽ Yo nunca he dejado de hablar a alguien por un partido. Bebe quien lo haya hecho.',
+];
+
+// ─── 🎯 RETOS del día a día (necesitan a la mesa) ────────────────────────
+export const MEGAMIX_RETOS_DIA: string[] = [
+  '🎯 RETO: {player}, haz de tu madre llamándote para preguntar si has comido. La mesa vota si es creíble; si no, bebe 2.',
+  '🎯 RETO: {player}, cuenta tu día como si fueras el hombre del tiempo de la tele. Si te ríes, bebe 2.',
+  '🎯 RETO: {player}, imita al camarero más borde que te haya atendido. La mesa puntúa del 1 al 5; menos de 3, bebe 2.',
+  '🎯 RETO: {player}, haz el discurso de un padrino de boda sobre la persona de tu derecha en 20 segundos. Si se emociona o se ríe, reparte 2.',
+  '🎯 RETO: {player}, pide una pizza imaginaria por teléfono con el acento que elija la mesa. Si te equivocas de acento, bebe 2.',
+  '🎯 RETO: {player}, vende a la mesa tu pueblo o tu barrio como si fueras de la agencia de turismo. Si nadie iría, bebe 2.',
+  '🎯 RETO: {player}, haz de presentador de las campanadas y cuenta las doce mientras la mesa “come uvas”. Si te equivocas, bebe 2.',
+  '🎯 RETO: {player}, imita a un guiri pidiendo una paella a las siete de la tarde. Si la mesa no se ríe, bebe 2.',
+  '🎯 RETO: {player}, enseña el último audio que has recibido (puedes elegir uno de los tres últimos). Si te niegas, bebe 3.',
+  '🎯 RETO: {player}, haz de vecino del quinto que se queja del ruido. Quien se ría primero, bebe 1.',
+  '🎯 RETO: {player}, la mesa te dice un objeto de la habitación y tienes que venderlo como si fuera de Wallapop. Si nadie pregunta el precio, bebe 2.',
+  '🎯 RETO: {player}, explica la regla del fuera de juego a la persona que menos sepa de fútbol. Si no lo entiende, bebéis los dos 1.',
+  '🎯 RETO: {player}, haz de profe de autoescuela con la persona de tu izquierda “conduciendo” su silla. Si se choca, bebéis los dos.',
+  '🎯 RETO: {player}, cuenta un cotilleo inventado del grupo como si fuera de Sálvame. La mesa vota si cuela; si no, bebe 2.',
+  '🎯 APUESTA: {player}, di los nombres de los cinco últimos contactos de tu WhatsApp sin mirar. La mesa apuesta antes; los que fallen beben 2.',
+  '🎯 APUESTA: {player}, di cuánto cuesta un litro de aceite de oliva ahora mismo. La mesa apuesta “se acerca” o “ni de broma”; los que fallen beben 2.',
+  '🎯 APUESTA: {player}, canta el estribillo de una canción del verano que elija la mesa. Antes se apuesta; los que fallen beben 2.',
+  '🎯 APUESTA: {player}, di de memoria qué cenaste hace tres días. La mesa apuesta si lo sabe; los que fallen beben 2.',
+];
+
+// ─── 🎤 VERDADES PICANTES (siempre se puede cambiar por tragos) ──────────
+export const MEGAMIX_VERDADES_PICANTES: string[] = [
+  '🎤 VERDAD O BEBE: {player}, ¿cuál ha sido tu cita más desastrosa? Si prefieres no contarla, bebe 3.',
+  '🎤 VERDAD O BEBE: {player}, ¿a quién de tus ex volverías a escribir esta noche? Sin nombre vale con una pista. Si no respondes, bebe 3.',
+  '🎤 VERDAD O BEBE: {player}, ¿qué es lo que más te atrae de alguien en los primeros cinco segundos? Si no respondes, bebe 2.',
+  '🎤 VERDAD O BEBE: {player}, ¿cuál es el sitio más raro donde te has liado con alguien? Si no respondes, bebe 3.',
+  '🎤 VERDAD O BEBE: {player}, ¿qué mensaje no mandarías nunca a tu ex… pero has escrito y borrado? Si no respondes, bebe 3.',
+  '🎤 VERDAD O BEBE: {player}, ¿has tenido algo con alguien de un grupo de amigos y luego habéis hecho como si nada? Si no respondes, bebe 3.',
+  '🎤 VERDAD O BEBE: {player}, del 1 al 10, ¿cuánto te gusta ligar por apps? Justifícalo en una frase o bebe 2.',
+  '🎤 VERDAD O BEBE: {player}, ¿cuál es tu “red flag” que sabes que tienes? Si no respondes, bebe 2.',
+  '🎤 VERDAD O BEBE: {player}, ¿qué es lo más vergonzoso que te ha pasado en una primera cita? Si no respondes, bebe 3.',
+  '🎤 VERDAD O BEBE: {player}, ¿le has mentido a alguien sobre tu edad para ligar? Si no respondes, bebe 2.',
+  '🎤 VERDAD O BEBE: {player}, ¿quién de la mesa crees que liga más sin que nadie se entere? Esa persona puede defenderse o beber 2.',
+  '🎤 VERDAD O BEBE: {player}, ¿cuál ha sido el mejor beso de tu vida y dónde fue? Si no respondes, bebe 2.',
+  '🎤 VERDAD O BEBE: {player}, ¿qué canción pondrías en una noche romántica… y cuál te da vergüenza admitir que pondrías? Si no respondes, bebe 2.',
+  '🎤 VERDAD O BEBE: {player}, ¿qué es lo más atrevido que has hecho por alguien que te gustaba? Si no respondes, bebe 3.',
+  '⚔️ DUELO: {player} contra {player2}. Cada uno dice el piropo más elegante que se le ocurra para la persona que elija la mesa. Gana el que más aplausos saque; el otro bebe 2.',
+  '⚔️ DUELO: {player} contra {player2}. Tenéis 15 segundos cada uno para contar vuestra peor cita. La mesa vota la más desastrosa: ese gana y el otro bebe 2.',
+];
+
 // ─── Registro: clave de peso (cardWeights.ts) → cartas ───────────────────
 export const MEGAMIX_EXTRA_GENERAL: Record<string, string[]> = {
   megamixEspañaGeneral: MEGAMIX_SPAIN_GENERAL,
@@ -338,6 +481,8 @@ export const MEGAMIX_EXTRA_GENERAL: Record<string, string[]> = {
   megamixAnecdotas: MEGAMIX_ANECDOTAS,
   megamixBomba: MEGAMIX_BOMBA,
   megamixQuizEspana: MEGAMIX_QUIZ_ESPANA,
+  megamixPicante: MEGAMIX_PICANTE,
+  megamixVidaEspana: MEGAMIX_VIDA_ESPANA,
 };
 
 export const MEGAMIX_EXTRA_INDIVIDUAL: Record<string, string[]> = {
@@ -345,4 +490,6 @@ export const MEGAMIX_EXTRA_INDIVIDUAL: Record<string, string[]> = {
   megamixRetos: MEGAMIX_RETOS,
   megamixVerdades: MEGAMIX_VERDADES,
   megamixDuelos: MEGAMIX_DUELOS,
+  megamixRetosDia: MEGAMIX_RETOS_DIA,
+  megamixVerdadesPicantes: MEGAMIX_VERDADES_PICANTES,
 };

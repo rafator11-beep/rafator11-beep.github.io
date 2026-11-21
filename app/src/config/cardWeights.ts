@@ -28,6 +28,8 @@ export const GENERAL_TYPE_WEIGHTS: Record<string, number> = {
   megamixAnecdotas: 1.0,
   megamixBomba: 0.8,
   megamixQuizEspana: 0.7,
+  megamixPicante: 1.2,
+  megamixVidaEspana: 1.4,
   // customPartyRetos ("Si has..., bebe"): pocas cartas, peso bajo para no repetirlas.
   customRetos: 0.05,
 };
@@ -46,6 +48,8 @@ export const INDIVIDUAL_TYPE_WEIGHTS: Record<string, number> = {
   megamixRetos: 1.6,
   megamixVerdades: 1.2,
   megamixDuelos: 1.0,
+  megamixRetosDia: 1.2,
+  megamixVerdadesPicantes: 0.8,
   // Pool extra que useGameContent inyecta (antes iba suelto al final del mazo
   // y solo aparecía gracias al shuffle global). Peso ≈ su cuota original.
   torneoRetos: 0.25,
@@ -109,10 +113,13 @@ export const TYPE_INTENSITY: Record<string, Intensity> = {
   enLaCama: 'fuerte',
   humorNegro: 'fuerte',
   megamixHumorNegro: 'fuerte',
+  megamixPicante: 'fuerte',
+  megamixVidaEspana: 'suave',
   // individuales
   triviaExpress: 'suave',
   categorias: 'suave',
   clasico: 'suave',
+  megamixVerdadesPicantes: 'fuerte',
 };
 
 export const PHASE_INTENSITY_MULTIPLIER: Record<

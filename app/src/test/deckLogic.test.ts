@@ -1,6 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
-import { getStructuredMegamix, isIndividualCard, normalizeCardText } from '@/data/gameContent';
+import {
+  capDrinking,
+  getStructuredMegamix,
+  isIndividualCard,
+  normalizeCardText,
+} from '@/data/gameContent';
+import { DUEL_POOL } from '@/data/tournamentPools';
 import { interleaveTasteCards, useGameContent } from '@/hooks/game/useGameContent';
 import { MEGAMIX_SPAIN_GENERAL, MEGAMIX_SPAIN_INDIVIDUAL } from '@/data/megamixSpain';
 import {
@@ -232,6 +238,38 @@ describe('cartas vistas en partidas anteriores', () => {
     const fromPool = deck.filter((c) => pool.includes(c));
     const firstStale = fromPool.findIndex((c) => seenHalf.has(cardKey(c)));
     expect(firstStale).toBe(26);
+  });
+});
+
+// ─── Consumo con cabeza ──────────────────────────────────────────────────────
+
+describe('capDrinking', () => {
+  it.each([
+    ['Si no lo haces, bebe el vaso entero.', 'Si no lo haces, bebe 3 tragos.'],
+    ['contar un secreto o beber un vaso entero', 'contar un secreto o beber 3 tragos'],
+    ['Si no, bebe fondo.', 'Si no, bebe 4 tragos.'],
+    ['El que pierda, fondo.', 'El que pierda, 4 tragos.'],
+    ['Si te niegas, fondo blanco de tu bebida.', 'Si te niegas, 4 tragos.'],
+    ['Ves a tu ex. Fondo por despecho.', 'Ves a tu ex. 4 tragos por despecho.'],
+    ['Limpiar una casa a fondo.', 'Limpiar una casa a fondo.'],
+  ])('%s', (card, expected) => {
+    expect(capDrinking(card)).toBe(expected);
+  });
+
+  it('el mazo de Megamix no tiene vasos enteros, fondos ni retos peligrosos', () => {
+    const big = getStructuredMegamix(6000, 6, {
+      extraGeneral: MEGAMIX_EXTRA_GENERAL,
+      extraIndividual: MEGAMIX_EXTRA_INDIVIDUAL,
+      withoutFiller: true,
+    });
+    const bad = big.filter((c) =>
+      /vaso entero|bebe fondo|¡fondo!|, fondo\.|cara metida en|aguanta la respiración|balcón o ventana|mezclar? tres líquidos/i.test(c)
+    );
+    expect(bad).toEqual([]);
+  });
+
+  it('los retos del torneo tampoco', () => {
+    expect(DUEL_POOL.filter((c) => /vaso entero|cara metida en|¡fondo!/i.test(c))).toEqual([]);
   });
 });
 
