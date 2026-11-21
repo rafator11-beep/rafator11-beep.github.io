@@ -1,6 +1,18 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, ArrowRight, AlertCircle, Video, VideoOff, Copy, Crown, Plus, Minus, EyeOff, Cast } from 'lucide-react';
+import {
+  ArrowLeft,
+  ArrowRight,
+  AlertCircle,
+  Video,
+  VideoOff,
+  Copy,
+  Crown,
+  Plus,
+  Minus,
+  EyeOff,
+  Cast,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { isGeminiConfigured, geminiGenerateImpostorRound } from '@/services/geminiClient';
 import { toast } from 'sonner';
@@ -12,7 +24,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import { useGame } from '@/hooks/useGame';
 import { supabase } from '@/integrations/supabase/client';
 import { useGameEngine } from '@/hooks/game/useGameEngine';
@@ -22,9 +34,20 @@ import { useGameEffects } from '@/hooks/game/useGameEffects';
 import { useMultiplayer } from '@/hooks/game/useMultiplayer';
 import { useRanking } from '@/hooks/useRanking';
 import { useGameContext } from '@/contexts/GameContext';
-import { CardDisplay, sanitizeCardText, detectCardKind, INTERACTIVE_CARD_KINDS, extractMimicaWord } from '@/components/game/CardDisplay';
+import {
+  CardDisplay,
+  sanitizeCardText,
+  detectCardKind,
+  INTERACTIVE_CARD_KINDS,
+  extractMimicaWord,
+} from '@/components/game/CardDisplay';
 import { cultureQuestions, type CultureQuestion } from '@/data/cultureQuestions';
-import { triviaPrimaria, triviaESO, triviaBachillerato, triviaVidaCotidiana } from '@/data/triviaConocimientoContent';
+import {
+  triviaPrimaria,
+  triviaESO,
+  triviaBachillerato,
+  triviaVidaCotidiana,
+} from '@/data/triviaConocimientoContent';
 import { debateTopics } from '@/data/debateTopics';
 import type { RaceRankEntry } from '@/components/game/KahootVoteSession';
 import { detectRarity } from '@/lib/godDeck';
@@ -39,7 +62,9 @@ import { duelosV5b } from '@/data/updatePostVerano2026_v2';
 import { moreTorneoRetos } from '@/data/extraContentIndex';
 
 // Pool de retos de duelo ampliado (base + post-verano + contenido reconectado)
-const DUEL_POOL: string[] = Array.from(new Set([...torneoRetos, ...duelosV5, ...duelosV5b, ...moreTorneoRetos]));
+const DUEL_POOL: string[] = Array.from(
+  new Set([...torneoRetos, ...duelosV5, ...duelosV5b, ...moreTorneoRetos])
+);
 import { YoNuncaResponse } from '@/components/game/YoNuncaResponse';
 import { RetoOutcome } from '@/components/game/RetoOutcome';
 import { useGameMemory, enrichChallengeWithAI } from '@/hooks/game/useGameMemory';
@@ -76,10 +101,9 @@ import { VotingOverlay } from './party/VotingOverlay';
 import { ChromecastModal } from './party/ChromecastModal';
 import { RankingDialog } from './party/RankingDialog';
 import { VirusAlertSheet } from './party/VirusAlertSheet';
+import { getMegamixPhaseMeta, isNoAlcoholMode, setNoAlcoholMode } from '@/utils/megamixExperience';
 
 export { XP };
-
-
 
 interface PartyGameProps {
   mode: GameMode;
@@ -95,8 +119,14 @@ interface PartyGameProps {
   spectatorRoomId?: string | null;
 }
 
-
-export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false, roomId = null, spectatorRoomId: spectatorRoomIdProp = null }: PartyGameProps) {
+export function PartyGame({
+  mode,
+  onExit,
+  isMultiplayer = false,
+  isHost = false,
+  roomId = null,
+  spectatorRoomId: spectatorRoomIdProp = null,
+}: PartyGameProps) {
   const {
     currentPlayer,
     players,
@@ -116,7 +146,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     scores,
     setGamesWon,
     gameOver,
-    setGameOver
+    setGameOver,
   } = useGameEngine(mode);
 
   useEffect(() => {
@@ -129,19 +159,28 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
   // Shake to randomize
   useEffect(() => {
     let lastShake = 0;
-    let lastX = 0, lastY = 0, lastZ = 0;
+    let lastX = 0,
+      lastY = 0,
+      lastZ = 0;
     const onMotion = (e: DeviceMotionEvent) => {
       const acc = e.accelerationIncludingGravity;
       if (!acc) return;
       const dx = Math.abs((acc.x ?? 0) - lastX);
       const dy = Math.abs((acc.y ?? 0) - lastY);
       const dz = Math.abs((acc.z ?? 0) - lastZ);
-      lastX = acc.x ?? 0; lastY = acc.y ?? 0; lastZ = acc.z ?? 0;
+      lastX = acc.x ?? 0;
+      lastY = acc.y ?? 0;
+      lastZ = acc.z ?? 0;
       if (dx + dy + dz > 30) {
         const now = Date.now();
         if (now - lastShake > 1500) {
           lastShake = now;
-          const overlayActive = gameState.showTrivia || gameState.showDuel || gameState.showImpostor || gameState.showMimica || gameState.showVoting;
+          const overlayActive =
+            gameState.showTrivia ||
+            gameState.showDuel ||
+            gameState.showImpostor ||
+            gameState.showMimica ||
+            gameState.showVoting;
           if (!overlayActive && !isMultiplayer) {
             handleNextRef.current();
             if (navigator.vibrate) navigator.vibrate(60);
@@ -151,7 +190,14 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     };
     window.addEventListener('devicemotion', onMotion);
     return () => window.removeEventListener('devicemotion', onMotion);
-  }, [gameState.showTrivia, gameState.showDuel, gameState.showImpostor, gameState.showMimica, gameState.showVoting, isMultiplayer]);
+  }, [
+    gameState.showTrivia,
+    gameState.showDuel,
+    gameState.showImpostor,
+    gameState.showMimica,
+    gameState.showVoting,
+    isMultiplayer,
+  ]);
 
   // Improvements State
   const [showTurnBanner, setShowTurnBanner] = useState(false);
@@ -162,9 +208,11 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
   useEffect(() => {
     if (!currentPlayer?.name) return;
-    if (prevPlayerNameRef.current &&
+    if (
+      prevPlayerNameRef.current &&
       prevPlayerNameRef.current !== currentPlayer.name &&
-      players.length > 1) {
+      players.length > 1
+    ) {
       setShowTurnBanner(true);
     }
     prevPlayerNameRef.current = currentPlayer.name;
@@ -187,32 +235,40 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
   // Show Captain Selection dialog at the start (manual pick, not random)
   useEffect(() => {
-    if (players.length > 0 && !gameState.captainId && !gameState.showCaptainSelection && (mode === 'megamix' || mode === 'clasico')) {
-      setGameState(prev => ({ ...prev, showCaptainSelection: true }));
+    if (
+      players.length > 0 &&
+      !gameState.captainId &&
+      !gameState.showCaptainSelection &&
+      (mode === 'megamix' || mode === 'clasico')
+    ) {
+      setGameState((prev) => ({ ...prev, showCaptainSelection: true }));
     }
   }, [players, gameState.captainId, gameState.showCaptainSelection, mode, setGameState]);
 
   const handleAdjustXP = (playerId: string, delta: number) => {
     addScore(playerId, delta);
-    const playerName = players.find(p => p.id === playerId)?.name || 'Jugador';
+    const playerName = players.find((p) => p.id === playerId)?.name || 'Jugador';
 
     // Mejora 4.2: Toast personalizado para XP
-    toast.custom((t) => (
-      <motion.div
-        initial={{ x: 60, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-        exit={{ x: 60, opacity: 0 }}
-        className="flex items-center gap-3 bg-zinc-900 border border-emerald-500/40 px-4 py-3 rounded-2xl shadow-xl"
-      >
-        <span className="text-2xl">{delta > 0 ? '⚡' : '💔'}</span>
-        <div>
-          <p className="text-white font-black text-sm">{playerName}</p>
-          <p className={`font-black text-lg ${delta > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-            {delta > 0 ? `+${delta}` : delta} XP
-          </p>
-        </div>
-      </motion.div>
-    ), { duration: 1200, position: 'top-right' });
+    toast.custom(
+      (t) => (
+        <motion.div
+          initial={{ x: 60, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          exit={{ x: 60, opacity: 0 }}
+          className="flex items-center gap-3 rounded-2xl border border-emerald-500/40 bg-zinc-900 px-4 py-3 shadow-xl"
+        >
+          <span className="text-2xl">{delta > 0 ? '⚡' : '💔'}</span>
+          <div>
+            <p className="text-sm font-black text-white">{playerName}</p>
+            <p className={`text-lg font-black ${delta > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+              {delta > 0 ? `+${delta}` : delta} XP
+            </p>
+          </div>
+        </motion.div>
+      ),
+      { duration: 1200, position: 'top-right' }
+    );
 
     if (delta > 0) sfx.click();
     else vibe(20);
@@ -233,13 +289,11 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     usedQuestionIds,
     setUsedQuestionIds,
     getCurrentContent,
-    getNextPreview
+    getNextPreview,
+    getMegamixPhaseForIndex,
   } = useGameContent(mode, currentIndex, currentPlayer?.name || 'Jugador', players.length, players);
 
-  const {
-    checkDrinkingGame,
-    lastMiniTurnRef
-  } = useDrinkingMicroGames(mode, 1); // players count logic improved
+  const { checkDrinkingGame, lastMiniTurnRef } = useDrinkingMicroGames(mode, 1); // players count logic improved
 
   const {
     playerViruses,
@@ -249,13 +303,16 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     updateViruses,
     checkMegamixSpecialEvents,
     manageMegamixViruses, // Every 5 rounds virus cycle
-    manageMegamixNormas   // Every 3 rounds norma
+    manageMegamixNormas, // Every 3 rounds norma
   } = useGameEffects(mode, players);
 
-  const performTurnAdvance = useCallback((skipPlayerAdvance: boolean = false) => {
-    sfx.whoosh();
-    advanceTurn(skipPlayerAdvance);
-  }, [advanceTurn]);
+  const performTurnAdvance = useCallback(
+    (skipPlayerAdvance: boolean = false) => {
+      sfx.whoosh();
+      advanceTurn(skipPlayerAdvance);
+    },
+    [advanceTurn]
+  );
 
   // --- TRACKING DATA for Classifications ---
   const [voteCounts, setVoteCounts] = useState<Record<string, number>>({});
@@ -268,18 +325,55 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
   // posibilidades de que alguien haga captura y lo comparta fuera del grupo.
   const podiumPrivateFor = useMemo(() => {
     if (!showPodium || players.length < 2) return undefined;
-    const podiumPlayers = players.map(p => ({ id: p.id, name: p.name, score: scores[p.id] || 0 }));
-    const awards = computePartyAwards(podiumPlayers, { voteCounts, drinkCounts, virusReceived, skipCounts });
-    const map: Record<string, { kind: 'award'; emoji: string; title: string; subtitle: string; stat?: string; accent: string }> = {};
+    const podiumPlayers = players.map((p) => ({
+      id: p.id,
+      name: p.name,
+      score: scores[p.id] || 0,
+    }));
+    const awards = computePartyAwards(podiumPlayers, {
+      voteCounts,
+      drinkCounts,
+      virusReceived,
+      skipCounts,
+    });
+    const map: Record<
+      string,
+      {
+        kind: 'award';
+        emoji: string;
+        title: string;
+        subtitle: string;
+        stat?: string;
+        accent: string;
+      }
+    > = {};
     for (const p of players) {
-      const award = awards.find(a => a.playerId === p.id);
-      if (award) map[p.name] = { kind: 'award', emoji: award.emoji, title: award.title, subtitle: award.subtitle, stat: award.stat, accent: award.accent };
+      const award = awards.find((a) => a.playerId === p.id);
+      if (award)
+        map[p.name] = {
+          kind: 'award',
+          emoji: award.emoji,
+          title: award.title,
+          subtitle: award.subtitle,
+          stat: award.stat,
+          accent: award.accent,
+        };
     }
     return map;
   }, [showPodium, players, scores, voteCounts, drinkCounts, virusReceived, skipCounts]);
 
   // --- AI MEMORY SYSTEM ---
-  const { events: gameEvents, playerStats, addEvent, addEvents, trackDrink: memoryTrackDrink, hasAiCard, peekAiCard, consumeAiCard, getMemorySummary } = useGameMemory(players);
+  const {
+    events: gameEvents,
+    playerStats,
+    addEvent,
+    addEvents,
+    trackDrink: memoryTrackDrink,
+    hasAiCard,
+    peekAiCard,
+    consumeAiCard,
+    getMemorySummary,
+  } = useGameMemory(players);
   const [showYoNuncaResponse, setShowYoNuncaResponse] = useState(false);
   const [showRetoOutcome, setShowRetoOutcome] = useState(false);
   const [aiCardOverride, setAiCardOverride] = useState<string | null>(null);
@@ -308,13 +402,13 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
   // Helper: track a vote for a player
   const trackVote = (playerId: string) => {
-    setVoteCounts(prev => ({ ...prev, [playerId]: (prev[playerId] || 0) + 1 }));
+    setVoteCounts((prev) => ({ ...prev, [playerId]: (prev[playerId] || 0) + 1 }));
     sfx.click();
     vibe(5);
   };
-  // Helper: track a drink for a player  
+  // Helper: track a drink for a player
   const trackDrink = (playerId: string) => {
-    setDrinkCounts(prev => ({ ...prev, [playerId]: (prev[playerId] || 0) + 1 }));
+    setDrinkCounts((prev) => ({ ...prev, [playerId]: (prev[playerId] || 0) + 1 }));
     memoryTrackDrink(playerId, 1); // Alimentar memoria IA
     sfx.click();
     vibe(5);
@@ -337,80 +431,116 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         if (remoteState.gameState) setGameState(remoteState.gameState);
         if (remoteState.currentQuestion) setCurrentQuestion(remoteState.currentQuestion);
       }
-    }, (action) => {
+    },
+    (action) => {
       // Host Logic: Receive Action from Guest
       if (isHost && action) {
         if (action.type === 'YO_NUNCA_VOTE') {
           const { phase, votes } = action.payload;
           if (phase === 'truth_phase') {
-            setGameState(prev => ({ ...prev, yoNuncaTruthVotes: { ...prev.yoNuncaTruthVotes, ...votes } }));
+            setGameState((prev) => ({
+              ...prev,
+              yoNuncaTruthVotes: { ...prev.yoNuncaTruthVotes, ...votes },
+            }));
           } else if (phase === 'guess_phase') {
-            setGameState(prev => ({ ...prev, yoNuncaGuessVotes: { ...prev.yoNuncaGuessVotes, ...votes } }));
+            setGameState((prev) => ({
+              ...prev,
+              yoNuncaGuessVotes: { ...prev.yoNuncaGuessVotes, ...votes },
+            }));
           }
         } else if (action.type === 'YO_NUNCA_PHASE_CHANGE') {
-          setGameState(prev => ({ ...prev, yoNuncaEquiposPhase: action.payload.phase }));
+          setGameState((prev) => ({ ...prev, yoNuncaEquiposPhase: action.payload.phase }));
         }
       }
-    });
+    }
+  );
 
   // Effect: Parse NORMA from content for Clasico/Megamix — auto-skip the card
   const normaAutoAdvanceRef = useRef(false);
   useEffect(() => {
     const txt = getCurrentContent();
-    const isOverlayActive = gameState.showVirusAlert || gameState.showTrivia || gameState.showDuel ||
-      gameState.showImpostor || gameState.showMimica;
+    const isOverlayActive =
+      gameState.showVirusAlert ||
+      gameState.showTrivia ||
+      gameState.showDuel ||
+      gameState.showImpostor ||
+      gameState.showMimica;
 
-    if (!isOverlayActive && typeof txt === 'string' && (txt.toUpperCase().startsWith('NORMA:') || txt.toUpperCase().startsWith('NUEVA NORMA:'))) {
+    if (
+      !isOverlayActive &&
+      typeof txt === 'string' &&
+      (txt.toUpperCase().startsWith('NORMA:') || txt.toUpperCase().startsWith('NUEVA NORMA:'))
+    ) {
       const rule = txt.split(':')[1]?.trim() || txt;
-      
+
       // Prevent infinite loop: Only update state if the norma actually changed
       if (gameState.currentNorma !== rule) {
-        setGameState(prev => ({
+        setGameState((prev) => ({
           ...prev,
           currentNorma: rule,
           showNormaGlobal: true,
-          currentNormaTurnsRemaining: (players.length > 0 ? players.length * 2 : 10)
+          currentNormaTurnsRemaining: players.length > 0 ? players.length * 2 : 10,
         }));
-        toast.success("¡Nueva Norma Activa!", { description: rule, duration: 4000 });
+        toast.success('¡Nueva Norma Activa!', { description: rule, duration: 4000 });
       }
-      
+
       if (!normaAutoAdvanceRef.current) {
         normaAutoAdvanceRef.current = true;
         const timer = setTimeout(() => {
           normaAutoAdvanceRef.current = false;
           performTurnAdvance(true);
         }, 3000); // Give players 3 seconds to read it
-        
-        // BUG FIX: Do NOT reset the ref in the cleanup, otherwise any re-render 
+
+        // BUG FIX: Do NOT reset the ref in the cleanup, otherwise any re-render
         // resets the flag, causing another timer + state update = infinite loop!
-        return () => { clearTimeout(timer); };
+        return () => {
+          clearTimeout(timer);
+        };
       }
     }
-  }, [currentIndex, isHost, mode, getCurrentContent, setGameState, performTurnAdvance, players.length,
-    gameState.showVirusAlert, gameState.showTrivia, gameState.showDuel,
-    gameState.showImpostor, gameState.showMimica, gameState.currentNorma]);
+  }, [
+    currentIndex,
+    isHost,
+    mode,
+    getCurrentContent,
+    setGameState,
+    performTurnAdvance,
+    players.length,
+    gameState.showVirusAlert,
+    gameState.showTrivia,
+    gameState.showDuel,
+    gameState.showImpostor,
+    gameState.showMimica,
+    gameState.currentNorma,
+  ]);
 
   const hasInitializedRound1 = useRef(false);
   // Trigger: Ronda 1 Norma Global + Virus Assignment (Robust Unified Sync)
   useEffect(() => {
-    if (mode === 'megamix' && gameState.round === 1 && currentIndex === 0 && !hasInitializedRound1.current && players.length > 0) {
+    if (
+      mode === 'megamix' &&
+      gameState.round === 1 &&
+      currentIndex === 0 &&
+      !hasInitializedRound1.current &&
+      players.length > 0
+    ) {
       hasInitializedRound1.current = true;
 
       // Get the virus first to include it in the single state update
       const randomVirus = applyRandomVirus(true);
 
-      setGameState(prev => ({
+      setGameState((prev) => ({
         ...prev,
         showNormaGlobal: true,
-        currentNorma: "Prohibido decir nombres de jugadores",
+        currentNorma: 'Prohibido decir nombres de jugadores',
         currentNormaTurnsRemaining: players.length * 2,
         // Integrate virus if assigned
         showVirusAlert: !!randomVirus,
         virusAlertData: randomVirus,
-        virusPlayerId: randomVirus?.player?.id
+        virusPlayerId: randomVirus?.player?.id,
       }));
 
-      toast.info("¡RONDA 1: Norma Global + Virus activados!");
+      toast.info('¡RONDA 1: Norma Global + Virus activados!');
     }
   }, [gameState.round, currentIndex, mode, applyRandomVirus, players.length, setGameState]);
 
@@ -426,18 +556,27 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         // scores, // need dependency
         currentPlayerId: currentPlayer?.id,
         currentQuestion, // Broadcast current question
-        gameId: game?.id // BROADCAST GAME ID
+        gameId: game?.id, // BROADCAST GAME ID
       });
     }
-  }, [currentIndex, gameState, isHost, isMultiplayer, mode, currentPlayer?.id, currentQuestion, game?.id]);
+  }, [
+    currentIndex,
+    gameState,
+    isHost,
+    isMultiplayer,
+    mode,
+    currentPlayer?.id,
+    currentQuestion,
+    game?.id,
+  ]);
 
   // Round Change Alert
   useEffect(() => {
     if (game?.current_round && game.current_round > 1) {
-      toast("¡Fin de Ronda! Cambia la Norma si es necesario.", {
+      toast('¡Fin de Ronda! Cambia la Norma si es necesario.', {
         description: `Ronda ${game.current_round} comenzando...`,
         duration: 5000,
-        icon: '🔄'
+        icon: '🔄',
       });
     }
   }, [game?.current_round]);
@@ -453,18 +592,32 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
     if (type === 'common' || type === 'rare') return;
 
-    // Avoid double counting? 
+    // Avoid double counting?
     // This effect runs when currentIndex changes.
     // We assume 1 card per index.
 
-    setBrutalCounts(prev => {
-      const stats = prev[currentPlayer.id] || { legendaryDrops: 0, chaosEvents: 0, cursedEvents: 0, virusesReceived: 0 };
+    setBrutalCounts((prev) => {
+      const stats = prev[currentPlayer.id] || {
+        legendaryDrops: 0,
+        chaosEvents: 0,
+        cursedEvents: 0,
+        virusesReceived: 0,
+      };
       const newStats = { ...stats };
       let changed = false;
 
-      if (type === 'legendary') { newStats.legendaryDrops++; changed = true; }
-      if (type === 'chaos') { newStats.chaosEvents++; changed = true; }
-      if (type === 'virus') { newStats.virusesReceived++; changed = true; } // Card-based virus
+      if (type === 'legendary') {
+        newStats.legendaryDrops++;
+        changed = true;
+      }
+      if (type === 'chaos') {
+        newStats.chaosEvents++;
+        changed = true;
+      }
+      if (type === 'virus') {
+        newStats.virusesReceived++;
+        changed = true;
+      } // Card-based virus
       // Cursed? detectRarity doesn't return 'cursed' usually, maybe 'chaos' covers it?
       // If detectRarity returns 'cursed', handle it.
       // Assuming 'chaos' maps to chaosEvents.
@@ -474,21 +627,30 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       }
       return prev;
     });
-
   }, [currentIndex, currentPlayer?.id, currentQuestion, setBrutalCounts]);
 
   const { updateMultiplePlayers, rankings } = useRanking();
 
   const [showChromecastModal, setShowChromecastModal] = useState(false);
-  const [showKahoot, setShowKahoot] = useState<{ active: boolean; mode: 'standard' | 'fastest_finger' | 'speed_race' }>({ active: false, mode: 'standard' });
+  const [showKahoot, setShowKahoot] = useState<{
+    active: boolean;
+    mode: 'standard' | 'fastest_finger' | 'speed_race';
+  }>({ active: false, mode: 'standard' });
   // Trivia de cultura general en carrera: pregunta elegida manualmente (botón del host),
   // independiente de currentQuestion para no interferir con el flujo normal del juego.
   const [speedRaceQuestion, setSpeedRaceQuestion] = useState<CultureQuestion | null>(null);
   // Pool ampliado: cultura general + "sabes más que..." (primaria/ESO/Bachillerato)
   // + información útil del día a día — encaja perfecto con el formato de carrera.
-  const speedRacePool = useMemo(() => [
-    ...cultureQuestions, ...triviaPrimaria, ...triviaESO, ...triviaBachillerato, ...triviaVidaCotidiana,
-  ], []);
+  const speedRacePool = useMemo(
+    () => [
+      ...cultureQuestions,
+      ...triviaPrimaria,
+      ...triviaESO,
+      ...triviaBachillerato,
+      ...triviaVidaCotidiana,
+    ],
+    []
+  );
   const launchSpeedRaceTrivia = useCallback(() => {
     const q = speedRacePool[Math.floor(Math.random() * speedRacePool.length)];
     setSpeedRaceQuestion(q);
@@ -506,7 +668,10 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     teamB: { id: string; name: string }[];
     judge: { id: string; name: string };
   } | null>(null);
-  const [debateVerdict, setDebateVerdict] = useState<{ winner: 'A' | 'B'; judgeName: string } | null>(null);
+  const [debateVerdict, setDebateVerdict] = useState<{
+    winner: 'A' | 'B';
+    judgeName: string;
+  } | null>(null);
 
   const launchDebate = useCallback(() => {
     if (players.length < 3) return; // hacen falta al menos juez + 1 por bando
@@ -514,54 +679,92 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     // (Impostor, Duelo, Trivia, Juego de bebida, Captain Pass, Votación, Virus,
     // Podium, Resumen de ronda, Torneo, etc.) — si no, se solapan visualmente.
     if (
-      gameState.showTrivia || gameState.showDrinkingGame || gameState.showImpostor ||
-      gameState.showDuel || gameState.showVoting || gameState.showCaptainPass ||
-      gameState.showVirusAlert || gameState.showCaptainSelection || gameState.showMimica ||
-      gameState.showImpostorWord || showKahoot.active || showPodium || showRoundSummary ||
-      showYoNuncaResponse || showRetoOutcome || showTorneoRound
+      gameState.showTrivia ||
+      gameState.showDrinkingGame ||
+      gameState.showImpostor ||
+      gameState.showDuel ||
+      gameState.showVoting ||
+      gameState.showCaptainPass ||
+      gameState.showVirusAlert ||
+      gameState.showCaptainSelection ||
+      gameState.showMimica ||
+      gameState.showImpostorWord ||
+      showKahoot.active ||
+      showPodium ||
+      showRoundSummary ||
+      showYoNuncaResponse ||
+      showRetoOutcome ||
+      showTorneoRound
     ) {
       return;
     }
-    const { topic, aFavorHints, enContraHints } = debateTopics[Math.floor(Math.random() * debateTopics.length)];
+    const { topic, aFavorHints, enContraHints } =
+      debateTopics[Math.floor(Math.random() * debateTopics.length)];
     // El juez sale de entre quienes NO son el capitán/anfitrión de turno —
     // excluido de entrada del pool, así no hace falta re-sortear. El resto
     // de jugadores (sin contar al juez) se reparte en los dos bandos.
     const excludedId = gameState.captainId || currentPlayer?.id || null;
-    const judgePool = players.filter(p => p.id !== excludedId);
+    const judgePool = players.filter((p) => p.id !== excludedId);
     const pool = judgePool.length > 0 ? judgePool : players;
     const judgeRaw = pool[Math.floor(Math.random() * pool.length)];
     const judge = { id: judgeRaw.id, name: judgeRaw.name };
-    const remaining = players.filter(p => p.id !== judge.id);
+    const remaining = players.filter((p) => p.id !== judge.id);
     const shuffled = [...remaining].sort(() => Math.random() - 0.5);
     const half = Math.ceil(shuffled.length / 2);
-    const teamA = shuffled.slice(0, half).map(p => ({ id: p.id, name: p.name }));
-    const teamB = shuffled.slice(half).map(p => ({ id: p.id, name: p.name }));
+    const teamA = shuffled.slice(0, half).map((p) => ({ id: p.id, name: p.name }));
+    const teamB = shuffled.slice(half).map((p) => ({ id: p.id, name: p.name }));
     setDebateVerdict(null);
     setDebateSession({ topic, aFavorHints, enContraHints, teamA, teamB, judge });
   }, [
-    players, gameState.captainId, currentPlayer, gameState.showTrivia, gameState.showDrinkingGame,
-    gameState.showImpostor, gameState.showDuel, gameState.showVoting, gameState.showCaptainPass,
-    gameState.showVirusAlert, gameState.showCaptainSelection, gameState.showMimica,
-    gameState.showImpostorWord, showKahoot.active, showPodium, showRoundSummary,
-    showYoNuncaResponse, showRetoOutcome, showTorneoRound,
+    players,
+    gameState.captainId,
+    currentPlayer,
+    gameState.showTrivia,
+    gameState.showDrinkingGame,
+    gameState.showImpostor,
+    gameState.showDuel,
+    gameState.showVoting,
+    gameState.showCaptainPass,
+    gameState.showVirusAlert,
+    gameState.showCaptainSelection,
+    gameState.showMimica,
+    gameState.showImpostorWord,
+    showKahoot.active,
+    showPodium,
+    showRoundSummary,
+    showYoNuncaResponse,
+    showRetoOutcome,
+    showTorneoRound,
   ]);
 
   // Usado tanto para ocultar el botón "Debate" como para bloquear launchDebate:
   // evita que el host dispare un debate mientras cualquier otro overlay a
   // pantalla completa ya está activo (causa real de solapamientos en móvil).
-  const isAnyFullscreenOverlayActive = (
-    gameState.showTrivia || gameState.showDrinkingGame || gameState.showImpostor ||
-    gameState.showDuel || gameState.showVoting || gameState.showCaptainPass ||
-    gameState.showVirusAlert || gameState.showCaptainSelection || gameState.showMimica ||
-    gameState.showImpostorWord || showKahoot.active || showPodium || showRoundSummary ||
-    showYoNuncaResponse || showRetoOutcome || showTorneoRound
-  );
+  const isAnyFullscreenOverlayActive =
+    gameState.showTrivia ||
+    gameState.showDrinkingGame ||
+    gameState.showImpostor ||
+    gameState.showDuel ||
+    gameState.showVoting ||
+    gameState.showCaptainPass ||
+    gameState.showVirusAlert ||
+    gameState.showCaptainSelection ||
+    gameState.showMimica ||
+    gameState.showImpostorWord ||
+    showKahoot.active ||
+    showPodium ||
+    showRoundSummary ||
+    showYoNuncaResponse ||
+    showRetoOutcome ||
+    showTorneoRound;
 
   // Siempre tenemos un room ID para que los espectadores puedan unirse, incluso en local.
   // Prioridad: roomId real de multijugador > el que ya se generó en PlayerSetup (sala de
   // espera, para que quien escaneó el QR antes de empezar no tenga que volver a escanear) >
   // uno nuevo como último recurso.
-  const spectatorRoomId = useRef<string>(roomId || spectatorRoomIdProp || Math.random().toString(36).substring(2, 8).toUpperCase()).current;
+  const spectatorRoomId = useRef<string>(
+    roomId || spectatorRoomIdProp || Math.random().toString(36).substring(2, 8).toUpperCase()
+  ).current;
 
   // Save game to history
   const hasSavedRef = useRef(false);
@@ -576,10 +779,12 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       const gameId = crypto.randomUUID();
 
       // Determine Winner
-      const sorted = players.map(p => ({
-        ...p,
-        score: scores[p.id] || 0
-      })).sort((a, b) => b.score - a.score);
+      const sorted = players
+        .map((p) => ({
+          ...p,
+          score: scores[p.id] || 0,
+        }))
+        .sort((a, b) => b.score - a.score);
       const winner = sorted[0];
 
       const newGame = {
@@ -587,8 +792,8 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         mode: mode,
         created_at: new Date().toISOString(),
         status: 'finished',
-        players: players.map(p => p.name),
-        winner: winner ? winner.name : null
+        players: players.map((p) => p.name),
+        winner: winner ? winner.name : null,
       };
 
       const updatedHistory = [newGame, ...history].slice(0, 50);
@@ -596,14 +801,16 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
       // Update Hall of Fame stats (Persistent Local + Cloud if configured)
       if (players.length > 0) {
-        await updateMultiplePlayers(players.map(p => ({
-          name: p.name,
-          score: scores[p.id] || 0,
-          won: winner && p.id === winner.id,
-          avatarUrl: p.avatar_url ?? undefined,
-          gameMode: mode,
-          brutalMeta: brutalCounts ? brutalCounts[p.id] : undefined
-        })));
+        await updateMultiplePlayers(
+          players.map((p) => ({
+            name: p.name,
+            score: scores[p.id] || 0,
+            won: winner && p.id === winner.id,
+            avatarUrl: p.avatar_url ?? undefined,
+            gameMode: mode,
+            brutalMeta: brutalCounts ? brutalCounts[p.id] : undefined,
+          }))
+        );
       }
       // ... (existing local logic is fine, handled by useGameEngine implicitly for scores)
 
@@ -614,7 +821,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           mode: mode,
           status: 'finished',
           created_at: new Date().toISOString(),
-          // current_round: 1, 
+          // current_round: 1,
           // current_turn: currentIndex
         });
 
@@ -622,48 +829,48 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
         // 2. Update Player Stats & Rankings
         // We need to upsert players based on name (or ID if we had auth).
-        // Since we don't have auth, we might just track "Anonymous" stats or skip personalized stats 
+        // Since we don't have auth, we might just track "Anonymous" stats or skip personalized stats
         // unless we have a consistent ID.
         // For now, let's just log the game for "Global Total" purposes?
         // User asked for: "clasificacion general total de usuarios"
         // We can try to upsert into `player_rankings` if it was a table, but it's a view.
         // We need to insert into `players` table linked to the game.
 
-        // Actually, `player_rankings` view aggregates data from `players` table? 
+        // Actually, `player_rankings` view aggregates data from `players` table?
         // Let's check schema. `player_rankings` seems to be a view based on... wait, it allows Insert/Update in types?
         // If it's a view, we should be inserting into `players` and `games`.
 
         // Let's assume `player_rankings` is a table for this bespoke app based on the types provided.
         // If it fails, we fall back.
 
-        const updates = players.map(p => ({
+        const updates = players.map((p) => ({
           player_name: p.name,
-          total_score: (localStorage.getItem('partyGameScores') ? JSON.parse(localStorage.getItem('partyGameScores')!)[p.id] : 0), // This is total cumulative? Or current game?
+          total_score: localStorage.getItem('partyGameScores')
+            ? JSON.parse(localStorage.getItem('partyGameScores')!)[p.id]
+            : 0, // This is total cumulative? Or current game?
           // We want to ADD to their score.
-          // Complex without backend logic. 
+          // Complex without backend logic.
           // Let's just try to insert into `games` for now to track "Total Games Played" globally.
         }));
 
         // better approach: Just record the game in 'games' table is enough for "Global Activity".
-        // For "Leaderboard", we need to increment scores. 
+        // For "Leaderboard", we need to increment scores.
         // Since we can't easily increment without a function, let's skip complex leaderboard sync for this iteration
         // and just ensure the Game itself is recorded.
       }
-
     } catch (e) {
       console.error('Error saving game history', e);
     }
   };
 
-
   const handleAIUpdate = (newContent: string, newType: any) => {
-    setGameState(prev => ({
+    setGameState((prev) => ({
       ...prev,
       currentCard: {
         ...prev.currentCard,
         content: newContent,
-        type: newType || 'common'
-      }
+        type: newType || 'common',
+      },
     }));
   };
 
@@ -673,49 +880,67 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     if (onExit) onExit();
   };
 
-
   // ── ANTI-TAP ACCIDENTAL ─────────────────────────────────────────────────────
   const lastTapRef = useRef<number>(0);
   const isProcessingRef = useRef<boolean>(false);
 
   // ── HANDLER: YO NUNCA response confirmed ──────────────────────────────────
-  const handleYoNuncaConfirm = useCallback((didItIds: string[]) => {
-    setShowYoNuncaResponse(false);
-    const cardText = getCurrentContent();
-    // Track each player who said yes
-    const allIds = players.map(p => p.id);
-    const noIds = allIds.filter(id => !didItIds.includes(id));
-    if (didItIds.length > 0) {
-      addEvents('yo_nunca_yes', didItIds, typeof cardText === 'string' ? cardText : '', gameState.round);
-      didItIds.forEach(id => {
-        const p = players.find(pl => pl.id === id);
-        if (p) addScore(p.id, XP.YO_NUNCA_YES);
+  const handleYoNuncaConfirm = useCallback(
+    (didItIds: string[]) => {
+      setShowYoNuncaResponse(false);
+      const cardText = getCurrentContent();
+      // Track each player who said yes
+      const allIds = players.map((p) => p.id);
+      const noIds = allIds.filter((id) => !didItIds.includes(id));
+      if (didItIds.length > 0) {
+        addEvents(
+          'yo_nunca_yes',
+          didItIds,
+          typeof cardText === 'string' ? cardText : '',
+          gameState.round
+        );
+        didItIds.forEach((id) => {
+          const p = players.find((pl) => pl.id === id);
+          if (p) addScore(p.id, XP.YO_NUNCA_YES);
+        });
+      }
+      noIds.forEach((id) => {
+        const p = players.find((pl) => pl.id === id);
+        if (p) addScore(p.id, XP.YO_NUNCA_NO);
       });
-    }
-    noIds.forEach(id => {
-      const p = players.find(pl => pl.id === id);
-      if (p) addScore(p.id, XP.YO_NUNCA_NO);
-    });
-    performTurnAdvance(true); // global card → no player advance
-  }, [getCurrentContent, addEvents, gameState.round, players, addScore, performTurnAdvance]);
+      performTurnAdvance(true); // global card → no player advance
+    },
+    [getCurrentContent, addEvents, gameState.round, players, addScore, performTurnAdvance]
+  );
 
   // ── HANDLER: Reto outcome ───────────────────────────────────────────────
-  const handleRetoOutcome = useCallback((completed: boolean) => {
-    setShowRetoOutcome(false);
-    setEnrichedCardText(null);
-    const cardText = getCurrentContent();
-    if (currentPlayer) {
-      addEvent(completed ? 'reto_done' : 'reto_fail', currentPlayer, typeof cardText === 'string' ? cardText : '', gameState.round);
-      if (completed) {
-        addScore(currentPlayer.id, XP.RETO_DONE);
-        toast.success(`✓ ${currentPlayer.name} lo ha completado — +${XP.RETO_DONE} XP · reparte 2 tragos 👑`, { duration: 2000 });
-      } else {
-        addScore(currentPlayer.id, XP.RETO_FAIL);
-        toast(`✗ ${currentPlayer.name} no lo ha completado — bebe 3 🍻`, { duration: 2000 });
+  const handleRetoOutcome = useCallback(
+    (completed: boolean) => {
+      setShowRetoOutcome(false);
+      setEnrichedCardText(null);
+      const cardText = getCurrentContent();
+      if (currentPlayer) {
+        addEvent(
+          completed ? 'reto_done' : 'reto_fail',
+          currentPlayer,
+          typeof cardText === 'string' ? cardText : '',
+          gameState.round
+        );
+        if (completed) {
+          addScore(currentPlayer.id, XP.RETO_DONE);
+          toast.success(
+            `✓ ${currentPlayer.name} lo ha completado — +${XP.RETO_DONE} XP · reparte 2 tragos 👑`,
+            { duration: 2000 }
+          );
+        } else {
+          addScore(currentPlayer.id, XP.RETO_FAIL);
+          toast(`✗ ${currentPlayer.name} no lo ha completado — bebe 3 🍻`, { duration: 2000 });
+        }
       }
-    }
-    performTurnAdvance(false); // individual card → advance player
-  }, [getCurrentContent, addEvent, gameState.round, currentPlayer, addScore, performTurnAdvance]);
+      performTurnAdvance(false); // individual card → advance player
+    },
+    [getCurrentContent, addEvent, gameState.round, currentPlayer, addScore, performTurnAdvance]
+  );
 
   const handleNext = () => {
     // Debounce: ignora taps en menos de 400ms
@@ -724,7 +949,9 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     if (isProcessingRef.current) return;
     lastTapRef.current = now;
     isProcessingRef.current = true;
-    setTimeout(() => { isProcessingRef.current = false; }, 400);
+    setTimeout(() => {
+      isProcessingRef.current = false;
+    }, 400);
 
     sfx.click();
     vibe(10);
@@ -746,7 +973,10 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     } else {
       isGlobal =
         currentQuestion?.type === 'yo_nunca' ||
-        (typeof cardText === 'string' && (cardText.toUpperCase().includes('NORMA:') || cardText.toUpperCase().includes('NUEVA NORMA:') || cardText.startsWith('TRIGGER:')));
+        (typeof cardText === 'string' &&
+          (cardText.toUpperCase().includes('NORMA:') ||
+            cardText.toUpperCase().includes('NUEVA NORMA:') ||
+            cardText.startsWith('TRIGGER:')));
     }
 
     // ── Intercepción de IA en Megamix para cartas individuales ────────────
@@ -762,9 +992,11 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         if (!txt.startsWith('⚔️')) {
           setShowRetoOutcome(true);
         }
-        enrichChallengeWithAI(txt, currentPlayer, players, playerStats, gameEvents).then(enriched => {
-          if (enriched && enriched !== txt) setEnrichedCardText(enriched);
-        });
+        enrichChallengeWithAI(txt, currentPlayer, players, playerStats, gameEvents).then(
+          (enriched) => {
+            if (enriched && enriched !== txt) setEnrichedCardText(enriched);
+          }
+        );
         return;
       }
     }
@@ -772,7 +1004,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     respondedCardRef.current = -1; // reset for next card
 
     // Global Reset of all potential "active overlay" flags to prevent ghost states
-    setGameState(prev => ({
+    setGameState((prev) => ({
       ...prev,
       showTrivia: false,
       showDrinkingGame: false,
@@ -786,7 +1018,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       showImpostorWarning: false,
       showBocaCerrada: false,
       currentBocaCerrada: null,
-      votingSelections: []
+      votingSelections: [],
     }));
 
     // Check specific game modes first
@@ -816,24 +1048,28 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         // 2. Periodic events (Normas/Viruses) - Priority 1
         const virusCycleEvent = manageMegamixViruses(gameState.round);
         if (virusCycleEvent) {
-          setGameState(prev => ({ ...prev, showVirusCycleAlert: true, virusCycleData: virusCycleEvent }));
+          setGameState((prev) => ({
+            ...prev,
+            showVirusCycleAlert: true,
+            virusCycleData: virusCycleEvent,
+          }));
           return; // STOP: wait for user to accept cycle event
         }
 
         // --- MEJORA: CAPTAIN DECISION RANDOM CHANCE ---
         if (Math.random() < 0.15 && players.length > 2) {
-          setGameState(prev => ({ ...prev, showCaptainDecision: true }));
+          setGameState((prev) => ({ ...prev, showCaptainDecision: true }));
           return; // STOP: wait for captain decision
         }
 
         const normaCycleEvent = manageMegamixNormas(gameState.round);
         if (normaCycleEvent) {
-          setGameState(prev => ({
+          setGameState((prev) => ({
             ...prev,
             showVirusCycleAlert: true,
             virusCycleData: normaCycleEvent,
             currentNorma: normaCycleEvent.message,
-            currentNormaTurnsRemaining: normaCycleEvent.duration
+            currentNormaTurnsRemaining: normaCycleEvent.duration,
           }));
           return; // STOP: wait for user to accept cycle event
         }
@@ -842,21 +1078,23 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       // 3. Apply Random Virus from current card - Priority 2
       const virusResult = applyRandomVirus();
       if (virusResult) {
-        setGameState(prev => ({ ...prev, showVirusAlert: true, virusAlertData: virusResult }));
+        setGameState((prev) => ({ ...prev, showVirusAlert: true, virusAlertData: virusResult }));
         return; // STOP: wait for user to accept virus
       }
 
       // Check Megamix special events
-      if (checkMegamixSpecialEvents(
-        currentIndex,
-        gameState.round,
-        currentPlayer,
-        usedQuestionIds,
-        setCurrentQuestion,
-        setUsedQuestionIds,
-        setGameState,
-        lastMiniTurnRef
-      )) {
+      if (
+        checkMegamixSpecialEvents(
+          currentIndex,
+          gameState.round,
+          currentPlayer,
+          usedQuestionIds,
+          setCurrentQuestion,
+          setUsedQuestionIds,
+          setGameState,
+          lastMiniTurnRef
+        )
+      ) {
         performTurnAdvance(isGlobal);
         return;
       }
@@ -872,11 +1110,22 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       const n = gameState.currentNorma;
       if (n) localStorage.setItem('beep_active_norma', n);
       else localStorage.removeItem('beep_active_norma');
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }, [gameState.currentNorma]);
 
   // Al desmontar la partida, limpia el rastro de norma.
-  useEffect(() => () => { try { localStorage.removeItem('beep_active_norma'); } catch { /* ignore */ } }, []);
+  useEffect(
+    () => () => {
+      try {
+        localStorage.removeItem('beep_active_norma');
+      } catch {
+        /* ignore */
+      }
+    },
+    []
+  );
 
   // Bug 6/8: NORMA - Auto turn advance logic (Megamix)
   // handleNext se recrea en cada render; lo leemos de un ref para que este timer
@@ -887,11 +1136,21 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     if (mode !== 'megamix' || !gameState.currentNorma) return;
 
     // Bug 8: Guard against overlays - Do not skip if an interaction is pending
-    if (gameState.showVirusAlert || gameState.showTrivia || gameState.showVoting ||
-      gameState.showDuel || gameState.showImpostor || gameState.showMimica ||
-      gameState.showImpostorWord) return;
+    if (
+      gameState.showVirusAlert ||
+      gameState.showTrivia ||
+      gameState.showVoting ||
+      gameState.showDuel ||
+      gameState.showImpostor ||
+      gameState.showMimica ||
+      gameState.showImpostorWord
+    )
+      return;
 
-    if (gameState.currentNorma.includes('AVANCE AUTOMÁTICO') || gameState.currentNorma.includes('AUTO-SKIP')) {
+    if (
+      gameState.currentNorma.includes('AVANCE AUTOMÁTICO') ||
+      gameState.currentNorma.includes('AUTO-SKIP')
+    ) {
       const timer = setTimeout(() => {
         // Bug 6: Ensure we are still on the same card before skipping
         if (!gameState.showVirusAlert && !gameState.showTrivia) {
@@ -900,9 +1159,17 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       }, 5000);
       return () => clearTimeout(timer);
     }
-  }, [gameState.currentNorma, gameState.showVirusAlert, gameState.showTrivia, gameState.showVoting,
-  gameState.showDuel, gameState.showImpostor, gameState.showMimica,
-  gameState.showImpostorWord, mode]);
+  }, [
+    gameState.currentNorma,
+    gameState.showVirusAlert,
+    gameState.showTrivia,
+    gameState.showVoting,
+    gameState.showDuel,
+    gameState.showImpostor,
+    gameState.showMimica,
+    gameState.showImpostorWord,
+    mode,
+  ]);
 
   // Rarity calculation for CardDisplay
   const rawText = enrichedCardText || aiCardOverride || getCurrentContent();
@@ -910,13 +1177,13 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     if (!rawText || typeof rawText !== 'string') return rawText;
     if (!currentPlayer || players.length === 0) return rawText;
     let result = rawText;
-    
+
     // Replace {player} and {player1} with current player's name
     result = result.replace(/{player}/g, currentPlayer.name);
     result = result.replace(/{player1}/g, currentPlayer.name);
-    
+
     // Filter out the current player to get other players for random selections
-    const otherPlayers = players.filter(p => p.id !== currentPlayer.id);
+    const otherPlayers = players.filter((p) => p.id !== currentPlayer.id);
     if (otherPlayers.length > 0) {
       // Reemplazo secuencial: {player2}, {player3}, etc. con los otros jugadores
       otherPlayers.forEach((other, index) => {
@@ -934,9 +1201,10 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     return result;
   }, [rawText, currentPlayer, players]);
 
-  const safeCurrentText = (currentText && currentText !== 'Siguiente carta' && currentText !== 'Cargando pregunta...')
-    ? currentText
-    : '';
+  const safeCurrentText =
+    currentText && currentText !== 'Siguiente carta' && currentText !== 'Cargando pregunta...'
+      ? currentText
+      : '';
   const rarity = aiCardOverride ? 'legendary' : detectRarity(currentText);
 
   // Auto-Kahoot: ciertas cartas (votación, trivia express) tienen más sentido
@@ -975,7 +1243,8 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
   const getMemorySummaryRef = useRef(getMemorySummary);
   getMemorySummaryRef.current = getMemorySummary;
   useEffect(() => {
-    if (!currentText || currentText === 'Siguiente carta' || currentText === 'Cargando pregunta...') return;
+    if (!currentText || currentText === 'Siguiente carta' || currentText === 'Cargando pregunta...')
+      return;
 
     // 1. Check for explicit TRIGGERS (Megamix)
     if (currentText.startsWith('TRIGGER:')) {
@@ -986,10 +1255,10 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
       if (triggerType === 'TRIVIA_FUTBOL') {
         loadSpecificQuestion?.('futbol');
-        setGameState(prev => ({ ...prev, showTrivia: true }));
+        setGameState((prev) => ({ ...prev, showTrivia: true }));
       } else if (triggerType === 'TRIVIA_CULTURA') {
         loadSpecificQuestion?.('cultura');
-        setGameState(prev => ({ ...prev, showTrivia: true }));
+        setGameState((prev) => ({ ...prev, showTrivia: true }));
       } else if (triggerType === 'VIRUS') {
         // BUG 4: Don't fire virus alerts before round 3
         if (gameState.round < 3) {
@@ -998,15 +1267,15 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         }
         const virusResult = applyRandomVirus(true);
         if (virusResult) {
-          setGameState(prev => ({ ...prev, showVirusAlert: true, virusAlertData: virusResult }));
+          setGameState((prev) => ({ ...prev, showVirusAlert: true, virusAlertData: virusResult }));
         }
       } else if (triggerType === 'DUELO') {
         // BUG 3: Handle DUELO triggers from deck cards
         if (players.length >= 2) {
           const randomDuelo = duelos[Math.floor(Math.random() * duelos.length)];
-          const opponents = players.filter(p => p.id !== (currentPlayer?.id || ''));
+          const opponents = players.filter((p) => p.id !== (currentPlayer?.id || ''));
           const opponent = opponents[Math.floor(Math.random() * opponents.length)];
-          setGameState(prev => ({
+          setGameState((prev) => ({
             ...prev,
             showDuel: true,
             currentDuelo: `${randomDuelo.name}: ${randomDuelo.description}`,
@@ -1023,13 +1292,18 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           // se encuentra demasiado rápido — escala a 2 a partir de 7 jugadores.
           const impostorCount = players.length >= 7 ? 2 : 1;
           const shuffled = [...players].sort(() => Math.random() - 0.5);
-          const impostorIds = shuffled.slice(0, impostorCount).map(p => p.id);
-          const impostorPlayer = players.find(p => p.id === impostorIds[0])!;
+          const impostorIds = shuffled.slice(0, impostorCount).map((p) => p.id);
+          const impostorPlayer = players.find((p) => p.id === impostorIds[0])!;
 
           // Reparte el rol+palabra a CADA jugador, por su móvil (ver
           // SpectatorQRPanel → privateFor). Clave = nombre, porque la
           // identidad del espectador en el móvil es por nombre, no por id.
-          const buildPrivateFor = (category: string, realWord: string, fakeWord: string, hint?: string) => {
+          const buildPrivateFor = (
+            category: string,
+            realWord: string,
+            fakeWord: string,
+            hint?: string
+          ) => {
             const map: NonNullable<typeof gameState.impostorPrivateFor> = {};
             for (const p of players) {
               const isImpostor = impostorIds.includes(p.id);
@@ -1044,7 +1318,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
             return map;
           };
 
-          setGameState(prev => ({
+          setGameState((prev) => ({
             ...prev,
             showImpostorWarning: true,
             impostorPlayerIds: impostorIds,
@@ -1057,21 +1331,46 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           }));
 
           if (isGeminiConfigured()) {
-            geminiGenerateImpostorRound().then(result => {
-              if (result) {
-                setGameState(prev => ({
-                  ...prev,
-                  impostorData: {
-                    ...prev.impostorData,
-                    currentImpostorReal: `${result.category}: ${result.word}`,
-                    currentImpostorFake: `${result.category}: ${result.fakeWord} (${result.hint})`,
-                    isLoading: false,
-                  },
-                  impostorPrivateFor: buildPrivateFor(result.category, result.word, result.fakeWord, result.hint),
-                }));
-              } else {
+            geminiGenerateImpostorRound()
+              .then((result) => {
+                if (result) {
+                  setGameState((prev) => ({
+                    ...prev,
+                    impostorData: {
+                      ...prev.impostorData,
+                      currentImpostorReal: `${result.category}: ${result.word}`,
+                      currentImpostorFake: `${result.category}: ${result.hint}`,
+                      isLoading: false,
+                    },
+                    impostorPrivateFor: buildPrivateFor(
+                      result.category,
+                      result.word,
+                      result.fakeWord,
+                      result.hint
+                    ),
+                  }));
+                } else {
+                  const round = impostorRounds[Math.floor(Math.random() * impostorRounds.length)];
+                  setGameState((prev) => ({
+                    ...prev,
+                    impostorData: {
+                      ...prev.impostorData,
+                      currentImpostorReal: round.normalQuestion || round.category || '',
+                      currentImpostorFake: round.impostorQuestion || round.hint || '',
+                      isLoading: false,
+                    },
+                    impostorPrivateFor: buildPrivateFor(
+                      round.category,
+                      round.normalQuestion,
+                      round.impostorQuestion,
+                      round.hint
+                    ),
+                  }));
+                }
+              })
+              .catch(() => {
                 const round = impostorRounds[Math.floor(Math.random() * impostorRounds.length)];
-                setGameState(prev => ({
+                setGameState((prev) => ({
                   ...prev,
                   impostorData: {
                     ...prev.impostorData,
@@ -1079,25 +1378,17 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                     currentImpostorFake: round.impostorQuestion || round.hint || '',
                     isLoading: false,
                   },
-                  impostorPrivateFor: buildPrivateFor(round.category, round.normalQuestion, round.impostorQuestion, round.hint),
+                  impostorPrivateFor: buildPrivateFor(
+                    round.category,
+                    round.normalQuestion,
+                    round.impostorQuestion,
+                    round.hint
+                  ),
                 }));
-              }
-            }).catch(() => {
-              const round = impostorRounds[Math.floor(Math.random() * impostorRounds.length)];
-              setGameState(prev => ({
-                ...prev,
-                impostorData: {
-                  ...prev.impostorData,
-                  currentImpostorReal: round.normalQuestion || round.category || '',
-                  currentImpostorFake: round.impostorQuestion || round.hint || '',
-                  isLoading: false,
-                },
-                impostorPrivateFor: buildPrivateFor(round.category, round.normalQuestion, round.impostorQuestion, round.hint),
-              }));
-            });
+              });
           } else {
             const round = impostorRounds[Math.floor(Math.random() * impostorRounds.length)];
-            setGameState(prev => ({
+            setGameState((prev) => ({
               ...prev,
               impostorData: {
                 ...prev.impostorData,
@@ -1105,7 +1396,12 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                 currentImpostorFake: round.impostorQuestion || round.hint || '',
                 isLoading: false,
               },
-              impostorPrivateFor: buildPrivateFor(round.category, round.normalQuestion, round.impostorQuestion, round.hint),
+              impostorPrivateFor: buildPrivateFor(
+                round.category,
+                round.normalQuestion,
+                round.impostorQuestion,
+                round.hint
+              ),
             }));
           }
         } else {
@@ -1121,7 +1417,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         }
       } else if (triggerType === 'TORNEO') {
         if (players.length >= 2 && !showTorneoRound) {
-          buildTorneoMatch(gameEvents, DUEL_POOL, getMemorySummaryRef.current()).then(match => {
+          buildTorneoMatch(gameEvents, DUEL_POOL, getMemorySummaryRef.current()).then((match) => {
             if (match) {
               setTorneoMatch(match);
               setShowTorneoRound(true);
@@ -1149,16 +1445,29 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         .replace(/NUEVA\s*NORMA:\s*/gi, '')
         .trim();
       if (cleanNorma.length > 5) {
-        setGameState(prev => ({
+        setGameState((prev) => ({
           ...prev,
           currentNorma: cleanNorma,
-          currentNormaTurnsRemaining: players.length * 2
+          currentNormaTurnsRemaining: players.length * 2,
         }));
       }
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps -- gameState solo se lee (round, tipos); depender de él re-ejecutaría el detector en cada cambio de estado
-  }, [currentText, currentIndex, advanceTurn, applyRandomVirus, currentPlayer, players, setGameState, loadSpecificQuestion, showTorneoRound, buildTorneoMatch, gameEvents, setTorneoMatch]);
+  }, [
+    currentText,
+    currentIndex,
+    advanceTurn,
+    applyRandomVirus,
+    currentPlayer,
+    players,
+    setGameState,
+    loadSpecificQuestion,
+    showTorneoRound,
+    buildTorneoMatch,
+    gameEvents,
+    setTorneoMatch,
+  ]);
 
   // ── Inyección de carta IA cada 10 cartas + Auto-Torneo cada 10 turnos ─────
   useEffect(() => {
@@ -1174,7 +1483,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
     // Auto-trigger torneo cada 10 turnos (offset de 5 para no coincidir con la carta IA)
     if (count % 10 === 5 && players.length >= 2 && !showTorneoRound) {
-      buildTorneoMatch(gameEvents, DUEL_POOL, getMemorySummary()).then(match => {
+      buildTorneoMatch(gameEvents, DUEL_POOL, getMemorySummary()).then((match) => {
         if (match) {
           setTorneoMatch(match);
           setShowTorneoRound(true);
@@ -1186,7 +1495,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     if (count % 10 === 8 && gameEvents.length > 0) {
       triggerRoundAnalysis(Math.ceil(count / players.length), gameEvents, playerStats);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentIndex]);
 
   // Show AI round analysis comment as toast
@@ -1201,7 +1510,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     if (mode === 'yo_nunca_equipos' && currentText && gameState.yoNuncaEquiposPhase === 'idle') {
       // [P0 VALIDATION] Ensure we have teams and participants
       if (teams.length < 2) {
-        if (isHost) toast.error("Se necesitan al menos 2 equipos para este modo.");
+        if (isHost) toast.error('Se necesitan al menos 2 equipos para este modo.');
         handleNextRef.current();
         return;
       }
@@ -1209,20 +1518,28 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       // Find team of current player to be the target team
       const targetTeamId = currentPlayer?.team_id;
       if (targetTeamId) {
-        setGameState(prev => ({
+        setGameState((prev) => ({
           ...prev,
           yoNuncaEquiposPhase: 'truth_phase',
           yoNuncaTargetTeamId: targetTeamId,
           yoNuncaTruthVotes: {},
-          yoNuncaGuessVotes: {}
+          yoNuncaGuessVotes: {},
         }));
       } else {
         // [STABILITY] If current player has no team, move on to avoid block
-        console.warn("YoNuncaEquipos: Current player has no team. Skipping.");
+        console.warn('YoNuncaEquipos: Current player has no team. Skipping.');
         handleNextRef.current();
       }
     }
-  }, [mode, currentText, gameState.yoNuncaEquiposPhase, currentPlayer, teams.length, isHost, setGameState]);
+  }, [
+    mode,
+    currentText,
+    gameState.yoNuncaEquiposPhase,
+    currentPlayer,
+    teams.length,
+    isHost,
+    setGameState,
+  ]);
 
   // Handle Virus Expiration Notifications
   const prevVirusesRef = useRef(playerViruses);
@@ -1231,15 +1548,15 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
     const current = playerViruses;
 
     // Find players who had a virus before but don't have it now
-    prev.forEach(oldVirus => {
-      const stillHasVirus = current.some(v => v.playerId === oldVirus.playerId);
+    prev.forEach((oldVirus) => {
+      const stillHasVirus = current.some((v) => v.playerId === oldVirus.playerId);
       if (!stillHasVirus) {
-        const pInfo = players.find(p => p.id === oldVirus.playerId);
+        const pInfo = players.find((p) => p.id === oldVirus.playerId);
         if (pInfo) {
           toast(`¡VIRUS TERMINADO para ${pInfo.name}! 🟢`, {
-            description: "Ya puedes dejar de cumplir el castigo.",
+            description: 'Ya puedes dejar de cumplir el castigo.',
             duration: 8000,
-            icon: '✅'
+            icon: '✅',
           });
         }
       }
@@ -1265,20 +1582,19 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       // Massive UPSERT simulation/logic for all players
       const syncAllPlayers = async () => {
         try {
-          const updates = players.map(p => {
+          const updates = players.map((p) => {
             // Mejora 3: Recuperar XP histórico del ranking local antes de sumar
             const existingRanking = (() => {
               try {
                 const raw = localStorage.getItem('fiesta-party-local-rankings-v1');
                 const all = raw ? JSON.parse(raw) : [];
-                return all.find((r: any) =>
-                  r.player_name?.toLowerCase() === p.name?.toLowerCase()
-                );
-              } catch { return null; }
+                return all.find((r: any) => r.player_name?.toLowerCase() === p.name?.toLowerCase());
+              } catch {
+                return null;
+              }
             })();
 
-            const historicalXP = existingRanking?.total_xp ||
-              existingRanking?.xp || 0;
+            const historicalXP = existingRanking?.total_xp || existingRanking?.xp || 0;
             const sessionXP = scores[p.id] || 0;
 
             return {
@@ -1289,9 +1605,9 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           });
 
           // await supabase.from('profiles').upsert(updates);
-          toast.success("¡Sincronización Cyber-Party Elite completada!");
+          toast.success('¡Sincronización Cyber-Party Elite completada!');
         } catch (err) {
-          console.error("Sync error:", err);
+          console.error('Sync error:', err);
         }
       };
 
@@ -1300,15 +1616,32 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       triggerRoundAnalysis(gameState.round, gameEvents, playerStats);
       setRoundSnapshot({
         round: gameState.round,
-        scores: scores
+        scores: scores,
       });
       setShowRoundSummary(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- cierre de ronda: solo al cambiar ronda/marcador; saveGameToHistory y compañía se recrean en cada render
   }, [gameOver, showRoundSummary, gameState.round, scores, players]);
 
+  // Nuevo estado local para modo sin alcohol y pacto temporal
+  const [noAlcoholMode, setNoAlcoholModeState] = useState(() => isNoAlcoholMode());
+  const [temporaryPactTurns, setTemporaryPactTurns] = useState(0);
+
+  const megamixPhase = mode === 'megamix' ? getMegamixPhaseForIndex() : null;
+  const phaseMeta = megamixPhase ? getMegamixPhaseMeta(megamixPhase) : null;
+  const nextMystery = mode === 'megamix' ? getNextPreview() : null;
+
+  useEffect(() => {
+    if (!safeCurrentText) return;
+    if (/ALIANZA TEMPORAL|EL PACTO/i.test(safeCurrentText)) {
+      setTemporaryPactTurns(2);
+    } else {
+      setTemporaryPactTurns((turns) => Math.max(0, turns - 1));
+    }
+  }, [currentIndex, safeCurrentText]);
+
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col relative overflow-hidden pb-24 md:pb-32">
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-slate-950 pb-24 md:pb-32">
       {/* Dynamic Background */}
       <DynamicBackground rarity={rarity} />
 
@@ -1330,15 +1663,15 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         players={players}
         scores={scores}
         votingSelections={gameState.votingSelections || []}
-        onSelectionsChange={ids => setGameState(prev => ({ ...prev, votingSelections: ids }))}
+        onSelectionsChange={(ids) => setGameState((prev) => ({ ...prev, votingSelections: ids }))}
         canLaunchKahoot={isHost || !isMultiplayer}
         onLaunchKahoot={() => setShowKahoot({ active: true, mode: 'standard' })}
-        onConfirm={ids => {
-          ids.forEach(id => {
+        onConfirm={(ids) => {
+          ids.forEach((id) => {
             handleAdjustXP(id, 5);
             trackVote(id);
           });
-          setGameState(prev => ({ ...prev, votingSelections: [] }));
+          setGameState((prev) => ({ ...prev, votingSelections: [] }));
           handleNext();
         }}
         onSkip={handleNext}
@@ -1352,12 +1685,17 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           Simplificado: se quita "Siguiente" del header (ya existe el botón
           grande de abajo), "Ronda" pasa a una pastilla compacta que no depende
           de cuánto texto quepa, y min-w-0/truncate evitan que nada se salga. */}
-      <header className="p-3 flex items-center gap-1.5 z-10 relative">
-        <Button variant="ghost" size="icon" className="shrink-0" onClick={() => {
-          if (window.confirm("¿Seguro que quieres salir?")) {
-            handleExit();
-          }
-        }}>
+      <header className="relative z-10 flex items-center gap-1.5 p-3">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="shrink-0"
+          onClick={() => {
+            if (window.confirm('¿Seguro que quieres salir?')) {
+              handleExit();
+            }
+          }}
+        >
           <ArrowLeft className="h-6 w-6 text-white/80" />
         </Button>
 
@@ -1365,31 +1703,31 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         <Button
           variant="ghost"
           size="icon"
-          className="shrink-0 bg-primary/10 hover:bg-primary/20 hover:text-white rounded-full transition-all border border-primary/20"
+          className="shrink-0 rounded-full border border-primary/20 bg-primary/10 transition-all hover:bg-primary/20 hover:text-white"
           onClick={() => setShowChromecastModal(true)}
         >
-          <Cast className="h-5 w-5 text-primary-200" />
+          <Cast className="text-primary-200 h-5 w-5" />
         </Button>
 
         {/* Captain Indicator — integrated in header */}
         {gameState.captainId && (
-          <div className="min-w-0 flex-1 flex justify-center">
-            <div className="flex items-center gap-1.5 bg-amber-500/20 border border-amber-500/40 px-3 py-1.5 rounded-full min-w-0">
-              <Crown className="w-3.5 h-3.5 text-amber-400 fill-amber-400 shrink-0" />
-              <span className="text-amber-200 text-xs font-black uppercase tracking-wider truncate">
-                {players.find(p => p.id === gameState.captainId)?.name}
+          <div className="flex min-w-0 flex-1 justify-center">
+            <div className="flex min-w-0 items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/20 px-3 py-1.5">
+              <Crown className="h-3.5 w-3.5 shrink-0 fill-amber-400 text-amber-400" />
+              <span className="truncate text-xs font-black uppercase tracking-wider text-amber-200">
+                {players.find((p) => p.id === gameState.captainId)?.name}
               </span>
             </div>
           </div>
         )}
 
-        <div className="ml-auto flex items-center gap-1.5 shrink-0">
+        <div className="ml-auto flex shrink-0 items-center gap-1.5">
           <Button
             variant="destructive"
             size="sm"
-            className="text-[10px] font-arcade font-black uppercase tracking-wider bg-gradient-to-r from-red-500/10 to-red-600/10 text-red-300 border border-red-500/30 px-2.5"
+            className="font-arcade border border-red-500/30 bg-gradient-to-r from-red-500/10 to-red-600/10 px-2.5 text-[10px] font-black uppercase tracking-wider text-red-300"
             onClick={() => {
-              if (window.confirm("¿Terminar partida y ver resultados?")) {
+              if (window.confirm('¿Terminar partida y ver resultados?')) {
                 setGameOver(true);
                 setShowPodium(true);
               }
@@ -1397,14 +1735,14 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           >
             Finalizar
           </Button>
-          <div className="bg-gradient-to-r from-slate-800/80 to-slate-700/80 backdrop-blur-xl px-2.5 py-1.5 rounded-full border border-white/10 flex items-center gap-1">
+          <div className="flex items-center gap-1 rounded-full border border-white/10 bg-gradient-to-r from-slate-800/80 to-slate-700/80 px-2.5 py-1.5 backdrop-blur-xl">
             <AnimatePresence mode="wait">
               <motion.span
                 key={gameState.round}
                 initial={{ y: 10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: -10, opacity: 0 }}
-                className="font-arcade font-bold text-base text-white"
+                className="font-arcade text-base font-bold text-white"
               >
                 R{gameState.round}
               </motion.span>
@@ -1417,16 +1755,19 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       <ChromecastModal open={showChromecastModal} onOpenChange={setShowChromecastModal} />
 
       {/* Active Norma Display for Megamix (If a rule is active, show it globally) */}
-      {
-        mode === 'megamix' && gameState.showTrivia && currentText && currentText.includes('NORMA ALEATORIA') && (
-          <div className="w-full flex justify-center z-10 -mt-2 mb-2">
-            <div className="bg-gradient-to-r from-red-500/20 to-red-600/20 border border-red-500 text-red-100 px-6 py-2 rounded-full font-bold shadow-[0_0_15px_rgba(239,68,68,0.5)] animate-pulse flex items-center gap-2">
+      {mode === 'megamix' &&
+        gameState.showTrivia &&
+        currentText &&
+        currentText.includes('NORMA ALEATORIA') && (
+          <div className="z-10 -mt-2 mb-2 flex w-full justify-center">
+            <div className="flex animate-pulse items-center gap-2 rounded-full border border-red-500 bg-gradient-to-r from-red-500/20 to-red-600/20 px-6 py-2 font-bold text-red-100 shadow-[0_0_15px_rgba(239,68,68,0.5)]">
               <span>🚨 NORMA ACTIVA:</span>
-              <span className="text-sm font-normal">{typeof currentQuestion?.answer === 'string' ? currentQuestion.answer : ''}</span>
+              <span className="text-sm font-normal">
+                {typeof currentQuestion?.answer === 'string' ? currentQuestion.answer : ''}
+              </span>
             </div>
           </div>
-        )
-      }
+        )}
 
       {/* Captain Indicator — moved to header above */}
 
@@ -1435,79 +1776,118 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           hacía solaparse con el icono de Chromecast y los botones de Finalizar/
           Ronda en pantallas estrechas. Ahora es una segunda fila normal del flujo,
           debajo del header, así nunca pisa nada. */}
-      <div className="w-full flex justify-center px-4 -mt-1 mb-2 relative z-20">
+      <div className="relative z-20 -mt-1 mb-2 flex w-full justify-center px-4">
         <div className="flex items-center gap-2">
           <div
-            className="bg-gradient-to-r from-slate-800/80 to-slate-700/80 px-3 py-1 rounded-full text-xs font-mono text-green-400 border border-green-500/30 flex items-center gap-2 cursor-pointer hover:bg-slate-800/90 hover:border-green-500/60 transition-all"
+            className="flex cursor-pointer items-center gap-2 rounded-full border border-green-500/30 bg-gradient-to-r from-slate-800/80 to-slate-700/80 px-3 py-1 font-mono text-xs text-green-400 transition-all hover:border-green-500/60 hover:bg-slate-800/90"
             onClick={() => copyInviteLink(spectatorRoomId)}
           >
-            <span>{isMultiplayer ? (isHost ? 'HOST' : 'ESPEC') : 'LOCAL'} • SALA: {spectatorRoomId}</span>
-            <Copy className="w-3 h-3 opacity-70" />
+            <span>
+              {isMultiplayer ? (isHost ? 'HOST' : 'ESPEC') : 'LOCAL'} • SALA: {spectatorRoomId}
+            </span>
+            <Copy className="h-3 w-3 opacity-70" />
           </div>
           {(isHost || !isMultiplayer) && (
-            <SpectatorQRPanel 
-              roomId={spectatorRoomId} 
-              currentCard={safeCurrentText} 
-              currentPlayer={currentPlayer?.name || ''} 
-              players={players.map(p => p.name)}
-              privateFor={debateSession ? {
-                [debateSession.judge.name]: { kind: 'judge', topic: debateSession.topic, aFavorHints: debateSession.aFavorHints, enContraHints: debateSession.enContraHints },
-              } : showPodium ? podiumPrivateFor : (gameState.showImpostorWarning || gameState.showImpostor) ? gameState.impostorPrivateFor : mimicaPrivateFor}
-              debateInfo={debateSession ? {
-                topic: debateSession.topic,
-                teamA: debateSession.teamA.map(p => p.name),
-                teamB: debateSession.teamB.map(p => p.name),
-                aFavorHints: debateSession.aFavorHints,
-                enContraHints: debateSession.enContraHints,
-                judgeName: debateSession.judge.name,
-              } : undefined}
+            <SpectatorQRPanel
+              roomId={spectatorRoomId}
+              currentCard={safeCurrentText}
+              currentPlayer={currentPlayer?.name || ''}
+              players={players.map((p) => p.name)}
+              privateFor={
+                debateSession
+                  ? {
+                      [debateSession.judge.name]: {
+                        kind: 'judge',
+                        topic: debateSession.topic,
+                        aFavorHints: debateSession.aFavorHints,
+                        enContraHints: debateSession.enContraHints,
+                      },
+                    }
+                  : showPodium
+                    ? podiumPrivateFor
+                    : gameState.showImpostorWarning || gameState.showImpostor
+                      ? gameState.impostorPrivateFor
+                      : mimicaPrivateFor
+              }
+              debateInfo={
+                debateSession
+                  ? {
+                      topic: debateSession.topic,
+                      teamA: debateSession.teamA.map((p) => p.name),
+                      teamB: debateSession.teamB.map((p) => p.name),
+                      aFavorHints: debateSession.aFavorHints,
+                      enContraHints: debateSession.enContraHints,
+                      judgeName: debateSession.judge.name,
+                    }
+                  : undefined
+              }
               onDebateVerdict={(winner, judgeName) => {
                 if (!debateSession || judgeName !== debateSession.judge.name) return;
                 setDebateVerdict({ winner, judgeName });
               }}
-              kahootConfig={showKahoot.active && !debateSession ? {
-                mode: showKahoot.mode,
-                question: showKahoot.mode === 'speed_race' && speedRaceQuestion
-                  ? speedRaceQuestion.question
-                  : (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion
-                  ? currentQuestion.question
-                  : sanitizeCardText(currentText || ''),
-                options: showKahoot.mode === 'speed_race' && speedRaceQuestion
-                  ? speedRaceQuestion.options
-                  : (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion
-                  ? currentQuestion.options
-                  : players.map(p => p.name),
-                correctAnswer: showKahoot.mode === 'speed_race' && speedRaceQuestion
-                  ? speedRaceQuestion.options[speedRaceQuestion.correctIndex]
-                  : (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion
-                  ? currentQuestion.options[currentQuestion.correctIndex]
-                  : undefined
-              } : null}
+              kahootConfig={
+                showKahoot.active && !debateSession
+                  ? {
+                      mode: showKahoot.mode,
+                      question:
+                        showKahoot.mode === 'speed_race' && speedRaceQuestion
+                          ? speedRaceQuestion.question
+                          : (gameState.showTrivia ||
+                                mode === 'cultura' ||
+                                mode === 'trivia_futbol') &&
+                              currentQuestion
+                            ? currentQuestion.question
+                            : sanitizeCardText(currentText || ''),
+                      options:
+                        showKahoot.mode === 'speed_race' && speedRaceQuestion
+                          ? speedRaceQuestion.options
+                          : (gameState.showTrivia ||
+                                mode === 'cultura' ||
+                                mode === 'trivia_futbol') &&
+                              currentQuestion
+                            ? currentQuestion.options
+                            : players.map((p) => p.name),
+                      correctAnswer:
+                        showKahoot.mode === 'speed_race' && speedRaceQuestion
+                          ? speedRaceQuestion.options[speedRaceQuestion.correctIndex]
+                          : (gameState.showTrivia ||
+                                mode === 'cultura' ||
+                                mode === 'trivia_futbol') &&
+                              currentQuestion
+                            ? currentQuestion.options[currentQuestion.correctIndex]
+                            : undefined,
+                    }
+                  : null
+              }
             />
           )}
           {(isHost || !isMultiplayer) && !showKahoot.active && (
             <button
               onClick={launchSpeedRaceTrivia}
               title="Trivia de cultura general: todos los móviles conectados responden a la vez y se reparten puntos según velocidad de acierto"
-              className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow flex items-center gap-1 hover:brightness-110 transition-all"
+              className="flex items-center gap-1 rounded-full bg-gradient-to-r from-red-500 to-orange-500 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-white shadow transition-all hover:brightness-110"
             >
               ⚡ Trivia en carrera
             </button>
           )}
-          {(isHost || !isMultiplayer) && !showKahoot.active && !debateSession && !isAnyFullscreenOverlayActive && players.length >= 3 && (
-            <button
-              onClick={launchDebate}
-              title="Debate: dos jugadores defienden posturas opuestas de un tema random y el resto vota quién ha ganado"
-              className="bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow flex items-center gap-1 hover:brightness-110 transition-all"
-            >
-              🗣️ Debate
-            </button>
-          )}
+          {(isHost || !isMultiplayer) &&
+            !showKahoot.active &&
+            !debateSession &&
+            !isAnyFullscreenOverlayActive &&
+            players.length >= 3 && (
+              <button
+                onClick={launchDebate}
+                title="Debate: dos jugadores defienden posturas opuestas de un tema random y el resto vota quién ha ganado"
+                className="flex items-center gap-1 rounded-full bg-gradient-to-r from-purple-500 to-fuchsia-500 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-white shadow transition-all hover:brightness-110"
+              >
+                🗣️ Debate
+              </button>
+            )}
         </div>
       </div>
 
       {/* Mobile Player Indicator (only visible on small screens where sidebar is hidden) */}
-      <div className="sm:hidden flex items-center gap-2">
+      <div className="flex items-center gap-2 sm:hidden">
         <span className="text-sm text-white/60">Turno de:</span>
         <span className="font-bold text-white">{currentPlayer?.name}</span>
       </div>
@@ -1515,13 +1895,15 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       <div className="flex items-center gap-2">
         {roomId && (
           <Button
-            variant={showVideo ? "destructive" : "secondary"}
+            variant={showVideo ? 'destructive' : 'secondary'}
             size="sm"
             onClick={() => setShowVideo(!showVideo)}
-            className={showVideo ? "animate-pulse border-red-500" : "bg-transparent border-white/20"}
+            className={
+              showVideo ? 'animate-pulse border-red-500' : 'border-white/20 bg-transparent'
+            }
           >
-            {showVideo ? <VideoOff className="w-4 h-4 mr-2" /> : <Video className="w-4 h-4 mr-2" />}
-            {showVideo ? "Salir" : "Video"}
+            {showVideo ? <VideoOff className="mr-2 h-4 w-4" /> : <Video className="mr-2 h-4 w-4" />}
+            {showVideo ? 'Salir' : 'Video'}
           </Button>
         )}
 
@@ -1530,12 +1912,16 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
             el "Finalizar" del header ya cubre terminar la partida con podio. */}
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="outline" size="sm" className="bg-transparent border-white/20 text-xs gap-1">
-              <AlertCircle className="w-3 h-3" />
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1 border-white/20 bg-transparent text-xs"
+            >
+              <AlertCircle className="h-3 w-3" />
               Estado
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto bg-gradient-to-r from-slate-900/80 to-slate-800/80 border border-white/10">
+          <DialogContent className="max-h-[80vh] max-w-md overflow-y-auto border border-white/10 bg-gradient-to-r from-slate-900/80 to-slate-800/80">
             <DialogHeader>
               <DialogTitle>Estado de la Partida</DialogTitle>
               <DialogDescription>
@@ -1546,26 +1932,31 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
             <div className="space-y-6 py-4">
               {/* Active Viruses Section */}
               <div>
-                <h3 className="text-lg font-bold mb-3 flex items-center gap-2 text-purple-400">
+                <h3 className="mb-3 flex items-center gap-2 text-lg font-bold text-purple-400">
                   🦠 Virus Activos
                 </h3>
                 {playerViruses.length === 0 ? (
-                  <p className="text-white/60 text-sm italic">No hay virus activos en este momento.</p>
+                  <p className="text-sm italic text-white/60">
+                    No hay virus activos en este momento.
+                  </p>
                 ) : (
                   <div className="grid gap-3">
                     {playerViruses.map((v, i) => {
-                      const affectedPlayer = players.find(p => p.id === v.playerId);
+                      const affectedPlayer = players.find((p) => p.id === v.playerId);
                       return (
-                        <div key={i} className="bg-gradient-to-r from-slate-800/80 to-slate-700/80 p-3 rounded-lg border border-purple-500/20">
-                          <div className="flex justify-between items-start mb-1">
-                            <span className="font-bold text-sm text-purple-300">
+                        <div
+                          key={i}
+                          className="rounded-lg border border-purple-500/20 bg-gradient-to-r from-slate-800/80 to-slate-700/80 p-3"
+                        >
+                          <div className="mb-1 flex items-start justify-between">
+                            <span className="text-sm font-bold text-purple-300">
                               {affectedPlayer?.name || 'Jugador'}
                             </span>
-                            <span className="text-xs bg-gradient-to-r from-purple-500/20 to-purple-600/20 px-2 py-0.5 rounded-full text-purple-200">
+                            <span className="rounded-full bg-gradient-to-r from-purple-500/20 to-purple-600/20 px-2 py-0.5 text-xs text-purple-200">
                               {v.turnsRemaining} turnos
                             </span>
                           </div>
-                          <p className="font-bold text-sm text-white">{v.virusName}</p>
+                          <p className="text-sm font-bold text-white">{v.virusName}</p>
                           <p className="text-xs text-white/60">{v.virusDescription}</p>
                         </div>
                       );
@@ -1586,16 +1977,16 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         open={gameState.showMimica}
         onOpenChange={(open) => {
           if (!open) {
-            setGameState(prev => ({
+            setGameState((prev) => ({
               ...prev,
               showMimica: false,
-              showMimicaReveal: false
+              showMimicaReveal: false,
             }));
           }
         }}
       >
         <DialogContent
-          className="sm:max-w-md bg-[url('/modern_bg.png')] bg-cover bg-center border-none p-0 text-white z-[70] overflow-hidden shadow-2xl"
+          className="z-[70] overflow-hidden border-none bg-[url('/modern_bg.png')] bg-cover bg-center p-0 text-white shadow-2xl sm:max-w-md"
           onOpenAutoFocus={(e) => e.preventDefault()}
           onCloseAutoFocus={(e) => e.preventDefault()}
         >
@@ -1605,29 +1996,39 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               Muestra el secreto al jugador actual sin que el resto del grupo pueda verlo.
             </DialogDescription>
           </DialogHeader>
-          <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-2xl z-0" />
-          <div className="p-6 text-center space-y-6 relative z-10 glass-panel border-b border-white/10">
+          <div className="absolute inset-0 z-0 bg-slate-950/40 backdrop-blur-2xl" />
+          <div className="glass-panel relative z-10 space-y-6 border-b border-white/10 p-6 text-center">
             <div className="space-y-1">
-              <p className="text-xl font-bold uppercase tracking-widest text-primary/80">Toca realizar la prueba a:</p>
+              <p className="text-xl font-bold uppercase tracking-widest text-primary/80">
+                Toca realizar la prueba a:
+              </p>
               <p className="text-5xl font-black text-white drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]">
                 {currentPlayer?.name}
               </p>
             </div>
-            <p className="text-red-400 font-bold animate-pulse text-sm uppercase tracking-widest bg-red-500/10 py-2 rounded-full border border-red-500/20">¡Que los demás no miren!</p>
+            <p className="animate-pulse rounded-full border border-red-500/20 bg-red-500/10 py-2 text-sm font-bold uppercase tracking-widest text-red-400">
+              ¡Que los demás no miren!
+            </p>
 
-            <div className="relative group perspective-1000">
+            <div className="perspective-1000 group relative">
               <motion.button
                 onClick={(e) => {
                   e.preventDefault();
-                  setGameState(prev => ({ ...prev, showMimicaReveal: !prev.showMimicaReveal }));
+                  setGameState((prev) => ({ ...prev, showMimicaReveal: !prev.showMimicaReveal }));
                 }}
-                onContextMenu={(e) => { e.preventDefault(); return false; }}
-                className="w-full relative preserve-3d transition-transform duration-300 shadow-2xl rounded-[2rem] overflow-hidden group-active:scale-[0.98] select-none touch-none"
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  return false;
+                }}
+                className="preserve-3d relative w-full touch-none select-none overflow-hidden rounded-[2rem] shadow-2xl transition-transform duration-300 group-active:scale-[0.98]"
               >
-                <div className={`w-full min-h-[220px] rounded-[2rem] border-4 flex flex-col items-center justify-center p-6 transition-all backdrop-blur-md
-                  ${gameState.showMimicaReveal
-                    ? 'bg-slate-900/80 border-primary shadow-[0_0_30px_rgba(168,85,247,0.6)]'
-                    : 'bg-slate-800/50 border-white/10 shadow-lg hover:border-primary/50'}`}>
+                <div
+                  className={`flex min-h-[220px] w-full flex-col items-center justify-center rounded-[2rem] border-4 p-6 backdrop-blur-md transition-all ${
+                    gameState.showMimicaReveal
+                      ? 'border-primary bg-slate-900/80 shadow-[0_0_30px_rgba(168,85,247,0.6)]'
+                      : 'border-white/10 bg-slate-800/50 shadow-lg hover:border-primary/50'
+                  }`}
+                >
                   <AnimatePresence mode="popLayout">
                     {!gameState.showMimicaReveal ? (
                       <motion.div
@@ -1637,10 +2038,12 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                         exit={{ opacity: 0, scale: 0.8 }}
                         className="flex flex-col items-center gap-3"
                       >
-                        <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30 mb-2">
-                          <EyeOff className="w-10 h-10 text-primary" />
+                        <div className="mb-2 flex h-20 w-20 items-center justify-center rounded-full border border-primary/30 bg-primary/20">
+                          <EyeOff className="h-10 w-10 text-primary" />
                         </div>
-                        <p className="font-bold text-white uppercase tracking-widest text-sm text-balance">Haz clic para revelar u ocultar el secreto</p>
+                        <p className="text-balance text-sm font-bold uppercase tracking-widest text-white">
+                          Haz clic para revelar u ocultar el secreto
+                        </p>
                       </motion.div>
                     ) : (
                       <motion.div
@@ -1648,10 +2051,12 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                         initial={{ opacity: 0, scale: 0.8, rotateX: 90 }}
                         animate={{ opacity: 1, scale: 1, rotateX: 0 }}
                         exit={{ opacity: 0, scale: 0.8 }}
-                        className="w-full flex-1 flex flex-col justify-center items-center gap-3"
+                        className="flex w-full flex-1 flex-col items-center justify-center gap-3"
                       >
-                        <p className="text-[10px] text-primary-100 font-bold uppercase tracking-[0.2em] mb-2">RETO DE MÍMICA</p>
-                        <p className="text-2xl md:text-3xl font-black text-white leading-tight drop-shadow-md pb-4">
+                        <p className="text-primary-100 mb-2 text-[10px] font-bold uppercase tracking-[0.2em]">
+                          RETO DE MÍMICA
+                        </p>
+                        <p className="pb-4 text-2xl font-black leading-tight text-white drop-shadow-md md:text-3xl">
                           {gameState.currentMimicaText}
                         </p>
                       </motion.div>
@@ -1662,12 +2067,12 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
             </div>
 
             <Button
-              className="w-full h-14 rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 font-bold uppercase tracking-widest text-sm text-white backdrop-blur-md transition-all active:scale-95"
+              className="h-14 w-full rounded-xl border border-white/20 bg-white/10 text-sm font-bold uppercase tracking-widest text-white backdrop-blur-md transition-all hover:bg-white/20 active:scale-95"
               onClick={() => {
-                setGameState(prev => ({
+                setGameState((prev) => ({
                   ...prev,
                   showMimicaReveal: false,
-                  showMimica: false
+                  showMimica: false,
                 }));
                 handleNext();
               }}
@@ -1677,55 +2082,61 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           </div>
         </DialogContent>
       </Dialog>
-      <Dialog open={gameState.showCaptainSelection} onOpenChange={() => { }}>
-        <DialogContent className="sm:max-w-md bg-slate-950/98 backdrop-blur-3xl border-yellow-500/40 text-white z-[300] rounded-[3rem] p-8">
+      <Dialog open={gameState.showCaptainSelection} onOpenChange={() => {}}>
+        <DialogContent className="bg-slate-950/98 z-[300] rounded-[3rem] border-yellow-500/40 p-8 text-white backdrop-blur-3xl sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-4xl font-black text-center text-yellow-500 flex flex-col items-center gap-4">
-              <div className="p-4 bg-yellow-500/10 rounded-3xl border border-yellow-500/20">
-                <Crown className="w-12 h-12 text-yellow-500 fill-yellow-500" />
+            <DialogTitle className="flex flex-col items-center gap-4 text-center text-4xl font-black text-yellow-500">
+              <div className="rounded-3xl border border-yellow-500/20 bg-yellow-500/10 p-4">
+                <Crown className="h-12 w-12 fill-yellow-500 text-yellow-500" />
               </div>
               <span>ELÍGE AL CAPITÁN</span>
             </DialogTitle>
-            <DialogDescription className="text-center text-slate-400 font-medium">
+            <DialogDescription className="text-center font-medium text-slate-400">
               El Capitán tendrá el control total del móvil y las puntuaciones.
             </DialogDescription>
           </DialogHeader>
 
           <div className="mt-8 space-y-6">
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-3">
-              <h4 className="text-[10px] font-black text-yellow-500 tracking-[0.3em] uppercase">Misiones del Capitán</h4>
-              <ul className="text-xs space-y-2 text-slate-300 font-medium">
+            <div className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-5">
+              <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-yellow-500">
+                Misiones del Capitán
+              </h4>
+              <ul className="space-y-2 text-xs font-medium text-slate-300">
                 <li className="flex items-center gap-2">✅ Leer las cartas en voz alta</li>
                 <li className="flex items-center gap-2">✅ Repartir XP por buen desempeño</li>
                 <li className="flex items-center gap-2">✅ Asegurar que todos beben cuando toca</li>
               </ul>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 max-h-[40vh] overflow-y-auto no-scrollbar pb-2">
-              {players.map(p => (
+            <div className="no-scrollbar grid max-h-[40vh] grid-cols-2 gap-4 overflow-y-auto pb-2">
+              {players.map((p) => (
                 <Button
                   key={`pick-captain-${p.id}`}
-                  className="h-28 flex flex-col items-center justify-center gap-2 bg-white/5 hover:bg-yellow-500/20 border border-white/10 hover:border-yellow-500/50 transition-all rounded-2xl relative overflow-hidden group shadow-xl"
+                  className="group relative flex h-28 flex-col items-center justify-center gap-2 overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-xl transition-all hover:border-yellow-500/50 hover:bg-yellow-500/20"
                   onClick={() => {
                     try {
                       if (typeof sfx !== 'undefined' && sfx.click) sfx.click();
-                    } catch (e) { }
-                    setGameState(prev => ({
+                    } catch (e) {}
+                    setGameState((prev) => ({
                       ...prev,
                       captainId: p.id,
-                      showCaptainSelection: false
+                      showCaptainSelection: false,
                     }));
                   }}
                 >
-                  <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-lg font-black overflow-hidden border-2 border-white/10 group-hover:border-yellow-400 group-hover:scale-110 transition-transform">
-                    {p.avatar_url ? <img src={p.avatar_url} className="w-full h-full object-cover" /> : p.name.substring(0, 2).toUpperCase()}
+                  <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border-2 border-white/10 bg-slate-800 text-lg font-black transition-transform group-hover:scale-110 group-hover:border-yellow-400">
+                    {p.avatar_url ? (
+                      <img src={p.avatar_url} className="h-full w-full object-cover" />
+                    ) : (
+                      p.name.substring(0, 2).toUpperCase()
+                    )}
                   </div>
-                  <span className="font-bold truncate w-full px-2 text-white/90">{p.name}</span>
+                  <span className="w-full truncate px-2 font-bold text-white/90">{p.name}</span>
                 </Button>
               ))}
             </div>
 
-            <p className="text-[9px] text-center text-slate-500 font-bold uppercase tracking-widest italic animate-pulse">
+            <p className="animate-pulse text-center text-[9px] font-bold uppercase italic tracking-widest text-slate-500">
               ¿Quién tiene el dispositivo ahora mismo?
             </p>
           </div>
@@ -1734,34 +2145,39 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
       {/* NEW: Impostor Anti-Spoiler Warning */}
       <Dialog open={gameState.showImpostorWarning}>
-        <DialogContent className="sm:max-w-md bg-slate-900/95 backdrop-blur-2xl border-red-500/50 text-white z-[80]">
+        <DialogContent className="z-[80] border-red-500/50 bg-slate-900/95 text-white backdrop-blur-2xl sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-3xl font-black text-center text-red-500 flex items-center justify-center gap-3 uppercase tracking-tighter">
+            <DialogTitle className="flex items-center justify-center gap-3 text-center text-3xl font-black uppercase tracking-tighter text-red-500">
               ⚠️ ACCESO RESTRINGIDO
             </DialogTitle>
-            <DialogDescription className="text-center text-red-400 font-bold text-xs uppercase tracking-widest mt-2">
+            <DialogDescription className="mt-2 text-center text-xs font-bold uppercase tracking-widest text-red-400">
               Esta pantalla contiene información secreta que solo el jugador asignado debe ver.
             </DialogDescription>
           </DialogHeader>
-          <div className="text-center py-6 space-y-6">
+          <div className="space-y-6 py-6 text-center">
             <div className="space-y-2">
-              <p className="text-base text-white/60 font-bold uppercase tracking-widest">Entrega el dispositivo a:</p>
-              <p className="text-4xl font-black text-white bg-red-500/10 p-4 rounded-2xl border border-red-500/30 shadow-[0_0_30px_rgba(239,68,68,0.2)]">
-                {players.find(p => p.id === gameState.impostorData?.impostorPlayerId)?.name || currentPlayer?.name}
+              <p className="text-base font-bold uppercase tracking-widest text-white/60">
+                Entrega el dispositivo a:
+              </p>
+              <p className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-4xl font-black text-white shadow-[0_0_30px_rgba(239,68,68,0.2)]">
+                {players.find((p) => p.id === gameState.impostorData?.impostorPlayerId)?.name ||
+                  currentPlayer?.name}
               </p>
             </div>
 
-            <div className="bg-slate-800/50 p-3 rounded-xl border border-white/5">
-              <p className="text-red-400 font-black text-xs uppercase tracking-[0.3em]">¡CAPITÁN! NO MIRES LA PANTALLA</p>
+            <div className="rounded-xl border border-white/5 bg-slate-800/50 p-3">
+              <p className="text-xs font-black uppercase tracking-[0.3em] text-red-400">
+                ¡CAPITÁN! NO MIRES LA PANTALLA
+              </p>
             </div>
 
             <div className="relative">
               <motion.button
-                onMouseDown={() => setGameState(prev => ({ ...prev, showImpostorWord: true }))}
-                onMouseUp={() => setGameState(prev => ({ ...prev, showImpostorWord: false }))}
-                onTouchStart={() => setGameState(prev => ({ ...prev, showImpostorWord: true }))}
-                onTouchEnd={() => setGameState(prev => ({ ...prev, showImpostorWord: false }))}
-                className="w-full h-36 rounded-2xl bg-gradient-to-br from-red-500/20 to-slate-900 border-2 border-dashed border-red-500/40 flex flex-col items-center justify-center gap-3 transition-all active:scale-95 active:bg-red-500/30 overflow-hidden shadow-xl"
+                onMouseDown={() => setGameState((prev) => ({ ...prev, showImpostorWord: true }))}
+                onMouseUp={() => setGameState((prev) => ({ ...prev, showImpostorWord: false }))}
+                onTouchStart={() => setGameState((prev) => ({ ...prev, showImpostorWord: true }))}
+                onTouchEnd={() => setGameState((prev) => ({ ...prev, showImpostorWord: false }))}
+                className="flex h-36 w-full flex-col items-center justify-center gap-3 overflow-hidden rounded-2xl border-2 border-dashed border-red-500/40 bg-gradient-to-br from-red-500/20 to-slate-900 shadow-xl transition-all active:scale-95 active:bg-red-500/30"
               >
                 <AnimatePresence mode="wait">
                   {!gameState.showImpostorWord ? (
@@ -1772,8 +2188,12 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                       exit={{ opacity: 0 }}
                       className="flex flex-col items-center gap-2"
                     >
-                      <EyeOff className="w-10 h-10 text-red-500" />
-                      <p className="font-black text-red-500 uppercase tracking-[0.15em] text-[9px]">{players.find(p => p.id === gameState.impostorData?.impostorPlayerId)?.name || currentPlayer?.name}: MANTÉN PULSADO</p>
+                      <EyeOff className="h-10 w-10 text-red-500" />
+                      <p className="text-[9px] font-black uppercase tracking-[0.15em] text-red-500">
+                        {players.find((p) => p.id === gameState.impostorData?.impostorPlayerId)
+                          ?.name || currentPlayer?.name}
+                        : MANTÉN PULSADO
+                      </p>
                     </motion.div>
                   ) : (
                     <motion.div
@@ -1789,17 +2209,26 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                         impostorQuestion={gameState.impostorData?.currentImpostorFake || ''}
                         onComplete={(impostorCaught, votedPlayerId) => {
                           if (impostorCaught) {
-                            players.forEach(p => {
-                              if (p.id !== gameState.impostorData?.impostorPlayerId) addScore(p.id, XP.IMPOSTOR_CAUGHT);
+                            players.forEach((p) => {
+                              if (p.id !== gameState.impostorData?.impostorPlayerId)
+                                addScore(p.id, XP.IMPOSTOR_CAUGHT);
                             });
                           } else if (gameState.impostorData?.impostorPlayerId) {
                             addScore(gameState.impostorData.impostorPlayerId, XP.IMPOSTOR_WIN);
                           }
-                          setGameState(prev => ({ ...prev, showImpostorWarning: false, showImpostorWord: false }));
+                          setGameState((prev) => ({
+                            ...prev,
+                            showImpostorWarning: false,
+                            showImpostorWord: false,
+                          }));
                           handleNext();
                         }}
                         onExit={() => {
-                          setGameState(prev => ({ ...prev, showImpostorWarning: false, showImpostorWord: false }));
+                          setGameState((prev) => ({
+                            ...prev,
+                            showImpostorWarning: false,
+                            showImpostorWord: false,
+                          }));
                         }}
                       />
                     </motion.div>
@@ -1809,9 +2238,9 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
             </div>
           </div>
           <Button
-            className="w-full h-14 text-lg font-black bg-white text-black hover:bg-white/90 rounded-2xl shadow-xl transition-all"
+            className="h-14 w-full rounded-2xl bg-white text-lg font-black text-black shadow-xl transition-all hover:bg-white/90"
             onClick={() => {
-              setGameState(prev => ({
+              setGameState((prev) => ({
                 ...prev,
                 showImpostorWarning: false,
                 showImpostor: false,
@@ -1826,16 +2255,22 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
       {/* BOCA CERRADA — hold-to-reveal */}
       <Dialog open={gameState.showBocaCerrada}>
-        <DialogContent className="sm:max-w-md bg-slate-950/98 backdrop-blur-3xl border-purple-500/40 text-white z-[85] rounded-[2.5rem] p-0 overflow-hidden">
+        <DialogContent className="bg-slate-950/98 z-[85] overflow-hidden rounded-[2.5rem] border-purple-500/40 p-0 text-white backdrop-blur-3xl sm:max-w-md">
           <DialogHeader className="sr-only">
             <DialogTitle>Boca Cerrada</DialogTitle>
-            <DialogDescription>Mantén pulsado para ver la frase que debes decir con la boca cerrada.</DialogDescription>
+            <DialogDescription>
+              Mantén pulsado para ver la frase que debes decir con la boca cerrada.
+            </DialogDescription>
           </DialogHeader>
           <BocaCerradaOverlay
             text={gameState.currentBocaCerrada || ''}
             playerName={currentPlayer?.name || 'Jugador'}
             onDone={() => {
-              setGameState(prev => ({ ...prev, showBocaCerrada: false, currentBocaCerrada: null }));
+              setGameState((prev) => ({
+                ...prev,
+                showBocaCerrada: false,
+                currentBocaCerrada: null,
+              }));
               performTurnAdvance();
             }}
           />
@@ -1844,38 +2279,50 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
       {/* Virus Cycle Notification */}
       <Dialog open={gameState.showVirusCycleAlert}>
-        <DialogContent className="sm:max-w-md bg-slate-900/95 backdrop-blur-2xl border-green-500/50 text-white z-[70]">
+        <DialogContent className="z-[70] border-green-500/50 bg-slate-900/95 text-white backdrop-blur-2xl sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-3xl font-black text-center text-green-400 uppercase tracking-tighter">
+            <DialogTitle className="text-center text-3xl font-black uppercase tracking-tighter text-green-400">
               {gameState.virusCycleData?.title || 'Evento Megamix'}
             </DialogTitle>
             <DialogDescription className="sr-only">Evento especial del Megamix</DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-4 py-2">
             {/* Infected player */}
-            <p className="text-center text-white/80 text-base font-semibold">{gameState.virusCycleData?.message}</p>
+            <p className="text-center text-base font-semibold text-white/80">
+              {gameState.virusCycleData?.message}
+            </p>
 
             {/* Virus name + description */}
             {gameState.virusCycleData?.virusName && (
-              <div className="bg-green-950/60 border border-green-500/30 rounded-2xl p-4 text-center space-y-1">
-                <p className="text-[10px] text-green-400 font-black uppercase tracking-widest">Virus activo</p>
-                <p className="text-green-300 font-black text-xl">{gameState.virusCycleData.virusName}</p>
-                <p className="text-white/70 text-sm leading-snug">{gameState.virusCycleData.virusDescription}</p>
+              <div className="space-y-1 rounded-2xl border border-green-500/30 bg-green-950/60 p-4 text-center">
+                <p className="text-[10px] font-black uppercase tracking-widest text-green-400">
+                  Virus activo
+                </p>
+                <p className="text-xl font-black text-green-300">
+                  {gameState.virusCycleData.virusName}
+                </p>
+                <p className="text-sm leading-snug text-white/70">
+                  {gameState.virusCycleData.virusDescription}
+                </p>
               </div>
             )}
 
             {/* Icebreaker challenge */}
             {gameState.virusCycleData?.challenge && (
-              <div className="bg-purple-950/60 border border-purple-500/30 rounded-2xl p-4 text-center space-y-1">
-                <p className="text-[10px] text-purple-400 font-black uppercase tracking-widest">Reto grupal</p>
-                <p className="text-white/90 text-sm leading-snug">{gameState.virusCycleData.challenge}</p>
+              <div className="space-y-1 rounded-2xl border border-purple-500/30 bg-purple-950/60 p-4 text-center">
+                <p className="text-[10px] font-black uppercase tracking-widest text-purple-400">
+                  Reto grupal
+                </p>
+                <p className="text-sm leading-snug text-white/90">
+                  {gameState.virusCycleData.challenge}
+                </p>
               </div>
             )}
           </div>
           <Button
-            className="w-full h-14 text-base font-black bg-green-600 hover:bg-green-500 text-white rounded-2xl shadow-xl transition-all mt-2"
+            className="mt-2 h-14 w-full rounded-2xl bg-green-600 text-base font-black text-white shadow-xl transition-all hover:bg-green-500"
             onClick={() => {
-              setGameState(prev => ({ ...prev, showVirusCycleAlert: false }));
+              setGameState((prev) => ({ ...prev, showVirusCycleAlert: false }));
               performTurnAdvance(true);
             }}
           >
@@ -1888,36 +2335,36 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       <AnimatePresence>
         {gameState.showCaptainDecision && (
           <CaptainDecisionPanel
-            captainName={players.find(p => p.id === gameState.captainId)?.name || 'Capitán'}
-            players={players.filter(p => p.id !== gameState.captainId)}
+            captainName={players.find((p) => p.id === gameState.captainId)?.name || 'Capitán'}
+            players={players.filter((p) => p.id !== gameState.captainId)}
             drinkCounts={drinkCounts}
             onDrink={(playerId, name) => {
               sfx.click();
               trackDrink(playerId);
               addScore(playerId, XP.DRINK_BRAVE);
-              const captain = players.find(p => p.id === gameState.captainId);
+              const captain = players.find((p) => p.id === gameState.captainId);
               if (captain) addScore(captain.id, XP.CAPITAN_ACTION);
               toast(`🍺 ${name} bebe por orden del Capitán!`, { duration: 3000 });
-              setGameState(prev => ({ ...prev, showCaptainDecision: false }));
+              setGameState((prev) => ({ ...prev, showCaptainDecision: false }));
               performTurnAdvance(true);
             }}
             onVirus={(playerId, name) => {
               sfx.click();
               applyRandomVirus(true, playerId);
               toast(`🦠 Capitán asignó el virus a ${name}!`, { duration: 3000 });
-              setGameState(prev => ({ ...prev, showCaptainDecision: false }));
+              setGameState((prev) => ({ ...prev, showCaptainDecision: false }));
               performTurnAdvance(true);
             }}
             onNormaCancel={(_playerId, name) => {
               sfx.click();
               toast(`📜 Norma anulada si ${name} cumple el castigo.`, { duration: 3000 });
-              setGameState(prev => ({ ...prev, showCaptainDecision: false }));
+              setGameState((prev) => ({ ...prev, showCaptainDecision: false }));
             }}
             onAllDrink={() => {
               sfx.click();
-              players.forEach(p => trackDrink(p.id));
+              players.forEach((p) => trackDrink(p.id));
               toast(`🥂 ¡El Capitán ordena que TODOS beban!`, { duration: 3000 });
-              setGameState(prev => ({ ...prev, showCaptainDecision: false }));
+              setGameState((prev) => ({ ...prev, showCaptainDecision: false }));
               performTurnAdvance(true);
             }}
             onDouble={(playerId, name) => {
@@ -1925,24 +2372,26 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               trackDrink(playerId);
               trackDrink(playerId);
               addScore(playerId, XP.DRINK_BRAVE);
-              const captainDouble = players.find(p => p.id === gameState.captainId);
+              const captainDouble = players.find((p) => p.id === gameState.captainId);
               if (captainDouble) addScore(captainDouble.id, XP.CAPITAN_ACTION);
               toast(`⚡ ¡Doble o nada! ${name} bebe el doble.`, { duration: 3000 });
-              setGameState(prev => ({ ...prev, showCaptainDecision: false }));
+              setGameState((prev) => ({ ...prev, showCaptainDecision: false }));
               performTurnAdvance(true);
             }}
-            onClose={() => setGameState(prev => ({ ...prev, showCaptainDecision: false }))}
+            onClose={() => setGameState((prev) => ({ ...prev, showCaptainDecision: false }))}
           />
         )}
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <main className={`flex-1 flex flex-col items-center justify-center p-4 relative transition-opacity duration-300 ${isMultiplayer && !isHost && (currentPlayer?.id !== localPlayerId) ? 'opacity-80 pointer-events-none' : ''}`}>
+      <main
+        className={`relative flex flex-1 flex-col items-center justify-center p-4 transition-opacity duration-300 ${isMultiplayer && !isHost && currentPlayer?.id !== localPlayerId ? 'pointer-events-none opacity-80' : ''}`}
+      >
         {/* Turn Flash Overlay */}
         <TurnFlash
           playerName={currentPlayer?.name || ''}
           avatarUrl={currentPlayer?.avatar_url}
-          playerIndex={players.findIndex(p => p.id === currentPlayer?.id)}
+          playerIndex={players.findIndex((p) => p.id === currentPlayer?.id)}
           visible={showTurnBanner}
           onDismiss={() => setShowTurnBanner(false)}
         />
@@ -1952,14 +2401,14 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           <motion.div
             initial={{ opacity: 0, scaleX: 0.9 }}
             animate={{ opacity: 1, scaleX: 1 }}
-            className="w-full max-w-md mx-auto mb-3 flex items-center gap-3 bg-amber-500/15 border-l-4 border-amber-500 px-3 py-2 rounded-r-xl z-10"
+            className="z-10 mx-auto mb-3 flex w-full max-w-md items-center gap-3 rounded-r-xl border-l-4 border-amber-500 bg-amber-500/15 px-3 py-2"
           >
-            <span className="text-xl shrink-0">📜</span>
-            <p className="text-amber-200 text-sm font-bold flex-1 leading-tight line-clamp-2">
+            <span className="shrink-0 text-xl">📜</span>
+            <p className="line-clamp-2 flex-1 text-sm font-bold leading-tight text-amber-200">
               {gameState.currentNorma.replace(/NORMA:\s*/i, '').replace(/📜\s*/g, '')}
             </p>
             {(gameState.currentNormaTurnsRemaining ?? 0) > 0 && (
-              <span className="text-amber-400 text-[10px] font-black shrink-0 bg-amber-500/20 px-2 py-0.5 rounded-full">
+              <span className="shrink-0 rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-black text-amber-400">
                 {gameState.currentNormaTurnsRemaining}T
               </span>
             )}
@@ -1982,18 +2431,62 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
             !gameState.showImpostor &&
             !gameState.showCaptainPass &&
             gameState.yoNuncaEquiposPhase === 'idle' && (
-              <div className="w-full flex flex-col items-center justify-center relative">
+              <div className="relative flex w-full flex-col items-center justify-center">
                 {/* Indicador de progreso superior */}
-                <div className="bg-slate-900/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-white/50 mb-3 shadow-[0_2px_10px_rgba(0,0,0,0.3)] z-10 transition-colors">
-                  <span>Carta {currentIndex + 1}</span>
-                  <span className="w-1 h-1 rounded-full bg-white/20" />
-                  <span>Ronda {gameState.round}</span>
+                <div className="z-10 mb-3 flex w-full max-w-[520px] flex-col items-center gap-2">
+                  <div className="flex items-center gap-2 rounded-full border border-white/10 bg-slate-900/40 px-3 py-1.5 text-[0.7rem] font-black uppercase tracking-[0.22em] text-white/60 shadow-[0_2px_10px_rgba(0,0,0,0.3)] backdrop-blur-md sm:text-[0.8rem]">
+                    <span>Carta {currentIndex + 1}</span>
+                    <span className="h-1 w-1 rounded-full bg-white/20" />
+                    {megamixPhase && phaseMeta ? (
+                      <span className={phaseMeta.accent}>
+                        {phaseMeta.emoji} {megamixPhase}
+                      </span>
+                    ) : (
+                      <span>Ronda {gameState.round}</span>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const next = !noAlcoholMode;
+                        setNoAlcoholModeState(next);
+                        setNoAlcoholMode(next);
+                      }}
+                      className={`ml-1 rounded-full px-2 py-1 tracking-normal transition-colors ${noAlcoholMode ? 'bg-cyan-400/20 text-cyan-300' : 'bg-white/5 text-white/50'}`}
+                    >
+                      {noAlcoholMode ? '⭐ SIN ALCOHOL' : '🍻 BEBIDA'}
+                    </button>
+                  </div>
+
+                  {mode === 'megamix' && nextMystery && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[10px] font-bold text-white/55"
+                    >
+                      Próxima carta:{' '}
+                      <span className="text-white/80">
+                        {nextMystery.emoji} {nextMystery.label}
+                      </span>
+                      <span className="mx-1 text-white/25">·</span>
+                      {nextMystery.hint}
+                    </motion.div>
+                  )}
+
+                  {temporaryPactTurns > 0 && (
+                    <motion.div
+                      initial={{ scale: 0.9, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="rounded-full border border-fuchsia-400/30 bg-fuchsia-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-fuchsia-200"
+                    >
+                      🃏 Pacto activo · {temporaryPactTurns} cartas
+                    </motion.div>
+                  )}
                 </div>
-                
+
                 <motion.div
                   key={currentIndex}
                   drag={false}
-                  className="w-full flex flex-col items-center justify-center relative"
+                  className="relative flex w-full flex-col items-center justify-center"
                 >
                   <motion.div
                     key={`card-inner-${currentIndex}`}
@@ -2005,56 +2498,73 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                       opacity: { duration: 0.12 },
                       scale: { type: 'spring', stiffness: 300, damping: 26 },
                     }}
-                    style={{ perspective: '1000px', transformStyle: 'preserve-3d', willChange: 'transform' }}
-                    className="w-full flex flex-col items-center justify-center relative z-20"
+                    style={{
+                      perspective: '1000px',
+                      transformStyle: 'preserve-3d',
+                      willChange: 'transform',
+                    }}
+                    className="relative z-20 flex w-full flex-col items-center justify-center"
                   >
+                    <CardDisplay
+                      content={safeCurrentText}
+                      type={rarity}
+                      onClick={() => {
+                        return;
+                      }}
+                      onSuccess={() => {
+                        const kind = safeCurrentText.toLowerCase();
+                        const xp = kind.includes('verdad o bebe') ? XP.VERDAD_TOLD : XP.RETO_DONE;
+                        if (currentPlayer) addScore(currentPlayer.id, xp);
+                        handleNext();
+                      }}
+                      onFail={() => {
+                        const kind = safeCurrentText.toLowerCase();
+                        const xp = kind.includes('verdad o bebe') ? XP.VERDAD_DRINK : XP.RETO_FAIL;
+                        if (currentPlayer) addScore(currentPlayer.id, xp);
+                        handleNext();
+                      }}
+                      gameMode={mode}
+                      players={players}
+                      currentPlayer={currentPlayer}
+                      round={gameState.round}
+                      onAIUpdate={handleAIUpdate}
+                    />
 
-                <CardDisplay
-                  content={safeCurrentText}
-                  type={rarity}
-                  onClick={() => { return; }}
-                  onSuccess={() => {
-                    const kind = safeCurrentText.toLowerCase();
-                    const xp = kind.includes('verdad o bebe') ? XP.VERDAD_TOLD
-                      : XP.RETO_DONE;
-                    if (currentPlayer) addScore(currentPlayer.id, xp);
-                    handleNext();
-                  }}
-                  onFail={() => {
-                    const kind = safeCurrentText.toLowerCase();
-                    const xp = kind.includes('verdad o bebe') ? XP.VERDAD_DRINK : XP.RETO_FAIL;
-                    if (currentPlayer) addScore(currentPlayer.id, xp);
-                    handleNext();
-                  }}
-                  gameMode={mode}
-                  players={players}
-                  currentPlayer={currentPlayer}
-                  round={gameState.round}
-                  onAIUpdate={handleAIUpdate}
-                />
+                    {/* Partículas doradas — legendary */}
+                    {rarity === 'legendary' && (
+                      <div
+                        className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden"
+                        style={{ zIndex: 5 }}
+                      >
+                        {[...Array(6)].map((_, i) => (
+                          <motion.div
+                            key={i}
+                            className="absolute h-1.5 w-1.5 rounded-full bg-amber-400"
+                            style={{
+                              left: `${18 + i * 13}%`,
+                              bottom: '38%',
+                              filter: 'blur(0.5px)',
+                            }}
+                            animate={{
+                              y: [0, -(55 + i * 15), -(110 + i * 20)],
+                              opacity: [0, 1, 0],
+                              scale: [0.5, 1, 0.3],
+                            }}
+                            transition={{
+                              duration: 1.8 + i * 0.2,
+                              repeat: Infinity,
+                              repeatDelay: i * 0.3,
+                              ease: 'easeOut',
+                            }}
+                          />
+                        ))}
+                      </div>
+                    )}
 
-                {/* Partículas doradas — legendary */}
-                {rarity === 'legendary' && (
-                  <div className="absolute inset-0 pointer-events-none overflow-hidden 
-                    flex items-center justify-center" style={{ zIndex: 5 }}>
-                    {[...Array(6)].map((_, i) => (
-                      <motion.div key={i}
-                        className="absolute w-1.5 h-1.5 rounded-full bg-amber-400"
-                        style={{ left: `${18 + i * 13}%`, bottom: '38%', filter: 'blur(0.5px)' }}
-                        animate={{ y: [0, -(55 + i * 15), -(110 + i * 20)], opacity: [0, 1, 0], scale: [0.5, 1, 0.3] }}
-                        transition={{
-                          duration: 1.8 + i * 0.2, repeat: Infinity,
-                          repeatDelay: i * 0.3, ease: 'easeOut'
-                        }}
-                      />
-                    ))}
-                  </div>
-                )}
-
-                {/* Borde glitch — chaos */}
-                {rarity === 'chaos' && (
-                  <>
-                    <style>{`
+                    {/* Borde glitch — chaos */}
+                    {rarity === 'chaos' && (
+                      <>
+                        <style>{`
                       @keyframes glitch {
                         0%,100%{ box-shadow: 0 0 0 2px rgba(239,68,68,0.6); }
                         20%    { box-shadow: 2px 0 0 2px rgba(239,68,68,0.9),
@@ -2064,28 +2574,30 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                         80%    { box-shadow: -2px -2px 0 2px rgba(239,68,68,0.7); }
                       }
                     `}</style>
-                    <div className="absolute inset-0 rounded-[2.5rem] pointer-events-none"
-                      style={{ animation: 'glitch 0.4s infinite', zIndex: 4 }} />
-                  </>
-                )}
+                        <div
+                          className="pointer-events-none absolute inset-0 rounded-[2.5rem]"
+                          style={{ animation: 'glitch 0.4s infinite', zIndex: 4 }}
+                        />
+                      </>
+                    )}
 
-                {/* Anillo de respiración — virus */}
-                {rarity === 'virus' && (
-                  <motion.div
-                    className="absolute inset-0 rounded-[2.5rem] pointer-events-none"
-                    style={{ zIndex: 4 }}
-                    animate={{
-                      boxShadow: [
-                        '0 0 0 0px rgba(34,197,94,0)',
-                        '0 0 0 7px rgba(34,197,94,0.28)',
-                        '0 0 0 0px rgba(34,197,94,0)',
-                      ]
-                    }}
-                    transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
-                  />
-                )}
-              </motion.div>
-              </motion.div>
+                    {/* Anillo de respiración — virus */}
+                    {rarity === 'virus' && (
+                      <motion.div
+                        className="pointer-events-none absolute inset-0 rounded-[2.5rem]"
+                        style={{ zIndex: 4 }}
+                        animate={{
+                          boxShadow: [
+                            '0 0 0 0px rgba(34,197,94,0)',
+                            '0 0 0 7px rgba(34,197,94,0.28)',
+                            '0 0 0 0px rgba(34,197,94,0)',
+                          ],
+                        }}
+                        transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+                      />
+                    )}
+                  </motion.div>
+                </motion.div>
               </div>
             )}
         </AnimatePresence>
@@ -2098,33 +2610,40 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           !gameState.showCaptainPass &&
           !gameState.showCaptainDecision &&
           gameState.yoNuncaEquiposPhase === 'idle' && (
-            <div className="w-full max-w-sm mx-auto mt-4 mb-2 flex flex-col gap-2 relative z-10">
+            <div className="relative z-10 mx-auto mb-2 mt-4 flex w-full max-w-sm flex-col gap-2">
               <motion.button
                 key={`next-btn-${currentIndex}`}
                 initial={{ opacity: 0, y: 16, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ delay: 0.5, type: 'spring', stiffness: 300, damping: 22 }}
-                onClick={() => { if (isMultiplayer && !isHost) return; handleNext(); }}
-                className="w-full flex items-center justify-between gap-3 px-6 py-5 rounded-[24px] font-black text-base uppercase tracking-widest select-none shadow-xl relative overflow-hidden"
+                onClick={() => {
+                  if (isMultiplayer && !isHost) return;
+                  handleNext();
+                }}
+                className="relative flex w-full select-none items-center justify-between gap-3 overflow-hidden rounded-[24px] px-6 py-5 text-base font-black uppercase tracking-widest shadow-xl"
                 style={{
-                  background: 'linear-gradient(135deg, hsl(318 100% 60% / 0.9) 0%, hsl(338 95% 55% / 0.9) 100%)',
-                  boxShadow: '0 8px 32px -8px hsl(318 100% 60% / 0.6), 0 0 0 1px rgba(255,255,255,0.15) inset',
+                  background:
+                    'linear-gradient(135deg, hsl(318 100% 60% / 0.9) 0%, hsl(338 95% 55% / 0.9) 100%)',
+                  boxShadow:
+                    '0 8px 32px -8px hsl(318 100% 60% / 0.6), 0 0 0 1px rgba(255,255,255,0.15) inset',
                   WebkitTapHighlightColor: 'transparent',
                   touchAction: 'manipulation',
                 }}
                 whileTap={{ scale: 0.96 }}
               >
-                <div className="flex flex-col items-start relative z-10">
-                  <span className="text-[10px] font-bold opacity-70 tracking-[0.3em] normal-case">Siguiente turno</span>
-                  <span className="text-white text-lg font-black leading-tight">
+                <div className="relative z-10 flex flex-col items-start">
+                  <span className="text-[10px] font-bold normal-case tracking-[0.3em] opacity-70">
+                    Siguiente turno
+                  </span>
+                  <span className="text-lg font-black leading-tight text-white">
                     {players[(currentIndex + 1) % Math.max(1, players.length)]?.name || '—'}
                   </span>
                 </div>
-                <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-white/20 relative z-10">
-                  <ArrowRight className="w-5 h-5 text-white" />
+                <div className="relative z-10 flex h-10 w-10 items-center justify-center rounded-2xl bg-white/20">
+                  <ArrowRight className="h-5 w-5 text-white" />
                 </div>
               </motion.button>
-              
+
               <button
                 onClick={() => {
                   if (isMultiplayer && !isHost) return;
@@ -2135,7 +2654,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                   // el mismo jugador se queda su turno y prueba con otra.
                   performTurnAdvance(true);
                 }}
-                className="text-white/40 text-[10px] font-bold uppercase tracking-widest text-center py-2 hover:text-white/80 transition-colors mx-auto active:scale-95"
+                className="mx-auto py-2 text-center text-[10px] font-bold uppercase tracking-widest text-white/40 transition-colors hover:text-white/80 active:scale-95"
               >
                 ⏭️ No me gusta, otra carta
               </button>
@@ -2143,170 +2662,239 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           )}
 
         {/* CAPTAIN ACTION PANEL - Give/Take XP in real-time (movido debajo de la carta) */}
-        {(!gameState.showTrivia && !gameState.showVoting && !gameState.showDuel && !gameState.showImpostor && !gameState.showMimica && !gameState.showImpostorWord && mode !== 'cultura' && mode !== 'trivia_futbol') && (
-          <div className="w-full max-w-md mt-3 mb-2 z-10">
-            <div className="flex items-center justify-between px-3 mb-2">
-              <div className="flex items-center gap-1.5">
-                <Crown className="w-3 h-3 text-amber-400" />
-                <span className="text-[10px] text-amber-400 font-black uppercase tracking-[0.25em]">Mesa del Capitán</span>
+        {!gameState.showTrivia &&
+          !gameState.showVoting &&
+          !gameState.showDuel &&
+          !gameState.showImpostor &&
+          !gameState.showMimica &&
+          !gameState.showImpostorWord &&
+          mode !== 'cultura' &&
+          mode !== 'trivia_futbol' && (
+            <div className="z-10 mb-2 mt-3 w-full max-w-md">
+              <div className="mb-2 flex items-center justify-between px-3">
+                <div className="flex items-center gap-1.5">
+                  <Crown className="h-3 w-3 text-amber-400" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.25em] text-amber-400">
+                    Mesa del Capitán
+                  </span>
+                </div>
+                <span className="text-[9px] font-bold text-white/30">
+                  +{Math.min(50, 10 + Math.floor(gameState.round / 2) * 5)} / -
+                  {Math.max(
+                    5,
+                    Math.floor(Math.min(50, 10 + Math.floor(gameState.round / 2) * 5) / 2)
+                  )}{' '}
+                  XP
+                </span>
               </div>
-              <span className="text-[9px] text-white/30 font-bold">
-                +{Math.min(50, 10 + Math.floor(gameState.round / 2) * 5)} / -{Math.max(5, Math.floor(Math.min(50, 10 + Math.floor(gameState.round / 2) * 5) / 2))} XP
-              </span>
-            </div>
-            <div className="flex flex-wrap justify-center gap-2 bg-black/30 backdrop-blur-xl border border-white/8 rounded-2xl px-4 py-3">
-              {players.map(p => {
-                const isCaptain = gameState.captainId === p.id;
-                const isActive = currentPlayer?.id === p.id;
-                const baseXP = 10 + Math.floor(gameState.round / 2) * 5;
-                const rewardXP = Math.min(50, baseXP);
-                const penaltyXP = Math.max(5, Math.floor(rewardXP / 2));
-                return (
-                  <div key={p.id} className="flex flex-col items-center gap-1">
-                    <div className="flex items-center gap-1">
-                      {/* Minus */}
-                      <motion.button
-                        whileTap={{ scale: 0.8 }}
-                        disabled={isCaptain || (isMultiplayer && !isHost)}
-                        onClick={() => {
-                          if (isCaptain) { toast.error("El Capitán no puede penalizarse 👑"); return; }
-                          handleAdjustXP(p.id, -penaltyXP);
-                          toast.error(`-${penaltyXP} XP ${p.name}`, { duration: 1200 });
-                        }}
-                        className="w-6 h-6 rounded-lg bg-red-500/80 text-white flex items-center justify-center hover:bg-red-500 disabled:opacity-30 transition-colors"
-                      >
-                        <Minus className="w-3 h-3" />
-                      </motion.button>
+              <div className="border-white/8 flex flex-wrap justify-center gap-2 rounded-2xl border bg-black/30 px-4 py-3 backdrop-blur-xl">
+                {players.map((p) => {
+                  const isCaptain = gameState.captainId === p.id;
+                  const isActive = currentPlayer?.id === p.id;
+                  const baseXP = 10 + Math.floor(gameState.round / 2) * 5;
+                  const rewardXP = Math.min(50, baseXP);
+                  const penaltyXP = Math.max(5, Math.floor(rewardXP / 2));
+                  return (
+                    <div key={p.id} className="flex flex-col items-center gap-1">
+                      <div className="flex items-center gap-1">
+                        {/* Minus */}
+                        <motion.button
+                          whileTap={{ scale: 0.8 }}
+                          disabled={isCaptain || (isMultiplayer && !isHost)}
+                          onClick={() => {
+                            if (isCaptain) {
+                              toast.error('El Capitán no puede penalizarse 👑');
+                              return;
+                            }
+                            handleAdjustXP(p.id, -penaltyXP);
+                            toast.error(`-${penaltyXP} XP ${p.name}`, { duration: 1200 });
+                          }}
+                          className="flex h-6 w-6 items-center justify-center rounded-lg bg-red-500/80 text-white transition-colors hover:bg-red-500 disabled:opacity-30"
+                        >
+                          <Minus className="h-3 w-3" />
+                        </motion.button>
 
-                      {/* Avatar */}
-                      <div className={`relative w-10 h-10 rounded-xl overflow-hidden border transition-all duration-200
-                        ${isActive ? 'border-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.4)] scale-110' : 'border-white/10'}`}>
-                        {p.avatar_url
-                          ? <img src={p.avatar_url} className="w-full h-full object-cover" alt={p.name} />
-                          : <div className="w-full h-full bg-slate-800 flex items-center justify-center text-xs font-black text-white/60">{p.name[0]}</div>
+                        {/* Avatar */}
+                        <div
+                          className={`relative h-10 w-10 overflow-hidden rounded-xl border transition-all duration-200 ${isActive ? 'scale-110 border-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.4)]' : 'border-white/10'}`}
+                        >
+                          {p.avatar_url ? (
+                            <img
+                              src={p.avatar_url}
+                              className="h-full w-full object-cover"
+                              alt={p.name}
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center bg-slate-800 text-xs font-black text-white/60">
+                              {p.name[0]}
+                            </div>
+                          )}
+                          {isCaptain && (
+                            <div className="absolute right-0 top-0 flex h-3 w-3 items-center justify-center rounded-bl bg-amber-500">
+                              <Crown className="h-2 w-2 text-black" />
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Plus */}
+                        <motion.button
+                          whileTap={{ scale: 0.8 }}
+                          disabled={isCaptain || (isMultiplayer && !isHost)}
+                          onClick={() => {
+                            if (isCaptain) {
+                              toast.error('El Capitán no puede auto-asignarse XP 👑');
+                              return;
+                            }
+                            handleAdjustXP(p.id, rewardXP);
+                            toast.success(`+${rewardXP} XP ${p.name} 🔥`, { duration: 1200 });
+                          }}
+                          className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-500/80 text-white transition-colors hover:bg-emerald-500 disabled:opacity-30"
+                        >
+                          <Plus className="h-3 w-3" />
+                        </motion.button>
+                      </div>
+                      <span
+                        className={`max-w-[56px] truncate text-center text-[9px] font-black uppercase ${isActive ? 'text-primary' : isCaptain ? 'text-amber-400' : 'text-white/30'}`}
+                      >
+                        {p.name}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+        {/* YO NUNCA - INTERACTIVE AVATARS with EXP rewards (movido debajo de la carta) */}
+        {currentText &&
+          (currentText.toLowerCase().includes('yo nunca') ||
+            mode === 'yo_nunca' ||
+            mode === 'yo_nunca_equipos') && (
+            <div className="z-10 mb-2 mt-3 w-full max-w-sm">
+              <div className="rounded-xl border border-amber-500/40 bg-gradient-to-r from-amber-900/40 to-orange-900/40 p-3">
+                <p className="mb-2 text-center text-[10px] font-bold uppercase tracking-widest text-amber-400">
+                  🍺 ¿Quién ha bebido? (toca para registrar)
+                </p>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {players.map((p) => (
+                    <motion.button
+                      key={`drink-${p.id}`}
+                      whileTap={{ scale: 0.85 }}
+                      onClick={async () => {
+                        trackDrink(p.id);
+                        addScore(p.id, XP.DRINK_BRAVE);
+                        toast(
+                          `🍺 ${p.name} ha bebido! +${XP.DRINK_BRAVE} XP (Total: ${(drinkCounts[p.id] || 0) + 1})`,
+                          { duration: 1500, position: 'top-center' }
+                        );
+                        // Sync EXP to Supabase profile if player has a linked account
+                        try {
+                          const pid = (p as any).supabase_id;
+                          if (pid) {
+                            await supabase
+                              .rpc('increment_player_exp', {
+                                player_id: pid,
+                                exp_amount: XP.DRINK_BRAVE,
+                              })
+                              .catch(() => {});
+                          }
+                        } catch {
+                          /* silent fail */
                         }
-                        {isCaptain && (
-                          <div className="absolute top-0 right-0 w-3 h-3 bg-amber-500 flex items-center justify-center rounded-bl">
-                            <Crown className="w-2 h-2 text-black" />
+                      }}
+                      className="flex min-w-[60px] flex-col items-center gap-1 rounded-lg border border-amber-500/30 bg-gradient-to-r from-amber-500/20 to-orange-500/20 px-2 py-1.5 transition-all hover:bg-gradient-to-r hover:from-amber-500/40 hover:to-orange-500/40 active:shadow-[0_0_15px_rgba(251,191,36,0.5)]"
+                    >
+                      <div className="h-10 w-10 overflow-hidden rounded-full border-2 border-amber-400/50 shadow-[0_0_8px_rgba(251,191,36,0.2)]">
+                        {p.avatar_url ? (
+                          <img
+                            src={p.avatar_url}
+                            className="h-full w-full object-cover"
+                            alt={p.name}
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-700 to-orange-800 text-sm font-bold text-white">
+                            {p.name.substring(0, 2).toUpperCase()}
                           </div>
                         )}
                       </div>
-
-                      {/* Plus */}
-                      <motion.button
-                        whileTap={{ scale: 0.8 }}
-                        disabled={isCaptain || (isMultiplayer && !isHost)}
-                        onClick={() => {
-                          if (isCaptain) { toast.error("El Capitán no puede auto-asignarse XP 👑"); return; }
-                          handleAdjustXP(p.id, rewardXP);
-                          toast.success(`+${rewardXP} XP ${p.name} 🔥`, { duration: 1200 });
-                        }}
-                        className="w-6 h-6 rounded-lg bg-emerald-500/80 text-white flex items-center justify-center hover:bg-emerald-500 disabled:opacity-30 transition-colors"
-                      >
-                        <Plus className="w-3 h-3" />
-                      </motion.button>
-                    </div>
-                    <span className={`text-[9px] font-black uppercase truncate max-w-[56px] text-center
-                      ${isActive ? 'text-primary' : isCaptain ? 'text-amber-400' : 'text-white/30'}`}>
-                      {p.name}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* YO NUNCA - INTERACTIVE AVATARS with EXP rewards (movido debajo de la carta) */}
-        {currentText && (currentText.toLowerCase().includes('yo nunca') || mode === 'yo_nunca' || mode === 'yo_nunca_equipos') && (
-          <div className="w-full max-w-sm mt-3 mb-2 z-10">
-            <div className="bg-gradient-to-r from-amber-900/40 to-orange-900/40 border border-amber-500/40 rounded-xl p-3">
-              <p className="text-[10px] text-amber-400 uppercase font-bold tracking-widest mb-2 text-center">🍺 ¿Quién ha bebido? (toca para registrar)</p>
-              <div className="flex flex-wrap justify-center gap-2">
-                {players.map(p => (
-                  <motion.button
-                    key={`drink-${p.id}`}
-                    whileTap={{ scale: 0.85 }}
-                    onClick={async () => {
-                      trackDrink(p.id);
-                      addScore(p.id, XP.DRINK_BRAVE);
-                      toast(`🍺 ${p.name} ha bebido! +${XP.DRINK_BRAVE} XP (Total: ${(drinkCounts[p.id] || 0) + 1})`, { duration: 1500, position: 'top-center' });
-                      // Sync EXP to Supabase profile if player has a linked account
-                      try {
-                        const pid = (p as any).supabase_id;
-                        if (pid) {
-                          await supabase.rpc('increment_player_exp', { player_id: pid, exp_amount: XP.DRINK_BRAVE }).catch(() => { });
-                        }
-                      } catch { /* silent fail */ }
-                    }}
-                    className="flex flex-col items-center gap-1 px-2 py-1.5 rounded-lg bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 hover:bg-gradient-to-r hover:from-amber-500/40 hover:to-orange-500/40 transition-all min-w-[60px] active:shadow-[0_0_15px_rgba(251,191,36,0.5)]"
-                  >
-                    <div className="w-10 h-10 rounded-full border-2 border-amber-400/50 overflow-hidden shadow-[0_0_8px_rgba(251,191,36,0.2)]">
-                      {p.avatar_url ? (
-                        <img src={p.avatar_url} className="w-full h-full object-cover" alt={p.name} />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-amber-700 to-orange-800 flex items-center justify-center text-sm font-bold text-white">
-                          {p.name.substring(0, 2).toUpperCase()}
-                        </div>
-                      )}
-                    </div>
-                    <span className="text-[9px] font-bold text-amber-300 truncate max-w-[55px]">{p.name}</span>
-                    <span className="text-[10px] font-black text-amber-400">{drinkCounts[p.id] || 0} 🍺</span>
-                  </motion.button>
-                ))}
+                      <span className="max-w-[55px] truncate text-[9px] font-bold text-amber-300">
+                        {p.name}
+                      </span>
+                      <span className="text-[10px] font-black text-amber-400">
+                        {drinkCounts[p.id] || 0} 🍺
+                      </span>
+                    </motion.button>
+                  ))}
+                </div>
+                <p className="mt-2 text-center text-[9px] text-amber-500/60">
+                  Cada trago otorga +5 XP al jugador
+                </p>
               </div>
-              <p className="text-[9px] text-amber-500/60 text-center mt-2">Cada trago otorga +5 XP al jugador</p>
             </div>
-          </div>
-        )}
+          )}
 
         {/* Render other game components (Trivia, Drinking, etc) overlaying or replacing card */}
-        {!gameState.showVirusAlert && ((gameState.showTrivia) || (mode === 'cultura') || (mode === 'trivia_futbol')) && currentQuestion && (
-          <div className="absolute inset-0 z-20 bg-gradient-to-r from-slate-900/80 to-slate-800/80 backdrop-blur-xl p-4 flex items-center justify-center">
-            <TriviaQuestionCard
-              question={currentQuestion}
-              playerName={currentPlayer?.name || "Jugador"}
-              onLaunchKahoot={(isHost || !isMultiplayer) ? (mode) => setShowKahoot({ active: true, mode }) : undefined}
-              onAnswer={(correct, points) => {
-                if (correct) {
-                  addScore(currentPlayer.id, points);
-                  confetti();
-                  toast.success(`✓ ${currentPlayer?.name} acierta — +${points} XP · reparte 1 trago 🍺`, { duration: 2000 });
-                } else {
-                  toast(`✗ ${currentPlayer?.name} falla — bebe 1 🍻`, { duration: 2000 });
+        {!gameState.showVirusAlert &&
+          (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') &&
+          currentQuestion && (
+            <div className="absolute inset-0 z-20 flex items-center justify-center bg-gradient-to-r from-slate-900/80 to-slate-800/80 p-4 backdrop-blur-xl">
+              <TriviaQuestionCard
+                question={currentQuestion}
+                playerName={currentPlayer?.name || 'Jugador'}
+                onLaunchKahoot={
+                  isHost || !isMultiplayer
+                    ? (mode) => setShowKahoot({ active: true, mode })
+                    : undefined
                 }
+                onAnswer={(correct, points) => {
+                  if (correct) {
+                    addScore(currentPlayer.id, points);
+                    confetti();
+                    toast.success(
+                      `✓ ${currentPlayer?.name} acierta — +${points} XP · reparte 1 trago 🍺`,
+                      { duration: 2000 }
+                    );
+                  } else {
+                    toast(`✗ ${currentPlayer?.name} falla — bebe 1 🍻`, { duration: 2000 });
+                  }
 
-                // If it was a trigger (megamix), close the overlay.
-                // If it is a full mode, just go to next question (handleNext handles it).
-                if (mode === 'megamix') {
-                  setGameState((prev: any) => ({ ...prev, showTrivia: false }));
-                }
+                  // If it was a trigger (megamix), close the overlay.
+                  // If it is a full mode, just go to next question (handleNext handles it).
+                  if (mode === 'megamix') {
+                    setGameState((prev: any) => ({ ...prev, showTrivia: false }));
+                  }
 
-                handleNext();
-              }}
-            />
-          </div>
-        )}
+                  handleNext();
+                }}
+              />
+            </div>
+          )}
 
         {/* Drinking Games Overlay ("Estatua Griega" etc) */}
         {gameState.showDrinkingGame && gameState.currentDrinkingGame && (
-          <div className="absolute inset-0 z-[60] bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="absolute inset-0 z-[60] flex items-center justify-center bg-slate-950/90 p-4 backdrop-blur-md">
             <motion.div
               initial={{ scale: 0.8, opacity: 0, rotateY: 90 }}
               animate={{ scale: 1, opacity: 1, rotateY: 0 }}
-              className="max-w-sm w-full bg-gradient-to-br from-indigo-900 to-slate-900 border-2 border-indigo-500 rounded-[2.5rem] p-8 text-center text-white shadow-[0_0_40px_rgba(99,102,241,0.4)] relative overflow-hidden"
+              className="relative w-full max-w-sm overflow-hidden rounded-[2.5rem] border-2 border-indigo-500 bg-gradient-to-br from-indigo-900 to-slate-900 p-8 text-center text-white shadow-[0_0_40px_rgba(99,102,241,0.4)]"
             >
               <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
               <div className="relative z-10 space-y-6">
                 <div>
-                  <p className="text-[10px] text-indigo-300 font-black uppercase tracking-[0.3em] mb-2">Evento Especial</p>
-                  <h2 className="text-3xl font-black text-white leading-tight uppercase tracking-tighter drop-shadow-lg">{gameState.currentDrinkingGame.name}</h2>
+                  <p className="mb-2 text-center text-[10px] font-bold uppercase tracking-widest text-indigo-300">
+                    Evento Especial
+                  </p>
+                  <h2 className="text-3xl font-black uppercase leading-tight tracking-tighter text-white drop-shadow-lg">
+                    {gameState.currentDrinkingGame.name}
+                  </h2>
                 </div>
-                <div className="bg-black/40 p-5 rounded-2xl border border-white/10 shadow-inner">
-                  <p className="text-lg font-bold text-indigo-100 leading-snug">{gameState.currentDrinkingGame.description}</p>
+                <div className="rounded-2xl border border-white/10 bg-black/40 p-5 shadow-inner">
+                  <p className="text-lg font-bold leading-snug text-indigo-100">
+                    {gameState.currentDrinkingGame.description}
+                  </p>
                 </div>
                 <Button
-                  className="w-full h-14 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-lg rounded-xl shadow-xl transition-all active:scale-95"
+                  className="h-14 w-full rounded-xl bg-indigo-600 text-lg font-black text-white shadow-xl transition-all hover:bg-indigo-500 active:scale-95"
                   onClick={() => {
                     setGameState((prev: any) => ({ ...prev, showDrinkingGame: false }));
                     handleNext();
@@ -2321,7 +2909,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
         {/* Impostor Round */}
         {gameState.showImpostor && gameState.impostorPlayerId && (
-          <div className="absolute inset-0 z-30 bg-gradient-to-r from-slate-900/80 to-slate-800/80 overflow-y-auto">
+          <div className="absolute inset-0 z-30 overflow-y-auto bg-gradient-to-r from-slate-900/80 to-slate-800/80">
             <ImpostorRound
               players={players}
               impostorPlayerId={gameState.impostorPlayerId}
@@ -2330,8 +2918,9 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               onComplete={(caught, votedId) => {
                 // Simple score logic for now
                 if (caught) {
-                  players.forEach(p => {
-                    if (p.id && p.id !== gameState.impostorPlayerId) addScore(p.id, XP.IMPOSTOR_CAUGHT);
+                  players.forEach((p) => {
+                    if (p.id && p.id !== gameState.impostorPlayerId)
+                      addScore(p.id, XP.IMPOSTOR_CAUGHT);
                   });
                 } else if (gameState.impostorPlayerId) {
                   addScore(gameState.impostorPlayerId, XP.IMPOSTOR_WIN);
@@ -2348,7 +2937,7 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
         {/* Duel Round */}
         {gameState.showDuel && gameState.duelPlayers.length >= 2 && (
-          <div className="absolute inset-0 z-30 bg-gradient-to-r from-slate-900/80 to-slate-800/80 overflow-y-auto">
+          <div className="absolute inset-0 z-30 overflow-y-auto bg-gradient-to-r from-slate-900/80 to-slate-800/80">
             <DueloComponent
               dueloText={gameState.currentDuelo || ''}
               player1={gameState.duelPlayers[0]}
@@ -2369,21 +2958,24 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           </div>
         )}
 
-
-
         {/* Voting Support (Suggestion/Voting) */}
         {gameState.showVoting && (
-          <div className="absolute inset-0 z-20 bg-gradient-to-r from-slate-900/80 to-slate-800/80 p-4 flex flex-col items-center justify-center">
-            <h2 className="text-2xl font-bold mb-6">Votación</h2>
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-gradient-to-r from-slate-900/80 to-slate-800/80 p-4">
+            <h2 className="mb-6 text-2xl font-bold">Votación</h2>
             <QuestionVote
               questionText={gameState.votingQuestion || ''}
               questionCategory="megamix"
-              gameId={""}
+              gameId={''}
             />
-            <Button className="mt-8" onClick={() => {
-              setGameState((prev: any) => ({ ...prev, showVoting: false }));
-              handleNext();
-            }}>Continuar</Button>
+            <Button
+              className="mt-8"
+              onClick={() => {
+                setGameState((prev: any) => ({ ...prev, showVoting: false }));
+                handleNext();
+              }}
+            >
+              Continuar
+            </Button>
           </div>
         )}
 
@@ -2392,22 +2984,23 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
         {/* VIRUS ALERT — sheet compacto desde abajo, con fondo que tapa el resto */}
         <VirusAlertSheet
-          show={!!gameState.showVirusAlert && !!gameState.virusAlertData && !gameState.showCaptainSelection}
+          show={
+            !!gameState.showVirusAlert &&
+            !!gameState.virusAlertData &&
+            !gameState.showCaptainSelection
+          }
           data={gameState.virusAlertData}
           onAcknowledge={() => {
-            setGameState(prev => ({ ...prev, showVirusAlert: false, virusAlertData: null }));
+            setGameState((prev) => ({ ...prev, showVirusAlert: false, virusAlertData: null }));
             performTurnAdvance();
           }}
         />
 
-        {/* Video Chat is now handled globally at Index.tsx level */}
-
-
         {/* Captain Pass Screen */}
         {gameState.showCaptainPass && (
-          <div className="absolute inset-0 z-30 bg-gradient-to-r from-slate-900/80 to-slate-800/80 overflow-y-auto">
+          <div className="absolute inset-0 z-30 overflow-y-auto bg-gradient-to-r from-slate-900/80 to-slate-800/80">
             <CaptainPassScreen
-              captainName={players.find(p => p.id === gameState.captainId)?.name || 'Capitán'}
+              captainName={players.find((p) => p.id === gameState.captainId)?.name || 'Capitán'}
               targetPlayerName={currentPlayer?.name || 'Siguiente Jugador'}
               isCaptainTurn={currentPlayer?.id === gameState.captainId}
               challengePreview={currentText}
@@ -2437,16 +3030,26 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
         )}
 
         {/* Final Emergency Fallback: If any of the flags are true but we failed to render the subcomponent, provide a way out */}
-        {(gameState.showTrivia || gameState.showDrinkingGame || gameState.showImpostor || gameState.showDuel ||
-          gameState.showMimica || gameState.showImpostorWord ||
-          gameState.showVoting || gameState.showCaptainPass ||
-          mode === 'cultura' || mode === 'trivia_futbol') && (
-            <div className="absolute bottom-4 left-0 right-0 p-4 flex flex-col items-center justify-center pointer-events-none gap-2">
-              <Button variant="outline" className="opacity-40 hover:opacity-100 pointer-events-auto bg-background/50 backdrop-blur text-[9px] uppercase font-black tracking-widest border-white/10" onClick={handleNext}>
-                Forzar Salto (Si está pillado)
-              </Button>
-            </div>
-          )}
+        {(gameState.showTrivia ||
+          gameState.showDrinkingGame ||
+          gameState.showImpostor ||
+          gameState.showDuel ||
+          gameState.showMimica ||
+          gameState.showImpostorWord ||
+          gameState.showVoting ||
+          gameState.showCaptainPass ||
+          mode === 'cultura' ||
+          mode === 'trivia_futbol') && (
+          <div className="pointer-events-none absolute bottom-4 left-0 right-0 flex flex-col items-center justify-center gap-2 p-4">
+            <Button
+              variant="outline"
+              className="pointer-events-auto border-white/10 bg-background/50 text-[9px] font-black uppercase tracking-widest opacity-40 backdrop-blur hover:opacity-100"
+              onClick={handleNext}
+            >
+              Forzar Salto (Si está pillado)
+            </Button>
+          </div>
+        )}
 
         {/* Eliminado el indicador legacy CARTA {X} duplicado */}
 
@@ -2459,25 +3062,43 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center gap-5 p-4 sm:p-6 text-center overflow-y-auto"
+              className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-5 overflow-y-auto bg-black/90 p-4 text-center backdrop-blur-md sm:p-6"
             >
-              <span className="text-xs font-black uppercase tracking-widest text-fuchsia-400">🗣️ Debate por equipos</span>
-              <h2 className="text-lg sm:text-3xl font-black text-white max-w-xl px-2">{debateSession.topic}</h2>
-              <p className="text-[11px] font-bold text-amber-300">⚖️ Juez: {debateSession.judge.name} (decide desde su móvil)</p>
-              <div className="flex flex-col sm:flex-row items-stretch gap-4 sm:gap-6 w-full max-w-2xl px-2">
-                <div className="flex-1 min-w-0 flex flex-col items-center gap-1 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-3">
-                  <span className="text-base sm:text-xl font-black uppercase tracking-wider text-emerald-400">A FAVOR</span>
-                  <span className="text-sm sm:text-base font-black text-white break-words">{debateSession.teamA.map(p => p.name).join(', ')}</span>
-                  <ul className="mt-2 text-left text-[11px] text-emerald-200/80 list-disc pl-4 space-y-0.5 w-full">
-                    {debateSession.aFavorHints.map((h, i) => <li key={i}>{h}</li>)}
+              <span className="text-xs font-black uppercase tracking-widest text-fuchsia-400">
+                🗣️ Debate por equipos
+              </span>
+              <h2 className="max-w-xl px-2 text-lg font-black text-white sm:text-3xl">
+                {debateSession.topic}
+              </h2>
+              <p className="text-[11px] font-bold text-amber-300">
+                ⚖️ Juez: {debateSession.judge.name} (decide desde su móvil)
+              </p>
+              <div className="flex w-full max-w-2xl flex-col items-stretch gap-4 px-2 sm:flex-row sm:gap-6">
+                <div className="flex min-w-0 flex-1 flex-col items-center gap-1 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-3">
+                  <span className="text-base font-black uppercase tracking-wider text-emerald-400 sm:text-xl">
+                    A FAVOR
+                  </span>
+                  <span className="break-words text-sm font-black text-white sm:text-base">
+                    {debateSession.teamA.map((p) => p.name).join(', ')}
+                  </span>
+                  <ul className="mt-2 w-full list-disc space-y-0.5 pl-4 text-left text-[11px] text-emerald-200/80">
+                    {debateSession.aFavorHints.map((h, i) => (
+                      <li key={i}>{h}</li>
+                    ))}
                   </ul>
                 </div>
-                <span className="hidden sm:flex items-center text-white/40 font-black">VS</span>
-                <div className="flex-1 min-w-0 flex flex-col items-center gap-1 rounded-2xl border border-red-500/30 bg-red-500/10 p-3">
-                  <span className="text-base sm:text-xl font-black uppercase tracking-wider text-red-400">EN CONTRA</span>
-                  <span className="text-sm sm:text-base font-black text-white break-words">{debateSession.teamB.map(p => p.name).join(', ')}</span>
-                  <ul className="mt-2 text-left text-[11px] text-red-200/80 list-disc pl-4 space-y-0.5 w-full">
-                    {debateSession.enContraHints.map((h, i) => <li key={i}>{h}</li>)}
+                <span className="hidden items-center font-black text-white/40 sm:flex">VS</span>
+                <div className="flex min-w-0 flex-1 flex-col items-center gap-1 rounded-2xl border border-red-500/30 bg-red-500/10 p-3">
+                  <span className="text-base font-black uppercase tracking-wider text-red-400 sm:text-xl">
+                    EN CONTRA
+                  </span>
+                  <span className="break-words text-sm font-black text-white sm:text-base">
+                    {debateSession.teamB.map((p) => p.name).join(', ')}
+                  </span>
+                  <ul className="mt-2 w-full list-disc space-y-0.5 pl-4 text-left text-[11px] text-red-200/80">
+                    {debateSession.enContraHints.map((h, i) => (
+                      <li key={i}>{h}</li>
+                    ))}
                   </ul>
                 </div>
               </div>
@@ -2485,16 +3106,22 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               {debateVerdict ? (
                 <div className="flex flex-col items-center gap-3">
                   <p className="text-lg font-black text-amber-300">
-                    ⚖️ {debateVerdict.judgeName} falla a favor de {debateVerdict.winner === 'A' ? 'A FAVOR' : 'EN CONTRA'}
+                    ⚖️ {debateVerdict.judgeName} falla a favor de{' '}
+                    {debateVerdict.winner === 'A' ? 'A FAVOR' : 'EN CONTRA'}
                   </p>
                   <Button
-                    className="bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white font-black"
+                    className="bg-gradient-to-r from-purple-500 to-fuchsia-500 font-black text-white"
                     onClick={() => {
-                      const losers = debateVerdict.winner === 'A' ? debateSession.teamB : debateSession.teamA;
-                      const winners = debateVerdict.winner === 'A' ? debateSession.teamA : debateSession.teamB;
-                      winners.forEach(p => addScore(p.id, XP.RETO_DONE));
+                      const losers =
+                        debateVerdict.winner === 'A' ? debateSession.teamB : debateSession.teamA;
+                      const winners =
+                        debateVerdict.winner === 'A' ? debateSession.teamA : debateSession.teamB;
+                      winners.forEach((p) => addScore(p.id, XP.RETO_DONE));
                       confetti();
-                      toast.success(`🗣️ Gana el equipo ${debateVerdict.winner === 'A' ? 'A FAVOR' : 'EN CONTRA'} — ${losers.map(p => p.name).join(', ')} beb${losers.length === 1 ? 'e' : 'en'} 🍻`, { duration: 3000 });
+                      toast.success(
+                        `🗣️ Gana el equipo ${debateVerdict.winner === 'A' ? 'A FAVOR' : 'EN CONTRA'} — ${losers.map((p) => p.name).join(', ')} beb${losers.length === 1 ? 'e' : 'en'} 🍻`,
+                        { duration: 3000 }
+                      );
                       setDebateSession(null);
                       setDebateVerdict(null);
                     }}
@@ -2507,7 +3134,10 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                   <Button
                     variant="outline"
                     className="border-white/20 text-white/70"
-                    onClick={() => { setDebateSession(null); setDebateVerdict(null); }}
+                    onClick={() => {
+                      setDebateSession(null);
+                      setDebateVerdict(null);
+                    }}
                   >
                     Cancelar debate
                   </Button>
@@ -2526,23 +3156,26 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               question={
                 showKahoot.mode === 'speed_race' && speedRaceQuestion
                   ? speedRaceQuestion.question
-                  : (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion
-                  ? currentQuestion.question
-                  : sanitizeCardText(currentText || '')
+                  : (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') &&
+                      currentQuestion
+                    ? currentQuestion.question
+                    : sanitizeCardText(currentText || '')
               }
               options={
                 showKahoot.mode === 'speed_race' && speedRaceQuestion
                   ? speedRaceQuestion.options
-                  : (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion
-                  ? currentQuestion.options
-                  : players.map(p => p.name)
+                  : (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') &&
+                      currentQuestion
+                    ? currentQuestion.options
+                    : players.map((p) => p.name)
               }
               correctAnswer={
                 showKahoot.mode === 'speed_race' && speedRaceQuestion
                   ? speedRaceQuestion.options[speedRaceQuestion.correctIndex]
-                  : (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion
-                  ? currentQuestion.options[currentQuestion.correctIndex]
-                  : undefined
+                  : (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') &&
+                      currentQuestion
+                    ? currentQuestion.options[currentQuestion.correctIndex]
+                    : undefined
               }
               isHost={isHost || !isMultiplayer}
               allowHostVote={!isMultiplayer}
@@ -2552,8 +3185,8 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
               onRaceComplete={(ranking: RaceRankEntry[]) => {
                 // Reparte puntos reales a cada jugador según su puesto en el ranking
                 // de velocidad de acierto (el más rápido se lleva más puntos).
-                ranking.forEach(entry => {
-                  const p = players.find(pl => pl.name === entry.voter);
+                ranking.forEach((entry) => {
+                  const p = players.find((pl) => pl.name === entry.voter);
                   if (p) addScore(p.id, entry.points);
                 });
                 if (ranking.length > 0) confetti();
@@ -2561,19 +3194,25 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
                 setShowKahoot({ active: false, mode: 'standard' });
               }}
               onResult={(winner, votes) => {
-                if (!((gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion)) {
-                  const wPlayer = players.find(p => p.name === winner);
+                if (!(
+                  (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') &&
+                  currentQuestion
+                )) {
+                  const wPlayer = players.find((p) => p.name === winner);
                   if (wPlayer) handleAdjustXP(wPlayer.id, 5);
                 }
-                setGameState(prev => ({ ...prev, votingSelections: [] }));
+                setGameState((prev) => ({ ...prev, votingSelections: [] }));
                 setShowKahoot({ active: false, mode: 'standard' });
 
                 // Si estamos en trivia, hay que procesar la respuesta
-                if ((gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') && currentQuestion) {
+                if (
+                  (gameState.showTrivia || mode === 'cultura' || mode === 'trivia_futbol') &&
+                  currentQuestion
+                ) {
                   const correctOpt = currentQuestion.options[currentQuestion.correctIndex];
                   if (winner === correctOpt) {
-                     addScore(currentPlayer?.id || '', XP.RETO_DONE);
-                     confetti();
+                    addScore(currentPlayer?.id || '', XP.RETO_DONE);
+                    confetti();
                   }
                   if (mode === 'megamix') {
                     setGameState((prev: any) => ({ ...prev, showTrivia: false }));
@@ -2584,27 +3223,24 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
             />
           )}
         </AnimatePresence>
-
       </main>
 
       {/* Round Summary Overlay */}
-      {
-        showRoundSummary && roundSnapshot && (
-          <div className="absolute inset-0 z-[100] bg-gradient-to-r from-slate-900/80 to-slate-800/80 flex items-center justify-center">
-            <RoundSummary
-              round={roundSnapshot.round}
-              scores={roundSnapshot.scores}
-              players={players}
-              teams={teams}
-              globalStats={rankings}
-              onContinue={() => setShowRoundSummary(false)}
-              onEndGame={() => setShowPodium(true)}
-              isGameOver={gameOver}
-              trackingData={{ voteCounts, drinkCounts, virusReceived, skipCounts }}
-            />
-          </div>
-        )
-      }
+      {showRoundSummary && roundSnapshot && (
+        <div className="absolute inset-0 z-[100] flex items-center justify-center bg-gradient-to-r from-slate-900/80 to-slate-800/80">
+          <RoundSummary
+            round={roundSnapshot.round}
+            scores={roundSnapshot.scores}
+            players={players}
+            teams={teams}
+            globalStats={rankings}
+            onContinue={() => setShowRoundSummary(false)}
+            onEndGame={() => setShowPodium(true)}
+            isGameOver={gameOver}
+            trackingData={{ voteCounts, drinkCounts, virusReceived, skipCounts }}
+          />
+        </div>
+      )}
 
       {/* ── YO NUNCA RESPONSE OVERLAY ── */}
       <AnimatePresence>
@@ -2619,12 +3255,13 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
 
       {/* ── RETO OUTCOME OVERLAY ── (no mientras hay virus/torneo/impostor) */}
       <AnimatePresence>
-        {showRetoOutcome && currentPlayer && !gameState.showVirusAlert && !showTorneoRound && !gameState.showImpostor && (
-          <RetoOutcome
-            player={currentPlayer}
-            onResult={handleRetoOutcome}
-          />
-        )}
+        {showRetoOutcome &&
+          currentPlayer &&
+          !gameState.showVirusAlert &&
+          !showTorneoRound &&
+          !gameState.showImpostor && (
+            <RetoOutcome player={currentPlayer} onResult={handleRetoOutcome} />
+          )}
       </AnimatePresence>
 
       {/* ── TORNEO ROUND OVERLAY ── */}
@@ -2633,18 +3270,24 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           <TorneoRound
             match={torneoMatch}
             torneoScores={Object.fromEntries(
-              Object.entries(torneoScores).map(([id, s]) => [id, { wins: s.wins, losses: s.losses }])
+              Object.entries(torneoScores).map(([id, s]) => [
+                id,
+                { wins: s.wins, losses: s.losses },
+              ])
             )}
             onWinner={(winnerId, loserId) => {
               recordTorneoWin(winnerId, loserId);
               setShowTorneoRound(false);
-              const winner = players.find(p => p.id === winnerId);
-              const loser = players.find(p => p.id === loserId);
+              const winner = players.find((p) => p.id === winnerId);
+              const loser = players.find((p) => p.id === loserId);
               if (winner) addScore(winner.id, XP.TORNEO_WIN);
               if (loser) addScore(loser.id, XP.TORNEO_LOSE);
               if (winner) addEvent('torneo_win', winner, loser?.name ?? 'torneo', gameState.round);
               if (loser) addEvent('torneo_lose', loser, winner?.name ?? 'torneo', gameState.round);
-              toast.success(`👑 ${winner?.name || 'Ganador'} gana el torneo — +${XP.TORNEO_WIN} XP · reparte 3 tragos!`, { duration: 3000 });
+              toast.success(
+                `👑 ${winner?.name || 'Ganador'} gana el torneo — +${XP.TORNEO_WIN} XP · reparte 3 tragos!`,
+                { duration: 3000 }
+              );
               advanceTurn(true);
             }}
           />
@@ -2659,32 +3302,42 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
             addScore={addScore}
             onWinner={(winner, loser) => {
               addEvent('torneo_win', winner, 'bracket_torneo', gameState.round);
-              toast.success(`👑 ${winner.name} elimina a ${loser.name} — reparte 3 tragos!`, { duration: 2500 });
+              toast.success(`👑 ${winner.name} elimina a ${loser.name} — reparte 3 tragos!`, {
+                duration: 2500,
+              });
             }}
             onClose={() => {
               setShowMegamixTournament(false);
-              setGameState(prev => ({ ...prev, tournamentBracket: null }));
+              setGameState((prev) => ({ ...prev, tournamentBracket: null }));
               advanceTurn(true);
             }}
-            onStateChange={(isHost || !isMultiplayer) ? (snapshot) => {
-              // Espejo del bracket en gameState: reutiliza el canal/broadcast
-              // ya existente (useMultiplayer) para que todos los móviles
-              // conectados vean el cuadro de eliminatorias en tiempo real.
-              setGameState(prev => ({
-                ...prev,
-                tournamentBracket: {
-                  active: snapshot.active,
-                  stage: snapshot.stage,
-                  bracketNumber: snapshot.bracketNumber,
-                  rounds: snapshot.rounds,
-                  currentRoundIdx: snapshot.currentRoundIdx,
-                  currentMatchIdx: snapshot.currentMatchIdx,
-                  champion: snapshot.champion
-                    ? { id: snapshot.champion.id, name: snapshot.champion.name, avatar_url: snapshot.champion.avatar_url }
-                    : null,
-                },
-              }));
-            } : undefined}
+            onStateChange={
+              isHost || !isMultiplayer
+                ? (snapshot) => {
+                    // Espejo del bracket en gameState: reutiliza el canal/broadcast
+                    // ya existente (useMultiplayer) para que todos los móviles
+                    // conectados vean el cuadro de eliminatorias en tiempo real.
+                    setGameState((prev) => ({
+                      ...prev,
+                      tournamentBracket: {
+                        active: snapshot.active,
+                        stage: snapshot.stage,
+                        bracketNumber: snapshot.bracketNumber,
+                        rounds: snapshot.rounds,
+                        currentRoundIdx: snapshot.currentRoundIdx,
+                        currentMatchIdx: snapshot.currentMatchIdx,
+                        champion: snapshot.champion
+                          ? {
+                              id: snapshot.champion.id,
+                              name: snapshot.champion.name,
+                              avatar_url: snapshot.champion.avatar_url,
+                            }
+                          : null,
+                      },
+                    }));
+                  }
+                : undefined
+            }
           />
         )}
       </AnimatePresence>
@@ -2693,19 +3346,21 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           conectados mientras el torneo Megamix está en marcha, incluso
           cuando el host está metido en la pantalla de duelo/votación ── */}
       {gameState.tournamentBracket?.active && (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[260] w-[min(92vw,420px)]">
-          <div className="rounded-2xl border border-amber-500/30 bg-slate-950/95 backdrop-blur-md shadow-2xl overflow-hidden">
+        <div className="fixed bottom-4 left-1/2 z-[260] w-[min(92vw,420px)] -translate-x-1/2">
+          <div className="overflow-hidden rounded-2xl border border-amber-500/30 bg-slate-950/95 shadow-2xl backdrop-blur-md">
             <button
-              onClick={() => setBracketPanelOpen(o => !o)}
-              className="w-full flex items-center justify-between px-4 py-2.5 text-left"
+              onClick={() => setBracketPanelOpen((o) => !o)}
+              className="flex w-full items-center justify-between px-4 py-2.5 text-left"
             >
-              <span className="text-amber-400 font-black text-xs uppercase tracking-widest">
+              <span className="text-xs font-black uppercase tracking-widest text-amber-400">
                 🏆 Bracket en vivo · Ronda {gameState.tournamentBracket.currentRoundIdx + 1}
               </span>
-              <span className="text-white/40 text-xs">{bracketPanelOpen ? '▾ ocultar' : '▸ ver'}</span>
+              <span className="text-xs text-white/40">
+                {bracketPanelOpen ? '▾ ocultar' : '▸ ver'}
+              </span>
             </button>
             {bracketPanelOpen && (
-              <div className="px-3 pb-3 max-h-[42vh] overflow-y-auto">
+              <div className="max-h-[42vh] overflow-y-auto px-3 pb-3">
                 <TournamentBracket
                   compact
                   rounds={gameState.tournamentBracket.rounds}
@@ -2722,11 +3377,11 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
       {/* Podium Screen Overlay */}
       {showPodium && (
         <PodiumScreen
-          players={players.map(p => ({
+          players={players.map((p) => ({
             id: p.id,
             name: p.name,
             score: scores[p.id] || 0,
-            avatar_url: p.avatar_url
+            avatar_url: p.avatar_url,
           }))}
           trackingData={{ voteCounts, drinkCounts, virusReceived, skipCounts }}
           onRestart={() => {
@@ -2739,6 +3394,6 @@ export function PartyGame({ mode, onExit, isMultiplayer = false, isHost = false,
           }}
         />
       )}
-    </div >
+    </div>
   );
 }

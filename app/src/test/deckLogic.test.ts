@@ -2,6 +2,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { getStructuredMegamix, isIndividualCard } from '@/data/gameContent';
 import { interleaveTasteCards, useGameContent } from '@/hooks/game/useGameContent';
+import { MEGAMIX_SPAIN_GENERAL, MEGAMIX_SPAIN_INDIVIDUAL } from '@/data/megamixSpain';
+import {
+  getMegamixPhase,
+  getMegamixMystery,
+  transformCardForNoAlcohol,
+} from '@/utils/megamixExperience';
 
 vi.mock('@/services/customThemeService', () => ({ fetchThemeCards: vi.fn(async () => []) }));
 
@@ -27,7 +33,7 @@ describe('isIndividualCard', () => {
     '⚔️ Duelo de miradas',
     'Reto: {player} canta el estribillo',
     'Cultura Chupística: ríos de España',
-  ])('individual: %s', card => {
+  ])('individual: %s', (card) => {
     expect(isIndividualCard(card)).toBe(true);
   });
 
@@ -39,7 +45,7 @@ describe('isIndividualCard', () => {
     '📜 NORMA: se bebe con la izquierda',
     'TRIGGER:IMPOSTOR',
     '',
-  ])('general: %s', card => {
+  ])('general: %s', (card) => {
     expect(isIndividualCard(card)).toBe(false);
   });
 });
@@ -51,32 +57,34 @@ describe('getStructuredMegamix', () => {
 
   it('devuelve exactamente las cartas pedidas', () => {
     expect(deck).toHaveLength(500);
-    expect(deck.every(c => typeof c === 'string' && c.trim().length > 0)).toBe(true);
+    expect(deck.every((c) => typeof c === 'string' && c.trim().length > 0)).toBe(true);
     expect(deck).not.toContain('[object Object]');
   });
 
   it('mantiene los triggers repetidos (antes se deduplicaban a 1 de cada)', () => {
     // Impostor en cada múltiplo de 20 → 24 en 500 cartas
-    expect(deck.filter(c => c === 'TRIGGER:IMPOSTOR')).toHaveLength(24);
-    expect(deck.filter(c => c === 'TRIGGER:TORNEO' || c === 'TRIGGER:MEGATORNEO').length).toBeGreaterThan(4);
+    expect(deck.filter((c) => c === 'TRIGGER:IMPOSTOR')).toHaveLength(24);
+    expect(
+      deck.filter((c) => c === 'TRIGGER:TORNEO' || c === 'TRIGGER:MEGATORNEO').length
+    ).toBeGreaterThan(4);
   });
 
-  it('alterna general / individual sin excepciones (cartas reclasificadas)', () => {
-    expect(oddSlots(deck).filter(c => !isIndividualCard(c))).toEqual([]);
-    expect(evenSlots(deck).filter(isIndividualCard)).toEqual([]);
+  it('alterna individual / general sin excepciones', () => {
+    expect(evenSlots(deck).filter((c) => !isIndividualCard(c))).toEqual([]);
+    expect(oddSlots(deck).filter(isIndividualCard)).toEqual([]);
   });
 
   it('respeta los intervalos de eventos aunque sean impares o coincidan', () => {
-    const n = (re: RegExp) => deck.filter(c => re.test(c)).length;
+    const n = (re: RegExp) => deck.filter((c) => re.test(c)).length;
     expect(n(/^TRIGGER:(MEGA)?TORNEO$/)).toBeGreaterThanOrEqual(30); // cada 15 → ~33
-    expect(n(/^📜 NORMA/)).toBeGreaterThanOrEqual(18);              // cada 25 → ~20
+    expect(n(/^📜 NORMA/)).toBeGreaterThanOrEqual(18); // cada 25 → ~20
     expect(n(/^TRIGGER:(TRIVIA_|DUELO|VIRUS)/)).toBeGreaterThanOrEqual(45); // cada 10 → ~50
   });
 
   it('respeta los tipos permitidos (modo clásico)', () => {
     const clasico = getStructuredMegamix(400, 4, CLASICO_OPTS);
     for (const banned of ['🎭', '⚔️', '⚡', '💀']) {
-      expect(clasico.filter(c => c.startsWith(banned))).toEqual([]);
+      expect(clasico.filter((c) => c.startsWith(banned))).toEqual([]);
     }
   });
 
@@ -89,7 +97,7 @@ describe('getStructuredMegamix', () => {
 
   it('no duplica el prefijo "Yo nunca"', () => {
     const big = getStructuredMegamix(2500, 4);
-    expect(big.filter(c => /yo nunca\.{3}\s*yo nunca/i.test(c))).toEqual([]);
+    expect(big.filter((c) => /yo nunca\.{3}\s*yo nunca/i.test(c))).toEqual([]);
   });
 
   it('mezcla los pools extra como un tipo más', () => {
@@ -98,6 +106,23 @@ describe('getStructuredMegamix', () => {
       extraGeneral: { customRetos: ['CARTA EXTRA DE PRUEBA'] },
     });
     expect(extra).toContain('CARTA EXTRA DE PRUEBA');
+  });
+
+  it('incluye contenido español curado en su posición correcta', () => {
+    const spanish = getStructuredMegamix(500, 4, {
+      extraGeneral: { megamixEspañaGeneral: MEGAMIX_SPAIN_GENERAL },
+      extraIndividual: { megamixEspañaIndividual: MEGAMIX_SPAIN_INDIVIDUAL },
+    });
+
+    expect(spanish.some((card) => MEGAMIX_SPAIN_GENERAL.includes(card))).toBe(true);
+    expect(spanish.some((card) => MEGAMIX_SPAIN_INDIVIDUAL.includes(card))).toBe(true);
+
+    spanish.forEach((card, index) => {
+      if (index % 2 === 0) expect(isIndividualCard(card)).toBe(true);
+      if (index % 2 === 1 && !isTrigger(card) && !card.startsWith('📜')) {
+        expect(isIndividualCard(card)).toBe(false);
+      }
+    });
   });
 });
 
@@ -115,7 +140,7 @@ describe('interleaveTasteCards', () => {
     expect(out).toHaveLength(51);
     expect(out[16]).toBe('gusto');
     expect(out[33]).toBe('gusto');
-    expect(out.filter(c => c !== 'gusto')).toEqual(deck);
+    expect(out.filter((c) => c !== 'gusto')).toEqual(deck);
   });
 });
 
@@ -132,13 +157,14 @@ describe('useGameContent', () => {
 
   it('megamix: no baraja el mazo estructurado (antes se perdía la alternancia)', async () => {
     const deck = (await loadDeck('megamix')).slice(0, 400);
-    expect(deck[20]).toBe('TRIGGER:IMPOSTOR');
-    expect(oddSlots(deck).filter(c => !isIndividualCard(c))).toEqual([]);
+    expect(evenSlots(deck).filter((c) => !isIndividualCard(c))).toEqual([]);
+    expect(oddSlots(deck).filter(isIndividualCard)).toEqual([]);
   });
 
   it('clásico: tampoco baraja', async () => {
     const deck = (await loadDeck('clasico')).slice(0, 400);
-    expect(oddSlots(deck).filter(c => !isIndividualCard(c))).toEqual([]);
+    expect(evenSlots(deck).filter((c) => !isIndividualCard(c))).toEqual([]);
+    expect(oddSlots(deck).filter(isIndividualCard)).toEqual([]);
   });
 
   it('no mete objetos crudos como cartas', async () => {
@@ -147,7 +173,7 @@ describe('useGameContent', () => {
 
   it('las cartas con -3 votos o menos dejan de salir en megamix', async () => {
     const first = await loadDeck('megamix');
-    const victim = first.find(c => c.startsWith('🙈'))!;
+    const victim = first.find((c) => c.startsWith('🙈'))!;
     localStorage.setItem('fiesta-party-votes', JSON.stringify({ megamix: { [victim]: -3 } }));
     expect(await loadDeck('megamix')).not.toContain(victim);
   });
@@ -156,5 +182,43 @@ describe('useGameContent', () => {
     const a = await loadDeck('picante');
     const b = await loadDeck('picante');
     expect(a.slice(0, 20)).not.toEqual(b.slice(0, 20));
+  });
+});
+
+// ─── Megamix experience ──────────────────────────────────────────────────────
+describe('Megamix experience', () => {
+  it('progresa por las cuatro fases de la partida', () => {
+    expect(getMegamixPhase(0)).toBe('Calienta motores');
+    expect(getMegamixPhase(50)).toBe('La previa se anima');
+    expect(getMegamixPhase(120)).toBe('Modo locura');
+    expect(getMegamixPhase(200)).toBe('Final épico');
+  });
+
+  it('devuelve pistas sin revelar el texto completo', () => {
+    expect(getMegamixMystery('⚔️ DUELO: piedra contra papel')).toMatchObject({ label: 'Duelo' });
+    expect(getMegamixMystery('TRIGGER:IMPOSTOR')).toMatchObject({ label: 'Sospecha' });
+  });
+
+  it('transforma consecuencias de alcohol a puntos', () => {
+    const transformed = transformCardForNoAlcohol('🍻 Bebe 2 tragos si fallas');
+    expect(transformed).not.toMatch(/🍻|bebes? 2|tragos/i);
+  });
+
+  it.each([
+    ['Bebe 2 tragos si fallas', 'Pierde 2 puntos si fallas'],
+    ['Los demás deben beber 1.', 'Los demás deben perder 1 punto.'],
+    ['Si fallas, bebéis 3.', 'Si fallas, perdéis 3 puntos.'],
+    ['El primero reparte 2.', 'El primero quita 2 puntos.'],
+    ['reparte un trago', 'quita un punto'],
+    ['si uno bebe, el otro también bebe', 'si uno pierde puntos, el otro también pierde puntos'],
+    ['🍻 BRINDIS REVUELTO', '⭐ BRINDIS REVUELTO'],
+    ['pensad en una bebida', 'pensad en una bebida'],
+  ])('sin alcohol: %s', (card, expected) => {
+    expect(transformCardForNoAlcohol(card)).toBe(expected);
+  });
+
+  it('las cartas españolas están en el lado correcto (general / individual)', () => {
+    expect(MEGAMIX_SPAIN_GENERAL.filter(isIndividualCard)).toEqual([]);
+    expect(MEGAMIX_SPAIN_INDIVIDUAL.filter((c) => !isIndividualCard(c))).toEqual([]);
   });
 });

@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Player, Team, GameMode } from '@/types/game';
 import { useGameContext } from '@/contexts/GameContext';
+import { readStorageJSON, writeStorageJSON } from '@/utils/storage';
 
 export interface GameState {
   phase: 'setup' | 'playing' | 'voting' | 'results' | 'minigame' | 'game_over';
@@ -52,16 +53,26 @@ export interface GameState {
   // cada jugador en SU móvil (ver SpectatorQRPanel/SpectatorView) — clave =
   // nombre del jugador, porque la identidad en el móvil espectador es por nombre.
   impostorPlayerIds?: string[];
-  impostorPrivateFor?: Record<string, {
-    kind: 'impostor';
-    isImpostor: boolean;
-    category: string;
-    word: string;
-    hint?: string;
-  }>;
+  impostorPrivateFor?: Record<
+    string,
+    {
+      kind: 'impostor';
+      isImpostor: boolean;
+      category: string;
+      word: string;
+      hint?: string;
+    }
+  >;
   captainId: string | null;
   virusAlertData: { player: Player; virus: any } | null;
-  virusCycleData?: { type: string; title: string; message: string; virusName?: string; virusDescription?: string; challenge?: string }; // Added
+  virusCycleData?: {
+    type: string;
+    title: string;
+    message: string;
+    virusName?: string;
+    virusDescription?: string;
+    challenge?: string;
+  }; // Added
 
   // Yo Nunca Equipos State
   yoNuncaEquiposPhase?: 'idle' | 'truth_phase' | 'guess_phase' | 'result_phase';
@@ -107,11 +118,18 @@ export const useGameEngine = (mode: GameMode) => {
   const { players, teams } = useGameContext();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
-  const [scores, setScores] = useState<Record<string, number>>({});
-  const [gamesWon, setGamesWon] = useState<Record<string, number>>({});
+  const [scores, setScores] = useState<Record<string, number>>(() =>
+    readStorageJSON<Record<string, number>>('partyGameScores', {})
+  );
+  const [gamesWon, setGamesWon] = useState<Record<string, number>>(() =>
+    readStorageJSON<Record<string, number>>('partyGameWins', {})
+  );
   const [gameOver, setGameOver] = useState(false);
   const [showRoundSummary, setShowRoundSummary] = useState(false);
-  const [roundSnapshot, setRoundSnapshot] = useState<{ round: number; scores: Record<string, number> } | null>(null);
+  const [roundSnapshot, setRoundSnapshot] = useState<{
+    round: number;
+    scores: Record<string, number>;
+  } | null>(null);
 
   const [gameState, setGameState] = useState<GameState>({
     phase: 'setup',
@@ -166,28 +184,20 @@ export const useGameEngine = (mode: GameMode) => {
     votingSelections: [],
   });
 
-  // Load stats from localStorage on mount
-  useEffect(() => {
-    const savedScores = localStorage.getItem('partyGameScores');
-    const savedGames = localStorage.getItem('partyGameWins');
-    if (savedScores) setScores(JSON.parse(savedScores));
-    if (savedGames) setGamesWon(JSON.parse(savedGames));
-  }, []);
-
   // Save stats whenever they change
   useEffect(() => {
-    localStorage.setItem('partyGameScores', JSON.stringify(scores));
+    writeStorageJSON('partyGameScores', scores);
   }, [scores]);
 
   useEffect(() => {
-    localStorage.setItem('partyGameWins', JSON.stringify(gamesWon));
+    writeStorageJSON('partyGameWins', gamesWon);
   }, [gamesWon]);
 
   // Derived state
   const currentPlayer = players[currentPlayerIndex];
 
   const playersWithScore = useMemo(() => {
-    return players.map(p => ({ ...p, score: scores[p.id] || 0 }));
+    return players.map((p) => ({ ...p, score: scores[p.id] || 0 }));
   }, [players, scores]);
 
   const teamsWithScore: Team[] = useMemo(() => {
@@ -197,58 +207,73 @@ export const useGameEngine = (mode: GameMode) => {
       if (!p.team_id) continue;
       sums.set(p.team_id, (sums.get(p.team_id) || 0) + (p.score || 0));
     }
-    return teams.map(t => ({ ...t, score: sums.get(t.id) || 0 }));
+    return teams.map((t) => ({ ...t, score: sums.get(t.id) || 0 }));
   }, [teams, playersWithScore]);
 
   const hasTeams = useMemo(() => {
-    return (teamsWithScore?.length || 0) > 0 && playersWithScore.some(p => !!p.team_id);
+    return (teamsWithScore?.length || 0) > 0 && playersWithScore.some((p) => !!p.team_id);
   }, [teamsWithScore, playersWithScore]);
 
-  const advanceTurn = useCallback((skipPlayerAdvance: boolean = false) => {
-    setCurrentIndex(prev => prev + 1);
+  const advanceTurn = useCallback(
+    (skipPlayerAdvance: boolean = false) => {
+      setCurrentIndex((prev) => prev + 1);
 
-    setCurrentPlayerIndex(prevPlayerIdx => {
-      const nextPlayerIdx = skipPlayerAdvance ? prevPlayerIdx : (prevPlayerIdx + 1) % Math.max(1, players.length);
+      setCurrentPlayerIndex((prevPlayerIdx) => {
+        const nextPlayerIdx = skipPlayerAdvance
+          ? prevPlayerIdx
+          : (prevPlayerIdx + 1) % Math.max(1, players.length);
 
-      setGameState(prev => {
-        const isEndOfRound = !skipPlayerAdvance && nextPlayerIdx === 0 && players.length > 1;
-        let nextState = { ...prev };
+        setGameState((prev) => {
+          const isEndOfRound = !skipPlayerAdvance && nextPlayerIdx === 0 && players.length > 1;
+          let nextState = { ...prev };
 
-        if (isEndOfRound) {
-          const nextRound = prev.round + 1;
+          if (isEndOfRound) {
+            const nextRound = prev.round + 1;
 
-          // No hard game-over limit — let the host decide when to end
-          let showNormaGlobal = prev.showNormaGlobal;
-          if (nextRound % 6 === 0) showNormaGlobal = true;
+            // No hard game-over limit — let the host decide when to end
+            let showNormaGlobal = prev.showNormaGlobal;
+            if (nextRound % 6 === 0) showNormaGlobal = true;
 
-          let nextVirusId = prev.virusPlayerId;
-          if (nextRound % 5 === 0 && players.length > 0) {
-            const currentVirusIdx = players.findIndex(p => p.id === prev.virusPlayerId);
-            const nextVirusIdx = (currentVirusIdx + 1) % players.length;
-            nextVirusId = players[nextVirusIdx].id;
+            let nextVirusId = prev.virusPlayerId;
+            if (nextRound % 5 === 0 && players.length > 0) {
+              const currentVirusIdx = players.findIndex((p) => p.id === prev.virusPlayerId);
+              const nextVirusIdx = (currentVirusIdx + 1) % players.length;
+              nextVirusId = players[nextVirusIdx].id;
+            }
+
+            nextState = {
+              ...nextState,
+              round: nextRound,
+              showNormaGlobal,
+              virusPlayerId: nextVirusId,
+            };
           }
 
-          nextState = { ...nextState, round: nextRound, showNormaGlobal, virusPlayerId: nextVirusId };
-        }
+          if (
+            !skipPlayerAdvance &&
+            nextState.currentNorma &&
+            (nextState.currentNormaTurnsRemaining ?? 0) > 0
+          ) {
+            const nextTurns = (nextState.currentNormaTurnsRemaining ?? 0) - 1;
+            nextState =
+              nextTurns === 0
+                ? { ...nextState, currentNorma: null, currentNormaTurnsRemaining: 0 }
+                : { ...nextState, currentNormaTurnsRemaining: nextTurns };
+          }
 
-        if (!skipPlayerAdvance && nextState.currentNorma && (nextState.currentNormaTurnsRemaining ?? 0) > 0) {
-          const nextTurns = (nextState.currentNormaTurnsRemaining ?? 0) - 1;
-          nextState = nextTurns === 0
-            ? { ...nextState, currentNorma: null, currentNormaTurnsRemaining: 0 }
-            : { ...nextState, currentNormaTurnsRemaining: nextTurns };
-        }
+          return nextState;
+        });
 
-        return nextState;
+        return nextPlayerIdx;
       });
-
-      return nextPlayerIdx;
-    });
-  }, [players]);
+    },
+    [players]
+  );
 
   const addScore = (playerId: string, points: number) => {
-    setScores(prev => ({
+    setScores((prev) => ({
       ...prev,
-      [playerId]: Math.max(0, (prev[playerId] || 0) + points)
+      [playerId]: Math.max(0, (prev[playerId] || 0) + points),
     }));
   };
 
@@ -259,14 +284,14 @@ export const useGameEngine = (mode: GameMode) => {
     setGameOver(true);
     setRoundSnapshot({
       round: gameState.round,
-      scores: { ...scores }
+      scores: { ...scores },
     });
   };
 
   const addWin = (playerId: string) => {
-    setGamesWon(prev => ({
+    setGamesWon((prev) => ({
       ...prev,
-      [playerId]: (prev[playerId] || 0) + 1
+      [playerId]: (prev[playerId] || 0) + 1,
     }));
   };
 
@@ -296,6 +321,6 @@ export const useGameEngine = (mode: GameMode) => {
     showRoundSummary,
     setShowRoundSummary,
     roundSnapshot,
-    setRoundSnapshot
+    setRoundSnapshot,
   };
 };

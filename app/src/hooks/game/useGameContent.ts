@@ -3,206 +3,277 @@ import { GameMode, Player } from '@/types/game';
 import { TASTE_CARD_TEMPLATES } from '@/data/tasteQuestionsContent';
 import { fetchThemeCards } from '@/services/customThemeService';
 import {
-    normasRonda,
-    clasico,
-    yoNunca,
-    picante,
-    nostalgia,
-    quienEsMasProbable,
-    pacovers,
-    getMegamixContent,
-    getStructuredMegamix,
-    enLaCamaY,
-    categoriasLetras,
-    categoriasReto,
+  normasRonda,
+  clasico,
+  yoNunca,
+  picante,
+  nostalgia,
+  quienEsMasProbable,
+  pacovers,
+  getMegamixContent,
+  getStructuredMegamix,
+  enLaCamaY,
+  categoriasLetras,
+  categoriasReto,
+  isIndividualCard,
 } from '@/data/gameContent';
 import {
-    clasicoExtra,
-    yoNuncaExtra,
-    picanteExtra,
-    masProbableExtra,
-    pacoversExtra,
-    enLaCamaYExtra,
-    categoriasLetrasExtra,
-    categoriasRetoExtra,
+  clasicoExtra,
+  yoNuncaExtra,
+  picanteExtra,
+  masProbableExtra,
+  pacoversExtra,
+  enLaCamaYExtra,
+  categoriasLetrasExtra,
+  categoriasRetoExtra,
 } from '@/data/gameContentExtra';
 import {
-    quienEsMasProbableExtra2,
-    yoNuncaExtra2,
-    categoriasRetoExtra2,
-    picanteExtra2,
-    clasicoExtra2,
-    pacoversExtra2,
-    enLaCamaYExtra2,
-    categoriasLetrasExtra2,
+  quienEsMasProbableExtra2,
+  yoNuncaExtra2,
+  categoriasRetoExtra2,
+  picanteExtra2,
+  clasicoExtra2,
+  pacoversExtra2,
+  enLaCamaYExtra2,
+  categoriasLetrasExtra2,
 } from '@/data/gameContentExtra2';
 import {
-    clasicoExtra3, yoNuncaExtra3, picanteExtra3, masProbableExtra3,
-    pacoversExtra3, espanaExtra3, enLaCamaYExtra3,
-    categoriasLetrasExtra3, categoriasRetoExtra3,
+  clasicoExtra3,
+  yoNuncaExtra3,
+  picanteExtra3,
+  masProbableExtra3,
+  pacoversExtra3,
+  espanaExtra3,
+  enLaCamaYExtra3,
+  categoriasLetrasExtra3,
+  categoriasRetoExtra3,
 } from '@/data/gameContentExtra3';
 import { customPartyRetos as importedCustomRetos } from '@/data/customPartyRetos';
 import { footballQuestions } from '@/data/footballQuestionsNew';
 import { cultureQuestions } from '@/data/cultureQuestions';
 import { cultureQuestionsNew2025 } from '@/data/cultureQuestionsNew2025';
-import { triviaPrimaria, triviaESO, triviaBachillerato, triviaVidaCotidiana } from '@/data/triviaConocimientoContent';
+import {
+  triviaPrimaria,
+  triviaESO,
+  triviaBachillerato,
+  triviaVidaCotidiana,
+} from '@/data/triviaConocimientoContent';
 import { buildGodDeck } from '@/lib/godDeck';
 import { rememberQuizIds } from '@/lib/recentContent';
 import { sanitizeCardText } from '../../components/game/CardDisplay';
 import {
-    megamixRetosV4, yoNuncaV4, picanteV4, votacionV4,
-    normasV4, duelosV4, cadenasV4,
+  megamixRetosV4,
+  yoNuncaV4,
+  picanteV4,
+  votacionV4,
+  normasV4,
+  duelosV4,
+  cadenasV4,
 } from '@/data/gameContentExtra13';
 import {
-    yoNuncaV5, retosV5, picanteV5, votacionV5, clasicoV5,
-    enLaCamaV5, espanaV5, normasV5, duelosV5,
+  yoNuncaV5,
+  retosV5,
+  picanteV5,
+  votacionV5,
+  clasicoV5,
+  enLaCamaV5,
+  espanaV5,
+  normasV5,
+  duelosV5,
 } from '@/data/updatePostVerano2026';
 import {
-    yoNuncaV5b, retosV5b, picanteV5b, votacionV5b, clasicoV5b,
-    enLaCamaV5b, espanaV5b, normasV5b, duelosV5b,
+  yoNuncaV5b,
+  retosV5b,
+  picanteV5b,
+  votacionV5b,
+  clasicoV5b,
+  enLaCamaV5b,
+  espanaV5b,
+  normasV5b,
+  duelosV5b,
 } from '@/data/updatePostVerano2026_v2';
 import {
-    manosArribaV5, elRankingV5, escenaV5,
-    dosVerdadesV5, elMovilV5, diezSegundosV5,
-    yoNuncaV5c, picanteV5c, votacionV5c, retosV5c, cadenaV5c, enLaCamaV5c,
+  manosArribaV5,
+  elRankingV5,
+  escenaV5,
+  dosVerdadesV5,
+  elMovilV5,
+  diezSegundosV5,
+  yoNuncaV5c,
+  picanteV5c,
+  votacionV5c,
+  retosV5c,
+  cadenaV5c,
+  enLaCamaV5c,
 } from '@/data/updatePostVerano2026_v3';
 import {
-    genYoNunca, genCadena, genCategorias, genCulturaChupistica, genDiezSegundos,
-    genVotacion, genManosArriba, genTodosALaVez, genRanking, genEnLaCama,
-    genRetos, genVerdadOBebe, genEscena, genMovil, genDosVerdades,
-    genQuePrefieres, genParanoia,
+  genYoNunca,
+  genCadena,
+  genCategorias,
+  genCulturaChupistica,
+  genDiezSegundos,
+  genVotacion,
+  genManosArriba,
+  genTodosALaVez,
+  genRanking,
+  genEnLaCama,
+  genRetos,
+  genVerdadOBebe,
+  genEscena,
+  genMovil,
+  genDosVerdades,
+  genQuePrefieres,
+  genParanoia,
 } from '@/data/generatedParty';
 import {
-    moreYoNunca, morePicante, moreVotacion, moreClasico, moreEspana,
-    moreEnLaCama, moreNormas, moreMimica, moreSalseo, moreTorneoRetos,
+  moreYoNunca,
+  morePicante,
+  moreVotacion,
+  moreClasico,
+  moreEspana,
+  moreEnLaCama,
+  moreNormas,
+  moreMimica,
+  moreSalseo,
+  moreTorneoRetos,
 } from '@/data/extraContentIndex';
+import { MEGAMIX_SPAIN_GENERAL, MEGAMIX_SPAIN_INDIVIDUAL } from '@/data/megamixSpain';
+import {
+  getMegamixPhase,
+  getMegamixMystery,
+  isNoAlcoholMode,
+  transformCardForNoAlcohol,
+} from '@/utils/megamixExperience';
 
 // Clean Fisher-Yates shuffle
 function shuffleArray<T>(array: T[]): T[] {
-    const shuffled = [...array];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    return shuffled;
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
 }
 
 // Barajado determinista por semilla (para re-barajar el mazo en cada "vuelta"
 // sin repetir el mismo orden exacto cuando se agota el contenido).
 function seededShuffle<T>(array: T[], seed: number): T[] {
-    let s = seed >>> 0;
-    const rand = () => {
-        s |= 0; s = (s + 0x6D2B79F5) | 0;
-        let t = Math.imul(s ^ (s >>> 15), 1 | s);
-        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-    };
-    const a = [...array];
-    for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(rand() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
+  let s = seed >>> 0;
+  const rand = () => {
+    s |= 0;
+    s = (s + 0x6d2b79f5) | 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const a = [...array];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
 }
 
 // ─── Cartas de "gustos" (ver PlayerSetup → sección Gustos) ─────────────────
 // Si nadie rellenó gustos, esto devuelve [] y el mazo se construye exactamente
 // igual que antes (no se nota ningún cambio).
 function buildTasteCards(players: Player[]): string[] {
-    if (!players || players.length === 0) return [];
-    try {
-        const raw = localStorage.getItem('fiesta_player_tastes');
-        if (!raw) return [];
-        const stored: Record<string, { chips?: string[]; free?: string }> = JSON.parse(raw);
-        const cards: string[] = [];
-        for (const p of players) {
-            const taste = stored[p.id];
-            if (!taste || !Array.isArray(taste.chips)) continue;
-            for (const chipKey of taste.chips) {
-                const templates = TASTE_CARD_TEMPLATES[chipKey];
-                if (!templates || templates.length === 0) continue;
-                // 1-2 cartas por gusto marcado, para no saturar el mazo con una sola persona.
-                const picks = shuffleArray(templates).slice(0, Math.min(2, templates.length));
-                for (const t of picks) {
-                    cards.push(t.replace(/\{taste_player\}/g, p.name));
-                }
-            }
-            if (taste.free && taste.free.trim().length > 0) {
-                cards.push(`🎯 GUSTOS: ${p.name} dijo que le gusta "${taste.free.trim()}". Que alguien del grupo le haga una pregunta rápida sobre eso; si ${p.name} tarda más de 5 segundos en responder, bebe 2.`);
-            }
+  if (!players || players.length === 0) return [];
+  try {
+    const raw = localStorage.getItem('fiesta_player_tastes');
+    if (!raw) return [];
+    const stored: Record<string, { chips?: string[]; free?: string }> = JSON.parse(raw);
+    const cards: string[] = [];
+    for (const p of players) {
+      const taste = stored[p.id];
+      if (!taste || !Array.isArray(taste.chips)) continue;
+      for (const chipKey of taste.chips) {
+        const templates = TASTE_CARD_TEMPLATES[chipKey];
+        if (!templates || templates.length === 0) continue;
+        // 1-2 cartas por gusto marcado, para no saturar el mazo con una sola persona.
+        const picks = shuffleArray(templates).slice(0, Math.min(2, templates.length));
+        for (const t of picks) {
+          cards.push(t.replace(/\{taste_player\}/g, p.name));
         }
-        return cards;
-    } catch {
-        return [];
+      }
+      if (taste.free && taste.free.trim().length > 0) {
+        cards.push(
+          `🎯 GUSTOS: ${p.name} dijo que le gusta "${taste.free.trim()}". Que alguien del grupo le haga una pregunta rápida sobre eso; si ${p.name} tarda más de 5 segundos en responder, bebe 2.`
+        );
+      }
     }
+    return cards;
+  } catch {
+    return [];
+  }
 }
 
 // Mezcla cartas de gustos en el mazo a un ritmo fijo (cada ~16 cartas), en vez
 // de simplemente concatenarlas y dejar que se diluyan en un pool de miles de
 // cartas (donde casi nunca saldrían). Si tasteCards está vacío, devuelve deck igual.
 export function interleaveTasteCards(deck: string[], tasteCards: string[]): string[] {
-    if (tasteCards.length === 0) return deck;
-    const shuffledTastes = shuffleArray(tasteCards);
-    const out: string[] = [];
-    const GAP = 16;
-    let tPtr = 0;
-    for (let i = 0; i < deck.length; i++) {
-        out.push(deck[i]);
-        if ((i + 1) % GAP === 0) {
-            out.push(shuffledTastes[tPtr % shuffledTastes.length]);
-            tPtr++;
-        }
+  if (tasteCards.length === 0) return deck;
+  const shuffledTastes = shuffleArray(tasteCards);
+  const out: string[] = [];
+  const GAP = 16;
+  let tPtr = 0;
+  for (let i = 0; i < deck.length; i++) {
+    out.push(deck[i]);
+    if ((i + 1) % GAP === 0) {
+      out.push(shuffledTastes[tPtr % shuffledTastes.length]);
+      tPtr++;
     }
-    return out;
+  }
+  return out;
 }
 
 function normalizeDeckEntries(items: any[]): string[] {
-    return items
-        .map(item => typeof item === 'string' ? item : String(item ?? ''))
-        .map(item => item.replace(/\s+/g, ' ').trim())
-        .filter(item => item.length > 0 && item !== 'undefined' && item !== 'null');
+  return items
+    .map((item) => (typeof item === 'string' ? item : String(item ?? '')))
+    .map((item) => item.replace(/\s+/g, ' ').trim())
+    .filter((item) => item.length > 0 && item !== 'undefined' && item !== 'null');
 }
 
 // customPartyRetos son objetos { id, text }: antes se metían tal cual en el
 // mazo y salían como la carta "[object Object]".
-const customRetoTexts = importedCustomRetos.map(r => r.text);
+const customRetoTexts = importedCustomRetos.map((r) => r.text);
 
 export function isStructuredMode(mode: string): boolean {
-    return mode === 'megamix' || mode === 'clasico';
+  return mode === 'megamix' || mode === 'clasico';
 }
 
 function readVoteScores(category: string): Record<string, number> {
-    try {
-        const raw = localStorage.getItem('fiesta-party-votes');
-        return (raw && JSON.parse(raw)?.[category]) || {};
-    } catch {
-        return {};
-    }
+  try {
+    const raw = localStorage.getItem('fiesta-party-votes');
+    return (raw && JSON.parse(raw)?.[category]) || {};
+  } catch {
+    return {};
+  }
 }
 
 // Mismo umbral que applyVoteWeights: con -3 o menos la carta deja de salir.
 function isDownvoted(category: string): (card: string) => boolean {
-    const scores = readVoteScores(category);
-    return card => (scores[card] || 0) <= -3;
+  const scores = readVoteScores(category);
+  return (card) => (scores[card] || 0) <= -3;
 }
 
 function applyVoteWeights(items: string[], category: string): string[] {
-    try {
-        const raw = localStorage.getItem('fiesta-party-votes');
-        if (!raw) return items;
-        const data = JSON.parse(raw);
-        const scores: Record<string, number> = data?.[category] || {};
-        const out: string[] = [];
-        for (const t of items) {
-            const s = scores[t] || 0;
-            if (s <= -3) continue;
-            out.push(t);
-            if (s >= 3) out.push(t);
-        }
-        return out.length ? out : items;
-    } catch {
-        return items;
+  try {
+    const raw = localStorage.getItem('fiesta-party-votes');
+    if (!raw) return items;
+    const data = JSON.parse(raw);
+    const scores: Record<string, number> = data?.[category] || {};
+    const out: string[] = [];
+    for (const t of items) {
+      const s = scores[t] || 0;
+      if (s <= -3) continue;
+      out.push(t);
+      if (s >= 3) out.push(t);
     }
+    return out.length ? out : items;
+  } catch {
+    return items;
+  }
 }
 
 // ─── Rotación entre partidas ───────────────────────────────────────────────
@@ -214,253 +285,402 @@ const RECENT_KEY = 'beep_recent_cards';
 const RECENT_CAP = 400;
 
 function rotateByRecent(deck: string[], mode: string, sessionSize: number): string[] {
-    try {
-        const raw = localStorage.getItem(RECENT_KEY);
-        const seen: string[] = raw ? (JSON.parse(raw)?.[mode] || []) : [];
-        if (seen.length === 0) return deck;
-        const seenSet = new Set(seen);
-        const fresh = deck.filter(c => !seenSet.has(c));
-        const stale = deck.filter(c => seenSet.has(c));
-        // Si casi todo está "visto", no penalices: baraja normal.
-        if (fresh.length < Math.max(sessionSize, deck.length * 0.15)) return deck;
-        return [...shuffleArray(fresh), ...shuffleArray(stale)];
-    } catch {
-        return deck;
-    }
+  try {
+    const raw = localStorage.getItem(RECENT_KEY);
+    const seen: string[] = raw ? JSON.parse(raw)?.[mode] || [] : [];
+    if (seen.length === 0) return deck;
+    const seenSet = new Set(seen);
+    const fresh = deck.filter((c) => !seenSet.has(c));
+    const stale = deck.filter((c) => seenSet.has(c));
+    // Si casi todo está "visto", no penalices: baraja normal.
+    if (fresh.length < Math.max(sessionSize, deck.length * 0.15)) return deck;
+    return [...shuffleArray(fresh), ...shuffleArray(stale)];
+  } catch {
+    return deck;
+  }
 }
 
 function rememberSession(deck: string[], mode: string, sessionSize: number): void {
-    try {
-        const raw = localStorage.getItem(RECENT_KEY);
-        const store = raw ? JSON.parse(raw) : {};
-        const prev: string[] = Array.isArray(store?.[mode]) ? store[mode] : [];
-        const justShown = deck.slice(0, Math.max(12, sessionSize));
-        const merged = [...justShown, ...prev].slice(0, RECENT_CAP);
-        store[mode] = merged;
-        localStorage.setItem(RECENT_KEY, JSON.stringify(store));
-    } catch {
-        /* sin persistencia, no pasa nada */
-    }
+  try {
+    const raw = localStorage.getItem(RECENT_KEY);
+    const store = raw ? JSON.parse(raw) : {};
+    const prev: string[] = Array.isArray(store?.[mode]) ? store[mode] : [];
+    const justShown = deck.slice(0, Math.max(12, sessionSize));
+    const merged = [...justShown, ...prev].slice(0, RECENT_CAP);
+    store[mode] = merged;
+    localStorage.setItem(RECENT_KEY, JSON.stringify(store));
+  } catch {
+    /* sin persistencia, no pasa nada */
+  }
 }
 
-export const useGameContent = (mode: GameMode, currentIndex: number, currentPlayerName: string, playersCount: number = 4, players: Player[] = []) => {
-    const [content, setContent] = useState<string[]>([]);
-    const [currentQuestion, setCurrentQuestion] = useState<any | null>(null);
-    const [usedQuestionIds, setUsedQuestionIds] = useState<Set<string>>(new Set());
-    const [questionNumber, setQuestionNumber] = useState(0);
-    // Key that forces re-shuffle on each new game (changes on mount)
-    const [reshuffleKey] = useState(() => Date.now());
+function rotateStructuredByRecent(deck: string[], mode: string): string[] {
+  try {
+    const raw = localStorage.getItem(RECENT_KEY);
+    const seen: string[] = raw ? JSON.parse(raw)?.[mode] || [] : [];
+    if (seen.length === 0) return deck;
 
-    useEffect(() => {
-        let modeContent: any[] = [];
+    const seenSet = new Set(seen);
+    const rotatePool = (pool: string[]) => {
+      const fresh = pool.filter((card) => !seenSet.has(card));
+      const stale = pool.filter((card) => seenSet.has(card));
+      return [...shuffleArray(fresh), ...shuffleArray(stale)];
+    };
 
-        switch (mode) {
-            case 'megamix':
-                // Todo el contenido (base + oleadas V4/V5/V5b/V5c + plantillas
-                // generadas) está fusionado dentro de los pools tipados que usa
-                // getStructuredMegamix (ver src/data/gameContent.ts). Antes, solo
-                // las primeras 500 cartas pasaban por el algoritmo de alternancia
-                // G/I ponderada; el resto eran arrays crudos concatenados sin
-                // estructura, así que una partida larga degeneraba en un bloque
-                // desordenado. Ahora TODO pasa por el mismo algoritmo, con un count
-                // alto para cubrir sesiones largas (los punteros por tipo reciclan
-                // con módulo, así que no hay riesgo de bucle infinito ni de
-                // quedarnos sin cartas: ver getStructuredMegamix ~línea 6105+).
-                modeContent = getStructuredMegamix(2500, playersCount, {
-                    extraGeneral: { customRetos: customRetoTexts },
-                    extraIndividual: { torneoRetos: moreTorneoRetos },
-                    exclude: isDownvoted(mode),
-                });
-                break;
-            case 'clasico':
-                // Mismo algoritmo estructurado que 'megamix', pero restringido a los
-                // tipos "clásicos" (sin mímica, duelos, trivia express, humor negro,
-                // cadena ni grupal — ese es el sabor diferenciado de este modo).
-                modeContent = getStructuredMegamix(2500, playersCount, {
-                    generalKeys: ['yoNunca', 'picante', 'enLaCama', 'masProbable', 'pacovers', 'espana'],
-                    individualKeys: ['retos', 'categorias', 'clasico'],
-                    extraGeneral: { customRetos: customRetoTexts },
-                    exclude: isDownvoted(mode),
-                });
-                break;
-            case 'yo_nunca':
-            case 'yo_nunca_equipos':
-                modeContent = shuffleArray([...yoNunca, ...yoNuncaExtra, ...yoNuncaExtra2, ...yoNuncaExtra3, ...yoNuncaV4, ...yoNuncaV5, ...yoNuncaV5b, ...yoNuncaV5c, ...moreYoNunca, ...genYoNunca]);
-                break;
-            case 'picante':
-                modeContent = shuffleArray([...picante, ...picanteExtra, ...picanteExtra2, ...picanteExtra3, ...picanteV4, ...picanteV5, ...picanteV5b, ...picanteV5c, ...morePicante]);
-                break;
-            case 'espana':
-                modeContent = shuffleArray([...nostalgia, ...pacoversExtra, ...pacoversExtra2, ...espanaExtra3, ...espanaV5, ...espanaV5b, ...moreEspana]);
-                break;
-            case 'votacion':
-                modeContent = shuffleArray([...quienEsMasProbable, ...masProbableExtra, ...quienEsMasProbableExtra2, ...masProbableExtra3, ...votacionV4, ...votacionV5, ...votacionV5b, ...votacionV5c, ...moreVotacion, ...manosArribaV5, ...elRankingV5, ...genVotacion, ...genManosArriba, ...genTodosALaVez, ...genRanking, ...genQuePrefieres, ...genParanoia]);
-                break;
-            case 'pacovers':
-                modeContent = shuffleArray([...pacovers, ...pacoversExtra, ...pacoversExtra2, ...pacoversExtra3, ...espanaV5, ...espanaV5b, ...moreEspana]);
-                break;
-            default:
-                modeContent = getMegamixContent(200);
-        }
+    const individual = rotatePool(deck.filter((card) => isIndividualCard(card)));
+    const general = rotatePool(deck.filter((card) => !isIndividualCard(card)));
+    const out: string[] = [];
 
-        let cleanedContent = normalizeDeckEntries(modeContent as any[]);
-        // Gustos: solo en los modos "mezcla" (megamix/clasico) tiene sentido meter
-        // una carta de vez en cuando sobre un jugador concreto. Si nadie rellenó
-        // gustos, buildTasteCards devuelve [] y esto no cambia nada.
-        if (mode === 'megamix' || mode === 'clasico') {
-            const tasteCards = buildTasteCards(players);
-            cleanedContent = interleaveTasteCards(cleanedContent, tasteCards);
-        }
-        const sessionSize = Math.max(18, playersCount * 12);
-        let rotated: string[];
-        if (isStructuredMode(mode)) {
-            // El orden YA es la partida (patrón G/I + triggers espaciados): barajar
-            // aquí deshacía todo el algoritmo. Los votos se aplican dentro del
-            // generador (exclude) y los pools se barajan en cada partida.
-            rotated = cleanedContent;
-        } else {
-            const weighted = normalizeDeckEntries(applyVoteWeights(cleanedContent, mode));
-            // Baraja + manda al fondo lo visto en partidas recientes (frescura entre sesiones)
-            rotated = rotateByRecent(shuffleArray(weighted), mode, sessionSize);
-        }
-        setContent(rotated);
-        rememberSession(rotated, mode, sessionSize);
+    for (let i = 0; i < Math.max(individual.length, general.length); i++) {
+      if (individual[i]) out.push(individual[i]);
+      if (general[i]) out.push(general[i]);
+    }
+    return out;
+  } catch {
+    return deck;
+  }
+}
 
-        // Reset used questions for fresh game
+export const useGameContent = (
+  mode: GameMode,
+  currentIndex: number,
+  currentPlayerName: string,
+  playersCount: number = 4,
+  players: Player[] = []
+) => {
+  const [content, setContent] = useState<string[]>([]);
+  const [currentQuestion, setCurrentQuestion] = useState<any | null>(null);
+  const [usedQuestionIds, setUsedQuestionIds] = useState<Set<string>>(new Set());
+  const [questionNumber, setQuestionNumber] = useState(0);
+  // Key that forces re-shuffle on each new game (changes on mount)
+  const [reshuffleKey] = useState(() => Date.now());
+  // Se aplica al mostrar la carta (currentText), no al generar el mazo: así
+  // cambiarlo a mitad de partida no rehace el mazo ni repite cartas.
+  const [noAlcohol, setNoAlcohol] = useState(isNoAlcoholMode);
+
+  useEffect(() => {
+    const refresh = () => setNoAlcohol(isNoAlcoholMode());
+    window.addEventListener('beep:no-alcohol-change', refresh);
+    return () => window.removeEventListener('beep:no-alcohol-change', refresh);
+  }, []);
+
+  useEffect(() => {
+    let modeContent: any[] = [];
+
+    switch (mode) {
+      case 'megamix':
+        // Todo el contenido (base + oleadas V4/V5/V5b/V5c + plantillas
+        // generadas) está fusionado dentro de los pools tipados que usa
+        // getStructuredMegamix (ver src/data/gameContent.ts). Antes, solo
+        // las primeras 500 cartas pasaban por el algoritmo de alternancia
+        // G/I ponderada; el resto eran arrays crudos concatenados sin
+        // estructura, así que una partida larga degeneraba en un bloque
+        // desordenado. Ahora TODO pasa por el mismo algoritmo, con un count
+        // alto para cubrir sesiones largas (los punteros por tipo reciclan
+        // con módulo, así que no hay riesgo de bucle infinito ni de
+        // quedarnos sin cartas: ver getStructuredMegamix ~línea 6105+).
+        modeContent = getStructuredMegamix(2500, playersCount, {
+          extraGeneral: {
+            customRetos: customRetoTexts,
+            megamixEspañaGeneral: MEGAMIX_SPAIN_GENERAL,
+          },
+          extraIndividual: {
+            torneoRetos: moreTorneoRetos,
+            megamixEspañaIndividual: MEGAMIX_SPAIN_INDIVIDUAL,
+          },
+          exclude: isDownvoted(mode),
+        });
+        break;
+      case 'clasico':
+        // Mismo algoritmo estructurado que 'megamix', pero restringido a los
+        // tipos "clásicos" (sin mímica, duelos, trivia express, humor negro,
+        // cadena ni grupal — ese es el sabor diferenciado de este modo).
+        modeContent = getStructuredMegamix(2500, playersCount, {
+          generalKeys: ['yoNunca', 'picante', 'enLaCama', 'masProbable', 'pacovers', 'espana'],
+          individualKeys: ['retos', 'categorias', 'clasico'],
+          extraGeneral: { customRetos: customRetoTexts },
+          exclude: isDownvoted(mode),
+        });
+        break;
+      case 'yo_nunca':
+      case 'yo_nunca_equipos':
+        modeContent = shuffleArray([
+          ...yoNunca,
+          ...yoNuncaExtra,
+          ...yoNuncaExtra2,
+          ...yoNuncaExtra3,
+          ...yoNuncaV4,
+          ...yoNuncaV5,
+          ...yoNuncaV5b,
+          ...yoNuncaV5c,
+          ...moreYoNunca,
+          ...genYoNunca,
+        ]);
+        break;
+      case 'picante':
+        modeContent = shuffleArray([
+          ...picante,
+          ...picanteExtra,
+          ...picanteExtra2,
+          ...picanteExtra3,
+          ...picanteV4,
+          ...picanteV5,
+          ...picanteV5b,
+          ...picanteV5c,
+          ...morePicante,
+        ]);
+        break;
+      case 'espana':
+        modeContent = shuffleArray([
+          ...nostalgia,
+          ...pacoversExtra,
+          ...pacoversExtra2,
+          ...espanaExtra3,
+          ...espanaV5,
+          ...espanaV5b,
+          ...moreEspana,
+        ]);
+        break;
+      case 'votacion':
+        modeContent = shuffleArray([
+          ...quienEsMasProbable,
+          ...masProbableExtra,
+          ...quienEsMasProbableExtra2,
+          ...masProbableExtra3,
+          ...votacionV4,
+          ...votacionV5,
+          ...votacionV5b,
+          ...votacionV5c,
+          ...moreVotacion,
+          ...manosArribaV5,
+          ...elRankingV5,
+          ...genVotacion,
+          ...genManosArriba,
+          ...genTodosALaVez,
+          ...genRanking,
+          ...genQuePrefieres,
+          ...genParanoia,
+        ]);
+        break;
+      case 'pacovers':
+        modeContent = shuffleArray([
+          ...pacovers,
+          ...pacoversExtra,
+          ...pacoversExtra2,
+          ...pacoversExtra3,
+          ...espanaV5,
+          ...espanaV5b,
+          ...moreEspana,
+        ]);
+        break;
+      default:
+        modeContent = getMegamixContent(200);
+    }
+
+    let cleanedContent = normalizeDeckEntries(modeContent as any[]);
+    // Gustos: solo en los modos "mezcla" (megamix/clasico) tiene sentido meter
+    // una carta de vez en cuando sobre un jugador concreto. Si nadie rellenó
+    // gustos, buildTasteCards devuelve [] y esto no cambia nada.
+    if (mode === 'megamix' || mode === 'clasico') {
+      const tasteCards = buildTasteCards(players);
+      cleanedContent = interleaveTasteCards(cleanedContent, tasteCards);
+    }
+    const sessionSize = Math.max(18, playersCount * 12);
+    let rotated: string[];
+    if (isStructuredMode(mode)) {
+      // El orden YA es la partida (patrón G/I + triggers espaciados): barajar
+      // aquí deshacía todo el algoritmo. Los votos se aplican dentro del
+      // generador (exclude) y los pools se barajan en cada partida.
+      rotated = cleanedContent;
+    } else {
+      const weighted = normalizeDeckEntries(applyVoteWeights(cleanedContent, mode));
+      // Baraja + manda al fondo lo visto en partidas recientes (frescura entre sesiones)
+      rotated = rotateByRecent(shuffleArray(weighted), mode, sessionSize);
+    }
+    setContent(rotated);
+    rememberSession(rotated, mode, sessionSize);
+
+    // Reset used questions for fresh game
+    setUsedQuestionIds(new Set());
+    setQuestionNumber(0);
+
+    // Tema personalizado (Fase 5): se pide en paralelo, sin bloquear el inicio
+    // de la partida. Si tarda, falla, o no hay tema puesto, no pasa nada — el
+    // mazo ya está jugable desde el principio con el banco normal.
+    if (mode === 'megamix' || mode === 'clasico') {
+      const theme = (localStorage.getItem('fiesta_party_theme') || '').trim();
+      if (theme) {
+        fetchThemeCards(theme).then((themeCards) => {
+          if (themeCards.length === 0) return;
+          setContent((prev) => interleaveTasteCards(prev, themeCards));
+        });
+      }
+    }
+
+    // Pre-load first trivia question synchronously to avoid 'Cargando pregunta' flash
+    if (mode === 'trivia_futbol' || mode === 'cultura') {
+      const isFootball = mode === 'trivia_futbol';
+      const sourceQuestions = (
+        isFootball
+          ? footballQuestions
+          : [
+              ...cultureQuestions,
+              ...cultureQuestionsNew2025,
+              ...triviaPrimaria,
+              ...triviaESO,
+              ...triviaBachillerato,
+              ...triviaVidaCotidiana,
+            ]
+      ) as any[];
+      if (sourceQuestions && sourceQuestions.length > 0) {
+        const shuffled = shuffleArray(sourceQuestions);
+        setCurrentQuestion(shuffled[0]);
+        setUsedQuestionIds(new Set([shuffled[0].question]));
+        setQuestionNumber(1);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- playersCount ya resume lo que importa de players
+  }, [mode, reshuffleKey, playersCount]);
+
+  const loadNextQuestion = useCallback(() => {
+    setQuestionNumber((prev) => prev + 1);
+
+    const isFootball = mode === 'trivia_futbol';
+    const sourceQuestions = (
+      isFootball
+        ? footballQuestions
+        : [
+            ...cultureQuestions,
+            ...cultureQuestionsNew2025,
+            ...triviaPrimaria,
+            ...triviaESO,
+            ...triviaBachillerato,
+            ...triviaVidaCotidiana,
+          ]
+    ) as any[];
+
+    // Safety check
+    if (!sourceQuestions || sourceQuestions.length === 0) {
+      return;
+    }
+
+    const shuffledQuestions = shuffleArray(sourceQuestions);
+    const availableQuestions = shuffledQuestions.filter((q) => !usedQuestionIds.has(q.question));
+
+    if (availableQuestions.length > 0) {
+      const randomQ = availableQuestions[0];
+      setCurrentQuestion(randomQ);
+      setUsedQuestionIds((prev) => new Set([...prev, randomQ.question]));
+    } else {
+      setUsedQuestionIds(new Set());
+      const randomQ = shuffledQuestions[0];
+      setCurrentQuestion(randomQ);
+    }
+  }, [mode, usedQuestionIds]);
+
+  const loadSpecificQuestion = useCallback(
+    (category: 'futbol' | 'cultura') => {
+      const isFootball = category === 'futbol';
+      const sourceQuestions = (
+        isFootball
+          ? footballQuestions
+          : [
+              ...cultureQuestions,
+              ...cultureQuestionsNew2025,
+              ...triviaPrimaria,
+              ...triviaESO,
+              ...triviaBachillerato,
+              ...triviaVidaCotidiana,
+            ]
+      ) as any[];
+
+      // Safety check
+      if (!sourceQuestions || sourceQuestions.length === 0) {
+        console.error('No questions found for category:', category);
+        // Set a fallback question so the game doesn't hang
+        setCurrentQuestion({
+          question: `Error: No hay preguntas de ${category} disponibles.`,
+          options: ['Continuar'],
+          correctIndex: 0,
+          category: 'Error',
+          difficulty: 1,
+        });
+        return;
+      }
+
+      const seenKey = `beep_trivia_seen_${category}`;
+      let persistedSeen = new Set<string>();
+      try {
+        persistedSeen = new Set(JSON.parse(localStorage.getItem(seenKey) || '[]'));
+      } catch {
+        /* ignore */
+      }
+
+      const shuffledQuestions = shuffleArray(sourceQuestions);
+      // No visto ni en esta partida ni en partidas recientes.
+      let availableQuestions = shuffledQuestions.filter(
+        (q) => !usedQuestionIds.has(q.question) && !persistedSeen.has(q.question)
+      );
+      if (availableQuestions.length === 0) {
+        availableQuestions = shuffledQuestions.filter((q) => !usedQuestionIds.has(q.question));
+      }
+
+      if (availableQuestions.length > 0) {
+        const randomQ = availableQuestions[0];
+        setCurrentQuestion(randomQ);
+        setUsedQuestionIds((prev) => new Set([...prev, randomQ.question]));
+        rememberQuizIds([randomQ.question], seenKey);
+      } else {
         setUsedQuestionIds(new Set());
-        setQuestionNumber(0);
+        const randomQ = shuffledQuestions[0];
+        setCurrentQuestion(randomQ);
+        rememberQuizIds([randomQ.question], seenKey);
+      }
+    },
+    [usedQuestionIds]
+  );
 
-        // Tema personalizado (Fase 5): se pide en paralelo, sin bloquear el inicio
-        // de la partida. Si tarda, falla, o no hay tema puesto, no pasa nada — el
-        // mazo ya está jugable desde el principio con el banco normal.
-        if (mode === 'megamix' || mode === 'clasico') {
-            const theme = (localStorage.getItem('fiesta_party_theme') || '').trim();
-            if (theme) {
-                fetchThemeCards(theme).then(themeCards => {
-                    if (themeCards.length === 0) return;
-                    setContent(prev => interleaveTasteCards(prev, themeCards));
-                });
-            }
-        }
+  const currentText = useMemo(() => {
+    if (mode === 'trivia_futbol' || mode === 'cultura') {
+      return currentQuestion?.question || 'Cargando pregunta...';
+    }
+    if (content.length === 0) return 'Siguiente carta';
+    // Al agotar el mazo se re-baraja con otra semilla en cada vuelta, para
+    // no repetir el mismo orden exacto (evita repeticiones en pantalla).
+    const lap = Math.floor(currentIndex / content.length);
+    const deck = lap === 0 ? content : seededShuffle(content, lap * 2654435761);
+    const pos = currentIndex % content.length;
+    const validContent =
+      deck.slice(pos).find((item) => typeof item === 'string' && item.trim().length > 0) ||
+      deck.find((item) => typeof item === 'string' && item.trim().length > 0);
+    const resolved = validContent?.replace(/{player}/g, currentPlayerName) || 'Siguiente carta';
+    return noAlcohol ? transformCardForNoAlcohol(resolved) : resolved;
+  }, [content, currentIndex, currentPlayerName, mode, currentQuestion, noAlcohol]);
 
-        // Pre-load first trivia question synchronously to avoid 'Cargando pregunta' flash
-        if (mode === 'trivia_futbol' || mode === 'cultura') {
-            const isFootball = mode === 'trivia_futbol';
-            const sourceQuestions = (isFootball ? footballQuestions : [...cultureQuestions, ...cultureQuestionsNew2025, ...triviaPrimaria, ...triviaESO, ...triviaBachillerato, ...triviaVidaCotidiana]) as any[];
-            if (sourceQuestions && sourceQuestions.length > 0) {
-                const shuffled = shuffleArray(sourceQuestions);
-                setCurrentQuestion(shuffled[0]);
-                setUsedQuestionIds(new Set([shuffled[0].question]));
-                setQuestionNumber(1);
-            }
-        }
-      // eslint-disable-next-line react-hooks/exhaustive-deps -- playersCount ya resume lo que importa de players
-    }, [mode, reshuffleKey, playersCount]);
+  const getCurrentContent = useCallback(() => currentText, [currentText]);
 
-    const loadNextQuestion = useCallback(() => {
-        setQuestionNumber(prev => prev + 1);
+  const getNextPreview = () => {
+    if (!content || content.length === 0) return getMegamixMystery('Sorpresa');
+    const next = currentIndex + 1;
+    const lap = Math.floor(next / content.length);
+    const deck = lap === 0 ? content : seededShuffle(content, lap * 2654435761);
+    const nextBase = deck[next % content.length];
+    return getMegamixMystery(nextBase);
+  };
 
-        const isFootball = mode === 'trivia_futbol';
-        const sourceQuestions = (isFootball ? footballQuestions : [...cultureQuestions, ...cultureQuestionsNew2025, ...triviaPrimaria, ...triviaESO, ...triviaBachillerato, ...triviaVidaCotidiana]) as any[];
+  const getMegamixPhaseForIndex = () => getMegamixPhase(currentIndex);
 
-        // Safety check
-        if (!sourceQuestions || sourceQuestions.length === 0) {
-            return;
-        }
-
-        const shuffledQuestions = shuffleArray(sourceQuestions);
-        const availableQuestions = shuffledQuestions.filter(q => !usedQuestionIds.has(q.question));
-
-        if (availableQuestions.length > 0) {
-            const randomQ = availableQuestions[0];
-            setCurrentQuestion(randomQ);
-            setUsedQuestionIds(prev => new Set([...prev, randomQ.question]));
-        } else {
-            setUsedQuestionIds(new Set());
-            const randomQ = shuffledQuestions[0];
-            setCurrentQuestion(randomQ);
-        }
-    }, [mode, usedQuestionIds]);
-
-    const loadSpecificQuestion = useCallback((category: 'futbol' | 'cultura') => {
-        const isFootball = category === 'futbol';
-        const sourceQuestions = (isFootball ? footballQuestions : [...cultureQuestions, ...cultureQuestionsNew2025, ...triviaPrimaria, ...triviaESO, ...triviaBachillerato, ...triviaVidaCotidiana]) as any[];
-
-        // Safety check
-        if (!sourceQuestions || sourceQuestions.length === 0) {
-            console.error("No questions found for category:", category);
-            // Set a fallback question so the game doesn't hang
-            setCurrentQuestion({
-                question: `Error: No hay preguntas de ${category} disponibles.`,
-                options: ["Continuar"],
-                correctIndex: 0,
-                category: "Error",
-                difficulty: 1
-            });
-            return;
-        }
-
-        const seenKey = `beep_trivia_seen_${category}`;
-        let persistedSeen = new Set<string>();
-        try { persistedSeen = new Set(JSON.parse(localStorage.getItem(seenKey) || '[]')); } catch { /* ignore */ }
-
-        const shuffledQuestions = shuffleArray(sourceQuestions);
-        // No visto ni en esta partida ni en partidas recientes.
-        let availableQuestions = shuffledQuestions.filter(q => !usedQuestionIds.has(q.question) && !persistedSeen.has(q.question));
-        if (availableQuestions.length === 0) {
-            availableQuestions = shuffledQuestions.filter(q => !usedQuestionIds.has(q.question));
-        }
-
-        if (availableQuestions.length > 0) {
-            const randomQ = availableQuestions[0];
-            setCurrentQuestion(randomQ);
-            setUsedQuestionIds(prev => new Set([...prev, randomQ.question]));
-            rememberQuizIds([randomQ.question], seenKey);
-        } else {
-            setUsedQuestionIds(new Set());
-            const randomQ = shuffledQuestions[0];
-            setCurrentQuestion(randomQ);
-            rememberQuizIds([randomQ.question], seenKey);
-        }
-    }, [usedQuestionIds]);
-
-    const currentText = useMemo(() => {
-        if (mode === 'trivia_futbol' || mode === 'cultura') {
-            return currentQuestion?.question || 'Cargando pregunta...';
-        }
-        if (content.length === 0) return 'Siguiente carta';
-        // Al agotar el mazo se re-baraja con otra semilla en cada vuelta, para
-        // no repetir el mismo orden exacto (evita repeticiones en pantalla).
-        const lap = Math.floor(currentIndex / content.length);
-        const deck = lap === 0 ? content : seededShuffle(content, lap * 2654435761);
-        const pos = currentIndex % content.length;
-        const validContent =
-            deck.slice(pos).find(item => typeof item === 'string' && item.trim().length > 0)
-            || deck.find(item => typeof item === 'string' && item.trim().length > 0);
-        return validContent?.replace(/{player}/g, currentPlayerName) || 'Siguiente carta';
-    }, [content, currentIndex, currentPlayerName, mode, currentQuestion]);
-
-    const getCurrentContent = useCallback(() => currentText, [currentText]);
-
-    const getNextPreview = () => {
-        if (!content || content.length === 0) return "Cargando...";
-        const next = currentIndex + 1;
-        const lap = Math.floor(next / content.length);
-        const deck = lap === 0 ? content : seededShuffle(content, lap * 2654435761);
-        const nextBase = deck[next % content.length];
-        return sanitizeCardText(nextBase).replace(/\{.*?\}/g, '___');
-    };
-
-    return {
-        content,
-        currentQuestion,
-        setCurrentQuestion,
-        usedQuestionIds,
-        setUsedQuestionIds,
-        loadNextQuestion,
-        loadSpecificQuestion: loadSpecificQuestion as (category: 'futbol' | 'cultura') => void,
-        getCurrentContent,
-        getNextPreview,
-        questionNumber
-    };
+  return {
+    content,
+    currentQuestion,
+    setCurrentQuestion,
+    usedQuestionIds,
+    setUsedQuestionIds,
+    loadNextQuestion,
+    loadSpecificQuestion: loadSpecificQuestion as (category: 'futbol' | 'cultura') => void,
+    getCurrentContent,
+    getNextPreview,
+    getMegamixPhaseForIndex,
+    questionNumber,
+  };
 };

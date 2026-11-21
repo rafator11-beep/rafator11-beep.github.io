@@ -6,28 +6,30 @@
 //
 // Tipos GENERAL (participa toda la mesa, no avanza el turno del jugador):
 export const GENERAL_TYPE_WEIGHTS: Record<string, number> = {
-  yoNunca: 1.0,
-  picante: 1.3,
-  humorNegro: 1.3,
+  yoNunca: 1.15,
+  picante: 1.35,
+  humorNegro: 1.15,
   enLaCama: 1.2,
-  masProbable: 1.1,
-  grupal: 1.1,
-  cadena: 0.8,
-  pacovers: 1.0,
-  espana: 0.5,
-  mimica: 0.9,
+  masProbable: 1.25,
+  grupal: 1.45,
+  cadena: 1.05,
+  pacovers: 0.75,
+  espana: 0.65,
+  mimica: 0.95,
+  megamixEspañaGeneral: 2.2,
   // customPartyRetos ("Si has..., bebe"): pocas cartas, peso bajo para no repetirlas.
   customRetos: 0.05,
 };
 
 // Tipos INDIVIDUAL (actúa el jugador activo, sí avanza el turno):
 export const INDIVIDUAL_TYPE_WEIGHTS: Record<string, number> = {
-  retos: 1.0,
-  verdadOBebe: 1.5,
-  triviaExpress: 0.6,
-  categorias: 0.6,
-  duelos: 1.0,
-  clasico: 0.9,
+  retos: 1.35,
+  verdadOBebe: 1.8,
+  triviaExpress: 0.45,
+  categorias: 0.55,
+  duelos: 1.15,
+  clasico: 0.7,
+  megamixEspañaIndividual: 2.4,
   // Pool extra que useGameContent inyecta (antes iba suelto al final del mazo
   // y solo aparecía gracias al shuffle global). Peso ≈ su cuota original.
   torneoRetos: 0.25,
