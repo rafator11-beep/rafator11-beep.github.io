@@ -90,7 +90,7 @@ describe('getStructuredMegamix', () => {
     // El respiro y las coincidencias retrasan alguno: margen de 2.
     expect(n(/^TRIGGER:(MEGA)?TORNEO$/)).toBeGreaterThanOrEqual(Math.floor(500 / every.torneo) - 2);
     expect(n(/^📜 NORMA/)).toBeGreaterThanOrEqual(Math.floor(500 / every.norma) - 2);
-    expect(n(/^TRIGGER:(TRIVIA_|DUELO|VIRUS)/)).toBeGreaterThanOrEqual(Math.floor(500 / every.especial) - 2);
+    expect(n(/^TRIGGER:(TRIVIA_|DUELO|VIRUS|EQUIPOS)/)).toBeGreaterThanOrEqual(Math.floor(500 / every.especial) - 2);
     expect(n(/^TRIGGER:IMPOSTOR$/)).toBeGreaterThanOrEqual(Math.floor(500 / every.impostor) - 2);
   });
 

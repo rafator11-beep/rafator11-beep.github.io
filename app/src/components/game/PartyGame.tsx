@@ -332,7 +332,6 @@ export function PartyGame({
     setBrutalCounts, // Needed for overlay logic
     applyRandomVirus,
     setPlayerViruses,
-    manageMegamixViruses, // Every 5 rounds virus cycle
   } = useGameEffects(mode, players);
 
   const performTurnAdvance = useCallback(
@@ -632,35 +631,9 @@ export function PartyGame({
     gameState.currentNorma,
   ]);
 
-  const hasInitializedRound1 = useRef(false);
-  // Trigger: Ronda 1 Norma Global + Virus Assignment (Robust Unified Sync)
-  useEffect(() => {
-    if (
-      mode === 'megamix' &&
-      gameState.round === 1 &&
-      currentIndex === 0 &&
-      !hasInitializedRound1.current &&
-      players.length > 0
-    ) {
-      hasInitializedRound1.current = true;
-
-      // Get the virus first to include it in the single state update
-      const randomVirus = applyRandomVirus(true);
-
-      // Sin norma al empezar: antes se forzaba "Prohibido decir nombres", que
-      // chocaba con el capitán leyendo las pruebas en voz alta. Las normas
-      // llegan con el mazo (📜 cada TRIGGER_INTERVALS.norma cartas).
-      setGameState((prev) => ({
-        ...prev,
-        // Integrate virus if assigned
-        showVirusAlert: !!randomVirus,
-        virusAlertData: randomVirus,
-        virusPlayerId: randomVirus?.player?.id,
-      }));
-
-      if (randomVirus) toast.info('¡RONDA 1: virus activado!');
-    }
-  }, [gameState.round, currentIndex, mode, applyRandomVirus, players.length, setGameState]);
+  // La partida empieza limpia: antes, nada más empezar salía un virus forzado
+  // (y una norma), y tras la primera carta el "ciclo de virus" metía otro de 7
+  // rondas con su propia ventana. Normas y virus llegan con el mazo.
 
   // Effect to broadcast state when Host changes things
   const broadcastStateRef = useRef(broadcastState);
@@ -1141,17 +1114,6 @@ export function PartyGame({
         if (currentPlayer) {
           const autoXp = Math.min(25, 5 + gameState.round * 2); // escala con la ronda
           addScore(currentPlayer.id, autoXp);
-        }
-
-        // 2. Periodic events (Normas/Viruses) - Priority 1
-        const virusCycleEvent = manageMegamixViruses(gameState.round);
-        if (virusCycleEvent) {
-          setGameState((prev) => ({
-            ...prev,
-            showVirusCycleAlert: true,
-            virusCycleData: virusCycleEvent,
-          }));
-          return; // STOP: wait for user to accept cycle event
         }
 
         // --- MEJORA: CAPTAIN DECISION RANDOM CHANCE ---

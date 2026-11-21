@@ -822,16 +822,19 @@ function GameAppInner() {
       )}
 
 
-      {/* Global Chat Bubble - Always visible */}
-      <ChatComponent
-        roomId={roomId || 'global_lobby'}
-        playerName={
-          // Try to find name in established players
-          players.find(p => p.id === localPlayerId)?.name
-          // Fallback for Host/Guest
-          || (roomId ? (isHost ? 'Anfitrión' : 'Invitado') : `Usuario ${localPlayerId?.slice(0, 4) || 'Guest'}`)
-        }
-      />
+      {/* Global Chat Bubble — fuera de la partida: durante el juego quedaba
+          encima de la flecha de "Siguiente turno" y se abría el chat al pasar carta. */}
+      {screen !== 'playing' && (
+        <ChatComponent
+          roomId={roomId || 'global_lobby'}
+          playerName={
+            // Try to find name in established players
+            players.find(p => p.id === localPlayerId)?.name
+            // Fallback for Host/Guest
+            || (roomId ? (isHost ? 'Anfitrión' : 'Invitado') : `Usuario ${localPlayerId?.slice(0, 4) || 'Guest'}`)
+          }
+        />
+      )}
     </>
   );
 }

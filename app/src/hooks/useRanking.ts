@@ -102,6 +102,53 @@ function resolveCloudIdentity(
   };
 }
 
+// ─── Estructura de user_stats ─────────────────────────────────────────────
+// En producción la tabla tiene la estructura antigua (name, user_id,
+// avatar_url, games_played, games_won, updated_at), sin id/player_name/
+// total_wins/total_xp: buscar por player_name daba 400. La migración
+// 20261121_user_stats_ranking.sql añade las columnas nuevas; mientras no se
+// aplique, se usa la antigua. Se detecta una vez (error 42703 = no existe la
+// columna) y se recuerda.
+let legacyUserStats: boolean | null = null;
+
+interface GuestRow {
+  row: Record<string, any> | null;
+  legacy: boolean;
+}
+
+async function findGuestRow(name: string): Promise<GuestRow> {
+  if (legacyUserStats !== true) {
+    const res = await supabase
+      .from('user_stats')
+      .select('*')
+      .is('user_id', null)
+      .ilike('player_name', name)
+      .limit(1)
+      .maybeSingle();
+    if (!res.error) {
+      legacyUserStats = false;
+      return { row: res.data, legacy: false };
+    }
+    if (res.error.code !== '42703') throw res.error;
+    legacyUserStats = true;
+  }
+  const res = await supabase
+    .from('user_stats')
+    .select('*')
+    .is('user_id', null)
+    .ilike('name', name)
+    .limit(1)
+    .maybeSingle();
+  if (res.error) throw res.error;
+  return { row: res.data, legacy: true };
+}
+
+/** UPDATE de la fila de un invitado: por id (estructura nueva) o por nombre. */
+function updateGuestRow(found: GuestRow, name: string, payload: Record<string, unknown>) {
+  const q = supabase.from('user_stats').update(payload);
+  return found.legacy ? q.is('user_id', null).ilike('name', name) : q.eq('id', found.row!.id);
+}
+
 /**
  * Sincroniza a la nube (tabla `user_stats`, la misma que lee fetchRankings
  * para "Comunidad") las estadísticas de un jugador SIN cuenta registrada en
@@ -138,41 +185,41 @@ async function syncGuestStatsToCloud(
   if (!normalizedName) return;
 
   try {
-    const { data: existing, error: selErr } = await supabase
-      .from('user_stats')
-      .select('id, total_wins, total_xp, games_played')
-      .is('user_id', null)
-      .ilike('player_name', normalizedName)
-      .limit(1)
-      .maybeSingle();
-
-    if (selErr) throw selErr;
+    const found = await findGuestRow(normalizedName);
+    const existing = found.row;
 
     if (existing) {
-      const updatePayload: Record<string, unknown> = {
-        total_wins: (existing.total_wins || 0) + (won ? 1 : 0),
-        total_xp: (existing.total_xp || 0) + scoreToAdd,
-        games_played: (existing.games_played || 0) + 1,
-        updated_at: new Date().toISOString(),
-      };
+      const updatePayload: Record<string, unknown> = found.legacy
+        ? { games_won: (existing.games_won || 0) + (won ? 1 : 0) }
+        : {
+            total_wins: (existing.total_wins || 0) + (won ? 1 : 0),
+            total_xp: (existing.total_xp || 0) + scoreToAdd,
+          };
+      updatePayload.games_played = (existing.games_played || 0) + 1;
+      updatePayload.updated_at = new Date().toISOString();
       if (avatarUrl) updatePayload.avatar_url = avatarUrl;
 
-      const { error: updErr } = await supabase
-        .from('user_stats')
-        .update(updatePayload)
-        .eq('id', existing.id);
+      const { error: updErr } = await updateGuestRow(found, normalizedName, updatePayload);
       if (updErr) throw updErr;
     } else {
-      const { error: insErr } = await supabase
-        .from('user_stats')
-        .insert({
-          user_id: null,
-          player_name: normalizedName,
-          avatar_url: avatarUrl || null,
-          total_wins: won ? 1 : 0,
-          total_xp: scoreToAdd,
-          games_played: 1,
-        });
+      const { error: insErr } = await supabase.from('user_stats').insert(
+        found.legacy
+          ? {
+              user_id: null,
+              name: normalizedName,
+              avatar_url: avatarUrl || null,
+              games_won: won ? 1 : 0,
+              games_played: 1,
+            }
+          : {
+              user_id: null,
+              player_name: normalizedName,
+              avatar_url: avatarUrl || null,
+              total_wins: won ? 1 : 0,
+              total_xp: scoreToAdd,
+              games_played: 1,
+            }
+      );
       if (insErr) throw insErr;
     }
   } catch (err) {
@@ -197,32 +244,29 @@ export async function ensureGuestPlayerSynced(playerName: string, avatarUrl?: st
   if (!normalizedName) return;
 
   try {
-    const { data: existing, error: selErr } = await supabase
-      .from('user_stats')
-      .select('id, avatar_url')
-      .is('user_id', null)
-      .ilike('player_name', normalizedName)
-      .limit(1)
-      .maybeSingle();
-
-    if (selErr) throw selErr;
+    const found = await findGuestRow(normalizedName);
+    const existing = found.row;
 
     if (existing) {
       if (avatarUrl && avatarUrl !== existing.avatar_url) {
-        await supabase
-          .from('user_stats')
-          .update({ avatar_url: avatarUrl, updated_at: new Date().toISOString() })
-          .eq('id', existing.id);
+        await updateGuestRow(found, normalizedName, {
+          avatar_url: avatarUrl,
+          updated_at: new Date().toISOString(),
+        });
       }
     } else {
-      await supabase.from('user_stats').insert({
-        user_id: null,
-        player_name: normalizedName,
-        avatar_url: avatarUrl || null,
-        total_wins: 0,
-        total_xp: 0,
-        games_played: 0,
-      });
+      await supabase.from('user_stats').insert(
+        found.legacy
+          ? { user_id: null, name: normalizedName, avatar_url: avatarUrl || null, games_played: 0, games_won: 0 }
+          : {
+              user_id: null,
+              player_name: normalizedName,
+              avatar_url: avatarUrl || null,
+              total_wins: 0,
+              total_xp: 0,
+              games_played: 0,
+            }
+      );
     }
   } catch (err) {
     console.warn('ensureGuestPlayerSynced failed (non-critical):', err);
@@ -267,7 +311,7 @@ export function useRanking() {
 
         const cloudStats = ((data as any[]) || []).map((row) => ({
           user_id: row.user_id || row.id || row.profile_id || crypto.randomUUID(),
-          name: row.player_name || row.username || 'Jugador',
+          name: row.player_name || row.name || row.username || 'Jugador',
           avatar_url: row.avatar_url || null,
           games_played: row.games_played || 0,
           games_won: row.total_wins || row.games_won || 0,
