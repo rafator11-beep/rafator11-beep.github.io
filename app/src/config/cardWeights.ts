@@ -8,7 +8,9 @@
 export const GENERAL_TYPE_WEIGHTS: Record<string, number> = {
   yoNunca: 1.15,
   picante: 1.35,
-  humorNegro: 1.15,
+  // El pool antiguo de humor negro es casi todo "Yo nunca" con 💀: pesa menos
+  // ahora que hay uno nuevo con votaciones (megamixHumorNegro).
+  humorNegro: 0.6,
   enLaCama: 1.2,
   masProbable: 1.25,
   grupal: 1.45,
@@ -16,7 +18,16 @@ export const GENERAL_TYPE_WEIGHTS: Record<string, number> = {
   pacovers: 0.75,
   espana: 0.65,
   mimica: 0.95,
-  megamixEspañaGeneral: 2.2,
+  // Solo 67 cartas: con más peso se repetían en cada partida.
+  megamixEspañaGeneral: 1.0,
+  // Núcleo de Megamix escrito a mano (src/data/megamixCore.ts).
+  megamixYoNunca: 1.6,
+  megamixHumorNegro: 1.6,
+  megamixVotaciones: 1.4,
+  megamixTodos: 1.3,
+  megamixAnecdotas: 1.0,
+  megamixBomba: 0.8,
+  megamixQuizEspana: 0.7,
   // customPartyRetos ("Si has..., bebe"): pocas cartas, peso bajo para no repetirlas.
   customRetos: 0.05,
 };
@@ -29,7 +40,12 @@ export const INDIVIDUAL_TYPE_WEIGHTS: Record<string, number> = {
   categorias: 0.55,
   duelos: 1.15,
   clasico: 0.7,
-  megamixEspañaIndividual: 2.4,
+  // Solo 52 cartas: con 2.4 salían en una de cada cuatro individuales.
+  megamixEspañaIndividual: 0.9,
+  // Núcleo de Megamix escrito a mano (src/data/megamixCore.ts).
+  megamixRetos: 1.6,
+  megamixVerdades: 1.2,
+  megamixDuelos: 1.0,
   // Pool extra que useGameContent inyecta (antes iba suelto al final del mazo
   // y solo aparecía gracias al shuffle global). Peso ≈ su cuota original.
   torneoRetos: 0.25,

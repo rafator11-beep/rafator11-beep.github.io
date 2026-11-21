@@ -9,6 +9,8 @@ import {
   transformCardForNoAlcohol,
 } from '@/utils/megamixExperience';
 import { cardKey, loadSeenCards, markCardSeen } from '@/utils/seenCards';
+import { MEGAMIX_EXTRA_GENERAL, MEGAMIX_EXTRA_INDIVIDUAL } from '@/data/megamixCore';
+import { GENERAL_TYPE_WEIGHTS, INDIVIDUAL_TYPE_WEIGHTS } from '@/config/cardWeights';
 
 vi.mock('@/services/customThemeService', () => ({ fetchThemeCards: vi.fn(async () => []) }));
 
@@ -301,6 +303,33 @@ describe('Megamix experience', () => {
     ['pensad en una bebida', 'pensad en una bebida'],
   ])('sin alcohol: %s', (card, expected) => {
     expect(transformCardForNoAlcohol(card)).toBe(expected);
+  });
+
+  it('el núcleo de Megamix cae cada carta en su lado y sin duplicados', () => {
+    for (const [key, cards] of Object.entries(MEGAMIX_EXTRA_GENERAL)) {
+      expect(cards.filter(isIndividualCard), key).toEqual([]);
+    }
+    for (const [key, cards] of Object.entries(MEGAMIX_EXTRA_INDIVIDUAL)) {
+      expect(cards.filter((c) => !isIndividualCard(c)), key).toEqual([]);
+    }
+    const all = [...Object.values(MEGAMIX_EXTRA_GENERAL), ...Object.values(MEGAMIX_EXTRA_INDIVIDUAL)].flat();
+    expect(new Set(all).size).toBe(all.length);
+  });
+
+  it('el núcleo de Megamix tiene peso propio y sale en la partida', () => {
+    // 2000 cartas: con 400, un tipo de peso 1 sale ~4 veces y a veces ninguna.
+    const deck = getStructuredMegamix(2000, 4, {
+      extraGeneral: MEGAMIX_EXTRA_GENERAL,
+      extraIndividual: MEGAMIX_EXTRA_INDIVIDUAL,
+      withoutFiller: true,
+    });
+    for (const [key, cards] of [
+      ...Object.entries(MEGAMIX_EXTRA_GENERAL),
+      ...Object.entries(MEGAMIX_EXTRA_INDIVIDUAL),
+    ]) {
+      expect(GENERAL_TYPE_WEIGHTS[key] ?? INDIVIDUAL_TYPE_WEIGHTS[key], key).toBeGreaterThan(0);
+      expect(deck.some((c) => cards.includes(c)), key).toBe(true);
+    }
   });
 
   it('las cartas españolas están en el lado correcto (general / individual)', () => {

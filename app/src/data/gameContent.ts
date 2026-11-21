@@ -6985,8 +6985,15 @@ export function getStructuredMegamix(
     exclude?: (card: string) => boolean;
     /** Cartas vistas en partidas anteriores: salen después de las nuevas de su tipo. */
     seen?: (card: string) => boolean;
+    /**
+     * Deja fuera las plantillas de relleno de generatedParty: los Yo nunca de
+     * "frase × 16 finales" y las cadenas/categorías/cultura chupística/10
+     * segundos que salen todas de la misma lista de objetos (COSAS).
+     */
+    withoutFiller?: boolean;
   }
 ): string[] {
+  const noFiller = !!options?.withoutFiller;
   function cleanDeckPool(items: any[]): string[] {
     const seen = new Set<string>();
     const cleaned: string[] = [];
@@ -7125,7 +7132,7 @@ export function getStructuredMegamix(
     ...yoNuncaV4.map((q) => (q.startsWith('🙈') ? q : `🙈 ${q}`)),
     // V5/V5b/V5c y genYoNunca ya son frases completas ("Yo nunca he...")
     ...[...yoNuncaV5, ...yoNuncaV5b, ...yoNuncaV5c].map((q) => `🙈 ${q}`),
-    ...genYoNunca.map((q) => `🙈 ${q}`),
+    ...(noFiller ? [] : genYoNunca).map((q) => `🙈 ${q}`),
     // moreYoNunca son continuaciones (duplican yoNuncaPool pero cleanDeckPool dedupea)
     ...moreYoNunca.map((q) => `🙈 Yo nunca... ${stripYoNunca(q)}`),
     ...moreSalseo.filter((s) => s.startsWith('🙈')),
@@ -7202,7 +7209,7 @@ export function getStructuredMegamix(
     ...elMovilV5,
     ...genMovil,
     ...diezSegundosV5,
-    ...genDiezSegundos,
+    ...(noFiller ? [] : genDiezSegundos),
   ]);
   const retosItems = getRandomItems(retosPool, retosPool.length);
   const retosCards = retosItems.map((q) =>
@@ -7232,7 +7239,7 @@ export function getStructuredMegamix(
     ...genEscena,
     ...dosVerdadesV5,
     ...genDosVerdades,
-    ...genCulturaChupistica,
+    ...(noFiller ? [] : genCulturaChupistica),
   ]);
   const clasicoItems = getRandomItems(clasicoPool, clasicoPool.length);
   const clasicoCards = clasicoItems.map((q) =>
@@ -7334,7 +7341,7 @@ export function getStructuredMegamix(
     // ── MEGA8 ──
     ...categoriasExtra8b,
     // ── Plantillas generadas ──
-    ...genCategorias,
+    ...(noFiller ? [] : genCategorias),
   ]);
   const categoriasItems = getRandomItems(categoriasPool, categoriasPool.length);
   const categoriasCards = categoriasItems.map((q) => {
@@ -7479,7 +7486,7 @@ export function getStructuredMegamix(
     // ── Post-verano 2026 + generadas ──
     ...cadenasV4,
     ...cadenaV5c,
-    ...genCadena,
+    ...(noFiller ? [] : genCadena),
   ]);
   const cadenaCards = getRandomItems(cadenaPool, cadenaPool.length);
 

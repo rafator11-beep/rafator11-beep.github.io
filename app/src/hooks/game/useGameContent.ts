@@ -137,7 +137,7 @@ import {
   moreSalseo,
   moreTorneoRetos,
 } from '@/data/extraContentIndex';
-import { MEGAMIX_SPAIN_GENERAL, MEGAMIX_SPAIN_INDIVIDUAL } from '@/data/megamixSpain';
+import { MEGAMIX_EXTRA_GENERAL, MEGAMIX_EXTRA_INDIVIDUAL } from '@/data/megamixCore';
 import {
   getMegamixPhase,
   getMegamixMystery,
@@ -362,16 +362,11 @@ export const useGameContent = (
         // con módulo, así que no hay riesgo de bucle infinito ni de
         // quedarnos sin cartas: ver getStructuredMegamix ~línea 6105+).
         modeContent = getStructuredMegamix(2500, playersCount, {
-          extraGeneral: {
-            customRetos: customRetoTexts,
-            megamixEspañaGeneral: MEGAMIX_SPAIN_GENERAL,
-          },
-          extraIndividual: {
-            torneoRetos: moreTorneoRetos,
-            megamixEspañaIndividual: MEGAMIX_SPAIN_INDIVIDUAL,
-          },
+          extraGeneral: { customRetos: customRetoTexts, ...MEGAMIX_EXTRA_GENERAL },
+          extraIndividual: { torneoRetos: moreTorneoRetos, ...MEGAMIX_EXTRA_INDIVIDUAL },
           exclude: isDownvoted(mode),
           seen: loadSeenCards(mode),
+          withoutFiller: true,
         });
         break;
       case 'clasico':
